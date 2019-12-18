@@ -1,0 +1,12 @@
+[dataset]
+name = spellman
+w = 28
+h = 28
+
+[PCA]
+n_components = 2
+
+[UMAP]
+n_components = 2
+n_neighbors = 15
+metric = euclidean
