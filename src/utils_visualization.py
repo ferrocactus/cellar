@@ -2,8 +2,10 @@ from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import seaborn as sns
-import umap
+
+from umap import UMAP
 from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 
 def plot_images(imlist, cols=3, titlelist=None, cmap='gray'):
     """
@@ -19,79 +21,57 @@ def plot_images(imlist, cols=3, titlelist=None, cmap='gray'):
             plt.title(titlelist[i])
     plt.show()
 
-def reduce_and_plot(x, y=None, ax=None,
-                                method='umap',
-                                emb=None,
-                                dims=2,
-                                n_neighbors=15,
-                                min_dist=0.1):
+def reduce_and_plot(x, y=None, method='umap', dims=2, **kwargs):
     """
-    Gives a "dims" dimensional plot of "x" using UMAP or PCA
+    Reduce the dimensionality of the data to 2D using the specified method
+    and plot.
     params:
-        x:      nunmpy array of size (d, dims); ignored if "emb" is set
-        y:      integer labels for data points in x (will be used for coloring);
-                    if None, no coloring applied
-        ax:     pyplot axis; if None, new axis will be created
-        method: method to use for dimensionality reduction; 'umap' or 'pca'
-        dims:   2 or 3 dimensions; ignored if "emb" is set
-        emb:    reduced embedding to plot
+        method: Method to use for dimensionality reduction;
+                choose between: umap, pca, t-sne
+        dims:   Plot dimension; Choose between 2 and 3
     """
-    assert dims == 2 or dims == 3, "Can only visualize 2 or 3 dimensions"
-    axis_is_set = False if ax is None else True
+    fig = plt.figure()
+    if   dims == 2:     ax = fig.add_subplot(111)
+    elif dims == 3:     ax = fig.add_subplot(111, projection='3d')
+    else:               raise NotImplementedError('Can only visualize 2 or 3 dims.')
 
-    if emb is None:
-        if method == 'umap':
-            emb = umap.UMAP(n_components=dims,
-                            n_neighbors=n_neighbors,
-                            min_dist=min_dist).fit_transform(x)
-        elif method == 'pca':
-            emb = PCA(n_components=dims).fit_transform(x)
+    if method == 'umap':
+        """
+        Possible arguments for UMAP and their default values
+            n_neighbors     = 15
+            min_dist        = 0.1
+            n_components    = 2
+            metric          = 'euclidean'
+        """
+        print("Reducing dimensionality using UMAP.")
+        emb = UMAP(n_components=dims, **kwargs).fit_transform(x)
+    elif method == 'pca':
+        print("Reducing dimensionality using PCA.")
+        emb = PCA(n_components=dims, **kwargs).fit_transform(x)
+    elif method == 'tsne':
+        print("Reducing dimensionality using T-SNE.")
+        emb = TSNE(n_components=dims, **kwargs).fit_transform(x)
     else:
-        assert emb.shape[1] == 2 or emb.shape[1] == 3, "Can only visualize 2 or 3 dimensions"
-
+        raise NotImplementedError('Method not found')
+    
     if dims == 2:
-        if not axis_is_set:
-            fig, ax = plt.subplots()
-        if y is not None and len(y) > 0:   # colors
-            ax.scatter(emb[:, 0], emb[:, 1], c=[sns.color_palette()[i] for i in y])
+        if y is not None:
+            sns.scatterplot(x=emb[:, 0], y=emb[:, 1],
+                            hue=y,
+                            palette='Dark2',
+                            linewidth=0,
+                            s=10,
+                            legend='full')
+            plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
         else:
-            ax.scatter(emb[:, 0], emb[:, 1])
-    elif dims == 3:
-        if not axis_is_set:
-            fig = plt.figure()
-            ax = fig.add_subplot(111, projection='3d')
-        if y is not None and len(y) > 0:   # colors
-            ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2], c=[sns.color_palette()[i] for i in y])
+            sns.scatterplot(x=emb[:, 0], y=emb[:, 1], linewidth=0, s=10)
+    else:
+        if y is not None:
+            ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2],
+                        c=[sns.color_palette()[i] for i in y])
         else:
             ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2])
-    sns.despine()
-    if not axis_is_set:
-        plt.show()
-    else:
-        return ax
-
-def plot_pca_var_ratio(x, ax=None, n_components=None, cumulative=False):
-    """
-    Plot n_components vs variance_ratio
-    """
-    n_components = n_components or x.shape[1]
-    print(n_components)
-    pca = PCA(n_components=n_components)
-    pca.fit(x)
-    var = pca.explained_variance_ratio_
-    
-    axis_is_set = False if ax is None else True
-    if not axis_is_set:
-        fig, ax = plt.subplots()
-    
-    if cumulative:
-        cumulative = np.cumsum(var)
-        ax.plot(range(1, n_components+1), cumulative)
-    else:
-        ax.plot(range(1, n_components+1), var)
-
-    sns.despine()
-    if not axis_is_set:
-        plt.show()
-    else:
-        return ax
+    sns.despine(left=True, bottom=True)
+    plt.xticks([])
+    plt.yticks([])
+    plt.show()

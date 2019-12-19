@@ -4,11 +4,16 @@ from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 import tqdm
 
+# Visualization and Dimensionality Reduction
 from umap import UMAP
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+# Clustering
+from sklearn.cluster import KMeans
 
 from sklearn.metrics import mean_squared_error as mse
+
+from src.utils_visualization import reduce_and_plot
 
 class Workflow:
     def __init__(self, x, y=None):
@@ -65,86 +70,6 @@ class Workflow:
         sns.reset_defaults()
         plt.show()
     
-    def reduce_and_plot(self, method='umap', dims=2, **kwargs):
-        """
-        Reduce the dimensionality of the data to 2D using the specified method
-        and plot.
-        params:
-            method: Method to use for dimensionality reduction;
-                    choose between: umap, pca, t-sne
-            dims:   Plot dimension; Choose between 2 and 3
-        """
-        fig = plt.figure()
-        if   dims == 2:     ax = fig.add_subplot(111)
-        elif dims == 3:     ax = fig.add_subplot(111, projection='3d')
-        else:               raise NotImplementedError('Can only visualize 2 or 3 dims.')
-
-        if method == 'umap':
-            """
-            Possible arguments for UMAP and their default values
-                n_neighbors     = 15
-                min_dist        = 0.1
-                n_components    = 2
-                metric          = 'euclidean'
-            """
-            print("Reducing dimensionality using UMAP.")
-            emb = UMAP(n_components=dims, **kwargs).fit_transform(self.x_train)
-        elif method == 'pca':
-            print("Reducing dimensionality using PCA.")
-            emb = PCA(n_components=dims, **kwargs).fit_transform(self.x_train)
-        elif method == 'tsne':
-            print("Reducing dimensionality using T-SNE.")
-            emb = TSNE(n_components=dims, **kwargs).fit_transform(self.x_train)
-        else:
-            raise NotImplementedError('Method not found')
-        
-        if dims == 2:
-            if self.has_y_train:
-                sns.scatterplot(x=emb[:, 0], y=emb[:, 1],
-                                hue=self.y_train,
-                                palette='Dark2',
-                                linewidth=0,
-                                s=10,
-                                legend='full')
-                plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-            else:
-                sns.scatterplot(x=emb[:, 0], y=emb[:, 1], linewidth=0, s=10)
-        else:
-            if self.has_y_train:
-                ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2],
-                            c=[sns.color_palette()[i] for i in self.y_train])
-            else:
-                ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2])
-        sns.despine(left=True, bottom=True)
-        plt.xticks([])
-        plt.yticks([])
-        plt.show()
-    
-    def reduce_dim(self, method='pca', **kwargs):
-        """
-        Reduces the dimensionality of the data and stores it in self.emb.
-        """
-        if method == 'pca':
-            print("Reducing dimensionality using PCA.")
-            pca = PCA(**kwargs)
-            pca.fit(self.x_train)
-            self.x_train_emb = pca.transform(self.x_train)
-
-            # Print scores
-            x_train_mserror = mse(self.x_train, pca.inverse_transform(self.x_train_emb))
-            x_train_score = pca.score(self.x_train)
-            print("Embedding created. Train MSE:", x_train_mserror)
-            print("Train Average Log Likelihood:", x_train_score)
-
-            if self.has_test_data:
-                self.x_test_emb = pca.transform(self.x_test)
-                x_test_mserror = mse(self.x_test, pca.inverse_transform(self.x_test_emb))
-                x_test_score = pca.score(self.x_test)
-                print("Embedding created. Test MSE:", x_test_mserror)
-                print("Test Average Log Likelihood:", x_test_score)
-        else:
-            raise NotImplementedError()
-    
     def pca_plot_var_ratio(self, n_components=None, **kwargs):
         """
         Plots the percentage of variance explained by each of the PCA components.
@@ -173,3 +98,51 @@ class Workflow:
 
         sns.despine()
         plt.show()
+    
+    def reduce_dim(self, method='pca', **kwargs):
+        """
+        Reduces the dimensionality of the data and stores it in self.emb.
+        """
+        if method == 'pca':
+            print("Reducing dimensionality using PCA.")
+            pca = PCA(**kwargs)
+            pca.fit(self.x_train)
+
+            # Print scores
+            self.x_train_emb        = pca.transform(self.x_train)
+            self.x_train_emb_mse    = mse(self.x_train,
+                                        pca.inverse_transform(self.x_train_emb))
+            self.x_train_emb_score  = pca.score(self.x_train)
+            print("Embedding created. Train MSE:", self.x_train_emb_mse)
+            print("Train Average Log Likelihood:", self.x_train_emb_score)
+
+            if self.has_test_data:
+                self.x_test_emb         = pca.transform(self.x_test)
+                self.x_test_emb_mse     = mse(self.x_test,
+                                            pca.inverse_transform(self.x_test_emb))
+                self.x_test_emb_score   = pca.score(self.x_test)
+                print("Embedding created. Test MSE:", self.x_test_emb_mse)
+                print("Test Average Log Likelihood:", self.x_test_emb_score)
+        else:
+            raise NotImplementedError()
+    
+    def cluster(self, method='kmeans', **kwargs):
+        """
+        Clusters the embeddings as constructed by reduce_dim.
+        """
+        if method == 'kmeans':
+            print("Clustering using k-means.")
+            kmeans = KMeans(**kwargs)
+            kmeans.fit(self.x_train_emb)
+
+            # Print scores
+            self.y_train_pred           = kmeans.predict(self.x_train_emb)
+            self.x_train_cluster_score  = kmeans.score(self.x_train_emb)
+            print("Clustering complete. Train Score:", self.x_train_cluster_score)
+
+            if self.has_test_data:
+                self.y_test_pred            = kmeans.predict(self.x_test_emb)
+                self.x_test_cluster_score   = kmeans.score(self.x_test_emb)
+                print("Test Score:", self.x_test_cluster_score)
+        else:
+            raise NotImplementedError()
