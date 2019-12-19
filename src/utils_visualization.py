@@ -1,5 +1,6 @@
 from matplotlib import pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 import seaborn as sns
 import umap
 from sklearn.decomposition import PCA
@@ -36,6 +37,7 @@ def reduce_and_plot(x, y=None, ax=None,
         emb:    reduced embedding to plot
     """
     assert dims == 2 or dims == 3, "Can only visualize 2 or 3 dimensions"
+    axis_is_set = False if ax is None else True
 
     if emb is None:
         if method == 'umap':
@@ -48,24 +50,27 @@ def reduce_and_plot(x, y=None, ax=None,
         assert emb.shape[1] == 2 or emb.shape[1] == 3, "Can only visualize 2 or 3 dimensions"
 
     if dims == 2:
-        if ax == None:
+        if not axis_is_set:
             fig, ax = plt.subplots()
-        if y is not None:   # colors
+        if y is not None and len(y) > 0:   # colors
             ax.scatter(emb[:, 0], emb[:, 1], c=[sns.color_palette()[i] for i in y])
         else:
             ax.scatter(emb[:, 0], emb[:, 1])
     elif dims == 3:
-        if ax == None:
+        if not axis_is_set:
             fig = plt.figure()
             ax = fig.add_subplot(111, projection='3d')
-        if y is not None:   # colors
+        if y is not None and len(y) > 0:   # colors
             ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2], c=[sns.color_palette()[i] for i in y])
         else:
             ax.scatter(emb[:, 0], emb[:, 1], emb[:, 2])
     sns.despine()
-    return ax
+    if not axis_is_set:
+        plt.show()
+    else:
+        return ax
 
-def plot_pca_var_ratio(x, ax=None, n_components=None):
+def plot_pca_var_ratio(x, ax=None, n_components=None, cumulative=False):
     """
     Plot n_components vs variance_ratio
     """
@@ -75,9 +80,18 @@ def plot_pca_var_ratio(x, ax=None, n_components=None):
     pca.fit(x)
     var = pca.explained_variance_ratio_
     
-    if ax == None:
+    axis_is_set = False if ax is None else True
+    if not axis_is_set:
         fig, ax = plt.subplots()
     
-    ax.plot(range(1, n_components+1), var)
+    if cumulative:
+        cumulative = np.cumsum(var)
+        ax.plot(range(1, n_components+1), cumulative)
+    else:
+        ax.plot(range(1, n_components+1), var)
+
     sns.despine()
-    return ax
+    if not axis_is_set:
+        plt.show()
+    else:
+        return ax

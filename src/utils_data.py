@@ -1,20 +1,20 @@
 import numpy as np
+import pandas as pd
 from mnist import MNIST
 from sklearn.datasets import load_iris, load_digits
 
 def load_data(dataset):
+    if dataset == 'spellman':
+        return pd.read_csv('datasets/Spellman.csv', index_col=0).to_numpy(), []
     if dataset == 'iris':
         X = load_iris()
-        s = int(2/3 * X.data.shape[0])
-        return X.data[:s], X.target[:s], X.data[s:], X.target[s:]
+        return X.data, X.target
     elif dataset == 'digits':
         X = load_digits()
-        s = int(2/3 * X.data.shape[0])
-        return X.data[:s], X.target[:s], X.data[s:], X.target[s:]
+        return X.data, X.target
     elif dataset == 'mnist':
         mndata = MNIST('datasets/mnist')
         images, labels = mndata.load_training()
-        images, labels = np.asarray(images), np.asarray(labels)
-        return images[:2000], labels[:2000], images[5000:7000], labels[5000:7000]
+        return np.asarray(images), np.asarray(labels)
     else:
         raise FileNotFoundError('Dataset not supported.')

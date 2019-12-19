@@ -1,7 +1,7 @@
 [dataset]
 name = spellman
-w = 28
-h = 28
+w = 24
+h = 1
 
 [PCA]
 n_components = 2
