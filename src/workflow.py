@@ -2,6 +2,7 @@ import numpy as np
 from matplotlib import pylab as plt
 from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
+import tqdm
 
 from umap import UMAP
 from sklearn.decomposition import PCA
@@ -144,7 +145,31 @@ class Workflow:
         else:
             raise NotImplementedError()
     
-    def pca_plot_var_ratio(self):
+    def pca_plot_var_ratio(self, n_components=None, **kwargs):
         """
-        Plots the percentage of variance explained by each of the components.
+        Plots the percentage of variance explained by each of the PCA components.
         """
+        kwargs['n_components'] = n_components or self.dims
+        pca = PCA(**kwargs)
+        pca.fit(self.x_train)
+
+        # Plotting
+        sns.set_style("whitegrid")
+
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        fig.set_size_inches(10, 5)
+
+        ax1.plot(list(range(1, kwargs['n_components'] + 1)),
+                pca.explained_variance_ratio_)
+        ax1.set_xlabel("Number of components")
+        ax1.set_ylabel("Percentage of Explained Variance per Component")
+        ax1.set_ylim(0)
+        # Cumulative plot
+        ax2.plot(list(range(1, kwargs['n_components'] + 1)),
+                np.cumsum(pca.explained_variance_ratio_))
+        ax2.set_xlabel("Number of components")
+        ax2.set_ylabel("Cumulative Percentage of Explained Variance")
+        ax2.set_ylim(0)
+
+        sns.despine()
+        plt.show()
