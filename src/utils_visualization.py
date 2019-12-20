@@ -21,7 +21,7 @@ def plot_images(imlist, cols=3, titlelist=None, cmap='gray'):
             plt.title(titlelist[i])
     plt.show()
 
-def reduce_and_plot(x, y=None, method='umap', dims=2, **kwargs):
+def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
     """
     Reduce the dimensionality of the data to 2D using the specified method
     and plot.
@@ -30,6 +30,8 @@ def reduce_and_plot(x, y=None, method='umap', dims=2, **kwargs):
                 choose between: umap, pca, t-sne
         dims:   Plot dimension; Choose between 2 and 3
     """
+    assert x is not None or emb is not None, "Data not provided."
+
     fig = plt.figure()
     if   dims == 2:     ax = fig.add_subplot(111)
     elif dims == 3:     ax = fig.add_subplot(111, projection='3d')
@@ -74,4 +76,3 @@ def reduce_and_plot(x, y=None, method='umap', dims=2, **kwargs):
     sns.despine(left=True, bottom=True)
     plt.xticks([])
     plt.yticks([])
-    plt.show()

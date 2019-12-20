@@ -69,9 +69,12 @@ class Workflow:
         if self.col_names is not None and len(self.col_names) < 40:
             plt.xticks(np.arange(self.dims), self.col_names, rotation=90)
         fig.set_size_inches(10, 5)
-        sns.reset_defaults()
-        plt.show()
     
+    def reduce_and_plot(self, labels=None, method='umap', dims=2, **kwargs):
+        if labels is None:      # By default use predicted labels
+            labels = self.y_train_pred
+        reduce_and_plot(x=self.x_train, y=labels, method=method, dims=dims, **kwargs)
+
     def pca_plot_var_ratio(self, n_components=None, **kwargs):
         """
         Plots the percentage of variance explained by each of the PCA components.
@@ -99,7 +102,6 @@ class Workflow:
         ax2.set_ylim(0)
 
         sns.despine()
-        plt.show()
     
     def reduce_dim(self, method='pca', **kwargs):
         """
