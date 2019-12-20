@@ -10,6 +10,8 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 # Clustering
 from sklearn.cluster import KMeans
+from sklearn.cluster import SpectralClustering
+from sklearn.neighbors import kneighbors_graph
 
 from sklearn.metrics import mean_squared_error as mse
 
@@ -103,6 +105,7 @@ class Workflow:
         """
         Reduces the dimensionality of the data and stores it in self.emb.
         """
+        self.reduce_dim_method = method
         if method == 'pca':
             print("Reducing dimensionality using PCA.")
             pca = PCA(**kwargs)
@@ -130,19 +133,26 @@ class Workflow:
         """
         Clusters the embeddings as constructed by reduce_dim.
         """
+        print("Embeddings were constructed using " + self.reduce_dim_method + ".")
         if method == 'kmeans':
             print("Clustering using k-means.")
             kmeans = KMeans(**kwargs)
             kmeans.fit(self.x_train_emb)
 
             # Print scores
-            self.y_train_pred           = kmeans.predict(self.x_train_emb)
-            self.x_train_cluster_score  = kmeans.score(self.x_train_emb)
-            print("Clustering complete. Train Score:", self.x_train_cluster_score)
+            self.y_train_pred      = kmeans.predict(self.x_train_emb)
+            x_train_cluster_score  = kmeans.score(self.x_train_emb)
+            print("Clustering complete. Train Score:", x_train_cluster_score)
 
             if self.has_test_data:
-                self.y_test_pred            = kmeans.predict(self.x_test_emb)
-                self.x_test_cluster_score   = kmeans.score(self.x_test_emb)
-                print("Test Score:", self.x_test_cluster_score)
+                self.y_test_pred       = kmeans.predict(self.x_test_emb)
+                x_test_cluster_score   = kmeans.score(self.x_test_emb)
+                print("Test Score:", x_test_cluster_score)
+        elif method == 'spectral':
+            print("Clustering using spectral clustering.")
+            spectral = SpectralClustering(**kwargs)
+            spectral.fit(self.x_train_emb)
+            self.y_train_pred = spectral.labels_
+            print('Clustering complete.')
         else:
             raise NotImplementedError()
