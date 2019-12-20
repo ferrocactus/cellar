@@ -76,3 +76,4 @@ def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
     sns.despine(left=True, bottom=True)
     plt.xticks([])
     plt.yticks([])
+    fig.set_size_inches(10, 5)
