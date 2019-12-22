@@ -70,7 +70,7 @@ class Workflow:
             plt.xticks(np.arange(self.dims), self.col_names, rotation=90)
         fig.set_size_inches(10, 5)
     
-    def reduce_and_plot(self, labels=None, method='umap', dims=2, **kwargs):
+    def reduce_plot(self, labels=None, method='umap', dims=2, **kwargs):
         if labels is None:      # By default use predicted labels
             labels = self.y_train_pred
         reduce_and_plot(x=self.x_train, y=labels, method=method, dims=dims, **kwargs)

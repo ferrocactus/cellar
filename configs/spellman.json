@@ -1,0 +1,36 @@
+{
+    "dataset": {
+        "name": "spellman",
+        "w": 23,
+        "h": 1,
+        "n": 4381
+    },
+    "reduce_dim": {
+        "pca": {
+            "n_components": 7
+        }
+    },
+    "cluster": {
+        "kmeans": {
+            "n_clusters": 8
+        },
+        "spectral": {
+            "n_clusters": 8,
+            "affinity": "nearest_neighbors"
+        }
+    },
+    "reduce_plot": {
+        "umap": {
+            "dims": 2,
+            "n_neighbors": 20,
+            "min_dist": 0,
+            "metric": "euclidean"
+        },
+        "pca": {
+            "dims": 2
+        },
+        "tsne": {
+            "dims": 2
+        }
+    }
+}
