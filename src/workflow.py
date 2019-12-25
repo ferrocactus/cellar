@@ -3,6 +3,7 @@ from matplotlib import pylab as plt
 from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
 import tqdm
+import json
 
 # Visualization and Dimensionality Reduction
 from umap import UMAP
@@ -18,16 +19,18 @@ from sklearn.metrics import mean_squared_error as mse
 from src.utils_visualization import reduce_and_plot
 
 class Workflow:
-    def __init__(self, x, y=None):
+    def __init__(self, x, y=None, config=None, verbose=False):
         self.set_train_data(x, y)
         self.has_test_data = False
+        # If use_config is set for a function, all its kwargs will be ignored
+        self.config = config
+        self.verbose = verbose
     
     def set_train_data(self, x, y=None, row_names=None, col_names=None):
         assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
         self.x_train        = x
         self.n_train        = x.shape[0]
         self.dims           = x.shape[1]
-        self.has_y_train    = False if y is None else True
         self.y_train        = y
         self.row_names      = row_names
         self.col_names      = col_names
@@ -47,6 +50,13 @@ class Workflow:
     def set_col_names(self, col_names):
         self.col_names = col_names
 
+    def set_config(self, config):
+        self.config = config
+    
+    def assert_config(self):
+        if self.config is None:
+            assert False, "Config file not provided."
+    
     def normalize(self):
         raise NotImplementedError()
     
@@ -54,7 +64,7 @@ class Workflow:
         """
         Boxplot of the columns of the data
         """
-        if self.has_y_train:
+        if self.y_train is not None and self.verbose:
             print("WARNING: This is a boxplot of the columns of the data. " +
                     "Results may not be what expected.")
         sns.set_style("whitegrid")
@@ -68,12 +78,21 @@ class Workflow:
         sns.despine(left=True)
         if self.col_names is not None and len(self.col_names) < 40:
             plt.xticks(np.arange(self.dims), self.col_names, rotation=90)
+        plt.xlabel('Columns')
+        plt.ylabel('Rows')
+        plt.title('Boxplot')
         fig.set_size_inches(10, 5)
     
-    def reduce_plot(self, labels=None, method='umap', dims=2, **kwargs):
+    def reduce_plot(self, labels=None, method='umap', use_config=True, **kwargs):
         if labels is None:      # By default use predicted labels
             labels = self.y_train_pred
-        reduce_and_plot(x=self.x_train, y=labels, method=method, dims=dims, **kwargs)
+        if use_config:
+            self.assert_config()
+            kwargs = self.config['reduce_plot'][method]
+            if self.verbose:
+                print('Using', method, 'with the following params:')
+                pretty_print_dict(kwargs)
+        reduce_and_plot(x=self.x_train, y=labels, method=method, **kwargs)
 
     def pca_plot_var_ratio(self, n_components=None, **kwargs):
         """
@@ -87,7 +106,6 @@ class Workflow:
         sns.set_style("whitegrid")
 
         fig, (ax1, ax2) = plt.subplots(1, 2)
-        fig.set_size_inches(10, 5)
 
         ax1.plot(list(range(1, kwargs['n_components'] + 1)),
                 pca.explained_variance_ratio_)
@@ -102,14 +120,20 @@ class Workflow:
         ax2.set_ylim(0)
 
         sns.despine()
+        fig.set_size_inches(10, 5)
     
-    def reduce_dim(self, method='pca', **kwargs):
+    def reduce_dim(self, method='pca', use_config=True, **kwargs):
         """
         Reduces the dimensionality of the data and stores it in self.emb.
         """
-        self.reduce_dim_method = method
+        if use_config:  # Use the provided config file instead
+            self.assert_config()
+            kwargs = self.config['reduce_dim'][method]
+            if self.verbose:
+                print('Using', method, 'with the following params:')
+                pretty_print_dict(kwargs)
+
         if method == 'pca':
-            print("Reducing dimensionality using PCA.")
             pca = PCA(**kwargs)
             pca.fit(self.x_train)
 
@@ -131,13 +155,18 @@ class Workflow:
         else:
             raise NotImplementedError()
     
-    def cluster(self, method='kmeans', **kwargs):
+    def cluster(self, method='kmeans', use_config=True, **kwargs):
         """
         Clusters the embeddings as constructed by reduce_dim.
         """
-        print("Embeddings were constructed using " + self.reduce_dim_method + ".")
+        if use_config:
+            self.assert_config()
+            kwargs = self.config['cluster'][method]
+            if self.verbose:
+                print('Using', method, 'with the following params:')
+                pretty_print_dict(kwargs)
+
         if method == 'kmeans':
-            print("Clustering using k-means.")
             kmeans = KMeans(**kwargs)
             kmeans.fit(self.x_train_emb)
 
@@ -151,10 +180,12 @@ class Workflow:
                 x_test_cluster_score   = kmeans.score(self.x_test_emb)
                 print("Test Score:", x_test_cluster_score)
         elif method == 'spectral':
-            print("Clustering using spectral clustering.")
             spectral = SpectralClustering(**kwargs)
             spectral.fit(self.x_train_emb)
             self.y_train_pred = spectral.labels_
             print('Clustering complete.')
         else:
             raise NotImplementedError()
+
+def pretty_print_dict(mydict):
+    print(json.dumps(mydict, sort_keys=True, indent=4))

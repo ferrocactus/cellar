@@ -37,6 +37,7 @@ def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
     elif dims == 3:     ax = fig.add_subplot(111, projection='3d')
     else:               raise NotImplementedError('Can only visualize 2 or 3 dims.')
 
+    print("Reducing dimensionality for visualization using " + method + ".")
     if method == 'umap':
         """
         Possible arguments for UMAP and their default values
@@ -45,13 +46,10 @@ def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
             n_components    = 2
             metric          = 'euclidean'
         """
-        print("Reducing dimensionality using UMAP.")
         emb = UMAP(n_components=dims, **kwargs).fit_transform(x)
     elif method == 'pca':
-        print("Reducing dimensionality using PCA.")
         emb = PCA(n_components=dims, **kwargs).fit_transform(x)
     elif method == 'tsne':
-        print("Reducing dimensionality using T-SNE.")
         emb = TSNE(n_components=dims, **kwargs).fit_transform(x)
     else:
         raise NotImplementedError('Method not found')
