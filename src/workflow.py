@@ -22,10 +22,10 @@ from src.utils_experiment import read_config
 class Workflow:
     def __init__(self, x, y=None, config=None, verbose=False):
         self.set_train_data(x, y)
-        self.has_test_data = False
+        self.has_test_data  = False
         # If use_config is set for a function, all its kwargs will be ignored
-        self.config = config
-        self.verbose = verbose
+        self.config         = config
+        self.verbose        = verbose
     
     def set_train_data(self, x, y=None, row_names=None, col_names=None):
         assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
@@ -46,13 +46,13 @@ class Workflow:
         self.y_test         = y
     
     def set_row_names(self, row_names):
-        self.row_names = row_names
+        self.row_names      = row_names
     
     def set_col_names(self, col_names):
-        self.col_names = col_names
+        self.col_names      = col_names
 
     def set_config(self, config):
-        self.config = config
+        self.config         = config
     
     def assert_config(self):
         if self.config is None:

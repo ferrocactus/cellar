@@ -56,9 +56,12 @@ def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
     
     if dims == 2:
         if y is not None:
+            pal = []
+            for i in range(len(np.unique(y))):
+                pal.append("#" + '%06x' % np.random.randint(16**6))
             sns.scatterplot(x=emb[:, 0], y=emb[:, 1],
                             hue=y,
-                            palette='Dark2',
+                            palette=pal,
                             linewidth=0,
                             s=10,
                             legend='full')
