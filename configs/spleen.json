@@ -1,0 +1,41 @@
+{
+    "dataset": {
+        "name": "spleen",
+        "w": 9308,
+        "n": 5078
+    },
+    "reduce_dim": {
+        "pca": {
+            "n_components": 10
+        },
+        "umap": {
+            "n_components": 10,
+            "n_neighbors": 5,
+            "min_dist": 0.1,
+            "metric": "euclidean"
+        }
+    },
+    "cluster": {
+        "kmeans": {
+            "n_clusters": 14
+        },
+        "spectral": {
+            "n_clusters": 14,
+            "affinity": "nearest_neighbors"
+        }
+    },
+    "reduce_plot": {
+        "umap": {
+            "dims": 2,
+            "n_neighbors": 20,
+            "min_dist": 0.1,
+            "metric": "euclidean"
+        },
+        "pca": {
+            "dims": 2
+        },
+        "tsne": {
+            "dims": 2
+        }
+    }
+}

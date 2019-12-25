@@ -17,6 +17,7 @@ from sklearn.neighbors import kneighbors_graph
 from sklearn.metrics import mean_squared_error as mse
 
 from src.utils_visualization import reduce_and_plot
+from src.utils_experiment import read_config
 
 class Workflow:
     def __init__(self, x, y=None, config=None, verbose=False):
@@ -83,22 +84,22 @@ class Workflow:
         plt.title('Boxplot')
         fig.set_size_inches(10, 5)
     
-    def reduce_plot(self, labels=None, method='umap', use_config=True, **kwargs):
+    def reduce_plot(self, labels=None, method='umap', use_emb=False, **kwargs):
         if labels is None:      # By default use predicted labels
             labels = self.y_train_pred
-        if use_config:
-            self.assert_config()
-            kwargs = self.config['reduce_plot'][method]
+        if self.config is not None:
+            kwargs = read_config(self.config)['reduce_plot'][method]
             if self.verbose:
                 print('Using', method, 'with the following params:')
                 pretty_print_dict(kwargs)
-        reduce_and_plot(x=self.x_train, y=labels, method=method, **kwargs)
+        reduce_and_plot(x=self.x_train_emb if use_emb else self.x_train,
+                        y=labels, method=method, **kwargs)
 
     def pca_plot_var_ratio(self, n_components=None, **kwargs):
         """
         Plots the percentage of variance explained by each of the PCA components.
         """
-        kwargs['n_components'] = n_components or self.dims
+        kwargs['n_components'] = n_components or min(self.dims, self.n_train)
         pca = PCA(**kwargs)
         pca.fit(self.x_train)
 
@@ -106,7 +107,6 @@ class Workflow:
         sns.set_style("whitegrid")
 
         fig, (ax1, ax2) = plt.subplots(1, 2)
-
         ax1.plot(list(range(1, kwargs['n_components'] + 1)),
                 pca.explained_variance_ratio_)
         ax1.set_xlabel("Number of components")
@@ -122,13 +122,12 @@ class Workflow:
         sns.despine()
         fig.set_size_inches(10, 5)
     
-    def reduce_dim(self, method='pca', use_config=True, **kwargs):
+    def reduce_dim(self, method='pca', **kwargs):
         """
         Reduces the dimensionality of the data and stores it in self.emb.
         """
-        if use_config:  # Use the provided config file instead
-            self.assert_config()
-            kwargs = self.config['reduce_dim'][method]
+        if self.config is not None:  # Use the provided config file instead
+            kwargs = read_config(self.config)['reduce_dim'][method]
             if self.verbose:
                 print('Using', method, 'with the following params:')
                 pretty_print_dict(kwargs)
@@ -136,49 +135,33 @@ class Workflow:
         if method == 'pca':
             pca = PCA(**kwargs)
             pca.fit(self.x_train)
-
             # Print scores
-            self.x_train_emb        = pca.transform(self.x_train)
-            self.x_train_emb_mse    = mse(self.x_train,
-                                        pca.inverse_transform(self.x_train_emb))
-            self.x_train_emb_score  = pca.score(self.x_train)
-            print("Embedding created. Train MSE:", self.x_train_emb_mse)
-            print("Train Average Log Likelihood:", self.x_train_emb_score)
-
-            if self.has_test_data:
-                self.x_test_emb         = pca.transform(self.x_test)
-                self.x_test_emb_mse     = mse(self.x_test,
-                                            pca.inverse_transform(self.x_test_emb))
-                self.x_test_emb_score   = pca.score(self.x_test)
-                print("Embedding created. Test MSE:", self.x_test_emb_mse)
-                print("Test Average Log Likelihood:", self.x_test_emb_score)
+            self.x_train_emb = pca.transform(self.x_train)
+            print("Embedding created. Train MSE:",
+                    mse(self.x_train, pca.inverse_transform(self.x_train_emb)))
+            print("Train Average Log Likelihood:", pca.score(self.x_train))
+        elif method == 'umap':
+            umap = UMAP(**kwargs)
+            umap.fit(self.x_train)
+            self.x_train_emb = umap.transform(self.x_train)
         else:
             raise NotImplementedError()
     
-    def cluster(self, method='kmeans', use_config=True, **kwargs):
+    def cluster(self, method='kmeans', **kwargs):
         """
         Clusters the embeddings as constructed by reduce_dim.
         """
-        if use_config:
-            self.assert_config()
-            kwargs = self.config['cluster'][method]
+        if self.config is not None:
+            kwargs = read_config(self.config)['cluster'][method]
             if self.verbose:
-                print('Using', method, 'with the following params:')
+                print('Using', method, 'clustering with the following params:')
                 pretty_print_dict(kwargs)
 
         if method == 'kmeans':
             kmeans = KMeans(**kwargs)
             kmeans.fit(self.x_train_emb)
-
-            # Print scores
-            self.y_train_pred      = kmeans.predict(self.x_train_emb)
-            x_train_cluster_score  = kmeans.score(self.x_train_emb)
-            print("Clustering complete. Train Score:", x_train_cluster_score)
-
-            if self.has_test_data:
-                self.y_test_pred       = kmeans.predict(self.x_test_emb)
-                x_test_cluster_score   = kmeans.score(self.x_test_emb)
-                print("Test Score:", x_test_cluster_score)
+            self.y_train_pred = kmeans.predict(self.x_train_emb)
+            print("Clustering complete. Train Score:", kmeans.score(self.x_train_emb))
         elif method == 'spectral':
             spectral = SpectralClustering(**kwargs)
             spectral.fit(self.x_train_emb)
