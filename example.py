@@ -9,16 +9,16 @@ warnings.filterwarnings('ignore')
 
 
 if __name__ == '__main__':
-    config = read_config('digits')
+    config = read_config('spellman')
     X, Y = load_data(config['dataset']['name'])
     plt.ion()
 
-    w = Workflow(X, Y)
+    w = Workflow(X, Y, config=config, verbose=True)
     w.boxplot()
     w.pca_plot_var_ratio()
-    w.reduce_dim(method='pca', **config['reduce_dim']['pca'])
-    w.cluster(method='spectral', **config['cluster']['spectral'])
-    w.reduce_plot(labels=w.y_train_pred, method='umap', **config['reduce_plot']['umap'])
+    w.reduce_dim(method='pca')
+    w.cluster(method='spectral')
+    w.reduce_plot(labels=w.y_train_pred, method='umap')
 
     plt.ioff()
     plt.show()
