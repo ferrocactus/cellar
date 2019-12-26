@@ -10,7 +10,7 @@ if __name__ == '__main__':
     dataset = 'spleen'
     X, Y = load_data(dataset)
     w = Workflow(X, Y, config=dataset, verbose=True)
-    w.pca_plot_var_ratio()
+    w.pca_plot_var_ratio(20)
     w.reduce_dim(method='pca')
     w.cluster(method='kmedoids')
     w.reduce_plot(labels=w.y_train_pred, method='umap')
