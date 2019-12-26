@@ -1,5 +1,5 @@
 from src.workflow import Workflow
-from src.utils_experiment import load_data
+from utils.utils_experiment import load_data
 from matplotlib import pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')

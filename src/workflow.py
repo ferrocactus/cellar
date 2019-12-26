@@ -15,8 +15,8 @@ from src.k_medoids import KMedoids
 # Metrics
 from sklearn.metrics import mean_squared_error as mse
 # Utils
-from src.utils_visualization import reduce_and_plot
-from src.utils_experiment import read_config
+from utils.utils_visualization import reduce_and_plot
+from utils.utils_experiment import read_config
 
 class Workflow:
     def __init__(self, x, y=None, config=None, verbose=False):
