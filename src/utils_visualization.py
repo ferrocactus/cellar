@@ -78,3 +78,4 @@ def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
     plt.xticks([])
     plt.yticks([])
     fig.set_size_inches(10, 5)
+    return emb

@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from matplotlib import pylab as plt
 from mpl_toolkits.mplot3d import Axes3D
 import seaborn as sns
@@ -13,6 +14,7 @@ from sklearn.manifold import TSNE
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.neighbors import kneighbors_graph
+from src.k_medoids import KMedoids
 
 from sklearn.metrics import mean_squared_error as mse
 
@@ -22,7 +24,6 @@ from src.utils_experiment import read_config
 class Workflow:
     def __init__(self, x, y=None, config=None, verbose=False):
         self.set_train_data(x, y)
-        self.has_test_data  = False
         # If use_config is set for a function, all its kwargs will be ignored
         self.config         = config
         self.verbose        = verbose
@@ -36,15 +37,6 @@ class Workflow:
         self.row_names      = row_names
         self.col_names      = col_names
     
-    def set_test_data(self, x, y=None):
-        assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
-        assert x.shape[1]   == self.dims, "Dimension mismatch between test & train."
-        self.has_test_data  = True
-        self.x_test         = x
-        self.n_test         = x.shape[0]
-        self.has_y_test     = False if y is None else True
-        self.y_test         = y
-    
     def set_row_names(self, row_names):
         self.row_names      = row_names
     
@@ -53,10 +45,6 @@ class Workflow:
 
     def set_config(self, config):
         self.config         = config
-    
-    def assert_config(self):
-        if self.config is None:
-            assert False, "Config file not provided."
     
     def normalize(self):
         raise NotImplementedError()
@@ -84,7 +72,7 @@ class Workflow:
         plt.title('Boxplot')
         fig.set_size_inches(10, 5)
     
-    def reduce_plot(self, labels=None, method='umap', use_emb=False, **kwargs):
+    def reduce_plot(self, labels=None, method='umap', use_emb=True, **kwargs):
         if labels is None:      # By default use predicted labels
             labels = self.y_train_pred
         if self.config is not None:
@@ -92,8 +80,11 @@ class Workflow:
             if self.verbose:
                 print('Using', method, 'with the following params:')
                 pretty_print_dict(kwargs)
-        reduce_and_plot(x=self.x_train_emb if use_emb else self.x_train,
-                        y=labels, method=method, **kwargs)
+        self.x_train_2d_emb = reduce_and_plot(
+                        x=self.x_train_emb if use_emb else self.x_train,
+                        y=labels,
+                        method=method,
+                        **kwargs)
 
     def pca_plot_var_ratio(self, n_components=None, **kwargs):
         """
@@ -104,7 +95,7 @@ class Workflow:
         pca.fit(self.x_train)
 
         # Plotting
-        sns.set_style("whitegrid")
+        sns.set_style('whitegrid')
 
         fig, (ax1, ax2) = plt.subplots(1, 2)
         ax1.plot(list(range(1, kwargs['n_components'] + 1)),
@@ -139,7 +130,7 @@ class Workflow:
             self.x_train_emb = pca.transform(self.x_train)
             print("Embedding created. Train MSE:",
                     mse(self.x_train, pca.inverse_transform(self.x_train_emb)))
-            print("Train Average Log Likelihood:", pca.score(self.x_train))
+            #print("Train Average Log Likelihood:", pca.score(self.x_train))
         elif method == 'umap':
             umap = UMAP(**kwargs)
             umap.fit(self.x_train)
@@ -154,21 +145,32 @@ class Workflow:
         if self.config is not None:
             kwargs = read_config(self.config)['cluster'][method]
             if self.verbose:
-                print('Using', method, 'clustering with the following params:')
+                print("Using", method, "clustering with the following params:")
                 pretty_print_dict(kwargs)
 
         if method == 'kmeans':
             kmeans = KMeans(**kwargs)
             kmeans.fit(self.x_train_emb)
             self.y_train_pred = kmeans.predict(self.x_train_emb)
-            print("Clustering complete. Train Score:", kmeans.score(self.x_train_emb))
         elif method == 'spectral':
             spectral = SpectralClustering(**kwargs)
             spectral.fit(self.x_train_emb)
             self.y_train_pred = spectral.labels_
-            print('Clustering complete.')
+        elif method == 'kmedoids':
+            kmedoids = KMedoids(**kwargs)
+            kmedoids.fit(self.x_train_emb)
+            self.y_train_pred = kmedoids.predict(self.x_train_emb)
         else:
             raise NotImplementedError()
+        
+        if self.verbose:
+            print("Clustering complete.")
+    
+    def get_markers(self):
+        df = pd.DataFrame(self.x_train)
+        df['y_train_pred'] = self.y_train_pred
+        self.markers = df.groupby('y_train_pred').median().to_numpy()
+        return self.markers
 
 def pretty_print_dict(mydict):
     print(json.dumps(mydict, sort_keys=True, indent=4))
