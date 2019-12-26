@@ -1,13 +1,10 @@
 from src.workflow import Workflow
-from src.utils_experiment import read_config, load_data
-import numpy as np
+from src.utils_experiment import load_data
 from matplotlib import pyplot as plt
 import warnings
 warnings.filterwarnings('ignore')
 
 if __name__ == '__main__':
-    config = read_config('spellman')
-    X, Y = load_data(config['dataset']['name'])
     plt.ion()
 
     dataset = 'spleen'
