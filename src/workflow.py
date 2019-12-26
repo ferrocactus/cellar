@@ -1,9 +1,7 @@
 import numpy as np
 import pandas as pd
-from matplotlib import pylab as plt
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib import pyplot as plt
 import seaborn as sns
-import tqdm
 import json
 
 # Visualization and Dimensionality Reduction
@@ -13,11 +11,10 @@ from sklearn.manifold import TSNE
 # Clustering
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
-from sklearn.neighbors import kneighbors_graph
 from src.k_medoids import KMedoids
-
+# Metrics
 from sklearn.metrics import mean_squared_error as mse
-
+# Utils
 from src.utils_visualization import reduce_and_plot
 from src.utils_experiment import read_config
 
@@ -115,7 +112,7 @@ class Workflow:
     
     def reduce_dim(self, method='pca', **kwargs):
         """
-        Reduces the dimensionality of the data and stores it in self.emb.
+        Reduces the dimensionality of the data and stores it in self.x_train_emb.
         """
         if self.config is not None:  # Use the provided config file instead
             kwargs = read_config(self.config)['reduce_dim'][method]

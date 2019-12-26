@@ -8,5 +8,5 @@ The following features have been implented so far.
     <li>Variance Ratio Plotting:PCA<br><img src="images/spellman_var_ratio.png"/></li><br>
     <li>2D and 3D visualization of the data: UMAP, PCA, t-SNE.<br><img src='images/spleen_2d_umap.png'/></li><br>
     <li>Dimensionality reduction: PCA, UMAP.</li><br>
-    <li>Clustering: k-Means, Spectral Clustering.</li><br>
+    <li>Clustering: k-Means, Spectral Clustering, k-Medoids.</li><br>
 </ul>
