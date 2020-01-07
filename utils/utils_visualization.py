@@ -3,10 +3,6 @@ from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import seaborn as sns
 
-from umap import UMAP
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-
 def plot_images(imlist, cols=3, titlelist=None, cmap='gray'):
     """
     Plots numpy images in a grid with "cols" columns.
@@ -46,10 +42,13 @@ def reduce_and_plot(x=None, y=None, method='umap', dims=2, **kwargs):
             n_components    = 2
             metric          = 'euclidean'
         """
+        from umap import UMAP
         emb = UMAP(n_components=dims, **kwargs).fit_transform(x)
     elif method == 'pca':
+        from sklearn.decomposition import PCA
         emb = PCA(n_components=dims, **kwargs).fit_transform(x)
     elif method == 'tsne':
+        from sklearn.manifold import TSNE
         emb = TSNE(n_components=dims, **kwargs).fit_transform(x)
     else:
         raise NotImplementedError('Method not found')
