@@ -3,6 +3,8 @@ import pandas as pd
 from matplotlib import pyplot as plt
 import seaborn as sns
 import json
+import tqdm
+import time
 
 # Visualization and Dimensionality Reduction
 from umap import UMAP
@@ -13,7 +15,7 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from acip.k_medoids import KMedoids
 # Metrics
-from sklearn.metrics import mean_squared_error as mse
+from sklearn.metrics import mean_squared_error as mse, silhouette_score
 # Utils
 from utils.utils_visualization import reduce_and_plot
 from utils.utils_experiment import read_config
@@ -70,6 +72,7 @@ class ACIP:
         fig.set_size_inches(10, 5)
     
     def reduce_plot(self, labels=None, method='umap', use_emb=True, **kwargs):
+        print_header("Visualizing")
         if labels is None:      # By default use predicted labels
             labels = self.y_train_pred
         if self.config is not None:
@@ -114,10 +117,12 @@ class ACIP:
         """
         Reduces the dimensionality of the data and stores it in self.x_train_emb.
         """
+        print_header("Reducing dimensionality")
+        print("Using " + method + ".")
         if self.config is not None:  # Use the provided config file instead
             kwargs = read_config(self.config)['reduce_dim'][method]
             if self.verbose:
-                print('Using', method, 'with the following params:')
+                print('Using the following params:')
                 pretty_print_dict(kwargs)
 
         if method == 'pca':
@@ -135,33 +140,60 @@ class ACIP:
         else:
             raise NotImplementedError()
     
-    def cluster(self, method='kmeans', **kwargs):
+    def cluster(self, method='kmedoids', n_clusters_list=list(range(2, 17, 2)), **kwargs):
         """
         Clusters the embeddings as constructed by reduce_dim.
         """
+        print_header("Clustering")
+        print("Using " + method + ".")
         if self.config is not None:
             kwargs = read_config(self.config)['cluster'][method]
             if self.verbose:
-                print("Using", method, "clustering with the following params:")
+                print("Using the following params:")
                 pretty_print_dict(kwargs)
 
-        if method == 'kmeans':
-            kmeans = KMeans(**kwargs)
-            kmeans.fit(self.x_train_emb)
-            self.y_train_pred = kmeans.predict(self.x_train_emb)
-        elif method == 'spectral':
-            spectral = SpectralClustering(**kwargs)
-            spectral.fit(self.x_train_emb)
-            self.y_train_pred = spectral.labels_
-        elif method == 'kmedoids':
-            kmedoids = KMedoids(**kwargs)
-            kmedoids.fit(self.x_train_emb)
-            self.y_train_pred = kmedoids.predict(self.x_train_emb)
-        else:
-            raise NotImplementedError()
+        silhouette_score_list = []
+        max_sscore = -2
+        
+        time.sleep(0.2) # To avoid tqdm bar from appearing before prints
+        pbar = tqdm.tqdm(n_clusters_list)
+        for n_clusters in pbar:
+            pbar.set_description("Trying n_clusters=" + str(n_clusters))
+            if method == 'kmeans':
+                kmeans = KMeans(n_clusters=n_clusters, **kwargs)
+                y_train_pred = kmeans.fit_predict(self.x_train_emb)
+            elif method == 'spectral':
+                spectral = SpectralClustering(n_clusters=n_clusters, **kwargs)
+                y_train_pred = spectral.fit_predict(self.x_train_emb)
+            elif method == 'kmedoids':
+                kmedoids = KMedoids(n_clusters=n_clusters, **kwargs)
+                y_train_pred = kmedoids.fit_predict(self.x_train_emb)
+            else:
+                raise NotImplementedError()
+
+            sscore = silhouette_score(self.x_train_emb, y_train_pred)
+            silhouette_score_list.append(sscore)
+            if max_sscore < sscore:
+                max_sscore = sscore
+                self.n_clusters = n_clusters
+                self.y_train_pred = y_train_pred
+        
+        print("Clustering complete.")
+        print("Highest silhouette score is achieved for n_clusters =", self.n_clusters)
         
         if self.verbose:
-            print("Clustering complete.")
+            sns.set_style('whitegrid')
+            fig, ax = plt.subplots()
+            ax.plot(n_clusters_list, silhouette_score_list)
+            ax.set_xlabel('Number of Clusters')
+            ax.set_ylabel('Silhouette Score')
+            sns.despine()
+            fig.set_size_inches(10, 5)
+    
+    def flow(self, reduce_dim='pca', cluster='kmedoids', reduce_plot='umap'):
+        self.reduce_dim(method=reduce_dim)
+        self.cluster(method=cluster)
+        self.reduce_plot(method=reduce_plot)
     
     def get_markers(self):
         df = pd.DataFrame(self.x_train)
@@ -171,3 +203,14 @@ class ACIP:
 
 def pretty_print_dict(mydict):
     print(json.dumps(mydict, sort_keys=True, indent=4))
+
+def print_header(text, max_length=50, prepend_newline=True):
+    if len(text) >= max_length:
+        if prepend_newline:
+            print()
+        print("*** " + text + " ***")
+    else:
+        rems = int((max_length - len(text)) / 2) - 2
+        if prepend_newline:
+            print()
+        print('*' * rems, text, '*' * (max_length - rems - len(text) - 2))

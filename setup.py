@@ -8,6 +8,7 @@ install_requires = [
     'seaborn',
     'sklearn',
     'umap-learn',
+    'tqdm',
     'jackstraw'
 ]
 
