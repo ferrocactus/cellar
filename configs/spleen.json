@@ -3,7 +3,6 @@
         "name": "spleen"
     },
     "reduce_dim": {
-        "_default" : "pca",
         "pca": {
             "n_components": 10
         },
@@ -15,7 +14,6 @@
         }
     },
     "cluster": {
-        "_default" : "kmedoids",
         "kmeans": {
         },
         "spectral": {
@@ -26,7 +24,6 @@
         }
     },
     "reduce_plot": {
-        "_default" : "umap",
         "umap": {
             "dims": 2,
             "n_neighbors": 15,

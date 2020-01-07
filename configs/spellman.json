@@ -1,12 +1,12 @@
 {
     "dataset": {
-        "name": "spellman",
-        "w": 23,
-        "h": 1,
-        "n": 4381
+        "name": "spellman"
     },
     "reduce_dim": {
         "pca": {
+            "n_components": 7
+        },
+        "umap": {
             "n_components": 7
         }
     },
@@ -17,6 +17,9 @@
         "spectral": {
             "n_clusters": 8,
             "affinity": "nearest_neighbors"
+        },
+        "kmedoids": {
+            "metric": "cosine"
         }
     },
     "reduce_plot": {

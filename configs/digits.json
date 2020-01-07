@@ -17,6 +17,9 @@
         "spectral": {
             "n_clusters": 10,
             "affinity": "nearest_neighbors"
+        },
+        "kmedoids": {
+            "metric": "cosine"
         }
     },
     "reduce_plot": {
