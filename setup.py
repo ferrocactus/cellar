@@ -1,10 +1,24 @@
 from setuptools import setup, find_packages
+from pip.req import parse_requirements
 
-install_requires = ['numpy', 'pandas', 'matplotlib', 'seaborn', 'umap',
-                'scikit-learn', 'anndata', 'jupyter', 'jackstraw', 'tqdm']
+#install_reqs = parse_requirements('requirements.txt')
+#reqs = [str(ir.req) for ir in install_reqs]
+
+install_requires = ['anndata',
+                    'h5py',
+                    'jupyter',
+                    'matplotlib',
+                    'numpy',
+                    'pandas',
+                    'scikit-learn',
+                    'seaborn',
+                    'sklearn',
+                    'tqdm',
+                    'umap-learn',
+                    'git+https://github.com/idc9/jackstraw']
 
 setup(
-    name='src',
+    name='acip',
     version=1.0,
     description='Workflow for identifying cell types.',
     author='Euxhen Hasanaj',
