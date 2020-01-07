@@ -11,14 +11,14 @@ from sklearn.manifold import TSNE
 # Clustering
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
-from src.k_medoids import KMedoids
+from acip.k_medoids import KMedoids
 # Metrics
 from sklearn.metrics import mean_squared_error as mse
 # Utils
 from utils.utils_visualization import reduce_and_plot
 from utils.utils_experiment import read_config
 
-class Workflow:
+class ACIP:
     def __init__(self, x, y=None, config=None, verbose=False):
         self.set_train_data(x, y)
         # If use_config is set for a function, all its kwargs will be ignored

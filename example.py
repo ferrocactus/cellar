@@ -1,4 +1,4 @@
-from src.workflow import Workflow
+from acip.acip import ACIP
 from utils.utils_experiment import load_data
 from matplotlib import pyplot as plt
 import warnings
@@ -9,7 +9,7 @@ if __name__ == '__main__':
 
     dataset = 'spleen'
     X, Y = load_data(dataset)
-    w = Workflow(X, Y, config=dataset, verbose=True)
+    w = ACIP(X, Y, config=dataset, verbose=True)
     w.pca_plot_var_ratio(20)
     w.reduce_dim(method='pca')
     w.cluster(method='kmedoids')
