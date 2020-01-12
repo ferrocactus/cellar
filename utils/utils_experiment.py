@@ -7,6 +7,7 @@ def read_config(dataset):
     return config
 
 def load_data(dataset):
+    # return X, Y
     if dataset == 'spleen':
         import anndata
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
