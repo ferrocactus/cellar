@@ -133,10 +133,6 @@ class ACIP:
             print("Embedding created. Train MSE:",
                     mse(self.x_train, pca.inverse_transform(self.x_train_emb)))
             #print("Train Average Log Likelihood:", pca.score(self.x_train))
-        elif method == 'umap':
-            umap = UMAP(**kwargs)
-            umap.fit(self.x_train)
-            self.x_train_emb = umap.transform(self.x_train)
         else:
             raise NotImplementedError()
     
@@ -148,6 +144,7 @@ class ACIP:
         print("Using " + method + ".")
         if self.config is not None:
             kwargs = read_config(self.config)['cluster'][method]
+            n_clusters_list=[kwargs['n_clusters']]
             if self.verbose:
                 print("Using the following params:")
                 pretty_print_dict(kwargs)
