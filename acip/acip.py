@@ -13,12 +13,16 @@ from sklearn.manifold import TSNE
 # Clustering
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
+from sklearn.cluster import AgglomerativeClustering
 from acip.k_medoids import KMedoids
 # Metrics
 from sklearn.metrics import mean_squared_error as mse, silhouette_score
 # Utils
 from utils.utils_visualization import reduce_and_plot
 from utils.utils_experiment import read_config
+# Constrained clustering
+from copkmeans.cop_kmeans import cop_kmeans
+from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 
 class ACIP:
     def __init__(self, x, y=None, config=None, verbose=False):
@@ -130,13 +134,14 @@ class ACIP:
             pca.fit(self.x_train)
             # Print scores
             self.x_train_emb = pca.transform(self.x_train)
-            print("Embedding created. Train MSE:",
+            print("Embedding created. MSE:",
                     mse(self.x_train, pca.inverse_transform(self.x_train_emb)))
+            print("Used", pca.n_components_, "components.")
             #print("Train Average Log Likelihood:", pca.score(self.x_train))
         else:
             raise NotImplementedError()
     
-    def cluster(self, method='kmedoids', n_clusters_list=list(range(2, 17, 2)), **kwargs):
+    def cluster(self, method='kmedoids', n_clusters_list=list(range(2, 65, 2)), **kwargs):
         """
         Clusters the embeddings as constructed by reduce_dim.
         """
@@ -144,7 +149,9 @@ class ACIP:
         print("Using " + method + ".")
         if self.config is not None:
             kwargs = read_config(self.config)['cluster'][method]
-            n_clusters_list=[kwargs['n_clusters']]
+            if 'n_clusters' in kwargs:
+                n_clusters_list=[kwargs['n_clusters']]
+                kwargs.pop('n_clusters', None)
             if self.verbose:
                 print("Using the following params:")
                 pretty_print_dict(kwargs)
@@ -168,7 +175,7 @@ class ACIP:
             else:
                 raise NotImplementedError()
 
-            sscore = silhouette_score(self.x_train_emb, y_train_pred)
+            sscore = silhouette_score(self.x_train_emb, y_train_pred, metric='correlation')
             silhouette_score_list.append(sscore)
             if max_sscore < sscore:
                 max_sscore = sscore
@@ -187,6 +194,51 @@ class ACIP:
             sns.despine()
             fig.set_size_inches(10, 5)
     
+    def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
+        assert constraints is not None, "No constraints provided."
+        print_header("Clustering with constraints")
+        print("Using " + method + ".")
+
+        silhouette_score_list = []
+        max_sscore = -2
+        
+        time.sleep(0.2) # To avoid tqdm bar from appearing before prints
+        pbar = tqdm.tqdm(n_clusters_list)
+        for n_clusters in pbar:
+            pbar.set_description("Trying n_clusters=" + str(n_clusters))
+            if method == 'cop_kmeans':
+                y_train_pred, centers = cop_kmeans(dataset=self.x_train_emb, k=n_clusters,
+                                                    ml=constraints['ml'], cl=constraints['cl'],
+                                                    **kwargs)
+            elif method == 'agglomerative':
+                ac = AgglomerativeClustering(n_clusters=n_clusters, connectivity=constraints, **kwargs)
+                y_train_pred = ac.fit_predict(self.x_train_emb)
+            elif method == 'pckmeans':
+                pck = PCKMeans(n_clusters=self.n_clusters)
+                pck.fit(self.x_train_emb, ml=constraints['ml'], cl=constraints['cl'])
+                y_train_pred = pck.labels_
+            else:
+                raise NotImplementedError()
+            
+            sscore = silhouette_score(self.x_train_emb, y_train_pred, metric='correlation')
+            silhouette_score_list.append(sscore)
+            if max_sscore < sscore:
+                max_sscore = sscore
+                self.n_clusters = n_clusters
+                self.y_train_pred = y_train_pred
+        
+        print("Clustering with constraints complete.")
+        print("Highest silhouette score is achieved for n_clusters =", self.n_clusters)
+
+        if self.verbose:
+            sns.set_style('whitegrid')
+            fig, ax = plt.subplots()
+            ax.plot(n_clusters_list, silhouette_score_list)
+            ax.set_xlabel('Number of Clusters')
+            ax.set_ylabel('Silhouette Score')
+            sns.despine()
+            fig.set_size_inches(10, 5)
+        
     def flow(self, reduce_dim='pca', cluster='kmedoids', reduce_plot='umap'):
         self.reduce_dim(method=reduce_dim)
         self.cluster(method=cluster)

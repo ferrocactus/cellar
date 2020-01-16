@@ -4,13 +4,7 @@
     },
     "reduce_dim": {
         "pca": {
-            "n_components": 10
-        },
-        "umap": {
-            "n_components": 10,
-            "n_neighbors": 5,
-            "min_dist": 0.1,
-            "metric": "euclidean"
+            "n_components": 15
         }
     },
     "cluster": {
@@ -20,15 +14,15 @@
             "affinity": "nearest_neighbors"
         },
         "kmedoids": {
-            "metric": "cosine"
+            "metric": "correlation"
         }
     },
     "reduce_plot": {
         "umap": {
             "dims": 2,
             "n_neighbors": 15,
-            "min_dist": 0.1,
-            "metric": "euclidean"
+            "min_dist": 0,
+            "metric": "correlation"
         },
         "pca": {
             "dims": 2
