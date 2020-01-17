@@ -116,7 +116,17 @@ class ACIP:
 
         sns.despine()
         fig.set_size_inches(10, 5)
-    
+
+    def filter_genes(self):
+        """
+        Computes the variance for every gene (column) and picks the highest 20%
+        variable genes. Stores the new matrix into self.x_train_filtered
+        """
+        print_header("Filtering genes")
+        gene_variances = np.var(self.x_train, axis=0)
+        highest_var_gene_indices = gene_variances.argsort()[-int(0.2 * self.x_train.shape[1]):]
+        self.x_train_filtered = self.x_train[:, highest_var_gene_indices]
+
     def reduce_dim(self, method='pca', **kwargs):
         """
         Reduces the dimensionality of the data and stores it in self.x_train_emb.
@@ -131,13 +141,13 @@ class ACIP:
 
         if method == 'pca':
             pca = PCA(**kwargs)
-            pca.fit(self.x_train)
+            pca.fit(self.x_train_filtered)
             # Print scores
-            self.x_train_emb = pca.transform(self.x_train)
+            self.x_train_emb = pca.transform(self.x_train_filtered)
             print("Embedding created. MSE:",
-                    mse(self.x_train, pca.inverse_transform(self.x_train_emb)))
+                    mse(self.x_train_filtered, pca.inverse_transform(self.x_train_emb)))
             print("Used", pca.n_components_, "components.")
-            #print("Train Average Log Likelihood:", pca.score(self.x_train))
+            #print("Train Average Log Likelihood:", pca.score(self.x_train_filtered))
         else:
             raise NotImplementedError()
     
@@ -240,6 +250,7 @@ class ACIP:
             fig.set_size_inches(10, 5)
         
     def flow(self, reduce_dim='pca', cluster='kmedoids', reduce_plot='umap'):
+        self.filter_genes()
         self.reduce_dim(method=reduce_dim)
         self.cluster(method=cluster)
         self.reduce_plot(method=reduce_plot)
