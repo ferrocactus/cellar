@@ -239,11 +239,11 @@ class ACIP:
                 ax[cluster_id][0].hist(pvals)
                 ax[cluster_id][0].set_xlabel("p-values")
                 ax[cluster_id][0].set_ylabel("gene count")
-                ax[cluster_id][0].set_title("Cluster:", cluster_id)
+                ax[cluster_id][0].set_title("Cluster:" + str(cluster_id))
                 ax[cluster_id][1].hist(mads, color='r')
                 ax[cluster_id][1].set_xlabel("absolute difference")
                 ax[cluster_id][1].set_ylabel("gene count")
-                ax[cluster_id][1].set_title("Cluster:", cluster_id)
+                ax[cluster_id][1].set_title("Cluster:" + str(cluster_id))
 
         self.markers = np.asarray(self.markers)
         
