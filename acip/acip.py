@@ -15,6 +15,8 @@ from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 from sklearn.cluster import AgglomerativeClustering
 from acip.k_medoids import KMedoids
+# Differential Expression
+from scipy import stats
 # Metrics
 from sklearn.metrics import mean_squared_error as mse, silhouette_score
 # Utils
@@ -28,31 +30,34 @@ class ACIP:
     def __init__(self, x, y=None, config=None, verbose=False):
         self.set_train_data(x, y)
         # If use_config is set for a function, all its kwargs will be ignored
-        self.config         = config
-        self.verbose        = verbose
+        self.config = config
+        self.verbose = verbose
     
     def set_train_data(self, x, y=None, row_names=None, col_names=None):
         assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
-        self.x_train        = x
-        self.n_train        = x.shape[0]
-        self.dims           = x.shape[1]
-        self.y_train        = y
-        self.row_names      = row_names
-        self.col_names      = col_names
+        self.x_train = x
+        self.n_train = x.shape[0]
+        self.dims = x.shape[1]
+        self.y_train = y
+        self.row_names = row_names
+        self.col_names = col_names
     
     def set_row_names(self, row_names):
-        self.row_names      = row_names
+        self.row_names = row_names
     
     def set_col_names(self, col_names):
-        self.col_names      = col_names
+        self.col_names = col_names
 
     def set_config(self, config):
-        self.config         = config
+        self.config = config
+
+    def set_verbose(self, verbose):
+        self.verbose = verbose
     
     def normalize(self):
         raise NotImplementedError()
     
-    def boxplot(self, data='train'):
+    def boxplot(self):
         """
         Boxplot of the columns of the data
         """
@@ -61,12 +66,8 @@ class ACIP:
                     "Results may not be what expected.")
         sns.set_style("whitegrid")
         fig, ax = plt.subplots()
-        if data == 'train':
-            sns.boxplot(data=self.x_train)
-        elif data == 'test' and self.has_test_data:
-            sns.boxplot(data=self.x_test)
-        else:
-            raise NameError("Dataset not found.")
+        sns.boxplot(data=self.x_train)
+
         sns.despine(left=True)
         if self.col_names is not None and len(self.col_names) < 40:
             plt.xticks(np.arange(self.dims), self.col_names, rotation=90)
@@ -127,6 +128,15 @@ class ACIP:
         highest_var_gene_indices = gene_variances.argsort()[-int(0.2 * self.x_train.shape[1]):]
         self.x_train_filtered = self.x_train[:, highest_var_gene_indices]
 
+        # Plotting
+        if self.verbose:
+            fig, ax = plt.subplots()
+            ax.hist(gene_variances)
+            ax.set_xlabel("Variance")
+            ax.set_ylabel("Gene Count")
+            sns.despine()
+            fig.set_size_inches(10, 5)
+
     def reduce_dim(self, method='pca', **kwargs):
         """
         Reduces the dimensionality of the data and stores it in self.x_train_emb.
@@ -151,7 +161,7 @@ class ACIP:
         else:
             raise NotImplementedError()
     
-    def cluster(self, method='kmedoids', n_clusters_list=list(range(2, 65, 2)), **kwargs):
+    def cluster(self, method='kmedoids', n_clusters_list=list(range(2, 15, 2)), **kwargs):
         """
         Clusters the embeddings as constructed by reduce_dim.
         """
@@ -204,6 +214,44 @@ class ACIP:
             sns.despine()
             fig.set_size_inches(10, 5)
     
+    def get_markers(self):
+        self.markers = []
+
+        fig, ax = plt.subplots(self.n_clusters, 2)
+
+        for cluster_id in tqdm.tqdm(range(self.n_clusters), desc="Cluster id"):
+            x_in = self.x_train[np.where(self.y_train_pred == cluster_id)]
+            x_not_in = self.x_train[np.where(self.y_train_pred != cluster_id)]
+
+            pvals = []
+            mads = []
+            for gene in tqdm.tqdm(range(self.dims), desc="Gene id"):
+                gene_vector_in = x_in[:, gene]
+                gene_vector_not_in = x_not_in[:, gene]
+
+                t, pval = stats.ttest_ind(gene_vector_in, gene_vector_not_in, equal_var=False)
+                pvals.append(pval)
+                mads.append(np.mean(gene_vector_in) - np.mean(gene_vector_not_in))
+            marker = self.col_names[np.where((np.array(pvals) < (0.05 / self.dims)) & (np.array(mads) > 1))]
+            self.markers.append(marker)
+
+            if self.verbose:
+                ax[cluster_id][0].hist(pvals)
+                ax[cluster_id][0].set_xlabel("p-values")
+                ax[cluster_id][0].set_ylabel("gene count")
+                ax[cluster_id][0].set_title("Cluster:", cluster_id)
+                ax[cluster_id][1].hist(mads, color='r')
+                ax[cluster_id][1].set_xlabel("absolute difference")
+                ax[cluster_id][1].set_ylabel("gene count")
+                ax[cluster_id][1].set_title("Cluster:", cluster_id)
+
+        self.markers = np.asarray(self.markers)
+        
+        if self.verbose:
+            sns.despine()
+            fig.set_size_inches(10, self.n_clusters * 5)
+            plt.show()
+    
     def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
         assert constraints is not None, "No constraints provided."
         print_header("Clustering with constraints")
@@ -254,12 +302,7 @@ class ACIP:
         self.reduce_dim(method=reduce_dim)
         self.cluster(method=cluster)
         self.reduce_plot(method=reduce_plot)
-    
-    def get_markers(self):
-        df = pd.DataFrame(self.x_train)
-        df['y_train_pred'] = self.y_train_pred
-        self.markers = df.groupby('y_train_pred').median().to_numpy()
-        return self.markers
+        self.get_markers()
 
 def pretty_print_dict(mydict):
     print(json.dumps(mydict, sort_keys=True, indent=4))
