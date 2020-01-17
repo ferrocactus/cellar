@@ -225,7 +225,7 @@ class ACIP:
 
             pvals = []
             mads = []
-            for gene in tqdm.tqdm(range(self.dims), desc="Gene id"):
+            for gene in range(self.dims):
                 gene_vector_in = x_in[:, gene]
                 gene_vector_not_in = x_not_in[:, gene]
 
@@ -250,7 +250,6 @@ class ACIP:
         if self.verbose:
             sns.despine()
             fig.set_size_inches(10, self.n_clusters * 5)
-            plt.show()
     
     def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
         assert constraints is not None, "No constraints provided."
