@@ -7,13 +7,17 @@ warnings.filterwarnings('ignore')
 if __name__ == '__main__':
     plt.ion()
 
+    #plt.ioff()
     dataset = 'spleen'
-    X, Y = load_data(dataset)
+    X, Y, gene_ids = load_data(dataset)
     w = ACIP(X, Y, config=dataset, verbose=True)
-    w.pca_plot_var_ratio(20)
+    w.set_col_names(gene_ids)
+    w.filter_genes()
     w.reduce_dim(method='pca')
     w.cluster(method='kmedoids')
-    w.reduce_plot(labels=w.y_train_pred, method='umap')
+    w.reduce_plot(method='umap')
+    w.get_markers()
+    print(w.markers)
 
     plt.ioff()
     plt.show()
