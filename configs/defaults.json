@@ -2,7 +2,7 @@
     "reduce_dim": {
         "method": "PCA",
         "PCA": {
-            "n_components": 15
+            "n_components": "mse"
         }
     },
     "explained_variance": {
@@ -13,11 +13,6 @@
     },
     "cluster": {
         "method": "KMedoids",
-        "KMeans": {
-        },
-        "SpectralClustering": {
-            "affinity": "nearest_neighbors"
-        },
         "KMedoids": {
             "metric": "correlation"
         },
@@ -26,7 +21,7 @@
             "metric": "correlation"
         },
         "low": 2,
-        "high": 5,
+        "high": 17,
         "step": 2
     },
     "markers": {
@@ -41,12 +36,6 @@
             "n_neighbors": 15,
             "min_dist": 0,
             "metric": "correlation"
-        },
-        "PCA": {
-            "dims": 2
-        },
-        "TSNE": {
-            "dims": 2
         }
     }
 }
