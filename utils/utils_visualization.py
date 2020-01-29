@@ -68,7 +68,7 @@ def plot_markers(n_clusters, pvals, mads):
         ax[cluster_id][1].set_title("Cluster:" + str(cluster_id))
     
     sns.despine()
-    fig.set_size_inches(10, self.n_clusters * 5)
+    fig.set_size_inches(10, n_clusters * 5)
 
 def plot_2d(x, y=None, dims=2):
     fig = plt.figure()
