@@ -25,7 +25,8 @@ from utils.utils_visualization import (plot_2d,
                                     plot_explained_variance,
                                     plot_gene_variances,
                                     plot_scores,
-                                    plot_markers)
+                                    plot_marker_hist,
+                                    plot_top_markers)
 from utils.utils_experiment import read_config
 # Constrained clustering
 from copkmeans.cop_kmeans import cop_kmeans
@@ -33,6 +34,9 @@ from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 
 class ACIP:
     def __init__(self, x, config="defaults", verbose=False, row_ids=None, col_ids=None):
+        assert type(x).__module__ == np.__name__
+        assert type(row_ids).__module__ == np.__name__ or row_ids is None
+        assert type(col_ids).__module__ == np.__name__ or col_ids is None
         self.set_train_data(x)
         # If use_config is set for a function, all its kwargs will be ignored
         self.config = config
@@ -118,8 +122,7 @@ class ACIP:
         else:            # Count of genes to keep
             highest_var_gene_indices = self.gene_variances.argsort()[-n_genes:]
         
-        if self.verbose:
-            print("Keeping", len(highest_var_gene_indices), "genes.")
+        print("Keeping", len(highest_var_gene_indices), "genes.")
 
         self.x_filtered = self.x[:, highest_var_gene_indices]
 
@@ -140,8 +143,9 @@ class ACIP:
         if method == 'PCA':
             method_obj.fit(self.x_filtered)
             self.x_emb = method_obj.transform(self.x_filtered)
-            print("Embedding created. MSE:",
-                    mse(self.x_filtered, method_obj.inverse_transform(self.x_emb)))
+            if self.verbose:
+                print("Embedding created. MSE:",
+                        mse(self.x_filtered, method_obj.inverse_transform(self.x_emb)))
             print("Used", method_obj.n_components_, "components.")
         else:
             raise NotImplementedError()
@@ -187,35 +191,71 @@ class ACIP:
         print("Highest score is achieved for n_clusters =", self.n_clusters)
     
     def find_markers(self):
+        """
+        After having constructed the clusters, look at all the genes and try
+        to determine which genes are significant for a given cluster. Collect
+        all such gene indices into "self.markers" list.
+        """
         if not hasattr(self, 'y_pred'):
             sys.exit("Clustering not performed. Run cluster first.")
-        print_header("Getting Markers")
+        print_header("Finding Markers")
         self.print_verbose('markers')
-
+        # Read params from config
         alpha = self.params['markers']['alpha']
         difference = self.params['markers']['difference']
-
-        self.markers = []
+        top_k = self.params['markers']['top_k']
+        # Initialize
+        self.marker_indices = []
         self.pvals = np.zeros((self.n_clusters, self.cols))
-        self.mads = np.zeros((self.n_clusters, self.cols))
+        self.mds = np.zeros((self.n_clusters, self.cols))
 
         time.sleep(0.2) # To avoid tqdm bar from appearing before prints
-        for cluster_id in tqdm.tqdm(range(self.n_clusters), desc="Cluster id"):
+        for cluster_id in tqdm.tqdm(range(self.n_clusters), desc="Completed clusters:"):
+            # Current cluster vs the rest
             x_in = self.x[np.where(self.y_pred == cluster_id)]
             x_not_in = self.x[np.where(self.y_pred != cluster_id)]
 
+            # Consider all genes and run T-test to determine if that gene
+            # is significant for the current cluster
             for gene in range(self.cols):
                 gene_vector_in = x_in[:, gene]
                 gene_vector_not_in = x_not_in[:, gene]
-
+                # T-test + mean difference (md)
                 t, pval = stats.ttest_ind(gene_vector_in, gene_vector_not_in, equal_var=False)
                 self.pvals[cluster_id][gene] = pval
-                self.mads[cluster_id][gene] = np.mean(gene_vector_in) - np.mean(gene_vector_not_in)
-            marker = self.col_ids[np.where((np.array(self.pvals[cluster_id]) < (alpha / self.cols)) & (np.array(self.mads[cluster_id]) > difference))]
-            self.markers.append(marker)
+                # No absolute value needed for the following difference
+                # While large negative values would also imply significance,
+                # they are not considered markers for the given cluster
+                self.mds[cluster_id][gene] = np.mean(gene_vector_in) - np.mean(gene_vector_not_in)
 
-        self.markers = np.asarray(self.markers)
+            # Sort the mean differences and use the indices to sort p-values
+            sorted_indices = np.flip(np.argsort(self.mds[cluster_id]))
+            pvals_sorted_by_mad = self.pvals[cluster_id][sorted_indices]
+            # Apply Bonferroni correction to the p-values (i.e., divide alpha by cols)
+            marker_index = sorted_indices[np.where(pvals_sorted_by_mad < (alpha / self.cols))]
+            # Choose top_k genes
+            self.marker_indices.append(marker_index[:top_k])
+        self.marker_indices = np.asarray(self.marker_indices)
     
+    def get_markers(self):
+        """
+        Returns two arrays where the first array consists of tuples (p-value, md)
+        and the second array consists of the corresponding gene IDs
+        """
+        if not hasattr(self, 'marker_indices'):
+            sys.exit("Markers not found. Run find_markers first.")
+        
+        marker_ids = []
+        marker_pvals = []
+        marker_mds = []
+
+        for i, marker_index in enumerate(self.marker_indices):
+            marker_ids.append(self.col_ids[marker_index]) # Get gene names
+            marker_pvals.append(np.array([self.pvals[i][m] for m in marker_index]))
+            marker_mds.append(np.array([self.mds[i][m] for m in marker_index]))
+
+        return np.array(marker_ids), np.array(marker_pvals), np.array(marker_mds)
+
     def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
         assert constraints is not None, "No constraints provided."
         print_header("Clustering with constraints")
@@ -278,13 +318,19 @@ class ACIP:
             if not hasattr(self, 'score_list'):
                 sys.exit("No scores found. Run cluster.")
             plot_scores(self.n_clusters_list, self.score_list)
-        elif what == "markers":
-            if not hasattr(self, 'markers'):
+        elif what == "marker_hist":
+            if not hasattr(self, 'marker_indices'):
                 sys.exit("No markers found. Run find_markers.")
-            plot_markers(self.n_clusters, self.pvals, self.mads)
+            plot_marker_hist(self.n_clusters, self.pvals, self.mds)
+        elif what == "top_markers":
+            if not hasattr(self, 'marker_indices'):
+                sys.exit("No markers found. Run find_markers.")
+            plot_top_markers(*self.get_markers())
         elif what == "2d":
             emb = self.get_visual_emb()
             plot_2d(emb, self.y_pred)
+        else:
+            raise ValueError()
 
 def pretty_print_dict(mydict):
     print(json.dumps(mydict, sort_keys=True, indent=4))
