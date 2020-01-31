@@ -78,7 +78,7 @@ def plot_top_markers(marker_id, marker_pvals, marker_mds):
         x = np.arange(len(marker_pvals[i]))
         y = marker_mds[i]
         ax[int(i/2)][i%2].scatter(x, y, c=np.arange(len(marker_pvals[i])))
-        ax[int(i/2)][i%2].set_xticklabels(np.round(marker_pvals[i], 2))
+        ax[int(i/2)][i%2].set_xticklabels(np.round(marker_pvals[i], 3))
         ax[int(i/2)][i%2].set_title("Cluster " + str(i+1))
         ax[int(i/2)][i%2].set_xlabel("p-value")
         ax[int(i/2)][i%2].set_ylabel("mean difference")

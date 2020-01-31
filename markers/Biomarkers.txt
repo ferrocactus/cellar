@@ -1,0 +1,183 @@
+Organ	Cell type	Subtype	Positive	Negative	citation	comments
+Spleen	T-cells	Naive	"CD45RA, CCR7, CD62L, CD127, CD132, CD45, CD27"		https://www.labome.com/method/T-Cell-Markers-and-B-Cell-Markers.html	
+		Follicular helper T cells	"CXCR5, CD28, OX40, ICOS, CD154"		10.3324/haematol.2009.019133	
+		Follicular regulator T cells	"CXCR5, PD-1, ICOS, CTLA-4, GITR, ICOS, IL-10"		10.3389/fimmu.2018.01792	"Proportions: CCR7-CD45RA+ CD8+ (more in spleen than PB), non-cytotoxic more than cytotoxic"
+	Dendritic cells	CD8+	"Clec9A (DNGR 1), CD205 (DEC205), Clec12A, CD36, CD24 (HSA), CD172a (SIRPalpha), CD11b (Mac1), Cystatin C, TLR 3, TLR12 (TLR11)"		https://doi.org/10.1111/j.0105-2896.2009.00870.x	
+		CD8-	" CD205 (DEC205), Clec12A , DCIR2 (33DI), Dectin 1, CD24 (HSA), CD172a (SIRPalpha), CD11b (Mac1), TLR 7"		https://doi.org/10.1111/j.0105-2896.2009.00870.x	
+		Follicular DCs	" CD23, CD35"			
+		CD8+ standard	JIId(CD24) NLI45(CD205) 	33D1 (DCIR2)	https://doi.org/10.1111/j.0105-2896.2009.00870.x	
+	B-cells	Follicular	"IgM, CD23, IgD"	CD21/35	https://www.novusbio.com/antibody-news/how-to-identify-b-cell-subsets-using-flow-cytometry	
+		Marginal zone	"CD19,CD21,CD24,IgM, B220, CD35"	CD23	https://www.novusbio.com/antibody-news/how-to-identify-b-cell-subsets-using-flow-cytometry	
+		Memory	"IgM, CD27, IgG, IgA, CD38, CD138"		https://www.labome.com/method/T-Cell-Markers-and-B-Cell-Markers.html	
+		Antibody secreting (plasma cell)	"CD27, CD38, CD138"	IgD	https://www.labome.com/method/T-Cell-Markers-and-B-Cell-Markers.html	
+		Antibody secreting (plasmablast)	"CD27, CD38"	"IgD, CD138"	https://www.labome.com/method/T-Cell-Markers-and-B-Cell-Markers.html	
+		B regulatory	"CD19, CD24, CD38, CD19, CD25, CD71"		"https://www.labome.com/method/T-Cell-Markers-and-B-Cell-Markers.html, https://www.sciencedirect.com/science/article/pii/S107476131500134X#tbl1"	
+		Transitional cells	" IgM, CD23, B220, CD19"		https://www.novusbio.com/antibody-news/how-to-identify-b-cell-subsets-using-flow-cytometry	
+		B1 B cells	" CD19, CD43, CD5+B1a, CD5-B1b"	"CD23-, B220, "	https://www.novusbio.com/antibody-news/how-to-identify-b-cell-subsets-using-flow-cytometry	
+	Macrophages	Macrophages	"CD68, CD36, CD163, SIRPalpha, MARCO, SIGNR1, LT, TNFalphaR, SIGLEC1, MOMA1, CD168, CD206, CD64"	"F4/80+CD11b, F4/80"	https://doi.org/10.3389/fimmu.2015.00480	
+	Littoral cells	Littoral cells	"CD31, VWF, CD8alpha, Stabilin-1, FHOD1, CD206, BCL2"			
+	Endothelial stave cells	Endothelial stave cells	"CD34, CD31, CD206"	CD8alpha	10.1007/BF00492078	surrounded by reticular fibres which can be imaged by silver stains etc. No specific markers except for endothelial ones
+Thymus	T lymphoblasts					
+	Macrophages					
+	Cortical thymic epithelial cells	General	" MHC-II, Beta-5t, Ly51, CK8, DLL4, CXCL12, CCL25, Prss16, CD83, CD205"			
+		Embryo lineage	Claudin beta57	"Claudin3,4, CD205"		
+						
+	Medullary thymic epithelial cells	General	"Aire, MHC-II, Fezf2, RANK, CD80, CD86, CCL21, CK5, LTbetaR"		doi.org/10.1146/annurev-immunol-051116-052320	
+		Committed progenitor		"Beta5t, CD205, Ly51, UEA1, RANK, MHCII"	doi.org/10.1146/annurev-immunol-051116-052320	
+		Immature	"UEA1, RANK, MHCII, "	"Ly51, AIRE"	doi.org/10.1146/annurev-immunol-051116-052320	
+		Mature	"UEA1, RANK, MHCII, AIRE"	Ly51 	doi.org/10.1146/annurev-immunol-051116-052320	
+	Dendritic cells					
+	T lymphocytes					
+Lymph nodes	B lymphocytes (developing)					
+	Helper T lymphocytes					
+	Follicular dendritic cells					
+	Macrophages					
+	High endothelial venules					
+Heart	Serous mesothelial cells					
+	Modified cardiac muscle cells					
+	Purkinje fibers					
+	Ganglionic nerve cells					
+Endothelium	endothelial cells					
+Lung: trachea	Trachealis muscle					
+	Ciliated columnar cells					
+	Goblet cells					
+	Brush cells					
+	Small granule cells					
+	Chondrocytes (hyaline cartilage)					
+	Some MALT cells					
+Lung: bronchus	(same as above)					
+	lymphocytes					
+Lung: bronchioles	Ciliated pseudostratified columnar epith.					
+	Ciliated simple columnar epithelium					
+	Simple cuboidal epithelium					
+	Bronchiolar exocrine cells (club cells)					
+	Brush cells					
+	DNES small granule cells					
+	Stem cells					
+Lung: alveoli	Type I alveolar cells					
+	Type II alveolar cells					
+	Fibroblasts					
+	Capillary endothelial cells					
+	Alveolar macrophages (dust cells)					
+	Stem cells					
+	Squamous respiratory epithelium					
+Lung: submucosa	Goblet cells					
+	Basal cells					
+	Mucin cells					
+	Serous cells					
+	Mixed compound tubuloacinar glands					
+Lung: branch point junctions						
+Lung: bronchoalveolar junctions	Simple cuboidal cells					
+	Ciliated cells					
+	Club cells					
+	Brush cells					
+	DNES small granule cells					
+	Stem cells					
+	Simple squamous cells					
+Bladder 	Umbrella cells (urothelium)					"Uroplakins, asymm unit memb."
+	Smooth muscle cells					
+	Detrusor muscle fibers					
+Ureter	Basal cells					
+	Cuboidal cells					
+	Low columnar cells					
+	Umbrella cells					
+Kidney (from paper)	Parietal epithelial cell	Parietal epithelial cell	"CRB2, CLDN1"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Podocytes (stellate epithelium cells)	Podocytes (stellate epithelium cells)	"NPHS2, PODXL, NPHS1"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Capillary endothelial cells	Capillary endothelial cells	"EHD3, EMCN, HECW2, FLT1, AQP1"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Mesangial cells	Mesangial cells	"POSTN, PIEZO2, ROBO1, ITGA8"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Proximal tubular cells (general)	Proximal tubular cells (general)	"CUBN, LRP2, SLC13A1, ALDOB, GATM"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Proximal convoluted tubular cell segment 1	Proximal convoluted tubular cell segment 1	"SLC5A2, SLC5A12"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Proximal tubular cell segment 2	Proximal tubular cell segment 2	SLC22A6		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Proximal tubular cell segment 3	Proximal tubular cell segment 3	"PDZK1IP1, MT1G"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Descending thin limb cell (general)	Descending thin limb cell (general)	"CRYAB, VCAM1, AQP1, SPP1"	CLDN10	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Ascending thin limb cell (general)	Ascending thin limb cell (general)	"CRYAB, TACSTD2, CLDN3"	AQP1	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Thick ascending limb cell (general)	Thick ascending limb cell (general)	"SLC12A1, UMOD"	SLC12A3	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Cortex-TAL cell	Cortex-TAL cell	"SLC12A1, UMOD"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Medulla-TAL cell	Medulla-TAL cell	"SLC12A1, UMOD"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	TAL-Macula Densa cell 	TAL-Macula Densa cell 	"NOS1, SLC12A1"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Distal convoluted tubule cell (general)	Distal convoluted tubule cell (general)	"SLC12A3, TRPM6"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	DCT Type 1 cell	DCT Type 1 cell	"SLC12A3, TRPM6"	"SLC8A1, HSD11B2"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	DCT Type 2 cell	DCT Type 2 cell	"SLC12A3, SLC8A1, HSD11B2"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Connecting tubule cell (general)	Connecting tubule cell (general)	"SLC8A1, CALB1, TRPV5"	SLC12A3	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CNT-Principal cell	CNT-Principal cell	"SLC8A1, AQP2, SCNN1G"	SLC12A3	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CNT- Intercalated cell	CNT- Intercalated cell	"SLC8A1, CA2, ATP6VOD2"	SLC12A3	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CNT-IC-A	CNT-IC-A	"SLC8A1, SLC4A1, SLC26A7"	SLC12A3	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CNT-IC-B	CNT-IC-B	"SLC8A1, SLC26A4, SLC4A9"	SLC12A3	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Collecting duct (general)	Collecting duct (general)	GATA3	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CD-PC (general)	CD-PC (general)	"AQP2, AQP3, FXYD4, SCNN1G, GATA3"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	C-CD-PC	C-CD-PC	"AQP2, AQP3, FXYD4, SCNN1G, GATA3"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	M-CD-PC	M-CD-PC	"AQP2, AQP3, FXYD4, SCNN1G, GATA3"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Outer Medulla-CD-PC	Outer Medulla-CD-PC	"AQP2, AQP3, FXYD4, SCNN1G, GATA3"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Inner Medulla-CD-PC	Inner Medulla-CD-PC	"AQP2, SLC14A2"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Transitional PC-IC	Transitional PC-IC	"FXYD4, SLC4A9/SLC26A7"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CD-IC (general)	CD-IC (general)	"CA9, ATP6VOD2"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CD-IC-A	CD-IC-A	"SLC4A1, SLC26A7, TMEM213"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	C-CD-IC-A	C-CD-IC-A	"SLC26A7, SLC4A1"	"SLC8A1, CALB1, TRPV5, CALCA, KIT"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	M-CD-IC-A	M-CD-IC-A	"SLC26A7, SLC4A1, KIT, CALCA"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	CD-IC-B (general)	CD-IC-B (general)	"SLC4A9, SLC26A4"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	C-CD-IC-B	C-CD-IC-B	"SLC4A9, SLC26A4"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	M-CD-IC-B	M-CD-IC-B	"SLC4A9, SLC26A4"	"SLC8A1, CALB1, TRPV5"	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Endothelial cell (general)	Endothelial cell (general)	"EMCN, PECAM1, FLT1"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	EC- Afferent/efferent arteriole	EC- Afferent/efferent arteriole	"SERPINE, TM4SF1"	PALMD	https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	EC- Peritubular capillaries	EC- Peritubular capillaries	PLVAP		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	EC- Descending vasa recta	EC- Descending vasa recta	"TM4SF1, PALMD"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	EC- Ascending vasa recta	EC- Ascending vasa recta	DNASEIL3		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	EC-Lymphatics 	EC-Lymphatics 	"MMRN1, PROX1"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Vascular smooth muscle/pericyte (general)	Vascular smooth muscle/pericyte (general)	"TAGLN, ACTA2, MYH11, NTRK3, MCAM"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	vSMC/P-Renin	vSMC/P-Renin	REN		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Fibroblasts	Fibroblasts	"DCN, ZEB2, C7, LUM"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Macrophages-Resident	Macrophages-Resident	"CD163, IL7R"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Macrophage	Macrophage	S100A9		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Natural Killer cells	Natural Killer cells	NKG7		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Dendritic cells	Dendritic cells	APOE		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	Monocytes	Monocytes	"C1QA, HLA-DRA"		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	T lymphocytes (general)	T lymphocytes (general)	CD3		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	T Cytotoxic	T Cytotoxic	GZMA		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+	B Lymphocyte	B Lymphocyte	IGJ		https://www.biorxiv.org/content/10.1101/828665v1.full.pdf	
+Kidney	Simple squamous epithelium	Simple squamous epithelium				
+	Simple cuboidal epithelium	Simple cuboidal epithelium				PCT: numerous mitochondria
+	Podocytes (stellate epithelium cells)	Podocytes (stellate epithelium cells)				
+	Fenestrated capillary endothelium	Fenestrated capillary endothelium				
+	Mesangial cells	Mesangial cells				
+	Principal cells	Principal cells				
+	Intercalated cells	Intercalated cells				
+	Proximal tubular cells	Proximal tubular cells				
+	Macula densa cells (JGA)	Macula densa cells (JGA)				
+	Lacis cells	Lacis cells				
+Small intestine	Enterocytes					
+	Goblet cells					
+	Paneth cells					
+	Enteroendocrine cells (incl)					
+	M cells					
+	I cells					
+	L cells					
+	Mo cells					
+	D cells					
+	N cells					
+	S cells					
+	K cells					
+	EC cells					
+	Peyer patches					
+Left colon (descending)	Colonocytes 					
+	Goblet cells					
+	Enteroendocrine cells 					
+	Teniae coli 					
+	Simple columnar epithelium					
+Blood	Erythrocytes (RBCs)					
+	Neutrophils					
+	Eosinophils					
+	Basophils					
+	B Lymphocytes					
+	Monocytes					
+	Cytotoxic T lymphocytes					
+	Helper T lymphocytes					
+	NK cells					
+	Thrombocytes					
+Breast	Adipocytes 					
+	Stratified cuboidal epithelium					
+	Simple cuboidal epithelium					
+	Myoepithelial cells					
+	Smooth muscle fibers					
+	Stellate myoepithelial cells					
+	Acini cells					
+	Alveolar cells					

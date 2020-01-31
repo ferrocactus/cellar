@@ -301,7 +301,7 @@ class ACIP:
             sns.despine()
             fig.set_size_inches(10, 5)
         
-    def flow(self, reduce_dim='pca', cluster='kmedoids', visualize='umap'):
+    def flow(self):
         self.filter_genes()
         self.reduce_dim()
         self.cluster()
@@ -327,6 +327,8 @@ class ACIP:
                 sys.exit("No markers found. Run find_markers.")
             plot_top_markers(*self.get_markers())
         elif what == "2d":
+            if not hasattr(self, 'y_pred'):
+                sys.exit("No labels found. Run cluster first.")
             emb = self.get_visual_emb()
             plot_2d(emb, self.y_pred)
         else:
