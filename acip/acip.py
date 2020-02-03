@@ -255,6 +255,14 @@ class ACIP:
             marker_mds.append(np.array([self.mds[i][m] for m in marker_index]))
 
         return np.array(marker_ids), np.array(marker_pvals), np.array(marker_mds)
+    
+    def get_clusters_csv(self):
+        self.filter_genes()
+        self.reduce_dim()
+        self.cluster()
+        emb = self.get_visual_emb()
+        result = np.hstack([emb, np.expand_dims(self.y_pred, axis=1)])
+        np.savetxt('csv/clusters.csv', result, delimiter=',')
 
     def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
         assert constraints is not None, "No constraints provided."
