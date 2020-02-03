@@ -9,11 +9,7 @@ install_requires = [
     'sklearn',
     'umap-learn',
     'tqdm',
-    'jackstraw'
-]
-
-dependency_links = [
-    'https://github.com/idc9/jackstraw#egg=jackstraw'
+    'kneed'
 ]
 
 setup(
@@ -25,7 +21,6 @@ setup(
     url='https://github.com/ferrocactus/cell_identification',
     packages=find_packages(),
     install_requires=install_requires,
-    dependency_links=dependency_links,
     python_requires='>3.7',
     license='MIT'
 )

@@ -7,8 +7,9 @@ warnings.filterwarnings('ignore')
 
 if __name__ == '__main__':
     dataset = 'spleen'
+    dataset = 'spleen'
     X, Y, gene_ids = load_data(dataset)
     w = ACIP(X, config=dataset, verbose=False, col_ids=gene_ids)
-    w.flow()
+    w.get_clusters_csv()
     w.plot("top_markers")
     plt.show()

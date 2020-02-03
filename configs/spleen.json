@@ -2,7 +2,7 @@
     "reduce_dim": {
         "method": "PCA",
         "PCA": {
-            "n_components": 20
+            "n_components": "auto"
         }
     },
     "explained_variance": {

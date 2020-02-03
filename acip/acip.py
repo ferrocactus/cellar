@@ -11,6 +11,7 @@ import sys
 from umap import UMAP
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+from kneed import KneeLocator
 # Clustering
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
@@ -102,7 +103,13 @@ class ACIP:
 
         pca = PCA(**self.params['explained_variance'])
         pca.fit(self.x)
-        return list(range(1, pca.n_components_ + 1)), pca.explained_variance_ratio_
+        kn = KneeLocator(list(range(1, pca.n_components_ + 1)),
+                        pca.explained_variance_ratio_,
+                        curve='convex',
+                        direction='decreasing')
+        self.knee = kn.knee
+        print("Ankle found at", self.knee, "components.")
+        self.explained_variance = pca.explained_variance_ratio_
 
     def filter_genes(self):
         """
@@ -138,6 +145,10 @@ class ACIP:
 
         method = self.params['reduce_dim']['method']
         assert method in ["PCA"]
+        n_components = self.params['reduce_dim'][method]["n_components"]
+        if n_components == "auto":
+            self.get_explained_variance()
+            self.params['reduce_dim'][method]["n_components"] = self.knee
         method_obj = globals()[method](**self.params['reduce_dim'][method])
         
         if method == 'PCA':
@@ -317,7 +328,8 @@ class ACIP:
 
     def plot(self, what):
         if what == "explained_variance":
-            plot_explained_variance(*self.get_explained_variance())
+            plot_explained_variance(list(range(1, len(self.explained_variance) + 1)),
+                                    self.explained_variance)
         elif what == "gene_variances":
             if not hasattr(self, 'gene_variances'):
                 sys.exit("No gene variances found. Run filter_genes.")
