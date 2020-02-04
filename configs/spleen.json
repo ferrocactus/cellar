@@ -19,14 +19,14 @@
             "affinity": "nearest_neighbors"
         },
         "KMedoids": {
-            "metric": "correlation"
+            "metric": "euclidean"
         },
         "eval_method": "silhouette_score",
         "silhouette_score": {
-            "metric": "correlation"
+            "metric": "euclidean"
         },
         "low": 3,
-        "high": 5,
+        "high": 11,
         "step": 1
     },
     "markers": {
@@ -41,7 +41,7 @@
             "n_components": 2,
             "n_neighbors": 15,
             "min_dist": 0,
-            "metric": "correlation"
+            "metric": "euclidean"
         },
         "PCA": {
             "dims": 2

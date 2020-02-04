@@ -28,7 +28,9 @@ from utils.utils_visualization import (plot_2d,
                                     plot_scores,
                                     plot_marker_hist,
                                     plot_top_markers)
-from utils.utils_experiment import read_config
+from utils.utils_experiment import (read_config,
+                                    gene_id_to_name,
+                                    gene_name_to_cell)
 # Constrained clustering
 from copkmeans.cop_kmeans import cop_kmeans
 from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
@@ -52,8 +54,8 @@ class ACIP:
         self.cols = x.shape[1]
     
     def set_ids(self, row_ids=None, col_ids=None):
-        self.row_ids = row_ids # Cell IDs
-        self.col_ids = col_ids # Gene IDs
+        self.row_ids = row_ids.astype('U') if row_ids is not None else None
+        self.col_ids = col_ids.astype('U') if col_ids is not None else None
     
     def read_config(self):
         self.params = read_config(self.config)
@@ -139,7 +141,7 @@ class ACIP:
         Requires filter_genes to be run first.
         """
         if not hasattr(self, 'x_filtered'):
-            sys.exit("Genes not filtered. Run filter_genes first.")
+            self.filter_genes()
         print_header("Reducing dimensionality")
         self.print_verbose('reduce_dim')
 
@@ -168,7 +170,7 @@ class ACIP:
         highest scoring labels according to eval_method.
         """
         if not hasattr(self, 'x_emb'):
-            sys.exit("Embeddings not created. Run reduce_dim first.")
+            self.reduce_dim()
         print_header("Clustering")
         self.print_verbose('cluster')
 
@@ -205,10 +207,10 @@ class ACIP:
         """
         After having constructed the clusters, look at all the genes and try
         to determine which genes are significant for a given cluster. Collect
-        all such gene indices into "self.markers" list.
+        all such gene ids into "self.marker_ids" list.
         """
         if not hasattr(self, 'y_pred'):
-            sys.exit("Clustering not performed. Run cluster first.")
+            self.cluster()
         print_header("Finding Markers")
         self.print_verbose('markers')
         # Read params from config
@@ -247,25 +249,21 @@ class ACIP:
             # Choose top_k genes
             self.marker_indices.append(marker_index[:top_k])
         self.marker_indices = np.asarray(self.marker_indices)
-    
-    def get_markers(self):
-        """
-        Returns two arrays where the first array consists of tuples (p-value, md)
-        and the second array consists of the corresponding gene IDs
-        """
-        if not hasattr(self, 'marker_indices'):
-            sys.exit("Markers not found. Run find_markers first.")
-        
-        marker_ids = []
-        marker_pvals = []
-        marker_mds = []
 
-        for i, marker_index in enumerate(self.marker_indices):
-            marker_ids.append(self.col_ids[marker_index]) # Get gene names
-            marker_pvals.append(np.array([self.pvals[i][m] for m in marker_index]))
-            marker_mds.append(np.array([self.mds[i][m] for m in marker_index]))
+        # Convert found indices to gene IDs
+        # Also keep track of p-values and md's
+        self.marker_ids = self.col_ids[self.marker_indices]
+        self.marker_pvals = np.array([self.pvals[i][self.marker_indices[i]] for i in range(len(self.marker_indices))])
+        self.marker_mds = np.array([self.mds[i][self.marker_indices[i]] for i in range(len(self.marker_indices))])
 
-        return np.array(marker_ids), np.array(marker_pvals), np.array(marker_mds)
+    def convert_markers(self):
+        """
+        Converts gene IDs to gene names.
+        """
+        if not hasattr(self, 'marker_ids'):
+            self.find_markers()
+        self.marker_names = gene_id_to_name(self.marker_ids)
+        self.cell_types, self.common_genes = gene_name_to_cell(self.marker_names)
     
     def get_clusters_csv(self):
         self.filter_genes()
@@ -275,56 +273,57 @@ class ACIP:
         result = np.hstack([emb, np.expand_dims(self.y_pred, axis=1)])
         np.savetxt('csv/clusters.csv', result, delimiter=',')
 
-    def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
-        assert constraints is not None, "No constraints provided."
-        print_header("Clustering with constraints")
-        print("Using " + method + ".")
+    # def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
+    #     assert constraints is not None, "No constraints provided."
+    #     print_header("Clustering with constraints")
+    #     print("Using " + method + ".")
 
-        silhouette_score_list = []
-        max_sscore = -2
+    #     silhouette_score_list = []
+    #     max_sscore = -2
         
-        time.sleep(0.2) # To avoid tqdm bar from appearing before prints
-        pbar = tqdm.tqdm(n_clusters_list)
-        for n_clusters in pbar:
-            pbar.set_description("Trying n_clusters=" + str(n_clusters))
-            if method == 'cop_kmeans':
-                y_pred, centers = cop_kmeans(dataset=self.x_emb, k=n_clusters,
-                                                    ml=constraints['ml'], cl=constraints['cl'],
-                                                    **kwargs)
-            elif method == 'agglomerative':
-                ac = AgglomerativeClustering(n_clusters=n_clusters, connectivity=constraints, **kwargs)
-                y_pred = ac.fit_predict(self.x_emb)
-            elif method == 'pckmeans':
-                pck = PCKMeans(n_clusters=self.n_clusters)
-                pck.fit(self.x_emb, ml=constraints['ml'], cl=constraints['cl'])
-                y_pred = pck.labels_
-            else:
-                raise NotImplementedError()
+    #     time.sleep(0.2) # To avoid tqdm bar from appearing before prints
+    #     pbar = tqdm.tqdm(n_clusters_list)
+    #     for n_clusters in pbar:
+    #         pbar.set_description("Trying n_clusters=" + str(n_clusters))
+    #         if method == 'cop_kmeans':
+    #             y_pred, centers = cop_kmeans(dataset=self.x_emb, k=n_clusters,
+    #                                                 ml=constraints['ml'], cl=constraints['cl'],
+    #                                                 **kwargs)
+    #         elif method == 'agglomerative':
+    #             ac = AgglomerativeClustering(n_clusters=n_clusters, connectivity=constraints, **kwargs)
+    #             y_pred = ac.fit_predict(self.x_emb)
+    #         elif method == 'pckmeans':
+    #             pck = PCKMeans(n_clusters=self.n_clusters)
+    #             pck.fit(self.x_emb, ml=constraints['ml'], cl=constraints['cl'])
+    #             y_pred = pck.labels_
+    #         else:
+    #             raise NotImplementedError()
             
-            sscore = silhouette_score(self.x_emb, y_pred, metric='correlation')
-            silhouette_score_list.append(sscore)
-            if max_sscore < sscore:
-                max_sscore = sscore
-                self.n_clusters = n_clusters
-                self.y_pred = y_pred
+    #         sscore = silhouette_score(self.x_emb, y_pred, metric='correlation')
+    #         silhouette_score_list.append(sscore)
+    #         if max_sscore < sscore:
+    #             max_sscore = sscore
+    #             self.n_clusters = n_clusters
+    #             self.y_pred = y_pred
         
-        print("Clustering with constraints complete.")
-        print("Highest silhouette score is achieved for n_clusters =", self.n_clusters)
+    #     print("Clustering with constraints complete.")
+    #     print("Highest silhouette score is achieved for n_clusters =", self.n_clusters)
 
-        if self.verbose:
-            sns.set_style('whitegrid')
-            fig, ax = plt.subplots()
-            ax.plot(n_clusters_list, silhouette_score_list)
-            ax.set_xlabel('Number of Clusters')
-            ax.set_ylabel('Silhouette Score')
-            sns.despine()
-            fig.set_size_inches(10, 5)
+    #     if self.verbose:
+    #         sns.set_style('whitegrid')
+    #         fig, ax = plt.subplots()
+    #         ax.plot(n_clusters_list, silhouette_score_list)
+    #         ax.set_xlabel('Number of Clusters')
+    #         ax.set_ylabel('Silhouette Score')
+    #         sns.despine()
+    #         fig.set_size_inches(10, 5)
         
     def flow(self):
         self.filter_genes()
         self.reduce_dim()
         self.cluster()
         self.find_markers()
+        self.convert_markers()
 
     def plot(self, what):
         if what == "explained_variance":
@@ -340,24 +339,25 @@ class ACIP:
             plot_scores(self.n_clusters_list, self.score_list)
         elif what == "marker_hist":
             if not hasattr(self, 'marker_indices'):
-                sys.exit("No markers found. Run find_markers.")
+                sys.exit("No markers found. Run find_marker_indices.")
             plot_marker_hist(self.n_clusters, self.pvals, self.mds)
         elif what == "top_markers":
             if not hasattr(self, 'marker_indices'):
-                sys.exit("No markers found. Run find_markers.")
-            plot_top_markers(*self.get_markers())
+                sys.exit("No markers found. Run find_marker_indices.")
+            plot_top_markers(*self.find_markers())
         elif what == "2d":
-            if not hasattr(self, 'y_pred'):
-                sys.exit("No labels found. Run cluster first.")
+            if not hasattr(self, 'cell_types'):
+                sys.exit("No markers found. Run convert_markers first.")
             emb = self.get_visual_emb()
-            plot_2d(emb, self.y_pred)
+            labels = [x + " (" + str(len(self.common_genes[i])) + " genes in common)" for i, x in enumerate(self.cell_types)]
+            plot_2d(emb, self.y_pred, labels=labels)
         else:
             raise ValueError()
 
 def pretty_print_dict(mydict):
     print(json.dumps(mydict, sort_keys=True, indent=4))
 
-def print_header(text, max_length=50, prepend_newline=True):
+def print_header(text, max_length=80, prepend_newline=True):
     if len(text) >= max_length:
         if prepend_newline:
             print()

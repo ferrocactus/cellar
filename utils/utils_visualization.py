@@ -88,7 +88,7 @@ def plot_top_markers(marker_id, marker_pvals, marker_mds):
     sns.despine()
     fig.set_size_inches(10, int((clusters + 1)/2)*8)
 
-def plot_2d(x, y=None, dims=2):
+def plot_2d(x, y=None, dims=2, labels=None):
     fig = plt.figure()
     if dims == 2: ax = fig.add_subplot(111)
     elif dims == 3: ax = fig.add_subplot(111, projection='3d')
@@ -99,13 +99,13 @@ def plot_2d(x, y=None, dims=2):
             pal = []
             for i in range(len(np.unique(y))):
                 pal.append("#" + '%06x' % np.random.randint(16**6))
-            sns.scatterplot(x=x[:, 0], y=x[:, 1],
+            g = sns.scatterplot(x=x[:, 0], y=x[:, 1],
                             hue=y,
                             palette=pal,
                             linewidth=0,
                             s=10,
                             legend='full')
-            plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+            plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., labels=labels)
         else:
             sns.scatterplot(x=x[:, 0], y=x[:, 1], linewidth=0, s=10)
     else:
