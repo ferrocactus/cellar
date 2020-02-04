@@ -71,8 +71,8 @@ def plot_marker_hist(n_clusters, pvals, mads):
     sns.despine()
     fig.set_size_inches(10, n_clusters * 5)
 
-def plot_top_markers(marker_id, marker_pvals, marker_mds):
-    clusters = marker_id.shape[0]
+def plot_top_markers(marker_ids, marker_pvals, marker_mds):
+    clusters = marker_ids.shape[0]
     fig, ax = plt.subplots(int((clusters + 1)/2), 2)
     for i in range(clusters):
         x = np.arange(len(marker_pvals[i]))
@@ -82,8 +82,8 @@ def plot_top_markers(marker_id, marker_pvals, marker_mds):
         ax[int(i/2)][i%2].set_title("Cluster " + str(i+1))
         ax[int(i/2)][i%2].set_xlabel("p-value")
         ax[int(i/2)][i%2].set_ylabel("mean difference")
-        for j, txt in enumerate(marker_id[i]):
-            ax[int(i/2)][i%2].text(x[j], y[j]+0.02, marker_id[i][j], fontsize=10, rotation=90)
+        for j, txt in enumerate(marker_ids[i]):
+            ax[int(i/2)][i%2].text(x[j], y[j]+0.02, marker_ids[i][j], fontsize=10, rotation=90)
 
     sns.despine()
     fig.set_size_inches(10, int((clusters + 1)/2)*8)

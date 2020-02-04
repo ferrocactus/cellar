@@ -344,7 +344,7 @@ class ACIP:
         elif what == "top_markers":
             if not hasattr(self, 'marker_indices'):
                 sys.exit("No markers found. Run find_marker_indices.")
-            plot_top_markers(*self.find_markers())
+            plot_top_markers(self.marker_ids, self.marker_pvals, self.marker_mds)
         elif what == "2d":
             if not hasattr(self, 'y_pred'):
                 sys.exit("No labels found. Run cluster first.")
