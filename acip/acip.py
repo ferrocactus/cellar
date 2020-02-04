@@ -346,10 +346,13 @@ class ACIP:
                 sys.exit("No markers found. Run find_marker_indices.")
             plot_top_markers(*self.find_markers())
         elif what == "2d":
-            if not hasattr(self, 'cell_types'):
-                sys.exit("No markers found. Run convert_markers first.")
+            if not hasattr(self, 'y_pred'):
+                sys.exit("No labels found. Run cluster first.")
             emb = self.get_visual_emb()
-            labels = [x + " (" + str(len(self.common_genes[i])) + " genes in common)" for i, x in enumerate(self.cell_types)]
+            labels = None
+            if hasattr(self, 'cell_types'):
+                labels = [x + " (" + str(len(self.common_genes[i])) + " genes in common)"\
+                            for i, x in enumerate(self.cell_types)]
             plot_2d(emb, self.y_pred, labels=labels)
         else:
             raise ValueError()

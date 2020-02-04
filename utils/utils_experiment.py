@@ -24,7 +24,7 @@ def load_data(dataset):
     elif dataset == 'digits':
         from sklearn.datasets import load_digits
         X = load_digits()
-        return X.data, X.target
+        return X.data, X.target, np.array([str(i) for i in range(1, 11)])
     elif dataset == 'mnist':
         from mnist import MNIST
         mndata = MNIST('datasets/mnist')
