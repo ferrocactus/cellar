@@ -37,29 +37,25 @@ from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 
 class ACIP:
     def __init__(self, x, config="defaults", verbose=False, row_ids=None, col_ids=None):
-        assert type(x).__module__ == np.__name__
-        assert type(row_ids).__module__ == np.__name__ or row_ids is None
-        assert type(col_ids).__module__ == np.__name__ or col_ids is None
         self.set_train_data(x)
-        # If use_config is set for a function, all its kwargs will be ignored
         self.config = config
         self.read_config()
         self.verbose = verbose
         self.set_ids(row_ids, col_ids)
-    
+
     def set_train_data(self, x):
         assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
         self.x = x
-        self.rows = x.shape[0]
-        self.cols = x.shape[1]
-    
+        self.rownum = x.shape[0]
+        self.colnum = x.shape[1]
+
     def set_ids(self, row_ids=None, col_ids=None):
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
-    
+
     def read_config(self):
         self.params = read_config(self.config)
-    
+
     def normalize(self):
         raise NotImplementedError()
 
@@ -67,7 +63,7 @@ class ACIP:
         # Prints configs for given processing step. Reads from self.params
         if self.verbose == False:
             return
-        
+
         if "method" in self.params[step]:
             method = self.params[step]['method']
             print("Using", method, "with params:")
@@ -75,7 +71,7 @@ class ACIP:
         else:
             print("Using params:")
             pretty_print_dict(self.params[step])
-    
+
     def get_visual_emb(self):
         """
         Constructs 2d/3d embeddings for visualization.
@@ -94,7 +90,8 @@ class ACIP:
         method = self.params['visual_emb']['method']
         assert method in ["UMAP", "PCA", "TSNE"]
         method_obj = globals()[method](**self.params['visual_emb'][method])
-        return method_obj.fit_transform(x)
+        self.visual_emb = method_obj.fit_transform(x)
+        return self.visual_emb
 
     def get_explained_variance(self):
         """
@@ -127,10 +124,10 @@ class ACIP:
 
         self.gene_variances = np.var(self.x, axis=0)
         if n_genes <= 1: # Fraction of genes to keep
-            highest_var_gene_indices = self.gene_variances.argsort()[-int(n_genes * self.cols):]
+            highest_var_gene_indices = self.gene_variances.argsort()[-int(n_genes * self.colnum):]
         else:            # Count of genes to keep
             highest_var_gene_indices = self.gene_variances.argsort()[-n_genes:]
-        
+
         print("Keeping", len(highest_var_gene_indices), "genes.")
 
         self.x_filtered = self.x[:, highest_var_gene_indices]
@@ -152,7 +149,7 @@ class ACIP:
             self.get_explained_variance()
             self.params['reduce_dim'][method]["n_components"] = self.knee
         method_obj = globals()[method](**self.params['reduce_dim'][method])
-        
+
         if method == 'PCA':
             method_obj.fit(self.x_filtered)
             self.x_emb = method_obj.transform(self.x_filtered)
@@ -162,7 +159,7 @@ class ACIP:
             print("Used", method_obj.n_components_, "components.")
         else:
             raise NotImplementedError()
-    
+
     def cluster(self):
         """
         Clusters the embeddings created by reduce_dim. Tries various n_clusters
@@ -186,7 +183,7 @@ class ACIP:
         self.n_clusters_list = list(range(low, high, step))
         self.score_list = []
         max_score = -np.Inf
-        
+
         time.sleep(0.2) # To avoid tqdm bar from appearing before prints
         pbar = tqdm.tqdm(self.n_clusters_list)
         for n_clusters in pbar:
@@ -199,10 +196,10 @@ class ACIP:
                 max_score = score
                 self.n_clusters = n_clusters
                 self.y_pred = y_pred
-        
+
         print("\nClustering complete.")
         print("Highest score is achieved for n_clusters =", self.n_clusters)
-    
+
     def find_markers(self):
         """
         After having constructed the clusters, look at all the genes and try
@@ -219,8 +216,8 @@ class ACIP:
         top_k = self.params['markers']['top_k']
         # Initialize
         self.marker_indices = []
-        self.pvals = np.zeros((self.n_clusters, self.cols))
-        self.mds = np.zeros((self.n_clusters, self.cols))
+        self.pvals = np.zeros((self.n_clusters, self.colnum))
+        self.mds = np.zeros((self.n_clusters, self.colnum))
 
         time.sleep(0.2) # To avoid tqdm bar from appearing before prints
         for cluster_id in tqdm.tqdm(range(self.n_clusters), desc="Completed clusters:"):
@@ -230,7 +227,7 @@ class ACIP:
 
             # Consider all genes and run T-test to determine if that gene
             # is significant for the current cluster
-            for gene in range(self.cols):
+            for gene in range(self.colnum):
                 gene_vector_in = x_in[:, gene]
                 gene_vector_not_in = x_not_in[:, gene]
                 # T-test + mean difference (md)
@@ -245,7 +242,7 @@ class ACIP:
             sorted_indices = np.flip(np.argsort(self.mds[cluster_id]))
             pvals_sorted_by_mad = self.pvals[cluster_id][sorted_indices]
             # Apply Bonferroni correction to the p-values (i.e., divide alpha by cols)
-            marker_index = sorted_indices[np.where(pvals_sorted_by_mad < (alpha / self.cols))]
+            marker_index = sorted_indices[np.where(pvals_sorted_by_mad < (alpha / self.colnum))]
             # Choose top_k genes
             self.marker_indices.append(marker_index[:top_k])
         self.marker_indices = np.asarray(self.marker_indices)
@@ -264,7 +261,7 @@ class ACIP:
             self.find_markers()
         self.marker_names = gene_id_to_name(self.marker_ids)
         self.cell_types, self.common_genes = gene_name_to_cell(self.marker_names)
-    
+
     def get_clusters_csv(self):
         self.filter_genes()
         self.reduce_dim()
@@ -280,7 +277,7 @@ class ACIP:
 
     #     silhouette_score_list = []
     #     max_sscore = -2
-        
+
     #     time.sleep(0.2) # To avoid tqdm bar from appearing before prints
     #     pbar = tqdm.tqdm(n_clusters_list)
     #     for n_clusters in pbar:
@@ -298,14 +295,14 @@ class ACIP:
     #             y_pred = pck.labels_
     #         else:
     #             raise NotImplementedError()
-            
+
     #         sscore = silhouette_score(self.x_emb, y_pred, metric='correlation')
     #         silhouette_score_list.append(sscore)
     #         if max_sscore < sscore:
     #             max_sscore = sscore
     #             self.n_clusters = n_clusters
     #             self.y_pred = y_pred
-        
+
     #     print("Clustering with constraints complete.")
     #     print("Highest silhouette score is achieved for n_clusters =", self.n_clusters)
 
@@ -317,7 +314,7 @@ class ACIP:
     #         ax.set_ylabel('Silhouette Score')
     #         sns.despine()
     #         fig.set_size_inches(10, 5)
-        
+
     def flow(self):
         self.filter_genes()
         self.reduce_dim()
