@@ -90,7 +90,7 @@ class ACIP:
         method = self.params['visual_emb']['method']
         assert method in ["UMAP", "PCA", "TSNE"]
         method_obj = globals()[method](**self.params['visual_emb'][method])
-        self.visual_emb = method_obj.fit_transform(x)
+        self.visual_emb = method_obj.fit_transform(x, y=self.y_pred)
         return self.visual_emb
 
     def get_explained_variance(self):
