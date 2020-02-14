@@ -74,24 +74,6 @@ def gene_name_to_cell(gene_names, path="markers.json"):
     common_genes = np.array(common_genes)
     return organ_names[top_classes], svs, common_genes
 
-def match(X, Y):
-    """
-    Given two arrays of arrays X and Y, find for each array x of X
-    the array y of Y which has most elements in common. Return top
-    indices found in Y.
-    """
-    top_classes = np.full(X.shape[0], 0)
-    common_genes = (X.shape[0]) * [[]]
-    for i, x in enumerate(X):
-        best_len_cap = 0
-        for j, y in enumerate(Y):
-            cap = np.intersect1d(x, y)
-            if len(cap) > best_len_cap:
-                best_len_cap = len(cap)
-                top_classes[i] = j
-                common_genes[i] = cap
-    return top_classes, common_genes
-
 def determine_pops(X, pops, return_intersec=True):
     """
     Compute for every x in X, the pop in pops where x is most likely
