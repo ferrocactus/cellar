@@ -260,7 +260,7 @@ class ACIP:
         if not hasattr(self, 'marker_ids'):
             self.find_markers()
         self.marker_names = gene_id_to_name(self.marker_ids)
-        self.cell_types, self.common_genes = gene_name_to_cell(self.marker_names)
+        self.cell_types, self.svs, self.common_genes = gene_name_to_cell(self.marker_names)
 
     def get_clusters_csv(self):
         self.filter_genes()
@@ -348,8 +348,10 @@ class ACIP:
             emb = self.get_visual_emb()
             labels = None
             if hasattr(self, 'cell_types'):
-                labels = [x + " (" + str(len(self.common_genes[i])) + " genes in common)"\
-                            for i, x in enumerate(self.cell_types)]
+                labels = ["{0} ({1} common genes; sv={2:.2f})".format(x,
+                                                        len(self.common_genes[i]),
+                                                        self.svs[i])
+                                for i, x in enumerate(self.cell_types)]
             plot_2d(emb, self.y_pred, labels=labels)
         else:
             raise ValueError()

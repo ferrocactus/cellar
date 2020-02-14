@@ -68,11 +68,11 @@ def gene_name_to_cell(gene_names, path="markers.json"):
             level1.append(np.char.upper(np.array(organ_genes, dtype='U')))
             organ_names.append(organ)
     organ_names = np.array(organ_names, dtype='U')
-    top_classes, sf, common_genes = determine_pops(gene_names, level1)
+    top_classes, svs, common_genes = determine_pops(gene_names, level1)
     top_classes = np.array(top_classes)
-    sf = np.array(sf)
+    svs = np.array(svs)
     common_genes = np.array(common_genes)
-    return organ_names[top_classes], common_genes
+    return organ_names[top_classes], svs, common_genes
 
 def match(X, Y):
     """
@@ -123,14 +123,14 @@ def determine_pop(x, pops, return_intersec=True):
     """
     M = sum(map(lambda pop: len(pop), pops))
     N = len(x)
-    sf_list = []
+    svs = []
     for pop in pops:
         n = len(pop)
         k = len(np.intersect1d(x, pop))
-        sf = hypergeom.sf(k-1, M=M, n=n, N=N)
-        sf_list.append(sf)
-    h = np.argmin(sf_list)
+        sv = hypergeom.sf(k-1, M=M, n=n, N=N)
+        svs.append(sv)
+    h = np.argmin(svs)
     if return_intersec:
-        return h, sf_list[h], np.intersect1d(x, pops[h])
+        return h, svs[h], np.intersect1d(x, pops[h])
     else:
-        return h, sf_list[h]
+        return h, svs[h]
