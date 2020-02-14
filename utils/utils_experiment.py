@@ -2,6 +2,7 @@ from ast import literal_eval
 import pandas as pd
 import numpy as np
 import json
+from scipy.stats import hypergeom
 
 def read_config(dataset):
     with open("configs/" + dataset + ".json", "r") as f:
@@ -67,7 +68,10 @@ def gene_name_to_cell(gene_names, path="markers.json"):
             level1.append(np.char.upper(np.array(organ_genes, dtype='U')))
             organ_names.append(organ)
     organ_names = np.array(organ_names, dtype='U')
-    top_classes, common_genes = match(gene_names, level1)
+    top_classes, sf, common_genes = determine_pops(gene_names, level1)
+    top_classes = np.array(top_classes)
+    sf = np.array(sf)
+    common_genes = np.array(common_genes)
     return organ_names[top_classes], common_genes
 
 def match(X, Y):
@@ -87,3 +91,46 @@ def match(X, Y):
                 top_classes[i] = j
                 common_genes[i] = cap
     return top_classes, common_genes
+
+def determine_pops(X, pops, return_intersec=True):
+    """
+    Compute for every x in X, the pop in pops where x is most likely
+    to have been drawn from by using a hypergeometric test.
+    params:
+        X: a list of 1D arrays
+        pops: a list of 1D arrays
+        return_intersec: to return the intersecion or no
+    returns:
+        (list, list, [list]): where the first list
+                contains the indices of the best pop for x
+                and the second list contains the survival
+                value (1 - cdf) for the returned pop.
+                If return_intersec is set to True, the returned
+                list will contain an extra list which contains
+                a list of the intersection between x and pop
+    """
+    return zip(*[determine_pop(x, pops, return_intersec=return_intersec) for x in X])
+
+def determine_pop(x, pops, return_intersec=True):
+    """
+    Given a 1D array "x" and a list of 1D arrays "pops"
+    run a hypergeometric test to determine the pop in pops
+    where x is most likely to come from.
+    Returns:
+        int: index of the above pop
+        float: the survival value for the returned pop (the lower, the better)
+                lies in [0, 1]
+    """
+    M = sum(map(lambda pop: len(pop), pops))
+    N = len(x)
+    sf_list = []
+    for pop in pops:
+        n = len(pop)
+        k = len(np.intersect1d(x, pop))
+        sf = hypergeom.sf(k-1, M=M, n=n, N=N)
+        sf_list.append(sf)
+    h = np.argmin(sf_list)
+    if return_intersec:
+        return h, sf_list[h], np.intersect1d(x, pops[h])
+    else:
+        return h, sf_list[h]

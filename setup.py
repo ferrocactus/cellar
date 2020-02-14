@@ -9,7 +9,8 @@ install_requires = [
     'sklearn',
     'umap-learn',
     'tqdm',
-    'kneed'
+    'kneed',
+    'gtfparse'
 ]
 
 setup(
