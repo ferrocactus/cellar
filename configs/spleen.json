@@ -26,7 +26,7 @@
             "metric": "euclidean"
         },
         "low": 3,
-        "high": 11,
+        "high": 5,
         "step": 1
     },
     "markers": {
