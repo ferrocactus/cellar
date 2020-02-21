@@ -134,14 +134,7 @@ def find_populations(X, pops):
 
 def find_population(x, pops):
     """
-    Given a 1D array "x" and a list of 1D arrays "pops"
-    run a hypergeometric test to determine the pop in pops
-    where x is most likely to come from.
-    Returns:
-        int: index of the above pop
-        float: the survival value for the returned pop (the lower, the better)
-                lies in [0, 1]
-        list: of intersections
+    See find_populations. Assumes x is a single list.
     """
     M = sum(map(lambda pop: len(pop), pops))
     N = len(x)
@@ -156,3 +149,8 @@ def find_population(x, pops):
     if len(intersec) == 0: # in case of no intersection, return -1
         h = -1
     return h, svs[h], intersec
+
+def dict_literal_eval(d):
+    for key in d:
+        d[key] = literal_eval(d[key])
+    return d

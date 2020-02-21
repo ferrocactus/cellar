@@ -6,6 +6,8 @@ import json
 import tqdm
 import time
 import sys
+import configparser
+from ast import literal_eval
 
 # Visualization and Dimensionality Reduction
 from umap import UMAP
@@ -22,24 +24,24 @@ from scipy import stats
 # Metrics
 from sklearn.metrics import mean_squared_error as mse, silhouette_score
 # Utils
-from utils.utils_visualization import (plot_2d,
-                                    plot_explained_variance,
-                                    plot_gene_variances,
-                                    plot_scores,
-                                    plot_marker_hist,
-                                    plot_top_markers)
+from utils.utils_visualization import ( plot_2d,
+                                        plot_explained_variance,
+                                        plot_gene_variances,
+                                        plot_scores,
+                                        plot_marker_hist,
+                                        plot_top_markers)
 from utils.utils_experiment import (read_config,
                                     gene_id_to_name,
-                                    gene_name_to_cell)
+                                    gene_name_to_cell,
+                                    dict_literal_eval)
 # Constrained clustering
-from copkmeans.cop_kmeans import cop_kmeans
-from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
+#from copkmeans.cop_kmeans import cop_kmeans
+#from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 
 class ACIP:
     def __init__(self, x, config="defaults", verbose=False, row_ids=None, col_ids=None):
         self.set_train_data(x)
-        self.config = config
-        self.read_config()
+        self.parse_config(config)
         self.verbose = verbose
         self.set_ids(row_ids, col_ids)
 
@@ -53,24 +55,47 @@ class ACIP:
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
 
-    def read_config(self):
-        self.params = read_config(self.config)
+    def parse_config(self, filename='configs/config.ini'):
+        configp = configparser.ConfigParser()
+        configp.read(filename)
+
+        self.config = configp._sections
+        for key in self.config:
+            self.config[key] = dict_literal_eval(self.config[key])
+
+        # Read from config file
+        self.method_reduce_dim = self.config['methods'].get('reduce_dim', 'PCA')
+        assert(self.method_reduce_dim in ['PCA'],
+                                "Dimensionality Reduction method not supported.")
+        if self.method_reduce_dim not in self.config:
+            self.config[self.method_reduce_dim] = {}
+        self.method_cluster = self.config['methods'].get('cluster', 'KMedoids')
+        assert(self.method_cluster in ['KMedoids', "KMeans", "SpectralClustering"],
+                                "Cluster method not supported.")
+        if self.method_cluster not in self.config:
+            self.config[self.method_cluster] = {}
+        self.method_cluster_eval = self.config['methods'].get('cluster_eval', 'silhouette_score')
+        assert(self.method_cluster_eval in ['silhouette_score'],
+                                "Cluster evaluation method not supported.")
+        if self.method_cluster_eval not in self.config:
+            self.config[self.method_cluster_eval] = {}
+        self.method_visualization = self.config['methods'].get('visualization', 'UMAP')
+        assert(self.method_visualization in ['UMAP', 'TSNE', 'PCA'],
+                                "Visualization method not supported.")
+        if self.method_visualization not in self.config:
+            self.config[self.method_visualization] = {}
+        self.markers = 'markers'
 
     def normalize(self):
         raise NotImplementedError()
 
-    def print_verbose(self, step):
-        # Prints configs for given processing step. Reads from self.params
+    def print_verbose(self, method):
+        # Prints configs for given processing step. Reads from self.config
         if self.verbose == False:
             return
 
-        if "method" in self.params[step]:
-            method = self.params[step]['method']
-            print("Using", method, "with params:")
-            pretty_print_dict(self.params[step][method])
-        else:
-            print("Using params:")
-            pretty_print_dict(self.params[step])
+        print("Step:", method)
+        pretty_print_dict(self.config[method])
 
     def get_visual_emb(self):
         """
@@ -78,85 +103,56 @@ class ACIP:
         If use_emb=1, then use embeddings x_emb otherwise use x.
         Method should be one of UMAP, PCA, TSNE.
         """
-        use_x_emb = self.params['visual_emb']['use_x_emb']
-        if use_x_emb and not hasattr(self, 'x_emb'):
-            sys.exit("No embeddings found. Consider setting use_x_emb=0.")
+        if not hasattr(self, 'x_emb'):
+            sys.exit("No embeddings found.")
         print_header("Constructing visual embeddings.")
-        self.print_verbose('visual_emb')
-
-        x = self.x_emb if use_x_emb else self.x
+        self.print_verbose(self.method_visualization)
 
         # Use the method specified in the config file
-        method = self.params['visual_emb']['method']
-        assert method in ["UMAP", "PCA", "TSNE"]
-        method_obj = globals()[method](**self.params['visual_emb'][method])
-        self.visual_emb = method_obj.fit_transform(x, y=self.y_pred)
+        method_obj = globals()[self.method_visualization](
+            **self.config[self.method_visualization]
+        )
+        self.visual_emb = method_obj.fit_transform(self.x_emb, y=self.y_pred)
         return self.visual_emb
 
-    def get_explained_variance(self):
+    def find_knee(self):
         """
-        Returns the percentage of variance explained by each of the PCA components.
+        Runs PCA with evr_components number of components
+        and uses KneeLocator to find the "knee" in the graph, which is the
+        point where the graph turns the fastest. Use that value for running
+        PCA when calling reduce_dim.
         """
-        print_header("Getting explained variance using PCA.")
-        self.print_verbose('explained_variance')
-
-        pca = PCA(**self.params['explained_variance'])
+        pca = PCA(self.config['PCA']['evr_components'])
         pca.fit(self.x)
         kn = KneeLocator(list(range(1, pca.n_components_ + 1)),
                         pca.explained_variance_ratio_,
-                        curve='convex',
-                        direction='decreasing')
+                        curve='convex',  # not sctrict, but we can assume it
+                        direction='decreasing')  # by virtue of PCA
         self.knee = kn.knee
         print("Ankle found at", self.knee, "components.")
         self.explained_variance = pca.explained_variance_ratio_
-
-    def filter_genes(self):
-        """
-        Computes the variance for every gene (column). If 0 < n_genes <= 1, then
-        use the top (n_genes*cols) genes, otherwise use the top (n_genes). It is
-        possible to set n_genes="all" in which case no filtering is done.
-        """
-        print_header("Filtering genes")
-        self.print_verbose("filter_genes")
-
-        n_genes = self.params['filter_genes']['n_genes']
-        assert n_genes > 0
-
-        self.gene_variances = np.var(self.x, axis=0)
-        if n_genes <= 1: # Fraction of genes to keep
-            highest_var_gene_indices = self.gene_variances.argsort()[-int(n_genes * self.colnum):]
-        else:            # Count of genes to keep
-            highest_var_gene_indices = self.gene_variances.argsort()[-n_genes:]
-
-        print("Keeping", len(highest_var_gene_indices), "genes.")
-
-        self.x_filtered = self.x[:, highest_var_gene_indices]
+        return self.knee
 
     def reduce_dim(self):
         """
         Reduces the dimensionality of the data and stores it in self.x_emb.
         Requires filter_genes to be run first.
         """
-        if not hasattr(self, 'x_filtered'):
-            self.filter_genes()
         print_header("Reducing dimensionality")
-        self.print_verbose('reduce_dim')
+        self.print_verbose(self.method_reduce_dim)
 
-        method = self.params['reduce_dim']['method']
-        assert method in ["PCA"]
-        n_components = self.params['reduce_dim'][method]["n_components"]
-        if n_components == "auto":
-            self.get_explained_variance()
-            self.params['reduce_dim'][method]["n_components"] = self.knee
-        method_obj = globals()[method](**self.params['reduce_dim'][method])
+        if self.method_reduce_dim == 'PCA':
+            n_components = self.config['PCA']["n_components"]
+            if n_components == "auto":
+                n_components = self.find_knee()
+            pca = PCA(n_components)
+            pca.fit(self.x)
+            self.x_emb = pca.transform(self.x)
 
-        if method == 'PCA':
-            method_obj.fit(self.x_filtered)
-            self.x_emb = method_obj.transform(self.x_filtered)
             if self.verbose:
                 print("Embedding created. MSE:",
-                        mse(self.x_filtered, method_obj.inverse_transform(self.x_emb)))
-            print("Used", method_obj.n_components_, "components.")
+                        mse(self.x, pca.inverse_transform(self.x_emb)))
+            print("Used", pca.n_components_, "components.")
         else:
             raise NotImplementedError()
 
@@ -169,18 +165,11 @@ class ACIP:
         if not hasattr(self, 'x_emb'):
             self.reduce_dim()
         print_header("Clustering")
-        self.print_verbose('cluster')
+        self.print_verbose(self.method_cluster)
 
-        method = self.params['cluster']['method']
-        assert method in ["KMeans", "KMedoids", "SpectralClustering"]
-        eval_method = self.params['cluster']['eval_method']
-        assert eval_method in ["silhouette_score"]
-
-        # Construct list of n_clusters to try
-        low = self.params['cluster']['low']
-        high = self.params['cluster']['high']
-        step = self.params['cluster']['step']
-        self.n_clusters_list = list(range(low, high, step))
+        # Construct range of clusters to try
+        self.n_clusters_list = list(range(*self.config[self.method_cluster]['n_clusters']))
+        self.config[self.method_cluster].pop('n_clusters', None)
         self.score_list = []
         max_score = -np.Inf
 
@@ -188,9 +177,13 @@ class ACIP:
         pbar = tqdm.tqdm(self.n_clusters_list)
         for n_clusters in pbar:
             pbar.set_description("Trying n_clusters=" + str(n_clusters))
-            method_obj = globals()[method](n_clusters=n_clusters, **self.params['cluster'][method])
+            method_obj = globals()[self.method_cluster](
+                n_clusters=n_clusters, **self.config[self.method_cluster]
+            )
             y_pred = method_obj.fit_predict(self.x_emb)
-            score = globals()[eval_method](self.x_emb, y_pred, **self.params['cluster'][eval_method])
+            score = globals()[self.method_cluster_eval](
+                self.x_emb, y_pred, **self.config[self.method_cluster_eval]
+            )
             self.score_list.append(score)
             if max_score < score: # Update best score
                 max_score = score
@@ -211,9 +204,9 @@ class ACIP:
         print_header("Finding Markers")
         self.print_verbose('markers')
         # Read params from config
-        alpha = self.params['markers']['alpha']
-        difference = self.params['markers']['difference']
-        top_k = self.params['markers']['top_k']
+        alpha = self.config[self.markers]['alpha']
+        difference = self.config[self.markers]['difference']
+        top_k = self.config[self.markers]['top_k']
         # Initialize
         self.marker_indices = []
         self.pvals = np.zeros((self.n_clusters, self.colnum))
@@ -316,7 +309,6 @@ class ACIP:
     #         fig.set_size_inches(10, 5)
 
     def flow(self):
-        self.filter_genes()
         self.reduce_dim()
         self.cluster()
         self.find_markers()
