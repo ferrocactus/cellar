@@ -142,7 +142,7 @@ def find_population(x, pops):
     for pop in pops:
         n = len(pop)
         k = len(np.intersect1d(x, pop))
-        sv = hypergeom.sf(k-1, M=M, n=n, N=N) if k > 0 else 2
+        sv = hypergeom.sf(k-1, M=M, n=n, N=N) if k > 0 else 1
         svs.append(sv)
     h = np.argmin(svs)
     intersec = np.intersect1d(x, pops[h])
@@ -151,6 +151,4 @@ def find_population(x, pops):
     return h, svs[h], intersec
 
 def dict_literal_eval(d):
-    for key in d:
-        d[key] = literal_eval(d[key])
-    return d
+    return {key: literal_eval(d[key]) for key in d}

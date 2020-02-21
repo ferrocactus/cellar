@@ -44,6 +44,10 @@ class ACIP:
         self.parse_config(config)
         self.verbose = verbose
         self.set_ids(row_ids, col_ids)
+        self.x_emb = None # Embeddings after running PCA
+        self.y_pred = None # Labels after running clustering
+        self.marker_ids = None # Markers for cluster
+        self.x_2d_emb = None # Embeddings used for visualization
 
     def set_train_data(self, x):
         assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
@@ -65,25 +69,25 @@ class ACIP:
 
         # Read from config file
         self.method_reduce_dim = self.config['methods'].get('reduce_dim', 'PCA')
-        assert(self.method_reduce_dim in ['PCA'],
-                                "Dimensionality Reduction method not supported.")
+        assert(self.method_reduce_dim in ['PCA'], self.method_reduce_dim + " not supported.")
         if self.method_reduce_dim not in self.config:
             self.config[self.method_reduce_dim] = {}
+
         self.method_cluster = self.config['methods'].get('cluster', 'KMedoids')
-        assert(self.method_cluster in ['KMedoids', "KMeans", "SpectralClustering"],
-                                "Cluster method not supported.")
+        assert(self.method_cluster in ['KMedoids', "KMeans", "SpectralClustering"], self.method_cluster + " not supported.")
         if self.method_cluster not in self.config:
             self.config[self.method_cluster] = {}
+
         self.method_cluster_eval = self.config['methods'].get('cluster_eval', 'silhouette_score')
-        assert(self.method_cluster_eval in ['silhouette_score'],
-                                "Cluster evaluation method not supported.")
+        assert(self.method_cluster_eval in ['silhouette_score'], self.method_cluster_eval + " not supported.")
         if self.method_cluster_eval not in self.config:
             self.config[self.method_cluster_eval] = {}
+
         self.method_visualization = self.config['methods'].get('visualization', 'UMAP')
-        assert(self.method_visualization in ['UMAP', 'TSNE', 'PCA'],
-                                "Visualization method not supported.")
+        assert(self.method_visualization in ['UMAP', 'TSNE'], self.method_visualization + " not supported.")
         if self.method_visualization not in self.config:
             self.config[self.method_visualization] = {}
+
         self.markers = 'markers'
 
     def normalize(self):
@@ -91,29 +95,23 @@ class ACIP:
 
     def print_verbose(self, method):
         # Prints configs for given processing step. Reads from self.config
-        if self.verbose == False:
-            return
-
-        print("Step:", method)
-        pretty_print_dict(self.config[method])
+        if self.verbose == True:
+            print("Step:", method)
+            pretty_print_dict(self.config[method])
 
     def get_visual_emb(self):
         """
-        Constructs 2d/3d embeddings for visualization.
-        If use_emb=1, then use embeddings x_emb otherwise use x.
-        Method should be one of UMAP, PCA, TSNE.
+        Constructs 2d embeddings for visualization. Methods available: UMAP, TSNE.
         """
-        if not hasattr(self, 'x_emb'):
-            sys.exit("No embeddings found.")
-        print_header("Constructing visual embeddings.")
-        self.print_verbose(self.method_visualization)
-
-        # Use the method specified in the config file
-        method_obj = globals()[self.method_visualization](
-            **self.config[self.method_visualization]
-        )
-        self.visual_emb = method_obj.fit_transform(self.x_emb, y=self.y_pred)
-        return self.visual_emb
+        if self.x_2d_emb is None:
+            if self.x_emb is None:
+                self.cluster()
+            print_header("Constructing visual embeddings.")
+            method = self.method_visualization
+            self.print_verbose(method)
+            # Use the method specified in the config file
+            method_obj = globals()[method](**self.config[method])
+            self.x_2d_emb = method_obj.fit_transform(self.x_emb, y=self.y_pred)
 
     def find_knee(self):
         """
@@ -142,7 +140,7 @@ class ACIP:
         self.print_verbose(self.method_reduce_dim)
 
         if self.method_reduce_dim == 'PCA':
-            n_components = self.config['PCA']["n_components"]
+            n_components = self.config['PCA'].get("n_components", "auto")
             if n_components == "auto":
                 n_components = self.find_knee()
             pca = PCA(n_components)
@@ -150,8 +148,7 @@ class ACIP:
             self.x_emb = pca.transform(self.x)
 
             if self.verbose:
-                print("Embedding created. MSE:",
-                        mse(self.x, pca.inverse_transform(self.x_emb)))
+                print("Embedding created. MSE:", mse(self.x, pca.inverse_transform(self.x_emb)))
             print("Used", pca.n_components_, "components.")
         else:
             raise NotImplementedError()
@@ -162,13 +159,13 @@ class ACIP:
         as specified by the list (low, high, step) and stores into y_pred the
         highest scoring labels according to eval_method.
         """
-        if not hasattr(self, 'x_emb'):
+        if self.x_emb is None:
             self.reduce_dim()
         print_header("Clustering")
         self.print_verbose(self.method_cluster)
 
         # Construct range of clusters to try
-        self.n_clusters_list = list(range(*self.config[self.method_cluster]['n_clusters']))
+        self.n_clusters_list = list(range(*self.config[self.method_cluster].get('n_clusters', (2, 15, 2))))
         self.config[self.method_cluster].pop('n_clusters', None)
         self.score_list = []
         max_score = -np.Inf
@@ -199,14 +196,14 @@ class ACIP:
         to determine which genes are significant for a given cluster. Collect
         all such gene ids into "self.marker_ids" list.
         """
-        if not hasattr(self, 'y_pred'):
+        if self.y_pred is None:
             self.cluster()
         print_header("Finding Markers")
         self.print_verbose('markers')
         # Read params from config
-        alpha = self.config[self.markers]['alpha']
-        difference = self.config[self.markers]['difference']
-        top_k = self.config[self.markers]['top_k']
+        alpha = self.config[self.markers].get('alpha', 0.05)
+        difference = self.config[self.markers].get('difference', 1)
+        top_k = self.config[self.markers].get('top_k', 100)
         # Initialize
         self.marker_indices = []
         self.pvals = np.zeros((self.n_clusters, self.colnum))
@@ -250,7 +247,7 @@ class ACIP:
         """
         Converts gene IDs to gene names.
         """
-        if not hasattr(self, 'marker_ids'):
+        if self.marker_ids is None:
             self.find_markers()
         self.marker_names = gene_id_to_name(self.marker_ids)
         self.pop_names, self.svs, self.intersec, self.sub_pop_names, self.sub_svs, self.sub_intersec = gene_name_to_cell(self.marker_names)
@@ -262,6 +259,39 @@ class ACIP:
         emb = self.get_visual_emb()
         result = np.hstack([emb, np.expand_dims(self.y_pred, axis=1)])
         np.savetxt('csv/clusters.csv', result, delimiter=',')
+
+    def new_hard_cluster(self, labels, indices=None, all_points=False):
+        """
+        Update the label of points whose indices are given in indices,
+        or it all_points flag is set, then assume all labels are given.
+        """
+        if all_points == False:
+            assert(indices is not None)
+            self.y_pred[indices] = labels
+        else:
+            assert(len(labels) == len(y_pred))
+            self.y_pred = labels
+
+    def new_soft_cluster(self, point_index, k=None):
+        """
+        Given a single point, find the cluster where that point belongs
+        determined by using elbow heuristics and update the labels.
+        """
+        if self.x_2d_emb is None:
+            self.get_visual_emb()
+        distances = np.linalg.norm(self.x_2d_emb[point_index] - self.x_2d_emb, axis=1)
+        sorted_indices = np.argsort(distances)
+        plt.plot(range(0, len(distances)), distances[sorted_indices])
+        knee = KneeLocator(range(0, len(distances)), distances[sorted_indices],
+                            curve='convex',
+                            direction='increasing',
+                            S=2)
+        print('knee at', knee.knee)
+        if k is not None:
+            self.y_pred[sorted_indices[:k]] = self.n_clusters
+            self.n_clusters += 1
+            self.find_markers()
+            self.convert_markers()
 
     # def cluster_constraints(self, method='agglomerative', n_clusters_list=list(range(2, 65, 2)), constraints=None, **kwargs):
     #     assert constraints is not None, "No constraints provided."
@@ -319,25 +349,15 @@ class ACIP:
             plot_explained_variance(list(range(1, len(self.explained_variance) + 1)),
                                     self.explained_variance)
         elif what == "gene_variances":
-            if not hasattr(self, 'gene_variances'):
-                sys.exit("No gene variances found. Run filter_genes.")
             plot_gene_variances(self.gene_variances)
         elif what == "cluster_scores":
-            if not hasattr(self, 'score_list'):
-                sys.exit("No scores found. Run cluster.")
             plot_scores(self.n_clusters_list, self.score_list)
         elif what == "marker_hist":
-            if not hasattr(self, 'marker_indices'):
-                sys.exit("No markers found. Run find_marker_indices.")
             plot_marker_hist(self.n_clusters, self.pvals, self.mds)
         elif what == "top_markers":
-            if not hasattr(self, 'marker_indices'):
-                sys.exit("No markers found. Run find_marker_indices.")
             plot_top_markers(self.marker_ids, self.marker_pvals, self.marker_mds)
         elif what == "2d":
-            if not hasattr(self, 'y_pred'):
-                sys.exit("No labels found. Run cluster first.")
-            emb = self.get_visual_emb()
+            self.get_visual_emb()
             labels = None
             if hasattr(self, 'pop_names'):
                 labels = ["{0} ({1} common genes; sv={2:.2f})\n{3} ({4} common genes; sv={5:.2f})".format(
@@ -348,7 +368,7 @@ class ACIP:
                                                         len(self.sub_intersec[i]),
                                                         self.sub_svs[i])
                                 for i, x in enumerate(self.pop_names)]
-            plot_2d(emb, self.y_pred, labels=labels)
+            plot_2d(self.x_2d_emb, self.y_pred, labels=labels)
         else:
             raise ValueError()
 
