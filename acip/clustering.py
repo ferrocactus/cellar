@@ -68,6 +68,7 @@ class Clu_KMeans(Clu):
         super().__init__(verbose, **args)
         self._obj = KMeans
 
+
 class Clu_SpectralClustering(Clu):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
