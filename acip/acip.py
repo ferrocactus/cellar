@@ -10,6 +10,7 @@ import configparser
 from ast import literal_eval
 
 # Visualization and Dimensionality Reduction
+from acip.dimensionality_reduction import DiR_PCA
 from umap import UMAP
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -58,6 +59,15 @@ class ACIP:
     def set_ids(self, row_ids=None, col_ids=None):
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
+
+    def pipe(self, methods):
+        DiR_obj = globals()[methods['DiR']](**self.config[methods['DiR']])
+        Clu_obj = globals()[methods['Clu']](**self.config[methods['Clu']])
+        Vis_obj = globals()[methods['Vis']](**self.config[methods['Vis']])
+
+        self.x_emb = DiR_obj.get(self.x)
+        self.clusters = Clu_obj.get(self.x_emb)
+        self.x_2d_emb = Vis_obj.get(self.x_emb, self.clusters)
 
     def parse_config(self, filename='configs/config.ini'):
         configp = configparser.ConfigParser()
