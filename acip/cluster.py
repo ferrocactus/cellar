@@ -16,10 +16,12 @@ class Cluster(Unit):
         Args:
             verbose (bool): Printing flag.
             **args: Argument list.
+        Raises:
+            ValueError: If number of clusters to use is not provided.
         """
-        super().__init__(verbose, **args)
         if 'n_clusters' not in args:
             raise ValueError("n_clusters not provided.")
+        super().__init__(verbose, **args)
         self._labels = None
         self._n_clusters = None
 
@@ -38,6 +40,10 @@ class Cluster(Unit):
                             Must be set if args['n_clusters'] is a tuple.
         Returns:
             clusters (np.ndarray): The labels for each x.
+        Raise:
+            ValueError: If a tuple passed for k and Eval object not provided.
+            ValueError: If range of k passed is invalid or empty.
+            ValueError: If anything other than scalar or tuple is passed for k.
         """
         self._labels = None
         self._n_clusters = None
@@ -45,25 +51,27 @@ class Cluster(Unit):
             self._labels = self.fit_predict(self._obj(**self.args), x)
             self._n_clusters = self.args['n_clusters']
         elif isinstance(self.args['n_clusters'], tuple): # range of cluster nums
-            temp = self.args['n_clusters'] # cache for later
+            temp_args = self.args.copy() # to avoid editting the original dict
+            k_list = range(*temp_args['n_clusters'])
+
             if eval_obj is None: # Need evaluation method if using range
-                raise ValueError("eval_obj not provided.")
-            k_list = range(*self.args['n_clusters'])
+                raise ValueError("Evaluation object not provided.")
             if len(k_list) < 1:
-                raise ValueError()
+                raise ValueError("Invalid k list encountered in clustering.")
+
             self.score_list = [0] * len(k_list)
             best_score = -np.Inf
             for i, k in enumerate(k_list): # Iterate over k
-                self.args['n_clusters'] = k
-                labels = self.fit_predict(self._obj(**self.args), x)
+                temp_args['n_clusters'] = k
+                labels = self.fit_predict(self._obj(**temp_args), x)
                 score = eval_obj.get(x, labels)
                 self.score_list[i] = score
                 if best_score < score: # Update if best score found
                     best_score, self._labels, self._n_clusters = score, labels, k
+
             self.vprint("Best score achieved for n={0} at {1:.2f}.".format(
                 self._n_clusters, best_score
             ))
-            self.args['n_clusters'] = temp # reset to original arg
         else:
             raise ValueError("Incorrect number of clusters used.")
         return self._labels
@@ -93,6 +101,6 @@ class Clu_KMeans(Cluster):
 class Clu_SpectralClustering(Cluster):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
-        if affinity not in self.args:
+        if affinity not in self.args: # For consistency.
             self.args['affinity'] = 'nearest_neighbors'
         self._obj = SpectralClustering

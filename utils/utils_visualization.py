@@ -67,7 +67,7 @@ def plot_marker_hist(n_clusters, pvals, mads):
         ax[cluster_id][1].set_xlabel("absolute difference")
         ax[cluster_id][1].set_ylabel("gene count")
         ax[cluster_id][1].set_title("Cluster:" + str(cluster_id))
-    
+
     sns.despine()
     fig.set_size_inches(10, n_clusters * 5)
 
@@ -88,8 +88,9 @@ def plot_top_markers(marker_ids, marker_pvals, marker_mds):
     sns.despine()
     fig.set_size_inches(10, int((clusters + 1)/2)*8)
 
-def plot_2d(x, y=None, dims=2, labels=None):
+def plot_2d(x, y=None, labels=None):
     fig = plt.figure()
+    dims = x.shape[1]
     if dims == 2: ax = fig.add_subplot(111)
     elif dims == 3: ax = fig.add_subplot(111, projection='3d')
     else: raise NotImplementedError('Can only visualize 2 or 3 dims.')
