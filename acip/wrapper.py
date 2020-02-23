@@ -1,17 +1,16 @@
-from acip.cluster import (
+from .steps import (
     Clu_KMedoids,
     Clu_KMeans,
-    Clu_SpectralClustering
-)
-from acip.dimensionality_reduction import (
+    Clu_SpectralClustering,
+
     Dim_PCA,
     Dim_UMAP,
-    Dim_TSNE
-)
-from acip.evaluation import (
+    Dim_TSNE,
+
     Eval_SilhouetteScore,
     Eval_DaviesBouldinScore
 )
+
 
 translation_dict = {
     "cluster": {
@@ -29,6 +28,7 @@ translation_dict = {
         "DaviesBouldinScore": Eval_DaviesBouldinScore
     }
 }
+
 
 def wrap(step, method):
     """

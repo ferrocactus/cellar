@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 
+
 class Unit(ABC):
     def __init__(self, verbose=False, **args):
         self._verbose = verbose

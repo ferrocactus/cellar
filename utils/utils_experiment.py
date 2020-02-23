@@ -149,6 +149,3 @@ def find_population(x, pops):
     if len(intersec) == 0: # in case of no intersection, return -1
         h = -1
     return h, svs[h], intersec
-
-def dict_literal_eval(d):
-    return {key: literal_eval(d[key]) for key in d}

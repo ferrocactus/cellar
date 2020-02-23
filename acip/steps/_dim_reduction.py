@@ -1,4 +1,4 @@
-from acip.unit import Unit
+from ._unit import Unit
 
 from abc import abstractmethod
 from sklearn.decomposition import PCA
@@ -7,6 +7,7 @@ from umap import UMAP
 from sklearn.manifold import TSNE
 
 PCA_EVR_MAX_N = 100
+
 
 class Dim(Unit):
     def __init__(self, verbose=False, **args):
@@ -30,6 +31,7 @@ class Dim(Unit):
             (np.ndarray): The embedding of x.
         """
         return x
+
 
 class Dim_PCA(Dim):
     def __init__(self, verbose=False, **args):
@@ -69,6 +71,7 @@ class Dim_PCA(Dim):
         """
         return getattr(self.pca, attr)
 
+
 class Dim_UMAP(Dim):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
@@ -79,6 +82,10 @@ class Dim_UMAP(Dim):
         self.umap = UMAP(**self.args)
         return self.umap.fit_transform(x, y=y)
 
+    def __getattr__(self, attr):
+        return getattr(self.umap, attr)
+
+
 class Dim_TSNE(Dim):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
@@ -86,5 +93,8 @@ class Dim_TSNE(Dim):
             raise ValueError("n_components not provided.")
 
     def get(self, x, y=None):
-        self.umap = TSNE(**self.args)
-        return self.umap.fit_transform(x) # y is ignored
+        self.tsne = TSNE(**self.args)
+        return self.tsne.fit_transform(x) # y is ignored
+
+    def __getattr__(self, attr):
+        return getattr(self.tsne, attr)

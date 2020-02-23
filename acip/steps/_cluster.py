@@ -1,10 +1,11 @@
-from acip.unit import Unit
+from ._unit import Unit
+from ._k_medoids import KMedoids
 
 from abc import abstractmethod
 import numpy as np
-from acip.k_medoids import KMedoids
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
+
 
 class Cluster(Unit):
     @abstractmethod
@@ -88,15 +89,18 @@ class Cluster(Unit):
         """
         return obj.fit_predict(x) # By default for most methods
 
+
 class Clu_KMedoids(Cluster):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
         self._obj = KMedoids
 
+
 class Clu_KMeans(Cluster):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
         self._obj = KMeans
+
 
 class Clu_SpectralClustering(Cluster):
     def __init__(self, verbose=False, **args):
