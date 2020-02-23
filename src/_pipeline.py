@@ -61,7 +61,6 @@ class Pipeline:
         self.x_emb = self.dim_obj.get(self.x)
         self.labels = self.clu_obj.get(self.x_emb, self.eval_obj)
         self.n_clusters = self.clu_obj._n_clusters
-
         self.find_markers()
         self.convert_markers()
 
