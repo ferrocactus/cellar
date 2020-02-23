@@ -11,7 +11,7 @@ from .wrapper import wrap
 # Differential Expression
 from scipy import stats
 # Utils
-from utils.utils_visualization import (
+from .utils.utils_visualization import (
     plot_2d,
     plot_explained_variance,
     plot_gene_variances,
@@ -19,12 +19,12 @@ from utils.utils_visualization import (
     plot_marker_hist,
     plot_top_markers
 )
-from utils.utils_experiment import (
+from .utils.utils_experiment import (
     read_config,
     gene_id_to_name,
     gene_name_to_cell
 )
-from utils.utils_read import parse_config
+from .utils.utils_read import parse_config
 # Constrained clustering
 #from copkmeans.cop_kmeans import cop_kmeans
 #from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
