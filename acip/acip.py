@@ -10,7 +10,7 @@ import configparser
 from ast import literal_eval
 
 # Visualization and Dimensionality Reduction
-from acip.dimensionality_reduction import DiR_PCA
+from acip.dimensionality_reduction import Dim_PCA
 from umap import UMAP
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
@@ -198,7 +198,7 @@ class ACIP:
                 self.y_pred = y_pred
 
         print("\nClustering complete.")
-        print("Highest score is achieved for n_clusters =", self.n_clusters)
+        print("Highest score is achieved for n_clusters =", self.n_clusters, "at", max_score)
 
     def find_markers(self):
         """
@@ -365,7 +365,7 @@ class ACIP:
         elif what == "marker_hist":
             plot_marker_hist(self.n_clusters, self.pvals, self.mds)
         elif what == "top_markers":
-            plot_top_markers(self.marker_ids, self.marker_pvals, self.marker_mds)
+            plot_top_markers(self.marker_ids[:10], self.marker_pvals[:10], self.marker_mds[:10])
         elif what == "2d":
             self.get_visual_emb()
             labels = None

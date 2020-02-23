@@ -1,5 +1,6 @@
 from acip.unit import Unit
 
+from abc import abstractmethod
 from sklearn.decomposition import PCA
 from kneed import KneeLocator
 
@@ -16,18 +17,23 @@ class Dim(Unit):
         """
         super().__init__(verbose, **args)
 
+    @abstractmethod
     def get(self, x):
         """
+        Returns the embedding of x.
+
         Args:
             x (np.ndarray): Data in matrix (n x d) form.
         Returns:
             emb (np.ndarray): The embedding of x.
         """
-        return x
+        pass
 
 class Dim_PCA(Dim):
     def __init__(self, verbose=False, **args):
         super().__init__(verbose, **args)
+        if 'n_components' not in args:
+            raise ValueError("n_components not provided.")
 
     def get(self, x):
         if self.args['n_components'] == 'knee':
@@ -38,16 +44,18 @@ class Dim_PCA(Dim):
             x_axis = list(range(1, self.pca.n_components_ + 1))
             y_axis = self.pca.explained_variance_ratio_
             # Find knee
-            self.args['n_components'] = KneeLocator(
+            self.args['n_components'] = self.knee = KneeLocator(
                 x_axis,
                 y_axis,
-                curve='convex', # assumed
-                direction='decreasing' # PCA eigenvalues are sorted
+                curve='convex', # approximately
+                direction='decreasing' # sklearn PCA eigenvalues are sorted
             ).knee
-            self.knee = self.args['n_components']
-            self.vprint("Knee found at", self.knee, "components.")
+            self.args['n_components'] = max(self.knee, 2)
+            self.vprint("Knee found at {0} components. Using n={1}.".format(
+                self.knee, self.args['n_components'])
+            )
             self.pca = PCA(**self.args)
-            self.args['n_components'] = 'knee'
+            self.args['n_components'] = 'knee' # Reset to original arg
         else:
             self.pca = PCA(**self.args)
         return self.pca.fit_transform(x)

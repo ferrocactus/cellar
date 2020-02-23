@@ -49,7 +49,7 @@ def gene_id_to_name(gene_ids, path="gene_id_name.csv"):
         np.array([i[0] for i in splitted]).reshape(gene_ids.shape))
     )
 
-def read_markers(path="filtered_markers.json"):
+def read_markers(path="CellTypeMarker.json"):
     with open("markers/" + path) as f:
         markers = json.load(f)
 
@@ -70,7 +70,7 @@ def read_markers(path="filtered_markers.json"):
         marker_organized[key] = organ
     return marker_organized
 
-def gene_name_to_cell(gene_names, path="filtered_markers.json"):
+def gene_name_to_cell(gene_names, path="CellTypeMarker.json"):
     with open("markers/" + path, "r") as f:
         markers_dict = json.load(f)
     gene_names = [[re.sub(r'[^A-Za-z0-9]+', '', i.upper()) for i in j] for j in gene_names]
