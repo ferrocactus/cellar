@@ -6,7 +6,7 @@ import json
 import time
 import tqdm
 
-from acip.wrapper import wrap
+from .wrapper import wrap
 
 # Differential Expression
 from scipy import stats

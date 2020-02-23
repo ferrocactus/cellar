@@ -14,9 +14,11 @@ install_requires = [
 ]
 
 setup(
-    name='acip',
+    name='cellar',
+    packages=['cellar'],
+    package_dir={'':'src'},
     version=1.0,
-    description='Automatic Cell Identification Platform.',
+    description='Cell Identification Pipeline.',
     author='Euxhen Hasanaj',
     author_email='ehasanaj@cs.cmu.edu',
     url='https://github.com/ferrocactus/cell_identification',
