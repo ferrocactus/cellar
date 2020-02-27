@@ -33,6 +33,7 @@ from .utils.utils_read import parse_config
 class Pipeline:
     def __init__(self, x, config='configs/config.ini', verbose=False, row_ids=None, col_ids=None):
         assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
+        assert isinstance(config, str)
         self.x = x
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
@@ -49,77 +50,32 @@ class Pipeline:
             clu_method = self.config["methods"]["cluster"]
             eval_method = self.config["methods"]["cluster_eval"]
             vis_method = self.config["methods"]["visualization"]
+            mark_method = self.config["methods"]["markers"]
         except:
             raise "Config file malformed or method missing."
 
-        self.dim_obj = wrap("dim_reduction", dim_method)(self.verbose, **self.config[dim_method])
-        self.clu_obj = wrap("cluster", clu_method)(self.verbose, **self.config[clu_method])
-        self.eval_obj = wrap("cluster_eval", eval_method)(self.verbose, **self.config[eval_method])
-        self.vis_obj = wrap("dim_reduction", vis_method)(self.verbose, **self.config[vis_method])
+        self.dim_obj = wrap("dim_reduction", dim_method)(self.verbose, **self.config["dim_reduction"])
+        self.clu_obj = wrap("cluster", clu_method)(self.verbose, **self.config["cluster"])
+        self.eval_obj = wrap("cluster_eval", eval_method)(self.verbose, **self.config["cluster_eval"])
+        self.vis_obj = wrap("dim_reduction", vis_method)(self.verbose, **self.config["visualization"])
+        self.mark_obj = wrap("markers", mark_method)(self.verbose, **self.config["markers"])
 
     def run(self):
         self.x_emb = self.dim_obj.get(self.x)
         self.labels = self.clu_obj.get(self.x_emb, self.eval_obj)
         self.n_clusters = self.clu_obj._n_clusters
-        self.find_markers()
-        self.convert_markers()
-
-    def find_markers(self):
-        """
-        After having constructed the clusters, look at all the genes and try
-        to determine which genes are significant for a given cluster. Collect
-        all such gene ids into "self.marker_ids" list.
-        """
-        print_header("Finding Markers")
-        # Read params from config
-        alpha = self.config['markers'].get('alpha', 0.05)
-        difference = self.config['markers'].get('difference', 1)
-        top_k = self.config['markers'].get('top_k', 100)
-        # Initialize
+        self.mark_results = self.mark_obj.get(self.x, self.labels)
         self.marker_indices = []
-        self.pvals = np.zeros((self.n_clusters, self.x.shape[1]))
-        self.mds = np.zeros((self.n_clusters, self.x.shape[1]))
-
-        time.sleep(0.2) # To avoid tqdm bar from appearing before prints
-        for cluster_id in tqdm.tqdm(range(self.n_clusters), desc="Completed clusters:"):
-            # Current cluster vs the rest
-            x_in = self.x[np.where(self.labels == cluster_id)]
-            x_not_in = self.x[np.where(self.labels != cluster_id)]
-
-            # Consider all genes and run T-test to determine if that gene
-            # is significant for the current cluster
-            for gene in range(self.x.shape[1]):
-                gene_vector_in = x_in[:, gene]
-                gene_vector_not_in = x_not_in[:, gene]
-                # T-test + mean difference (md)
-                t, pval = stats.ttest_ind(gene_vector_in, gene_vector_not_in, equal_var=False)
-                self.pvals[cluster_id][gene] = pval
-                # No absolute value needed for the following difference
-                # While large negative values would also imply significance,
-                # they are not considered markers for the given cluster
-                self.mds[cluster_id][gene] = np.mean(gene_vector_in) - np.mean(gene_vector_not_in)
-
-            # Sort the mean differences and use the indices to sort p-values
-            sorted_indices = np.flip(np.argsort(self.mds[cluster_id]))
-            pvals_sorted_by_mad = self.pvals[cluster_id][sorted_indices]
-            # Apply Bonferroni correction to the p-values (i.e., divide alpha by cols)
-            marker_index = sorted_indices[np.where(pvals_sorted_by_mad < (alpha / self.x.shape[1]))]
-            # Choose top_k genes
-            self.marker_indices.append(marker_index[:top_k])
-        self.marker_indices = np.asarray(self.marker_indices)
-
-        # Convert found indices to gene IDs
-        # Also keep track of p-values and md's
+        for i in self.mark_results.keys():
+            self.marker_indices.append(self.mark_results[i]['indices'])
+        self.marker_indices = np.array(self.marker_indices)
         self.marker_ids = self.col_ids[self.marker_indices]
-        self.marker_pvals = np.array([self.pvals[i][self.marker_indices[i]] for i in range(len(self.marker_indices))])
-        self.marker_mds = np.array([self.mds[i][self.marker_indices[i]] for i in range(len(self.marker_indices))])
+        self.convert_markers()
 
     def convert_markers(self):
         """
         Converts gene IDs to gene names.
         """
-        if self.marker_ids is None:
-            self.find_markers()
         self.marker_names = gene_id_to_name(self.marker_ids)
         self.pop_names, self.svs, self.intersec, self.sub_pop_names, self.sub_svs, self.sub_intersec = gene_name_to_cell(self.marker_names)
 

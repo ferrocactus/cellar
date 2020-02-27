@@ -12,3 +12,26 @@ from ._evaluation import (
     Eval_SilhouetteScore,
     Eval_DaviesBouldinScore
 )
+from ._markers import (
+    Mark_TTest
+)
+
+translation_dict = {
+    "cluster": {
+        "KMedoids": Clu_KMedoids,
+        "KMeans": Clu_KMeans,
+        "SpectralClustering": Clu_SpectralClustering
+    },
+    "dim_reduction": {
+        "PCA": Dim_PCA,
+        "UMAP": Dim_UMAP,
+        "TSNE": Dim_TSNE
+    },
+    "cluster_eval": {
+        "SilhouetteScore": Eval_SilhouetteScore,
+        "DaviesBouldinScore": Eval_DaviesBouldinScore
+    },
+    "markers": {
+        "TTest": Mark_TTest
+    }
+}

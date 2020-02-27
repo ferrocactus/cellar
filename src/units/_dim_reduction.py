@@ -10,15 +10,16 @@ PCA_EVR_MAX_N = 100
 
 
 class Dim(Unit):
-    def __init__(self, verbose=False, **args):
+    """
+    Base class for Dimensionality Reduction methods.
+    """
+    def __init__(self, verbose=False, **kwargs):
         """
-        Base class for Dimensionality Reduction methods.
-
         Args:
             verbose (bool): Printing flag.
-            **args: Argument list.
+            **kwargs: Argument dict.
         """
-        super().__init__(verbose, **args)
+        super().__init__(verbose, **kwargs)
 
     @abstractmethod
     def get(self, x):
@@ -34,34 +35,34 @@ class Dim(Unit):
 
 
 class Dim_PCA(Dim):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
-        if 'n_components' not in args:
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+        if 'n_components' not in kwargs:
             raise ValueError("n_components not provided.")
 
     def get(self, x):
-        if self.args['n_components'] == 'knee':
-            temp_args = self.args.copy()
-            temp_args['n_components'] = min(PCA_EVR_MAX_N, x.shape[1])
-            self.ev_pca = PCA(**temp_args)
+        if self.kwargs['n_components'] == 'knee':
+            temp_kwargs = self.kwargs.copy()
+            temp_kwargs['n_components'] = min(PCA_EVR_MAX_N, x.shape[1])
+            self.ev_pca = PCA(**temp_kwargs)
             self.ev_pca.fit(x)
             # Construct axis for KneeLocator
             x_axis = list(range(1, self.ev_pca.n_components_ + 1))
             y_axis = self.ev_pca.explained_variance_ratio_
             # Find knee
-            temp_args['n_components'] = self.knee = KneeLocator(
+            temp_kwargs['n_components'] = self.knee = KneeLocator(
                 x_axis,
                 y_axis,
                 curve='convex', # approximately
                 direction='decreasing' # sklearn PCA eigenvalues are sorted
             ).knee
-            temp_args['n_components'] = max(self.knee, 2)
+            temp_kwargs['n_components'] = max(self.knee, 2)
             self.vprint("Knee found at {0} components. Using n={1}.".format(
-                self.knee, temp_args['n_components'])
+                self.knee, temp_kwargs['n_components'])
             )
-            self.pca = PCA(**temp_args)
+            self.pca = PCA(**temp_kwargs)
         else:
-            self.pca = PCA(**self.args)
+            self.pca = PCA(**self.kwargs)
         return self.pca.fit_transform(x)
 
     def __getattr__(self, attr):
@@ -73,13 +74,13 @@ class Dim_PCA(Dim):
 
 
 class Dim_UMAP(Dim):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
-        if 'n_components' not in args:
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+        if 'n_components' not in kwargs:
             raise ValueError("n_components not provided.")
 
     def get(self, x, y=None):
-        self.umap = UMAP(**self.args)
+        self.umap = UMAP(**self.kwargs)
         return self.umap.fit_transform(x, y=y)
 
     def __getattr__(self, attr):
@@ -87,13 +88,13 @@ class Dim_UMAP(Dim):
 
 
 class Dim_TSNE(Dim):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
-        if 'n_components' not in args:
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+        if 'n_components' not in kwargs:
             raise ValueError("n_components not provided.")
 
     def get(self, x, y=None):
-        self.tsne = TSNE(**self.args)
+        self.tsne = TSNE(**self.kwargs)
         return self.tsne.fit_transform(x) # y is ignored
 
     def __getattr__(self, attr):

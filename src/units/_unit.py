@@ -2,9 +2,9 @@ from abc import ABC, abstractmethod
 
 
 class Unit(ABC):
-    def __init__(self, verbose=False, **args):
+    def __init__(self, verbose=False, **kwargs):
         self._verbose = verbose
-        self.args = args
+        self.kwargs = kwargs
 
     @abstractmethod
     def get(self):

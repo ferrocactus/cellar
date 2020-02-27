@@ -10,7 +10,8 @@ install_requires = [
     'umap-learn',
     'tqdm',
     'kneed',
-    'gtfparse'
+    'gtfparse',
+    'statsmodels'
 ]
 
 setup(

@@ -6,15 +6,16 @@ from sklearn.metrics import davies_bouldin_score
 
 
 class Eval(Unit):
-    def __init__(self, verbose=False, **args):
+    """
+    Base class for Evaluation methods.
+    """
+    def __init__(self, verbose=False, **kwargs):
         """
-        Base class for Evaluation methods.
-
         Args:
             verbose (bool): Printing flag.
-            **args: Argument list.
+            **kwargs: Argument dict.
         """
-        super().__init__(verbose, **args)
+        super().__init__(verbose, **kwargs)
         self._score = None
 
     @abstractmethod
@@ -30,21 +31,21 @@ class Eval(Unit):
 
 
 class Eval_SilhouetteScore(Eval):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
 
     def get(self, x, labels):
-        self._score = silhouette_score(x, labels, **self.args)
+        self._score = silhouette_score(x, labels, **self.kwargs)
         #self.vprint("Silhouette Score: {0:.2f}.".format(self._score))
         return self._score
 
 
 class Eval_DaviesBouldinScore(Eval):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
 
     def get(self, x, labels):
-        self._score = davies_bouldin_score(x, labels, **self.args)
+        self._score = davies_bouldin_score(x, labels, **self.kwargs)
         #self.vprint("Davies Bouldin Score: {0:.2f}.".format(self._score))
         # Return negative the result, because the db score
         # assumes a better clustering if the score is lower

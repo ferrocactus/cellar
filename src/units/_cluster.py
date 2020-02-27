@@ -8,21 +8,22 @@ from sklearn.cluster import SpectralClustering
 
 
 class Cluster(Unit):
+    """
+    Base class for Clustering methods. A child class needs to instantiate
+    a self._obj object with a fit_predict member function.
+    """
     @abstractmethod
-    def __init__(self, verbose=False, **args):
+    def __init__(self, verbose=False, **kwargs):
         """
-        Base class for Clustering methods. A child class needs to instantiate
-        a self._obj object with a fit_predict member function.
-
         Args:
             verbose (bool): Printing flag.
-            **args: Argument list.
+            **kwargs: Argument list.
         Raises:
             ValueError: If number of clusters to use is not provided.
         """
-        if 'n_clusters' not in args:
+        if 'n_clusters' not in kwargs:
             raise ValueError("n_clusters not provided.")
-        super().__init__(verbose, **args)
+        super().__init__(verbose, **kwargs)
         self._labels = None
         self._n_clusters = None
 
@@ -38,7 +39,7 @@ class Cluster(Unit):
         Args:
             x (np.ndarray): Data in matrix (n x d) form.
             eval_obj (Sco): Sco object to use for evaluating clusters.
-                            Must be set if args['n_clusters'] is a tuple.
+                            Must be set if kwargs['n_clusters'] is a tuple.
         Returns:
             clusters (np.ndarray): The labels for each x.
         Raise:
@@ -48,12 +49,12 @@ class Cluster(Unit):
         """
         self._labels = None
         self._n_clusters = None
-        if isinstance(self.args['n_clusters'], int): # single cluster num
-            self._labels = self.fit_predict(self._obj(**self.args), x)
+        if isinstance(self.kwargs['n_clusters'], int): # single cluster num
+            self._labels = self.fit_predict(self._obj(**self.kwargs), x)
             self._n_clusters = self.args['n_clusters']
-        elif isinstance(self.args['n_clusters'], tuple): # range of cluster nums
-            temp_args = self.args.copy() # to avoid editting the original dict
-            k_list = range(*temp_args['n_clusters'])
+        elif isinstance(self.kwargs['n_clusters'], tuple): # range of cluster nums
+            temp_kwargs = self.kwargs.copy() # to avoid editting the original dict
+            k_list = range(*temp_kwargs['n_clusters'])
 
             if eval_obj is None: # Need evaluation method if using range
                 raise ValueError("Evaluation object not provided.")
@@ -63,8 +64,8 @@ class Cluster(Unit):
             self.score_list = [0] * len(k_list)
             best_score = -np.Inf
             for i, k in enumerate(k_list): # Iterate over k
-                temp_args['n_clusters'] = k
-                labels = self.fit_predict(self._obj(**temp_args), x)
+                temp_kwargs['n_clusters'] = k
+                labels = self.fit_predict(self._obj(**temp_kwargs), x)
                 score = eval_obj.get(x, labels)
                 self.score_list[i] = score
                 if best_score < score: # Update if best score found
@@ -91,20 +92,20 @@ class Cluster(Unit):
 
 
 class Clu_KMedoids(Cluster):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
         self._obj = KMedoids
 
 
 class Clu_KMeans(Cluster):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
         self._obj = KMeans
 
 
 class Clu_SpectralClustering(Cluster):
-    def __init__(self, verbose=False, **args):
-        super().__init__(verbose, **args)
-        if affinity not in self.args: # For consistency.
-            self.args['affinity'] = 'nearest_neighbors'
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+        if affinity not in self.kwargs: # For consistency.
+            self.kwargs['affinity'] = 'nearest_neighbors'
         self._obj = SpectralClustering
