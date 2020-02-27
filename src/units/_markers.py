@@ -99,6 +99,6 @@ class Mark_TTest(Mark):
             test_results[i] = {'indices': final_indices,
                                'pvals': pvals[final_indices],
                                'diffs': diffs[final_indices]}
-            self.vprint("Finished finding markers for label {0}.".format(i))
+            self.vprint("Finished finding markers for cluster {0}.".format(i))
 
         return test_results

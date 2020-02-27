@@ -73,7 +73,7 @@ class Cluster(Unit):
                     best_score, self._labels, self._n_clusters = score, labels, k
                 self.vprint("Finished clustering for k={0}.".format(k))
 
-            self.vprint("Best score achieved for n={0} at {1:.2f}.".format(
+            self.vprint("Best score achieved for k={0} at {1:.2f}.".format(
                 self._n_clusters, best_score
             ))
         else:
