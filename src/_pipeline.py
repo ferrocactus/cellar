@@ -6,19 +6,11 @@ import json
 import time
 import tqdm
 
-from .wrapper import wrap
+from ._wrapper import wrap
 
 # Differential Expression
 from scipy import stats
 # Utils
-from .utils.utils_visualization import (
-    plot_2d,
-    plot_explained_variance,
-    plot_gene_variances,
-    plot_scores,
-    plot_marker_hist,
-    plot_top_markers
-)
 from .utils.utils_experiment import (
     read_config,
     gene_id_to_name,
@@ -63,6 +55,7 @@ class Pipeline:
     def run(self):
         self.x_emb = self.dim_obj.get(self.x)
         self.labels = self.clu_obj.get(self.x_emb, self.eval_obj)
+        return
         self.n_clusters = self.clu_obj._n_clusters
         self.mark_results = self.mark_obj.get(self.x, self.labels)
         self.marker_indices = []
@@ -110,33 +103,26 @@ class Pipeline:
             self.find_markers()
             self.convert_markers()
 
-    def plot(self, what):
-        if what == "explained_variance":
-            plot_explained_variance(list(range(1, len(self.explained_variance) + 1)),
-                                    self.explained_variance)
-        elif what == "gene_variances":
-            plot_gene_variances(self.gene_variances)
-        elif what == "cluster_scores":
-            plot_scores(self.n_clusters_list, self.score_list)
-        elif what == "marker_hist":
-            plot_marker_hist(self.n_clusters, self.pvals, self.mds)
-        elif what == "top_markers":
-            plot_top_markers(self.marker_ids[:10], self.marker_pvals[:10], self.marker_mds[:10])
-        elif what == "2d":
-            emb_2d = self.vis_obj.get(self.x_emb, self.labels)
-            labels = None
-            if hasattr(self, 'pop_names'):
-                labels = ["{0} ({1} common genes; sv={2:.2f})\n{3} ({4} common genes; sv={5:.2f})".format(
-                                                        x,
-                                                        len(self.intersec[i]),
-                                                        self.svs[i],
-                                                        self.sub_pop_names[i],
-                                                        len(self.sub_intersec[i]),
-                                                        self.sub_svs[i])
-                                for i, x in enumerate(self.pop_names)]
-            plot_2d(emb_2d, self.labels, labels=labels)
-        else:
-            raise ValueError()
+    # def plot(self, what):
+    #     elif what == "marker_hist":
+    #         plot_marker_hist(self.n_clusters, self.pvals, self.mds)
+    #     elif what == "top_markers":
+    #         plot_top_markers(self.marker_ids[:10], self.marker_pvals[:10], self.marker_mds[:10])
+    #     elif what == "2d":
+    #         emb_2d = self.vis_obj.get(self.x_emb, self.labels)
+    #         labels = None
+    #         if hasattr(self, 'pop_names'):
+    #             labels = ["{0} ({1} common genes; sv={2:.2f})\n{3} ({4} common genes; sv={5:.2f})".format(
+    #                                                     x,
+    #                                                     len(self.intersec[i]),
+    #                                                     self.svs[i],
+    #                                                     self.sub_pop_names[i],
+    #                                                     len(self.sub_intersec[i]),
+    #                                                     self.sub_svs[i])
+    #                             for i, x in enumerate(self.pop_names)]
+    #         plot_2d(emb_2d, self.labels, labels=labels)
+    #     else:
+    #         raise ValueError()
 
 
 def print_header(text, max_length=80, prepend_newline=True):

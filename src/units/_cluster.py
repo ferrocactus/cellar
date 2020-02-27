@@ -52,7 +52,8 @@ class Cluster(Unit):
         self._n_clusters = None
         if isinstance(self.kwargs['n_clusters'], int): # single cluster num
             self._labels = self.fit_predict(self._obj(**self.kwargs), x)
-            self._n_clusters = self.args['n_clusters']
+            self._n_clusters = self.kwargs['n_clusters']
+            self.score_list = np.array([eval_obj.get(x, self._labels)])
         elif isinstance(self.kwargs['n_clusters'], tuple): # range of cluster nums
             temp_kwargs = self.kwargs.copy() # to avoid editting the original dict
             k_list = range(*temp_kwargs['n_clusters'])
@@ -62,7 +63,7 @@ class Cluster(Unit):
             if len(k_list) < 1:
                 raise ValueError("Invalid k list encountered in clustering.")
 
-            self.score_list = [0] * len(k_list)
+            self.score_list = np.zeros(len(k_list))
             best_score = -np.Inf
             for i, k in enumerate(k_list): # Iterate over k
                 temp_kwargs['n_clusters'] = k

@@ -32,7 +32,7 @@ class Dim(Unit):
         Returns:
             (np.ndarray): The embedding of x.
         """
-        return x
+        pass
 
 
 class Dim_PCA(Dim):
