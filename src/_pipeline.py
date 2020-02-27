@@ -32,7 +32,7 @@ from .utils.utils_read import parse_config
 
 class Pipeline:
     def __init__(self, x, config='configs/config.ini', verbose=False, row_ids=None, col_ids=None):
-        assert len(x.shape) == 2, "Data needs to be of shape (n x d)."
+        assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
         assert isinstance(config, str)
         self.x = x
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
@@ -52,7 +52,7 @@ class Pipeline:
             vis_method = self.config["methods"]["visualization"]
             mark_method = self.config["methods"]["markers"]
         except:
-            raise "Config file malformed or method missing."
+            raise "Pipe: Config file malformed or method missing."
 
         self.dim_obj = wrap("dim_reduction", dim_method)(self.verbose, **self.config["dim_reduction"])
         self.clu_obj = wrap("cluster", clu_method)(self.verbose, **self.config["cluster"])

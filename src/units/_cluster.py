@@ -24,6 +24,7 @@ class Cluster(Unit):
         if 'n_clusters' not in kwargs:
             raise ValueError("n_clusters not provided.")
         super().__init__(verbose, **kwargs)
+        self.name = 'Clu'
         self._labels = None
         self._n_clusters = None
 
@@ -70,6 +71,7 @@ class Cluster(Unit):
                 self.score_list[i] = score
                 if best_score < score: # Update if best score found
                     best_score, self._labels, self._n_clusters = score, labels, k
+                self.vprint("Finished clustering for k={0}.".format(k))
 
             self.vprint("Best score achieved for n={0} at {1:.2f}.".format(
                 self._n_clusters, best_score
@@ -85,7 +87,7 @@ class Cluster(Unit):
         classes if the fit predict method is different.
 
         Args:
-            obj (Clu): Clu object.
+            obj (Cluster): Cluster object.
             x (np.ndarray): Data to use for clustering.
         """
         return obj.fit_predict(x) # By default for most methods

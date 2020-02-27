@@ -17,6 +17,7 @@ class Eval(Unit):
         """
         super().__init__(verbose, **kwargs)
         self._score = None
+        self.name = 'Eval'
 
     @abstractmethod
     def get(self, x, labels):

@@ -20,6 +20,7 @@ class Dim(Unit):
             **kwargs: Argument dict.
         """
         super().__init__(verbose, **kwargs)
+        self.name = 'Dim'
 
     @abstractmethod
     def get(self, x):
