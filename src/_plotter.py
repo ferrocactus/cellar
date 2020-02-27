@@ -66,7 +66,7 @@ class Plotter:
         for i in range(len(COLORS), unq): # In case more colors are needed.
             pal.append("#" + '%06x' % np.random.randint(16**6))
 
-        fig = plt.Figure()
+        plt.figure(figsize=(10,5))
         sns.scatterplot(x=x[:, 0], y=x[:, 1], hue=hue, palette=pal, linewidth=0,
                                                             s=10, legend='full')
         plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0, labels=labels)
@@ -74,7 +74,6 @@ class Plotter:
         sns.despine(left=True, bottom=True)
         plt.xticks([])
         plt.yticks([])
-        fig.set_size_inches(10, 5)
         plt.show()
 
     def plot_clu_all(self, cols=3):

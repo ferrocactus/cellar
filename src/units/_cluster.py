@@ -42,7 +42,7 @@ class Cluster(Unit):
             eval_obj (Sco): Sco object to use for evaluating clusters.
                             Must be set if kwargs['n_clusters'] is a tuple.
         Returns:
-            clusters (np.ndarray): The labels for each x.
+            clusters (np.ndarray): The labels for each x (must be integers).
         Raise:
             ValueError: If a tuple passed for k and Eval object not provided.
             ValueError: If range of k passed is invalid or empty.

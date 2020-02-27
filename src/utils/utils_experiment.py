@@ -37,18 +37,6 @@ def load_data(dataset):
     else:
         raise FileNotFoundError('Dataset not supported.')
 
-def gene_id_to_name(gene_ids, path="gene_id_name.csv"):
-    """
-    Given an array of gene ids, convert them to gene names using the provided file
-    and return an array of the same shape with the converted names.
-    """
-    gene_dict = pd.read_csv('markers/' + path, index_col=0, squeeze=True).to_dict()
-    # Split gene ids by dot char if there is any and take the first part
-    splitted = np.char.split(gene_ids.flatten(), sep='.')
-    return np.char.upper(np.vectorize(gene_dict.get)(
-        np.array([i[0] for i in splitted]).reshape(gene_ids.shape))
-    )
-
 def read_markers(path="CellTypeMarker.json"):
     with open("markers/" + path) as f:
         markers = json.load(f)

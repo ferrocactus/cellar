@@ -15,6 +15,9 @@ from ._evaluation import (
 from ._markers import (
     Mark_TTest
 )
+from ._converter import (
+    Con
+)
 
 translation_dict = {
     "cluster": {
@@ -33,5 +36,8 @@ translation_dict = {
     },
     "markers": {
         "TTest": Mark_TTest
+    },
+    "converter": {
+        "Converter": Con
     }
 }

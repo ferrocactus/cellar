@@ -13,7 +13,6 @@ from scipy import stats
 # Utils
 from .utils.utils_experiment import (
     read_config,
-    gene_id_to_name,
     gene_name_to_cell
 )
 from .utils.utils_read import parse_config
@@ -23,18 +22,16 @@ from .utils.utils_read import parse_config
 
 
 class Pipeline:
-    def __init__(self, x, config='configs/config.ini', verbose=False, row_ids=None, col_ids=None):
+    def __init__(self, x, config='configs/config.ini', verbose=False,
+                row_ids=None, col_ids=None):
         assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
         assert isinstance(config, str)
         self.x = x
-        self.row_ids = row_ids.astype('U') if row_ids is not None else None
-        self.col_ids = col_ids.astype('U') if col_ids is not None else None
         self.config = parse_config(config)
         self.verbose = verbose
+        self.row_ids = row_ids.astype('U') if row_ids is not None else None
+        self.col_ids = col_ids.astype('U') if col_ids is not None else None
         self.create_objects()
-        self.x_emb = None # Embeddings after running PCA
-        self.labels = None # Labels after running clustering
-        self.marker_ids = None # Markers for cluster
 
     def create_objects(self, methods=None):
         try:
@@ -44,32 +41,46 @@ class Pipeline:
             vis_method = self.config["methods"]["visualization"]
             mark_method = self.config["methods"]["markers"]
         except:
-            raise "Pipe: Config file malformed or method missing."
+            raise ValueError("Pipe: Config file malformed or method missing.")
 
-        self.dim_obj = wrap("dim_reduction", dim_method)(self.verbose, **self.config["dim_reduction"])
-        self.clu_obj = wrap("cluster", clu_method)(self.verbose, **self.config["cluster"])
-        self.eval_obj = wrap("cluster_eval", eval_method)(self.verbose, **self.config["cluster_eval"])
-        self.vis_obj = wrap("dim_reduction", vis_method)(self.verbose, **self.config["visualization"])
-        self.mark_obj = wrap("markers", mark_method)(self.verbose, **self.config["markers"])
+        self.dim_obj = wrap("dim_reduction", dim_method)(
+            self.verbose, **self.config["dim_reduction"]
+        )
+        self.clu_obj = wrap("cluster", clu_method)(
+            self.verbose, **self.config["cluster"]
+        )
+        self.eval_obj = wrap("cluster_eval", eval_method)(
+            self.verbose, **self.config["cluster_eval"]
+        )
+        self.vis_obj = wrap("dim_reduction", vis_method)(
+            self.verbose, **self.config["visualization"]
+        )
+        self.mark_obj = wrap("markers", mark_method)(
+            self.verbose, **self.config["markers"]
+        )
+        self.con_obj = wrap("converter", "Converter")(
+            self.verbose, **self.config["converter"]
+        )
 
     def run(self):
         self.x_emb = self.dim_obj.get(self.x)
         self.labels = self.clu_obj.get(self.x_emb, self.eval_obj)
+        self.unq_labels = np.unique(self.labels)
+        self.markers = self.mark_obj.get(self.x, self.labels, self.unq_labels)
+        for marker in self.markers:
+            self.markers[marker]['ids'] = self.col_ids[
+                self.markers[marker]['indices']
+            ]
+            self.markers[marker]['names'] = self.con_obj.get(
+                self.markers[marker]['ids']
+            )
         return
-        self.n_clusters = self.clu_obj._n_clusters
-        self.mark_results = self.mark_obj.get(self.x, self.labels)
-        self.marker_indices = []
-        for i in self.mark_results.keys():
-            self.marker_indices.append(self.mark_results[i]['indices'])
-        self.marker_indices = np.array(self.marker_indices)
-        self.marker_ids = self.col_ids[self.marker_indices]
         self.convert_markers()
 
     def convert_markers(self):
         """
         Converts gene IDs to gene names.
         """
-        self.marker_names = gene_id_to_name(self.marker_ids)
         self.pop_names, self.svs, self.intersec, self.sub_pop_names, self.sub_svs, self.sub_intersec = gene_name_to_cell(self.marker_names)
 
     def new_hard_cluster(self, labels, indices=None, all_points=False):
@@ -123,15 +134,3 @@ class Pipeline:
     #         plot_2d(emb_2d, self.labels, labels=labels)
     #     else:
     #         raise ValueError()
-
-
-def print_header(text, max_length=80, prepend_newline=True):
-    if len(text) >= max_length:
-        if prepend_newline:
-            print()
-        print("*** " + text + " ***")
-    else:
-        rems = int((max_length - len(text)) / 2) - 2
-        if prepend_newline:
-            print()
-        print('*' * rems, text, '*' * (max_length - rems - len(text) - 2))
