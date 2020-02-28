@@ -100,7 +100,7 @@ class Pipeline:
 
         if path is None:
             fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
-            path = "states/marker-info-" + fn + ".csv"
+            path = "csv/marker-info-" + fn + ".csv"
         df.to_csv(path)
 
     def save(self, path=None):
@@ -109,7 +109,7 @@ class Pipeline:
         """
         if path is None:
             fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
-            path = "states/pipe-" + fn + ".pkl"
+            path = "csv/pipe-" + fn + ".pkl"
         with open(path, "wb") as f:
             pickle.dump(self, f)
         return path
