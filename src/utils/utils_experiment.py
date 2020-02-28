@@ -12,6 +12,8 @@ def read_config(dataset):
     return config
 
 def parse(x):
+    if x.size == 0:
+        return x
     parsed_x = np.char.split(x.flatten(), sep='.', maxsplit=1)
     parsed_x = np.array([i[0] for i in parsed_x])
     parsed_x = np.char.replace(parsed_x, '-', '')

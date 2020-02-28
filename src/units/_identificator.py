@@ -88,10 +88,13 @@ class Ide_HyperGeom(Ide):
 
         # Level 2 in the hierarchy identification loop
         for key in x:
-            tp, sv, intersec, total = self.find_population(
-                x[key][self.convention],
-                lvl2[x[key]['lvl1_type']]
-            )
+            if x[key]['lvl1_type'] == 'None':
+                tp, sv, intersec, total = "None", 1, np.array([]), 0
+            else:
+                tp, sv, intersec, total = self.find_population(
+                    x[key][self.convention],
+                    lvl2[x[key]['lvl1_type']]
+                )
             x[key]['lvl2_type'] = tp
             x[key]['lvl2_sv'] = sv
             x[key]['lvl2_intersec'] = intersec
@@ -146,6 +149,6 @@ class Ide_HyperGeom(Ide):
             if sv < rsv:
                 rsv, rpop, rk = sv, pop, k
         if rk == 0: # in case of no intersection, return -1
-            return "None", 2, np.array([]), 0
+            return "None", 1, np.array([]), 0
         else:
             return rpop, rsv, np.intersect1d(x, pops[rpop]), len(pops[rpop])
