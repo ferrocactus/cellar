@@ -12,8 +12,7 @@ from ._wrapper import wrap
 from scipy import stats
 # Utils
 from .utils.utils_experiment import (
-    read_config,
-    gene_name_to_cell
+    read_config
 )
 from .utils.utils_read import parse_config
 # Constrained clustering
@@ -22,7 +21,7 @@ from .utils.utils_read import parse_config
 
 
 class Pipeline:
-    def __init__(self, x, config='configs/config.ini', verbose=False,
+    def __init__(self, x, config, verbose=False,
                 row_ids=None, col_ids=None):
         assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
         assert isinstance(config, str)
@@ -40,48 +39,46 @@ class Pipeline:
             eval_method = self.config["methods"]["cluster_eval"]
             vis_method = self.config["methods"]["visualization"]
             mark_method = self.config["methods"]["markers"]
+            con_method = self.config["methods"]["conversion"]
+            ide_method = self.config["methods"]["identification"]
         except:
             raise ValueError("Pipe: Config file malformed or method missing.")
 
-        self.dim_obj = wrap("dim_reduction", dim_method)(
+        self.dim = wrap("dim_reduction", dim_method)(
             self.verbose, **self.config["dim_reduction"]
         )
-        self.clu_obj = wrap("cluster", clu_method)(
+        self.clu = wrap("cluster", clu_method)(
             self.verbose, **self.config["cluster"]
         )
-        self.eval_obj = wrap("cluster_eval", eval_method)(
+        self.eval = wrap("cluster_eval", eval_method)(
             self.verbose, **self.config["cluster_eval"]
         )
-        self.vis_obj = wrap("dim_reduction", vis_method)(
+        self.vis = wrap("dim_reduction", vis_method)(
             self.verbose, **self.config["visualization"]
         )
-        self.mark_obj = wrap("markers", mark_method)(
+        self.mark = wrap("markers", mark_method)(
             self.verbose, **self.config["markers"]
         )
-        self.con_obj = wrap("converter", "Converter")(
-            self.verbose, **self.config["converter"]
+        self.con = wrap("conversion", con_method)(
+            self.verbose, **self.config["conversion"]
+        )
+        self.ide = wrap("identification", ide_method)(
+            self.verbose, **self.config["identification"]
         )
 
     def run(self):
-        self.x_emb = self.dim_obj.get(self.x)
-        self.labels = self.clu_obj.get(self.x_emb, self.eval_obj)
+        self.x_emb = self.dim.get(self.x)
+        self.labels = self.clu.get(self.x_emb, self.eval)
         self.unq_labels = np.unique(self.labels)
-        self.markers = self.mark_obj.get(self.x, self.labels, self.unq_labels)
+        self.markers = self.mark.get(self.x, self.labels, self.unq_labels)
         for marker in self.markers:
             self.markers[marker]['ids'] = self.col_ids[
                 self.markers[marker]['indices']
             ]
-            self.markers[marker]['names'] = self.con_obj.get(
+            self.markers[marker]['names'] = self.con.get(
                 self.markers[marker]['ids']
             )
-        return
-        self.convert_markers()
-
-    def convert_markers(self):
-        """
-        Converts gene IDs to gene names.
-        """
-        self.pop_names, self.svs, self.intersec, self.sub_pop_names, self.sub_svs, self.sub_intersec = gene_name_to_cell(self.marker_names)
+        self.markers = self.ide.get(self.markers)
 
     def new_hard_cluster(self, labels, indices=None, all_points=False):
         """

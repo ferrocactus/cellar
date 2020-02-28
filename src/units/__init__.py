@@ -18,6 +18,9 @@ from ._markers import (
 from ._converter import (
     Con
 )
+from ._identificator import (
+    Ide_HyperGeom
+)
 
 translation_dict = {
     "cluster": {
@@ -37,7 +40,10 @@ translation_dict = {
     "markers": {
         "TTest": Mark_TTest
     },
-    "converter": {
+    "conversion": {
         "Converter": Con
+    },
+    "identification": {
+        "HyperGeom": Ide_HyperGeom
     }
 }

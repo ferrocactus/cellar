@@ -1,4 +1,5 @@
 from ._unit import Unit
+from src.utils.utils_experiment import parse
 
 from abc import abstractmethod
 import pandas as pd
@@ -39,14 +40,6 @@ class Con(Unit):
         else:
             raise NotImplementedError("Convention not found.")
 
-    def parse(self, x):
-        parsed_x = np.char.split(x.flatten(), sep='.', maxsplit=1)
-        parsed_x = np.array([i[0] for i in parsed_x])
-        parsed_x = np.char.replace(parsed_x, '-', '')
-        parsed_x = np.char.upper(parsed_x)
-        parsed_x = parsed_x.reshape(x.shape)
-        return parsed_x
-
     def id_to_name(self, ids):
         """
         Given an array of gene ids, convert them to gene names.
@@ -55,7 +48,7 @@ class Con(Unit):
             ids (np.ndarray): List of strings.
         """
         gene_dict = pd.read_csv(self.path, index_col=0, squeeze=True).to_dict()
-        parsed_ids = self.parse(ids)
+        parsed_ids = parse(ids)
         # Leave unchanged if not found
         return np.char.upper([gene_dict.get(i, i) for i in parsed_ids])
 
@@ -67,6 +60,6 @@ class Con(Unit):
         col1, col2 = gene_dict.columns
         # Revert the order of columns
         gene_dict = gene_dict[gene_dict.columns[::-1]].set_index(col2)[col1].to_dict()
-        parsed_names = self.parse(names)
+        parsed_names = parse(names)
         # Leave unchanged if not found
         return np.char.upper([gene_dict.get(i, i) for i in parsed_names])

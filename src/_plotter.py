@@ -30,7 +30,7 @@ class Plotter:
         """
         fig, ax = plt.subplots(1, cumulative+1, squeeze=False)
 
-        y = self.pipe.dim_obj.ev_pca.explained_variance_ratio_
+        y = self.pipe.dim.ev_pca.explained_variance_ratio_
         x = list(range(1, y+1))
 
         ax[0][0].plot(x, y*100)
@@ -55,7 +55,7 @@ class Plotter:
         Plots the clusters in 2D for a single k.
         """
         hue = self.pipe.labels
-        x = self.pipe.vis_obj.get(self.pipe.x_emb, hue)
+        x = self.pipe.vis.get(self.pipe.x_emb, hue)
         if x.shape[1] != 2:
             raise ValueError('Incorrect number of dimensions.')
 
@@ -83,15 +83,15 @@ class Plotter:
             cols (int): Number of columns to use in the plot.
         """
         clu_method = self.pipe.config["methods"]["cluster"]
-        kwargs = self.pipe.clu_obj.kwargs.copy() # Copy original kwargs
+        kwargs = self.pipe.clu.kwargs.copy() # Copy original kwargs
         k = kwargs['n_clusters']
 
         if not isinstance(k, tuple): # Single cluster_n
             self.plot_clu()
             return
 
-        # Get the embedding using vis_obj
-        emb = self.pipe.vis_obj.get(self.pipe.x_emb)
+        # Get the embedding using vis
+        emb = self.pipe.vis.get(self.pipe.x_emb)
         if emb.shape[1] != 2:
             raise ValueError("Incorrect number of dimensions.")
 
@@ -102,12 +102,12 @@ class Plotter:
         # Iterate over all k
         for i, kk in enumerate(ks):
             kwargs['n_clusters'] = kk
-            clu_obj = wrap("cluster", clu_method)(**kwargs)
-            labels = clu_obj.get(self.pipe.x_emb, self.pipe.eval_obj)
+            clu = wrap("cluster", clu_method)(**kwargs)
+            labels = clu.get(self.pipe.x_emb, self.pipe.eval)
 
             ax[i // cols][i % cols].scatter(emb[:, 0], emb[:, 1], s=.5, c=labels)
             ax[i // cols][i %cols].set_title('k={0}, score={1:.2f}'.format(
-                                                kk, clu_obj.score_list))
+                                                kk, clu.score_list))
             ax[i // cols][i %cols].set_xticks([])
             ax[i // cols][i %cols].set_yticks([])
 
@@ -129,7 +129,7 @@ class Plotter:
         """
         fig, ax = plt.subplots()
 
-        k = self.pipe.clu_obj.kwargs['n_clusters']
+        k = self.pipe.clu.kwargs['n_clusters']
         if isinstance(k, tuple):
             x = list(range(*k))
             ax.set_xticks(x)
@@ -137,7 +137,7 @@ class Plotter:
             x = k
             ax.set_xticks([x-1, x, x+1])
 
-        y = self.pipe.clu_obj.score_list
+        y = self.pipe.clu.score_list
 
         ax.bar(x, y)
         ax.set_xlabel('Number of Clusters')
