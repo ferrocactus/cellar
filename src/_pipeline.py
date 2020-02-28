@@ -2,6 +2,8 @@ from ._wrapper import wrap
 from .utils.utils_read import parse_config
 
 import numpy as np
+import pickle
+import datetime
 
 
 class Pipeline:
@@ -67,3 +69,11 @@ class Pipeline:
             )
         # 4. Perform identification
         self.markers = self.ide.get(self.markers)
+
+    def save(self, path=None):
+        if path is None:
+            fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
+            path = "states/" + fn + ".pkl"
+        with open(path, "wb") as f:
+            pickle.dump(self, f)
+        return path

@@ -66,13 +66,6 @@ class Dim_PCA(Dim):
             self.pca = PCA(**self.kwargs)
         return self.pca.fit_transform(x)
 
-    def __getattr__(self, attr):
-        """
-        Allows user to return member values of pca object without
-        having to remember or know any variable names.
-        """
-        return getattr(self.pca, attr)
-
 
 class Dim_UMAP(Dim):
     def __init__(self, verbose=False, **kwargs):
@@ -84,9 +77,6 @@ class Dim_UMAP(Dim):
         self.umap = UMAP(**self.kwargs)
         return self.umap.fit_transform(x, y=y)
 
-    def __getattr__(self, attr):
-        return getattr(self.umap, attr)
-
 
 class Dim_TSNE(Dim):
     def __init__(self, verbose=False, **kwargs):
@@ -97,6 +87,3 @@ class Dim_TSNE(Dim):
     def get(self, x, y=None):
         self.tsne = TSNE(**self.kwargs)
         return self.tsne.fit_transform(x) # y is ignored
-
-    def __getattr__(self, attr):
-        return getattr(self.tsne, attr)
