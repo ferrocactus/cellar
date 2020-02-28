@@ -26,7 +26,10 @@ class Cluster(Unit):
         super().__init__(verbose, **kwargs)
         self.name = 'Clu'
         self._labels = None
-        self._n_clusters = None
+        self._n_clusters = kwargs.get('n_clusters', (2, 11, 2))
+
+    def set_n_clusters(self, n_clusters):
+        self._n_clusters = n_clusters
 
     def get(self, x, eval_obj=None):
         """
@@ -49,14 +52,17 @@ class Cluster(Unit):
             ValueError: If anything other than scalar or tuple is passed for k.
         """
         self._labels = None
-        self._n_clusters = None
-        if isinstance(self.kwargs['n_clusters'], int): # single cluster num
-            self._labels = self.fit_predict(self._obj(**self.kwargs), x)
-            self._n_clusters = self.kwargs['n_clusters']
+        kwargs = self.kwargs.copy()
+
+        if isinstance(self._n_clusters, int): # single cluster num
+            kwargs['n_clusters'] = self._n_clusters
+            self._labels = self.fit_predict(self._obj(**kwargs), x)
             self.score_list = np.array([eval_obj.get(x, self._labels)])
-        elif isinstance(self.kwargs['n_clusters'], tuple): # range of clusters
-            temp_kwargs = self.kwargs.copy() # avoid editting the original dict
-            k_list = range(*temp_kwargs['n_clusters'])
+            self.vprint(f"Finished clustering for k={0}. Score={1:.2f}".format(
+                self._n_clusters, self.score_list[0])
+            )
+        elif isinstance(self._n_clusters, tuple): # range of clusters
+            k_list = range(*self._n_clusters)
 
             if eval_obj is None: # Need evaluation method if using range
                 raise ValueError("Evaluation object not provided.")
@@ -66,8 +72,8 @@ class Cluster(Unit):
             self.score_list = np.zeros(len(k_list))
             best_score = -np.Inf
             for i, k in enumerate(k_list): # Iterate over k
-                temp_kwargs['n_clusters'] = k
-                labels = self.fit_predict(self._obj(**temp_kwargs), x)
+                kwargs['n_clusters'] = k
+                labels = self.fit_predict(self._obj(**kwargs), x)
                 score = eval_obj.get(x, labels)
                 self.score_list[i] = score
                 if best_score < score: # Update if best score found

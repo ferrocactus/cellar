@@ -29,6 +29,7 @@ class Pipeline:
             mark_method = self.config["methods"]["markers"]
             con_method = self.config["methods"]["conversion"]
             ide_method = self.config["methods"]["identification"]
+            ssclu_method = self.config["methods"]["ss_cluster"]
         except:
             raise ValueError("Pipe: Config file malformed or method missing.")
 
@@ -53,12 +54,21 @@ class Pipeline:
         self.ide = wrap("identification", ide_method)(
             self.verbose, **self.config["identification"]
         )
+        self.ssclu = wrap("ss_cluster", ssclu_method)(
+            self.verbose, **self.config["ss_cluster"]
+        )
 
     def run(self):
+        self.cluster()
+        self.de()
+
+    def cluster(self):
         # 1. Create embedding
         self.x_emb = self.dim.get(self.x)
         # 2. Cluster
         self.labels = self.clu.get(self.x_emb, self.eval)
+
+    def de(self):
         self.unq_labels = np.unique(self.labels)
         # 3. Differential expression
         self.markers = self.mark.get(self.x, self.labels, self.unq_labels)
@@ -78,7 +88,7 @@ class Pipeline:
         """
         df = pd.DataFrame()
         if not hasattr(self, 'x_emb_2d'):
-            self.x_emb_2d = self.vis.get(self.x_emb)
+            self.x_emb_2d = self.vis.get(self.x_emb, self.labels)
 
         df['x'] = self.x_emb_2d[:, 0]
         df['y'] = self.x_emb_2d[:, 1]
@@ -88,6 +98,7 @@ class Pipeline:
             fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
             path = "states/plot-info-" + fn + ".csv"
         df.to_csv(path)
+        return path
 
     def save_marker_info(self, path=None):
         """
@@ -102,6 +113,7 @@ class Pipeline:
             fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
             path = "csv/marker-info-" + fn + ".csv"
         df.to_csv(path)
+        return path
 
     def save(self, path=None):
         """
@@ -113,3 +125,29 @@ class Pipeline:
         with open(path, "wb") as f:
             pickle.dump(self, f)
         return path
+
+    def update(self, new_labels=None, ml=None, cl=None, code=100):
+        """
+        Given new_labels, update current labels according to code;
+        Codes:
+            100: Hard cluster. Simply update to given labels.
+            200: Hard constrained cluster. Run full constrained clustering
+                using ml (must-link) and cl (cannot-link) lists.
+            300: Soft constrained cluster. Run constrained clustering
+                using ml and cl but save most of the current structure.
+            400: New cluster. Rerun clustering with one extra cluster.
+        """
+        if code == 100:
+            self.labels = new_labels
+        elif code == 200:
+            n = self.unq_labels = np.unique(self.labels)
+            self.labels = self.ssclu.get(self.x_emb, n, ml, cl)
+        elif code == 300:
+            self.labels = self.ssclu.get(self.x_emb, ml, cl)
+        elif code == 400:
+            self.clu.set_n_clusters(self.clu._n_clusters + 1)
+            self.labels = self.clu.get(self.x_emb, self.eval)
+        else:
+            raise ValueError("Invalid code.")
+
+        self.de()

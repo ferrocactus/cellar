@@ -21,6 +21,10 @@ from ._converter import (
 from ._identificator import (
     Ide_HyperGeom
 )
+from ._ss_cluster import (
+    SSClu_COPKMeans,
+    SSClu_PCKMeans
+)
 
 translation_dict = {
     "cluster": {
@@ -45,5 +49,9 @@ translation_dict = {
     },
     "identification": {
         "HyperGeom": Ide_HyperGeom
+    },
+    "ss_cluster": {
+        "COPKMeans": SSClu_COPKMeans,
+        "PCKMeans": SSClu_PCKMeans
     }
 }

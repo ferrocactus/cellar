@@ -1,34 +1,50 @@
-# Constrained clustering
-#from copkmeans.cop_kmeans import cop_kmeans
+from ._unit import Unit
+
+from abc import abstractmethod
+
 #from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
+#from copkmeans.cop_kmeans import cop_kmeans
 
-def new_hard_cluster(self, labels, indices=None, all_points=False):
+class SSClu(Unit):
     """
-    Update the label of points whose indices are given in indices,
-    or it all_points flag is set, then assume all labels are given.
+    Base class for Semi-Supervised Clustering.
     """
-    if all_points == False:
-        assert(indices is not None)
-        self.labels[indices] = labels
-    else:
-        assert(len(labels) == len(labels))
-        self.labels = labels
+    def __init__(self, verbose=False, **kwargs):
+        """
+        Args:
+            verbose (bool): Printing flag.
+            **kwargs: Argument dict.
+        """
+        super().__init__(verbose, **kwargs)
+        self.name = 'Dim'
 
-def new_soft_cluster(self, point_index, k=None):
-    """
-    Given a single point, find the cluster where that point belongs
-    determined by using elbow heuristics and update the labels.
-    """
-    distances = np.linalg.norm(self.x_2d_emb[point_index] - self.x_2d_emb, axis=1)
-    sorted_indices = np.argsort(distances)
-    plt.plot(range(0, len(distances)), distances[sorted_indices])
-    knee = KneeLocator(range(0, len(distances)), distances[sorted_indices],
-                        curve='convex',
-                        direction='increasing',
-                        S=2)
-    print('knee at', knee.knee)
-    if k is not None:
-        self.labels[sorted_indices[:k]] = self.n_clusters
-        self.n_clusters += 1
-        self.find_markers()
-        self.convert_markers()
+    @abstractmethod
+    def get(self, x):
+        """
+        Returns the labels of x.
+
+        Args:
+            x (np.ndarray): Data in matrix (n x d) form.
+        Returns:
+            (np.ndarray): The labels of x.
+        """
+        pass
+
+
+class SSClu_COPKMeans(SSClu):
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+
+    def get(self, x, n, ml, cl):
+        clusters, _ = cop_kmeans(x, k=n, ml=ml, cl=cl)
+        return clusters
+
+
+class SSClu_PCKMeans(SSClu):
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+
+    def get(self, x, n, ml, cl):
+        pckmeans = PCKMeans(n_clusters=n)
+        pckmeans.fit(x, ml=ml, cl=cl)
+        return pckmeans.labels_
