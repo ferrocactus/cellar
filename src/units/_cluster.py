@@ -54,8 +54,8 @@ class Cluster(Unit):
             self._labels = self.fit_predict(self._obj(**self.kwargs), x)
             self._n_clusters = self.kwargs['n_clusters']
             self.score_list = np.array([eval_obj.get(x, self._labels)])
-        elif isinstance(self.kwargs['n_clusters'], tuple): # range of cluster nums
-            temp_kwargs = self.kwargs.copy() # to avoid editting the original dict
+        elif isinstance(self.kwargs['n_clusters'], tuple): # range of clusters
+            temp_kwargs = self.kwargs.copy() # avoid editting the original dict
             k_list = range(*temp_kwargs['n_clusters'])
 
             if eval_obj is None: # Need evaluation method if using range
@@ -71,8 +71,10 @@ class Cluster(Unit):
                 score = eval_obj.get(x, labels)
                 self.score_list[i] = score
                 if best_score < score: # Update if best score found
-                    best_score, self._labels, self._n_clusters = score, labels, k
-                self.vprint("Finished clustering for k={0}.".format(k))
+                    best_score, self._labels, self._n_clusters = score,labels,k
+                self.vprint("Finished clustering for k={0}. Score={1:.2f}.".format(
+                    k, score
+                ))
 
             self.vprint("Best score achieved for k={0} at {1:.2f}.".format(
                 self._n_clusters, best_score

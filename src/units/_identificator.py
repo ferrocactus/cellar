@@ -84,9 +84,7 @@ class Ide_HyperGeom(Ide):
             x[key]['lvl1_sv'] = sv
             x[key]['lvl1_intersec'] = intersec
             x[key]['lvl1_total'] = total
-            self.vprint(
-                "Finished finding lvl1 type for cluster={0}.".format(key)
-            )
+        self.vprint("Finished finding lvl1 types.")
 
         # Level 2 in the hierarchy identification loop
         for key in x:
@@ -98,9 +96,7 @@ class Ide_HyperGeom(Ide):
             x[key]['lvl2_sv'] = sv
             x[key]['lvl2_intersec'] = intersec
             x[key]['lvl2_total'] = total
-            self.vprint(
-                "Finished finding lvl2 type for cluster={0}.".format(key)
-            )
+        self.vprint("Finished finding lvl2 types.")
 
         return x
 

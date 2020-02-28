@@ -50,7 +50,7 @@ class Plotter:
         fig.set_size_inches(5*(cumulative + 1), 5)
         plt.show()
 
-    def plot_clu(self):
+    def plot_clu(self, use_markers=True):
         """
         Plots the clusters in 2D for a single k.
         """
@@ -59,7 +59,24 @@ class Plotter:
         if x.shape[1] != 2:
             raise ValueError('Incorrect number of dimensions.')
 
-        labels = "sdf"
+        labels = []
+        if use_markers == True:
+            for label in self.pipe.markers:
+                lvl1_type = self.pipe.markers[label]['lvl1_type']
+                lvl1_sv = self.pipe.markers[label]['lvl1_sv']
+                lvl1_intersec_n =len(self.pipe.markers[label]['lvl1_intersec'])
+                lvl1_total = self.pipe.markers[label]['lvl1_total']
+                lvl2_type = self.pipe.markers[label]['lvl2_type']
+                lvl2_sv = self.pipe.markers[label]['lvl2_sv']
+                lvl2_total = self.pipe.markers[label]['lvl2_total']
+                lvl2_intersec_n =len(self.pipe.markers[label]['lvl2_intersec'])
+
+                labels.append("Lvl1: {0}, sv={1:.2f}, IoU={2}/{3}".format(
+                        lvl1_type, lvl1_sv, lvl1_intersec_n, lvl1_total
+                    ) + "\nLvl2: {0}, sv={1:.2f}, IoU={2}/{3}".format(
+                        lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
+                    )
+                )
 
         unq = len(np.unique(hue))
         pal = COLORS[:unq]
