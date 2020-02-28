@@ -5,7 +5,7 @@ import seaborn as sns
 import numpy as np
 
 COLORS = [
-    '#cc5151', '#7f3333', '#51cccc', '#337f7f', '#8ecc51', '#597f33', '#8e51cc',
+    '#cc5151', '#51cccc', '#337f7f', '#8ecc51', '#7f3333', '#597f33', '#8e51cc',
     '#59337f', '#ccad51', '#7f6c33', '#51cc70', '#337f46', '#5170cc', '#33467f',
     '#cc51ad', '#7f336c', '#cc7f51', '#7f4f33', '#bccc51', '#757f33', '#60cc51',
     '#3c7f33', '#51cc9e', '#337f62', '#519ecc', '#33627f', '#6051cc', '#3c337f'
@@ -31,7 +31,7 @@ class Plotter:
         fig, ax = plt.subplots(1, cumulative+1, squeeze=False)
 
         y = self.pipe.dim.ev_pca.explained_variance_ratio_
-        x = list(range(1, y+1))
+        x = list(range(1, len(y)+1))
 
         ax[0][0].plot(x, y*100)
         ax[0][0].set_xlabel("Number of components")
@@ -124,7 +124,7 @@ class Plotter:
 
             ax[i // cols][i % cols].scatter(emb[:, 0], emb[:, 1], s=.5, c=labels)
             ax[i // cols][i %cols].set_title('k={0}, score={1:.2f}'.format(
-                                                kk, clu.score_list))
+                                                kk, clu.score_list[0]))
             ax[i // cols][i %cols].set_xticks([])
             ax[i // cols][i %cols].set_yticks([])
 
@@ -161,4 +161,44 @@ class Plotter:
         ax.set_ylabel('Score')
         sns.despine()
         fig.set_size_inches(10, 5)
+        plt.show()
+
+    def plot_mark(self, convention="names"):
+        """
+        Plots marker information.
+        """
+        n_clusters = len(self.pipe.unq_labels)
+
+        fig, ax = plt.subplots(n_clusters, 2)
+
+        for i, label in enumerate(self.pipe.unq_labels):
+            pvals = self.pipe.markers[label]['pvals']
+            diffs = self.pipe.markers[label]['diffs']
+            names = self.pipe.markers[label]['names']
+
+            ax[i][0].hist(pvals, color='b', alpha=.4, label="pvals")
+            ax[i][0].set_xlabel("p-values")
+            ax[i][0].set_ylabel("gene count")
+            ax[i][0].legend(loc=1)
+            ax[i][0].spines['bottom'].set_color('blue')
+
+            ax2 = ax[i][0].twiny()
+            ax2.hist(diffs, color='r', alpha=.4, label="diffs")
+            ax2.set_xlabel("absolute difference")
+            ax2.xaxis.tick_top()
+            ax2.xaxis.set_label_position('top')
+            ax2.legend(loc=5)
+            ax2.spines['top'].set_color('red')
+
+            k = 10
+            x = np.arange(len(pvals[:k]))
+            ax[i][1].scatter(x, diffs[:k], c=np.arange(len(pvals[:k])))
+            ax[i][1].set_xticklabels(np.round(pvals[:k], 3))
+            ax[i][1].set_title(f"Cluster: {label}")
+            ax[i][1].set_xlabel("p-value")
+            ax[i][1].set_ylabel("mean difference")
+            for j, txt in enumerate(names[:k]):
+                ax[i][1].text(x[j], diffs[j]+0.02, names[j], fontsize=10, rotation=90)
+
+        fig.set_size_inches(10, n_clusters * 6)
         plt.show()

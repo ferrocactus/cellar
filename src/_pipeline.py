@@ -1,19 +1,9 @@
-import numpy as np
-import pandas as pd
-from matplotlib import pyplot as plt
-import seaborn as sns
-import json
-import time
-import tqdm
-
 from ._wrapper import wrap
 
-# Differential Expression
-from scipy import stats
+import numpy as np
+
 # Utils
-from .utils.utils_experiment import (
-    read_config
-)
+from .utils.utils_experiment import read_config
 from .utils.utils_read import parse_config
 # Constrained clustering
 #from copkmeans.cop_kmeans import cop_kmeans
@@ -110,24 +100,3 @@ class Pipeline:
             self.n_clusters += 1
             self.find_markers()
             self.convert_markers()
-
-    # def plot(self, what):
-    #     elif what == "marker_hist":
-    #         plot_marker_hist(self.n_clusters, self.pvals, self.mds)
-    #     elif what == "top_markers":
-    #         plot_top_markers(self.marker_ids[:10], self.marker_pvals[:10], self.marker_mds[:10])
-    #     elif what == "2d":
-    #         emb_2d = self.vis_obj.get(self.x_emb, self.labels)
-    #         labels = None
-    #         if hasattr(self, 'pop_names'):
-    #             labels = ["{0} ({1} common genes; sv={2:.2f})\n{3} ({4} common genes; sv={5:.2f})".format(
-    #                                                     x,
-    #                                                     len(self.intersec[i]),
-    #                                                     self.svs[i],
-    #                                                     self.sub_pop_names[i],
-    #                                                     len(self.sub_intersec[i]),
-    #                                                     self.sub_svs[i])
-    #                             for i, x in enumerate(self.pop_names)]
-    #         plot_2d(emb_2d, self.labels, labels=labels)
-    #     else:
-    #         raise ValueError()
