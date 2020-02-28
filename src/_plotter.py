@@ -108,9 +108,10 @@ class Plotter:
             return
 
         # Get the embedding using vis
-        emb = self.pipe.vis.get(self.pipe.x_emb)
-        if emb.shape[1] != 2:
-            raise ValueError("Incorrect number of dimensions.")
+        if not hasattr(self.pipe, 'x_emb_2d'):
+            emb = self.pipe.vis.get(self.pipe.x_emb)
+        else:
+            emb = self.pipe.x_emb_2d
 
         ks = list(range(*k))
         rows = (len(ks) + cols - 1) // cols

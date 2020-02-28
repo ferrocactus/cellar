@@ -2,6 +2,7 @@ from ._wrapper import wrap
 from .utils.utils_read import parse_config
 
 import numpy as np
+import pandas as pd
 import pickle
 import datetime
 
@@ -17,6 +18,7 @@ class Pipeline:
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
         self.create_objects()
+        self.updated = False
 
     def create_objects(self, methods=None):
         try:
@@ -70,10 +72,44 @@ class Pipeline:
         # 4. Perform identification
         self.markers = self.ide.get(self.markers)
 
-    def save(self, path=None):
+    def save_plot_info(self, path=None):
+        """
+        Saves x, y coordinates and label for every point.
+        """
+        df = pd.DataFrame()
+        if not hasattr(self, 'x_emb_2d'):
+            self.x_emb_2d = self.vis.get(self.x_emb)
+
+        df['x'] = self.x_emb_2d[:, 0]
+        df['y'] = self.x_emb_2d[:, 1]
+        df['label'] = self.labels
+
         if path is None:
             fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
-            path = "states/" + fn + ".pkl"
+            path = "states/plot-info-" + fn + ".csv"
+        df.to_csv(path)
+
+    def save_marker_info(self, path=None):
+        """
+        Saves all the information obtained (indices, p-values, differences
+        significant gene names, lvl1/2 cell type, lvl1/2 survival values,
+        lvl1/2 common gene names, lvl1/2 total gene names for type)
+        for every label.
+        """
+        df = pd.DataFrame.from_dict(self.markers, orient='index')
+
+        if path is None:
+            fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
+            path = "states/marker-info-" + fn + ".csv"
+        df.to_csv(path)
+
+    def save(self, path=None):
+        """
+        Saves current object state into a pickle file.
+        """
+        if path is None:
+            fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
+            path = "states/pipe-" + fn + ".pkl"
         with open(path, "wb") as f:
             pickle.dump(self, f)
         return path
