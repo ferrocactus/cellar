@@ -119,7 +119,7 @@ class Ide_HyperGeom(Ide):
             d = {}
             for path in self.path:
                 with open(path, "r") as f:
-                    d += json.load(f)
+                    d = {**d, **json.load(f)}
             return d
 
     def find_population(self, x, pops):
