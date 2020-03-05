@@ -1,5 +1,6 @@
 from ._wrapper import wrap
 from .utils.utils_read import parse_config
+from .units._unit import Unit
 
 import numpy as np
 import pandas as pd
@@ -7,9 +8,10 @@ import pickle
 import datetime
 
 
-class Pipeline:
+class Pipeline(Unit):
     def __init__(self, x, config, verbose=False,
                 row_ids=None, col_ids=None):
+        super().__init__(verbose)
         assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
         assert isinstance(config, str)
         self.x = x
@@ -19,6 +21,7 @@ class Pipeline:
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
         self.create_objects()
         self.updated = False
+        self.name = 'Pipe'
 
     def create_objects(self, methods=None):
         try:
@@ -169,3 +172,6 @@ class Pipeline:
             raise ValueError("Invalid code.")
 
         self.de()
+
+    def get(self):
+        return self.x_emb_2d, self.labels, self.markers

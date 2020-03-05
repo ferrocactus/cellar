@@ -13,7 +13,7 @@ class Cluster(Unit):
     a self._obj object with a fit_predict member function.
     """
     @abstractmethod
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='Clu', **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
@@ -23,8 +23,7 @@ class Cluster(Unit):
         """
         if 'n_clusters' not in kwargs:
             raise ValueError("n_clusters not provided.")
-        super().__init__(verbose, **kwargs)
-        self.name = 'Clu'
+        super().__init__(verbose, name, **kwargs)
         self._labels = None
         self._n_clusters = kwargs.get('n_clusters', (2, 11, 2))
 
@@ -103,20 +102,20 @@ class Cluster(Unit):
 
 
 class Clu_KMedoids(Cluster):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='KMedoids', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         self._obj = KMedoids
 
 
 class Clu_KMeans(Cluster):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='KMeans', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         self._obj = KMeans
 
 
 class Clu_SpectralClustering(Cluster):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='Spectral', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         if affinity not in self.kwargs: # For consistency.
             self.kwargs['affinity'] = 'nearest_neighbors'
         self._obj = SpectralClustering

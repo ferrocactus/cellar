@@ -26,14 +26,13 @@ class Dim(Unit):
     """
     Base class for Dimensionality Reduction methods.
     """
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='Dim', **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, **kwargs)
-        self.name = 'Dim'
+        super().__init__(verbose, name, **kwargs)
 
     @abstractmethod
     def get(self, x):
@@ -49,8 +48,8 @@ class Dim(Unit):
 
 
 class Dim_PCA(Dim):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='PCA', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         if 'n_components' not in kwargs:
             raise ValueError("n_components not provided.")
 
@@ -81,8 +80,8 @@ class Dim_PCA(Dim):
 
 
 class Dim_UMAP(Dim):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='UMAP', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         if 'n_components' not in kwargs:
             raise ValueError("n_components not provided.")
 
@@ -92,8 +91,8 @@ class Dim_UMAP(Dim):
 
 
 class Dim_TSNE(Dim):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='TSNE', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         if 'n_components' not in kwargs:
             raise ValueError("n_components not provided.")
 
@@ -105,8 +104,8 @@ class Dim_AE(Dim):
     """
     Use autoencoder to reduce dimensionality.
     """
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='AE', **kwargs):
+        super().__init__(verbose, name, **kwargs)
         self.epochs = kwargs.get('epochs', EPOCHS)
         self.batch = kwargs.get('batch', BATCH)
         self.n_components = kwargs.get('n_components', N_COMPONENTS_AE)

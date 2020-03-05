@@ -13,14 +13,13 @@ class Con(Unit):
     """
     Base class for converting marker names.
     """
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='Con', **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, **kwargs)
-        self.name = 'Con'
+        super().__init__(verbose, name, **kwargs)
         self.convention = kwargs.get('convention', CONVENTION)
         self.path = kwargs.get('path', PATH)
 

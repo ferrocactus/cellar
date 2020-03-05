@@ -9,15 +9,14 @@ class Eval(Unit):
     """
     Base class for Evaluation methods.
     """
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='Eval', **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, **kwargs)
+        super().__init__(verbose, name, **kwargs)
         self._score = None
-        self.name = 'Eval'
 
     @abstractmethod
     def get(self, x, labels):
@@ -32,8 +31,8 @@ class Eval(Unit):
 
 
 class Eval_SilhouetteScore(Eval):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='Silhouette', **kwargs):
+        super().__init__(verbose, name, **kwargs)
 
     def get(self, x, labels):
         self._score = silhouette_score(x, labels, **self.kwargs)
@@ -42,8 +41,8 @@ class Eval_SilhouetteScore(Eval):
 
 
 class Eval_DaviesBouldinScore(Eval):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='DaviesBouldin', **kwargs):
+        super().__init__(verbose, name, **kwargs)
 
     def get(self, x, labels):
         self._score = davies_bouldin_score(x, labels, **self.kwargs)

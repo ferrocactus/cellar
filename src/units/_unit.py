@@ -2,10 +2,10 @@ from abc import ABC, abstractmethod
 
 
 class Unit(ABC):
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='NoName', **kwargs):
         self._verbose = verbose
+        self.name = name
         self.kwargs = kwargs
-        self.name = 'NoName'
 
     @abstractmethod
     def get(self):

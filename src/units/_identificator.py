@@ -15,14 +15,13 @@ class Ide(Unit):
     """
     Base class for gene identification methods.
     """
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='Ide', **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, **kwargs)
-        self.name = 'Ide'
+        super().__init__(verbose, name, **kwargs)
         self.path = kwargs.get('path', PATH)
         self.tissue = kwargs.get('tissue', TISSUE)
 
@@ -52,8 +51,8 @@ class Ide_HyperGeom(Ide):
     It is assumed that the dictionary that is passed has two levels of
     hierarchy of types. First determine the lvl1 type, then the lvl2 subtype.
     """
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+    def __init__(self, verbose=False, name='HyperGeom', **kwargs):
+        super().__init__(verbose, name, **kwargs)
 
     def get(self, x):
         """

@@ -14,14 +14,13 @@ class Mark(Unit):
     """
     Base class for Marker Finding methods.
     """
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='Mark', **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, **kwargs)
-        self.name = 'Mark'
+        super().__init__(verbose, name, **kwargs)
 
     @abstractmethod
     def get(self, x, labels):
@@ -61,7 +60,7 @@ class Mark_TTest(Mark):
     the p-value being less than alpha (corrected for multiple testing) we
     choose the top_k genes which exhibit the highest difference of the means.
     """
-    def __init__(self, verbose=False, **kwargs):
+    def __init__(self, verbose=False, name='TTest', **kwargs):
         """
         Args:
             alpha (float): Alpha value to use for hypothesis testing.
@@ -69,7 +68,7 @@ class Mark_TTest(Mark):
             markers_n (int): Number of significant markers to return
                             (returned array could have less).
         """
-        super().__init__(verbose, **kwargs)
+        super().__init__(verbose, name, **kwargs)
         self.alpha = kwargs.get('alpha', ALPHA)
         self.correction = kwargs.get('correction', CORRECTION)
         self.markers_n = kwargs.get('markers_n', MARKERS_N)
