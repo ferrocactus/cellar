@@ -71,12 +71,17 @@ class Plotter:
                 lvl2_total = self.pipe.markers[label]['lvl2_total']
                 lvl2_intersec_n =len(self.pipe.markers[label]['lvl2_intersec'])
 
-                labels.append("Lvl1: {0}, sv={1:.2f}, IoU={2}/{3}".format(
-                        lvl1_type, lvl1_sv, lvl1_intersec_n, lvl1_total
-                    ) + "\nLvl2: {0}, sv={1:.2f}, IoU={2}/{3}".format(
-                        lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
+                if lvl1_type == "User Defined":
+                    labels.append("{0}: {1}, sv={2:.2f}, IoU={3}/{4}".format(
+                        self.pipe.ide.tissue, lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
+                    ))
+                else:
+                    labels.append("Lvl1: {0}, sv={1:.2f}, IoU={2}/{3}".format(
+                            lvl1_type, lvl1_sv, lvl1_intersec_n, lvl1_total
+                        ) + "\nLvl2: {0}, sv={1:.2f}, IoU={2}/{3}".format(
+                            lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
+                        )
                     )
-                )
 
         unq = len(np.unique(hue))
         pal = COLORS[:unq]

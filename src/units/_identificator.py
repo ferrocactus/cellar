@@ -8,6 +8,7 @@ import numpy as np
 from scipy.stats import hypergeom
 
 PATH = "markers/cell_type_marker.json"
+TISSUE = 'all'
 
 
 class Ide(Unit):
@@ -23,6 +24,7 @@ class Ide(Unit):
         super().__init__(verbose, **kwargs)
         self.name = 'Ide'
         self.path = kwargs.get('path', PATH)
+        self.tissue = kwargs.get('tissue', TISSUE)
 
     @abstractmethod
     def get(self, x):
@@ -63,7 +65,7 @@ class Ide_HyperGeom(Ide):
                     total (int): total number of names in dict[type]
         """
         x = x.copy()
-        lvl2 = self.get_dict() # Assumed to have two nested levels
+        lvl2 = self.get_dict()
 
         # Construct lvl1 dict by merging all lvl2 dicts
         lvl1 = {}
@@ -72,34 +74,51 @@ class Ide_HyperGeom(Ide):
                 np.array(reduce(lambda a, b: a+b, lvl2[pop].values()))
             )
 
-        # Level 1 in the hierarchy identification loop
+        if self.tissue == 'all':
+            self.process_level(x, lvl1, level=1)
+            self.process_level(x, lvl2, level=2)
+        else:
+            self.process_tissue(x, tissue=self.tissue, level_dict=lvl2)
+
+        return x
+
+    def process_level(self, x, level_dict, level):
+        for key in x:
+            if level > 1 and x[key][f'lvl{level-1}_type'] == 'None':
+                tp, sv, intersec, total = "None", 1, np.array([]), 0
+            else:
+                if level > 1:
+                    tp, sv, intersec, total = self.find_population(
+                        x[key]['outp_names'],
+                        level_dict[x[key][f'lvl{level-1}_type']]
+                    )
+                else:
+                    tp, sv, intersec, total = self.find_population(
+                        x[key]['outp_names'],
+                        level_dict
+                    )
+            x[key][f'lvl{level}_type'] = tp
+            x[key][f'lvl{level}_sv'] = sv
+            x[key][f'lvl{level}_intersec'] = intersec
+            x[key][f'lvl{level}_total'] = total
+        self.vprint(f"Finished finding lvl{level} types.")
+
+    def process_tissue(self, x, tissue, level_dict):
         for key in x:
             tp, sv, intersec, total = self.find_population(
                 x[key]['outp_names'],
-                lvl1
+                level_dict[tissue]
             )
-            x[key]['lvl1_type'] = tp
-            x[key]['lvl1_sv'] = sv
-            x[key]['lvl1_intersec'] = intersec
-            x[key]['lvl1_total'] = total
-        self.vprint("Finished finding lvl1 types.")
+            x[key]['lvl1_type'] = "User Defined"
+            x[key]['lvl1_sv'] = 1
+            x[key]['lvl1_intersec'] = np.array([])
+            x[key]['lvl1_total'] = 0
 
-        # Level 2 in the hierarchy identification loop
-        for key in x:
-            if x[key]['lvl1_type'] == 'None':
-                tp, sv, intersec, total = "None", 1, np.array([]), 0
-            else:
-                tp, sv, intersec, total = self.find_population(
-                    x[key]['outp_names'],
-                    lvl2[x[key]['lvl1_type']]
-                )
             x[key]['lvl2_type'] = tp
             x[key]['lvl2_sv'] = sv
             x[key]['lvl2_intersec'] = intersec
             x[key]['lvl2_total'] = total
         self.vprint("Finished finding lvl2 types.")
-
-        return x
 
     def get_dict(self):
         """
