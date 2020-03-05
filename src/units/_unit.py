@@ -3,8 +3,8 @@ from abc import ABC, abstractmethod
 
 class Unit(ABC):
     def __init__(self, verbose=False, name='NoName', **kwargs):
-        self._verbose = verbose
-        self.name = name
+        self.__verbose = verbose
+        self.__name = name
         self.kwargs = kwargs
 
     @abstractmethod
@@ -12,5 +12,5 @@ class Unit(ABC):
         pass
 
     def vprint(self, *args):
-        if self._verbose == True:
-            print(self.name + ":", *args)
+        if self.__verbose == True:
+            print(self.__name + ":", *args)

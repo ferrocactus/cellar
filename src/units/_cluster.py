@@ -6,6 +6,8 @@ import numpy as np
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 
+N_CLUSTERS = (2, 11, 2)
+
 
 class Cluster(Unit):
     """
@@ -25,7 +27,7 @@ class Cluster(Unit):
             raise ValueError("n_clusters not provided.")
         super().__init__(verbose, name, **kwargs)
         self._labels = None
-        self._n_clusters = kwargs.get('n_clusters', (2, 11, 2))
+        self._n_clusters = kwargs.get('n_clusters', N_CLUSTERS)
 
     def set_n_clusters(self, n_clusters):
         self._n_clusters = n_clusters

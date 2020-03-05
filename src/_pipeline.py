@@ -166,6 +166,7 @@ class Pipeline(Unit):
             # of points that should belong together
             self.x_emb, self.labels = self.ssclu.get(self.x, new_labels, self.clu, self.eval)
         elif code == 300:
+            pass
             self.labels = self.ssclu.get(self.x_emb, ml, cl)
         elif code == 400:
             self.clu.set_n_clusters(self.clu._n_clusters + 1)

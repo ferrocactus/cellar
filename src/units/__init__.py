@@ -1,32 +1,10 @@
-from ._cluster import (
-    Clu_KMedoids,
-    Clu_KMeans,
-    Clu_SpectralClustering
-)
-from ._dim_reduction import (
-    Dim_PCA,
-    Dim_UMAP,
-    Dim_TSNE,
-    Dim_AE
-)
-from ._evaluation import (
-    Eval_SilhouetteScore,
-    Eval_DaviesBouldinScore
-)
-from ._markers import (
-    Mark_TTest
-)
-from ._converter import (
-    Con
-)
-from ._identificator import (
-    Ide_HyperGeom
-)
-from ._ss_cluster import (
-    SSClu_UMAP,
-    SSClu_COPKMeans,
-    SSClu_PCKMeans
-)
+from ._cluster import *
+from ._dim_reduction import *
+from ._evaluation import *
+from ._markers import *
+from ._converter import *
+from ._identificator import *
+from ._ss_cluster import *
 
 translation_dict = {
     "cluster": {
