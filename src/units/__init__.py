@@ -23,6 +23,7 @@ from ._identificator import (
     Ide_HyperGeom
 )
 from ._ss_cluster import (
+    SSClu_UMAP,
     SSClu_COPKMeans,
     SSClu_PCKMeans
 )
@@ -53,6 +54,7 @@ translation_dict = {
         "HyperGeom": Ide_HyperGeom
     },
     "ss_cluster": {
+        "UMAP": SSClu_UMAP,
         "COPKMeans": SSClu_COPKMeans,
         "PCKMeans": SSClu_PCKMeans
     }

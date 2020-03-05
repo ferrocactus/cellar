@@ -147,7 +147,7 @@ class Pipeline(Unit):
             pickle.dump(self, f)
         return path
 
-    def update(self, new_labels=None, ml=None, cl=None, code=100):
+    def update(self, new_labels=None, code=100):
         """
         Given new_labels, update current labels according to code;
         Codes:
@@ -159,10 +159,12 @@ class Pipeline(Unit):
             400: New cluster. Rerun clustering with one extra cluster.
         """
         if code == 100:
+            # labels assumed to be 1D and same dimension as original labels
             self.labels = new_labels
         elif code == 200:
-            n = self.unq_labels = np.unique(self.labels)
-            self.labels = self.ssclu.get(self.x_emb, n, ml, cl)
+            # labels assumed to be 2D with each array representing indices
+            # of points that should belong together
+            self.x_emb, self.labels = self.ssclu.get(self.x, new_labels, self.clu, self.eval)
         elif code == 300:
             self.labels = self.ssclu.get(self.x_emb, ml, cl)
         elif code == 400:
@@ -171,7 +173,9 @@ class Pipeline(Unit):
         else:
             raise ValueError("Invalid code.")
 
-        self.de()
+        self.get_markers()
+        self.convert()
+        self.identify()
 
     def get(self):
         return self.x_emb_2d, self.labels, self.markers
