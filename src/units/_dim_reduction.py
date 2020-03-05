@@ -44,7 +44,7 @@ class Dim_PCA(Dim):
     def get(self, x):
         if self.kwargs['n_components'] == 'knee':
             temp_kwargs = self.kwargs.copy()
-            temp_kwargs['n_components'] = min(PCA_EVR_MAX_N, x.shape[1])
+            temp_kwargs['n_components'] = min(PCA_EVR_MAX_N, min(x.shape))
             self.ev_pca = PCA(**temp_kwargs)
             self.ev_pca.fit(x)
             # Construct axis for KneeLocator

@@ -62,7 +62,7 @@ class Cluster(Unit):
                 self._n_clusters, self.score_list[0])
             )
         elif isinstance(self._n_clusters, tuple): # range of clusters
-            k_list = range(*self._n_clusters)
+            k_list = list(range(*self._n_clusters))
 
             if eval_obj is None: # Need evaluation method if using range
                 raise ValueError("Evaluation object not provided.")
@@ -77,13 +77,13 @@ class Cluster(Unit):
                 score = eval_obj.get(x, labels)
                 self.score_list[i] = score
                 if best_score < score: # Update if best score found
-                    best_score, self._labels, self._n_clusters = score,labels,k
+                    best_score, self._labels, self.n_clusters = score,labels,k
                 self.vprint("Finished clustering for k={0}. Score={1:.2f}.".format(
                     k, score
                 ))
 
             self.vprint("Best score achieved for k={0} at {1:.2f}.".format(
-                self._n_clusters, best_score
+                self.n_clusters, best_score
             ))
         else:
             raise ValueError("Incorrect number of clusters used.")

@@ -58,20 +58,33 @@ class Pipeline:
             self.verbose, **self.config["ss_cluster"]
         )
 
-    def run(self):
+    def run(self, indices=None):
+        if indices is not None:
+            x = self.x[indices, :]
+        else:
+            x = None
+        self.emb(x=x)
         self.cluster()
-        self.de()
+        self.get_markers(x=x)
+        self.convert()
+        self.identify()
+
+    def emb(self, x=None):
+        self.x_emb = self.dim.get(self.x if x is None else x)
 
     def cluster(self):
-        # 1. Create embedding
-        self.x_emb = self.dim.get(self.x)
-        # 2. Cluster
         self.labels = self.clu.get(self.x_emb, self.eval)
 
-    def de(self):
+    def get_markers(self, x=None):
         self.unq_labels = np.unique(self.labels)
         # 3. Differential expression
-        self.markers = self.mark.get(self.x, self.labels, self.unq_labels)
+        self.markers = self.mark.get(
+            self.x if x is None else x,
+            self.labels,
+            self.unq_labels
+        )
+
+    def convert(self):
         for marker in self.markers:
             self.markers[marker]['inp_names'] = self.col_ids[
                 self.markers[marker]['indices']
@@ -79,7 +92,8 @@ class Pipeline:
             self.markers[marker]['outp_names'] = self.con.get(
                 self.markers[marker]['inp_names']
             )
-        # 4. Perform identification
+
+    def identify(self):
         self.markers = self.ide.get(self.markers)
 
     def save_plot_info(self, path=None):
