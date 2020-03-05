@@ -175,7 +175,7 @@ class Plotter:
         for i, label in enumerate(self.pipe.unq_labels):
             pvals = self.pipe.markers[label]['pvals']
             diffs = self.pipe.markers[label]['diffs']
-            names = self.pipe.markers[label]['names']
+            names = self.pipe.markers[label]['outp_names']
 
             ax[i][0].hist(pvals, color='b', alpha=.4, label="pvals")
             ax[i][0].set_xlabel("p-values")

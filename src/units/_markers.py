@@ -26,6 +26,9 @@ class Mark(Unit):
     @abstractmethod
     def get(self, x, labels):
         """
+        Args:
+            x (np.ndarray): 2D array
+            labels (np.ndarray): 2D array of labels
         Returns:
         dict: {
             'label_1': {

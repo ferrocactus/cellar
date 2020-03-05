@@ -73,11 +73,11 @@ class Pipeline:
         # 3. Differential expression
         self.markers = self.mark.get(self.x, self.labels, self.unq_labels)
         for marker in self.markers:
-            self.markers[marker]['ids'] = self.col_ids[
+            self.markers[marker]['inp_names'] = self.col_ids[
                 self.markers[marker]['indices']
             ]
-            self.markers[marker]['names'] = self.con.get(
-                self.markers[marker]['ids']
+            self.markers[marker]['outp_names'] = self.con.get(
+                self.markers[marker]['inp_names']
             )
         # 4. Perform identification
         self.markers = self.ide.get(self.markers)

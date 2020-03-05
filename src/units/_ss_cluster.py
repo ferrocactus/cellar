@@ -36,6 +36,7 @@ class SSClu_COPKMeans(SSClu):
         super().__init__(verbose, **kwargs)
 
     def get(self, x, n, ml, cl):
+        pass
         clusters, _ = cop_kmeans(x, k=n, ml=ml, cl=cl)
         return clusters
 
@@ -45,6 +46,7 @@ class SSClu_PCKMeans(SSClu):
         super().__init__(verbose, **kwargs)
 
     def get(self, x, n, ml, cl):
+        pass
         pckmeans = PCKMeans(n_clusters=n)
         pckmeans.fit(x, ml=ml, cl=cl)
         return pckmeans.labels_

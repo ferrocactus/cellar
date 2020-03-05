@@ -8,7 +8,6 @@ import numpy as np
 from scipy.stats import hypergeom
 
 PATH = "markers/cell_type_marker.json"
-CONVENTION = "names"
 
 
 class Ide(Unit):
@@ -24,7 +23,6 @@ class Ide(Unit):
         super().__init__(verbose, **kwargs)
         self.name = 'Ide'
         self.path = kwargs.get('path', PATH)
-        self.convention = kwargs.get('convention', CONVENTION)
 
     @abstractmethod
     def get(self, x):
@@ -34,7 +32,7 @@ class Ide(Unit):
         Args:
             x (dict): x = {
                 label_1: {
-                    convention: [name_1, ...],
+                    outp_names: [name_1, ...],
                     ...
                 },
                 ...
@@ -77,7 +75,7 @@ class Ide_HyperGeom(Ide):
         # Level 1 in the hierarchy identification loop
         for key in x:
             tp, sv, intersec, total = self.find_population(
-                x[key][self.convention],
+                x[key]['outp_names'],
                 lvl1
             )
             x[key]['lvl1_type'] = tp
@@ -92,7 +90,7 @@ class Ide_HyperGeom(Ide):
                 tp, sv, intersec, total = "None", 1, np.array([]), 0
             else:
                 tp, sv, intersec, total = self.find_population(
-                    x[key][self.convention],
+                    x[key]['outp_names'],
                     lvl2[x[key]['lvl1_type']]
                 )
             x[key]['lvl2_type'] = tp
