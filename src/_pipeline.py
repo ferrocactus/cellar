@@ -96,6 +96,10 @@ class Pipeline:
     def identify(self):
         self.markers = self.ide.get(self.markers)
 
+    def get_emb_2d(self):
+        self.x_emb_2d = self.vis.get(self.x_emb, self.labels)
+        return self.x_emb_2d
+
     def save_plot_info(self, path=None):
         """
         Saves x, y coordinates and label for every point.

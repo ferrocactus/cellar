@@ -6,7 +6,8 @@ from ._cluster import (
 from ._dim_reduction import (
     Dim_PCA,
     Dim_UMAP,
-    Dim_TSNE
+    Dim_TSNE,
+    Dim_AE
 )
 from ._evaluation import (
     Eval_SilhouetteScore,
@@ -35,7 +36,8 @@ translation_dict = {
     "dim_reduction": {
         "PCA": Dim_PCA,
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE
+        "TSNE": Dim_TSNE,
+        "Autoencoder": Dim_AE
     },
     "cluster_eval": {
         "SilhouetteScore": Eval_SilhouetteScore,

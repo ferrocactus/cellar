@@ -22,7 +22,7 @@ class Plotter:
         """
         self.pipe = pipe
 
-    def plot_dim(self, cumulative=True):
+    def plot_dim(self, cumulative=True, save_path=None):
         """
         Plots explained variance ratio per component.
         Args:
@@ -48,14 +48,16 @@ class Plotter:
 
         sns.despine()
         fig.set_size_inches(5*(cumulative + 1), 5)
+        if save_path is not None:
+            plt.savefig(save_path)
         plt.show()
 
-    def plot_clu(self, use_markers=True):
+    def plot_clu(self, use_markers=True, save_path=None):
         """
         Plots the clusters in 2D for a single k.
         """
         hue = self.pipe.labels
-        x = self.pipe.vis.get(self.pipe.x_emb, hue)
+        x = self.pipe.get_emb_2d()
         if x.shape[1] != 2:
             raise ValueError('Incorrect number of dimensions.')
 
@@ -96,9 +98,11 @@ class Plotter:
         sns.despine(left=True, bottom=True)
         plt.xticks([])
         plt.yticks([])
+        if save_path is not None:
+            plt.savefig(save_path)
         plt.show()
 
-    def plot_clu_all(self, cols=3):
+    def plot_clu_all(self, cols=3, save_path=None):
         """
         Plots the clusters in 2D for different k.
         Args:
@@ -144,9 +148,11 @@ class Plotter:
             ax[i // cols][i % cols].set_yticks([])
 
         fig.set_size_inches(5 * cols, 5 * rows)
+        if save_path is not None:
+            plt.savefig(save_path)
         plt.show()
 
-    def plot_eval(self):
+    def plot_eval(self, save_path=None):
         """
         Plots the scores of the clusters for different k. Branch if k is int.
         """
@@ -167,9 +173,11 @@ class Plotter:
         ax.set_ylabel('Score')
         sns.despine()
         fig.set_size_inches(10, 5)
+        if save_path is not None:
+            plt.savefig(save_path)
         plt.show()
 
-    def plot_mark(self, convention="names"):
+    def plot_mark(self, convention="names", save_path=None):
         """
         Plots marker information.
         """
@@ -207,4 +215,6 @@ class Plotter:
                 ax[i][1].text(x[j], diffs[j]+0.02, names[j], fontsize=10, rotation=90)
 
         fig.set_size_inches(10, n_clusters * 6)
+        if save_path is not None:
+            plt.savefig(save_path)
         plt.show()

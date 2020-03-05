@@ -1,12 +1,25 @@
 from ._unit import Unit
+from src.methods import Autoencoder
 
 from abc import abstractmethod
 from sklearn.decomposition import PCA
 from kneed import KneeLocator
 from umap import UMAP
 from sklearn.manifold import TSNE
+import torch
+import numpy as np
 
 PCA_EVR_MAX_N = 100
+N_COMPONENTS = 'knee'
+
+# Autoencoder
+N_COMPONENTS_AE = 15
+EPOCHS = 5
+BATCH = 64
+FACTOR = 0.1
+ACTIVATION = 'ReLU'
+LR = 1e-3
+WEIGHT_DECAY = 1e-5
 
 
 class Dim(Unit):
@@ -87,3 +100,53 @@ class Dim_TSNE(Dim):
     def get(self, x, y=None):
         self.tsne = TSNE(**self.kwargs)
         return self.tsne.fit_transform(x) # y is ignored
+
+class Dim_AE(Dim):
+    """
+    Use autoencoder to reduce dimensionality.
+    """
+    def __init__(self, verbose=False, **kwargs):
+        super().__init__(verbose, **kwargs)
+        self.epochs = kwargs.get('epochs', EPOCHS)
+        self.batch = kwargs.get('batch', BATCH)
+        self.n_components = kwargs.get('n_components', N_COMPONENTS_AE)
+        self.factor = kwargs.get('factor', FACTOR)
+        self.activation = kwargs.get('activation', ACTIVATION)
+        self.lr = kwargs.get('lr', LR)
+        self.weight_decay = kwargs.get('weight_decay', WEIGHT_DECAY)
+
+    def get(self, x):
+        model = Autoencoder(
+            x.shape[1],
+            factor=self.factor,
+            output_dim=self.n_components,
+            non_linearity=self.activation
+        )
+
+        loss_f = torch.nn.MSELoss()
+        optimizer = torch.optim.Adam(
+            model.parameters(),
+            lr=self.lr,
+            weight_decay=self.weight_decay
+        )
+
+        self.vprint("Training Autoencoder.")
+        for epoch in range(self.epochs):
+            indices = np.arange(0, x.shape[0])
+            np.random.shuffle(indices)
+            for b in range(0, x.shape[0] // self.batch):
+                data = x[indices[b * self.batch: (b + 1) * self.batch]]
+                #device = torch.device("cpu")
+                data = torch.tensor(data, device='cpu').float()
+                # ===================forward=====================
+                output = model(data)
+                loss = loss_f(output, data)
+                # ===================backward====================
+                optimizer.zero_grad()
+                loss.backward()
+                optimizer.step()
+            # ===================log========================
+            self.vprint(f'epoch [{epoch+1}/{self.epochs}], loss:{loss.item():.4f}')
+        return model.encoder(
+            torch.tensor(x, device='cpu').float()
+        ).detach().numpy()

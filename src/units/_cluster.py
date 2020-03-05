@@ -1,5 +1,5 @@
 from ._unit import Unit
-from src.methods._k_medoids import KMedoids
+from src.methods import KMedoids
 
 from abc import abstractmethod
 import numpy as np
