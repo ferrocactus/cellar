@@ -133,6 +133,7 @@ class Pipeline(Unit):
         if path is None:
             fn = datetime.datetime.now().strftime("%y%m%d-%H-%M-%S")
             path = "csv/marker-info-" + fn + ".csv"
+
         df.to_csv(path)
         return path
 
