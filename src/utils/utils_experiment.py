@@ -4,6 +4,7 @@ import numpy as np
 import json
 import re
 import itertools
+import anndata
 from functools import reduce
 
 def read_config(dataset):
@@ -27,11 +28,12 @@ def parse(x):
 def load_data(dataset):
     # return X, Y
     if dataset == 'spleen':
-        import anndata
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return ann.X, ann.var.index.to_numpy().astype('U')
-    if dataset == 'spellman':
-        import pandas as pd
+    elif dataset == 'brain':
+        rnaseqtpm = pd.read_csv('datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
+        return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy()
+    elif dataset == 'spellman':
         return pd.read_csv('datasets/Spellman.csv', index_col=0).to_numpy(), None
     else:
         raise FileNotFoundError('Dataset not supported.')

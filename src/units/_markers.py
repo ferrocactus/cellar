@@ -7,7 +7,7 @@ from statsmodels.stats.multitest import multipletests
 
 ALPHA = 0.05
 CORRECTION = 'hs'
-MARKERS_N = 100
+MARKERS_N = 0.05
 
 
 class Mark(Unit):
@@ -86,6 +86,9 @@ class Mark_TTest(Mark):
             self.vprint("Only one label found. Cannot run t-test.")
             return {}
 
+        m = int(self.markers_n*x.shape[1]) if self.markers_n < 1 else self.markers_n
+        self.vprint(f"Using {m} markers.")
+
         test_results = {}
 
         for i in unq_labels: # label to consider
@@ -115,7 +118,7 @@ class Mark_TTest(Mark):
             # difference of means of x_ij and x_not_ij
             rejected_hs = np.where(decision == True)[0]
             sorted_diff_indices = np.flip(np.argsort(diffs[rejected_hs]))
-            final_indices = rejected_hs[sorted_diff_indices][:self.markers_n]
+            final_indices = rejected_hs[sorted_diff_indices][:m]
 
             test_results[i] = {'indices': final_indices,
                                'pvals': pvals[final_indices],
