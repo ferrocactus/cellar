@@ -88,7 +88,8 @@ class Ide_HyperGeom(Ide):
             else:
                 if level > 1:
                     tp, sv, intersec, total = self.find_population(
-                        x[key]['outp_names'],
+                        #x[key]['outp_names'],
+                        x[key][f'lvl{level-1}_intersec'],
                         level_dict[x[key][f'lvl{level-1}_type']]
                     )
                 else:
@@ -162,7 +163,7 @@ class Ide_HyperGeom(Ide):
             n = len(pops[pop])
             k = len(np.intersect1d(x, pops[pop]))
             sv = hypergeom.sf(k-1, M=M, n=n, N=N) if k > 0 else 1
-            if sv < rsv:
+            if sv <= rsv or (rsv == 2 and k > 0):
                 rsv, rpop, rk = sv, pop, k
         if rk == 0: # in case of no intersection, return -1
             return "None", 1, np.array([]), 0
