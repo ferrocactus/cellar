@@ -87,13 +87,13 @@ class Ide_HyperGeom(Ide):
                 tp, sv, intersec, total = "None", 1, np.array([]), 0
             else:
                 if level > 1:
-                    tp, sv, intersec, total = self.find_population(
+                    tp, sv, intersec, total, all_pops = self.find_population(
                         #x[key]['outp_names'],
                         x[key][f'lvl{level-1}_intersec'],
                         level_dict[x[key][f'lvl{level-1}_type']]
                     )
                 else:
-                    tp, sv, intersec, total = self.find_population(
+                    tp, sv, intersec, total, all_pops = self.find_population(
                         x[key]['outp_names'],
                         level_dict
                     )
@@ -101,11 +101,12 @@ class Ide_HyperGeom(Ide):
             x[key][f'lvl{level}_sv'] = sv
             x[key][f'lvl{level}_intersec'] = intersec
             x[key][f'lvl{level}_total'] = total
+            x[key][f'lvl{level}_all'] = all_pops
         self.vprint(f"Finished finding lvl{level} types.")
 
     def process_tissue(self, x, tissue, level_dict):
         for key in x:
-            tp, sv, intersec, total = self.find_population(
+            tp, sv, intersec, total, all_pops = self.find_population(
                 x[key]['outp_names'],
                 level_dict[tissue]
             )
@@ -113,11 +114,13 @@ class Ide_HyperGeom(Ide):
             x[key]['lvl1_sv'] = 1
             x[key]['lvl1_intersec'] = np.array([])
             x[key]['lvl1_total'] = 0
+            x[key]['lvl1_all'] = {}
 
             x[key]['lvl2_type'] = tp
             x[key]['lvl2_sv'] = sv
             x[key]['lvl2_intersec'] = intersec
             x[key]['lvl2_total'] = total
+            x[key]['lvl2_all'] = all_pops
         self.vprint("Finished finding lvl2 types.")
 
     def get_dict(self):
@@ -157,15 +160,30 @@ class Ide_HyperGeom(Ide):
         M = sum([len(pops[pop]) for pop in pops])
         N = len(x)
 
+        survival_values = []
+        intersections = []
+        lens = []
+
         rsv, rpop, rk = 2, -1, 0
 
         for pop in pops:
             n = len(pops[pop])
-            k = len(np.intersect1d(x, pops[pop]))
+            intersec = np.intersect1d(x, pops[pop])
+            k = len(intersec)
             sv = hypergeom.sf(k-1, M=M, n=n, N=N) if k > 0 else 1
+
+            survival_values.append(sv)
+            intersections.append(intersec)
+            lens.append(len(pops[pop]))
+
             if sv <= rsv or (rsv == 2 and k > 0):
                 rsv, rpop, rk = sv, pop, k
+
+        all_pops = {'svs': np.array(survival_values),
+                        'intersecs': np.array(intersections),
+                        'lens': np.array(lens)}
+
         if rk == 0: # in case of no intersection, return -1
-            return "None", 1, np.array([]), 0
+            return "None", 1, np.array([]), 0, all_pops
         else:
-            return rpop, rsv, np.intersect1d(x, pops[rpop]), len(pops[rpop])
+            return rpop, rsv, np.intersect1d(x, pops[rpop]), len(pops[rpop]), all_pops
