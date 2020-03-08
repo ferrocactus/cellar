@@ -14,6 +14,7 @@ class Mark(Unit):
     """
     Base class for Marker Finding methods.
     """
+
     def __init__(self, verbose=False, name='Mark', **kwargs):
         """
         Args:
@@ -60,6 +61,7 @@ class Mark_TTest(Mark):
     the p-value being less than alpha (corrected for multiple testing) we
     choose the top_k genes which exhibit the highest difference of the means.
     """
+
     def __init__(self, verbose=False, name='TTest', **kwargs):
         """
         Args:
@@ -86,20 +88,21 @@ class Mark_TTest(Mark):
             self.vprint("Only one label found. Cannot run t-test.")
             return {}
 
-        m = int(self.markers_n*x.shape[1]) if self.markers_n < 1 else self.markers_n
+        m = int(self.markers_n*x.shape[1]
+                ) if self.markers_n < 1 else self.markers_n
         self.vprint(f"Using {m} markers.")
 
         test_results = {}
 
-        for i in unq_labels: # label to consider
+        for i in unq_labels:  # label to consider
             pvals = np.zeros(shape=(x.shape[1]))
             diffs = np.zeros_like(pvals)
 
-            for j in range(x.shape[1]): # current column index (gene)
-                x_ij = x[np.where(labels == i), j].squeeze() # Not empty
-                x_not_ij = x[np.where(labels != i), j].squeeze() # Not empty
+            for j in range(x.shape[1]):  # current column index (gene)
+                x_ij = x[np.where(labels == i), j].squeeze()  # Not empty
+                x_not_ij = x[np.where(labels != i), j].squeeze()  # Not empty
 
-                #WARNING: ttest will throw error if cluster has single point
+                # WARNING: ttest will throw error if cluster has single point
                 # Having equal_var=False runs Welch's t-test which assumes
                 # different n and different variances
                 t, pvals[j] = ttest_ind(x_ij, x_not_ij, equal_var=False)

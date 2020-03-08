@@ -7,10 +7,12 @@ import numpy as np
 #from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 #from copkmeans.cop_kmeans import cop_kmeans
 
+
 class SSClu(Unit):
     """
     Base class for Semi-Supervised Clustering.
     """
+
     def __init__(self, verbose=False, name='SSClu', **kwargs):
         """
         Args:

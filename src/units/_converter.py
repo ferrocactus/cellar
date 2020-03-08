@@ -13,6 +13,7 @@ class Con(Unit):
     """
     Base class for converting marker names.
     """
+
     def __init__(self, verbose=False, name='Con', **kwargs):
         """
         Args:
@@ -60,7 +61,8 @@ class Con(Unit):
         gene_dict = pd.read_csv(self.path, squeeze=True)
         col1, col2 = gene_dict.columns
         # Revert the order of columns
-        gene_dict = gene_dict[gene_dict.columns[::-1]].set_index(col2)[col1].to_dict()
+        gene_dict = gene_dict[gene_dict.columns[::-1]
+                              ].set_index(col2)[col1].to_dict()
         parsed_names = parse(names)
         if parsed_names.size == 0:
             return np.array([])

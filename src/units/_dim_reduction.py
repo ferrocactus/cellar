@@ -26,6 +26,7 @@ class Dim(Unit):
     """
     Base class for Dimensionality Reduction methods.
     """
+
     def __init__(self, verbose=False, name='Dim', **kwargs):
         """
         Args:
@@ -66,8 +67,8 @@ class Dim_PCA(Dim):
             temp_kwargs['n_components'] = self.knee = KneeLocator(
                 x_axis,
                 y_axis,
-                curve='convex', # approximately
-                direction='decreasing' # sklearn PCA eigenvalues are sorted
+                curve='convex',  # approximately
+                direction='decreasing'  # sklearn PCA eigenvalues are sorted
             ).knee
             temp_kwargs['n_components'] = max(self.knee, 2)
             self.vprint("Knee found at {0} components. Using n={1}.".format(
@@ -98,12 +99,14 @@ class Dim_TSNE(Dim):
 
     def get(self, x, y=None):
         self.tsne = TSNE(**self.kwargs)
-        return self.tsne.fit_transform(x) # y is ignored
+        return self.tsne.fit_transform(x)  # y is ignored
+
 
 class Dim_AE(Dim):
     """
     Use autoencoder to reduce dimensionality.
     """
+
     def __init__(self, verbose=False, name='AE', **kwargs):
         super().__init__(verbose, name, **kwargs)
         self.epochs = kwargs.get('epochs', EPOCHS)
@@ -145,7 +148,8 @@ class Dim_AE(Dim):
                 loss.backward()
                 optimizer.step()
             # ===================log========================
-            self.vprint(f'epoch [{epoch+1}/{self.epochs}], loss:{loss.item():.4f}')
+            self.vprint(
+                f'epoch [{epoch+1}/{self.epochs}], loss:{loss.item():.4f}')
         return model.encoder(
             torch.tensor(x, device='cpu').float()
         ).detach().numpy()

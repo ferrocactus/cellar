@@ -15,6 +15,7 @@ class Ide(Unit):
     """
     Base class for gene identification methods.
     """
+
     def __init__(self, verbose=False, name='Ide', **kwargs):
         """
         Args:
@@ -51,6 +52,7 @@ class Ide_HyperGeom(Ide):
     It is assumed that the dictionary that is passed has two levels of
     hierarchy of types. First determine the lvl1 type, then the lvl2 subtype.
     """
+
     def __init__(self, verbose=False, name='HyperGeom', **kwargs):
         super().__init__(verbose, name, **kwargs)
 
@@ -88,7 +90,7 @@ class Ide_HyperGeom(Ide):
             else:
                 if level > 1:
                     tp, sv, intersec, total, all_pops = self.find_population(
-                        #x[key]['outp_names'],
+                        # x[key]['outp_names'],
                         x[key][f'lvl{level-1}_intersec'],
                         level_dict[x[key][f'lvl{level-1}_type']]
                     )
@@ -180,10 +182,10 @@ class Ide_HyperGeom(Ide):
                 rsv, rpop, rk = sv, pop, k
 
         all_pops = {'svs': np.array(survival_values),
-                        'intersecs': np.array(intersections),
-                        'lens': np.array(lens)}
+                    'intersecs': np.array(intersections),
+                    'lens': np.array(lens)}
 
-        if rk == 0: # in case of no intersection, return -1
+        if rk == 0:  # in case of no intersection, return -1
             return "None", 1, np.array([]), 0, all_pops
         else:
             return rpop, rsv, np.intersect1d(x, pops[rpop]), len(pops[rpop]), all_pops

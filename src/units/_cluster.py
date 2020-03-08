@@ -55,30 +55,30 @@ class Cluster(Unit):
         self._labels = None
         kwargs = self.kwargs.copy()
 
-        if isinstance(self._n_clusters, int): # single cluster num
+        if isinstance(self._n_clusters, int):  # single cluster num
             kwargs['n_clusters'] = self._n_clusters
             self._labels = self.fit_predict(self._obj(**kwargs), x)
             self.score_list = np.array([eval_obj.get(x, self._labels)])
             self.vprint(f"Finished clustering for k={0}. Score={1:.2f}".format(
                 self._n_clusters, self.score_list[0])
             )
-        elif isinstance(self._n_clusters, tuple): # range of clusters
+        elif isinstance(self._n_clusters, tuple):  # range of clusters
             k_list = list(range(*self._n_clusters))
 
-            if eval_obj is None: # Need evaluation method if using range
+            if eval_obj is None:  # Need evaluation method if using range
                 raise ValueError("Evaluation object not provided.")
             if len(k_list) < 1:
                 raise ValueError("Invalid k list encountered in clustering.")
 
             self.score_list = np.zeros(len(k_list))
             best_score = -np.Inf
-            for i, k in enumerate(k_list): # Iterate over k
+            for i, k in enumerate(k_list):  # Iterate over k
                 kwargs['n_clusters'] = k
                 labels = self.fit_predict(self._obj(**kwargs), x)
                 score = eval_obj.get(x, labels)
                 self.score_list[i] = score
-                if best_score < score: # Update if best score found
-                    best_score, self._labels, self.n_clusters = score,labels,k
+                if best_score < score:  # Update if best score found
+                    best_score, self._labels, self.n_clusters = score, labels, k
                 self.vprint("Finished clustering for k={0}. Score={1:.2f}.".format(
                     k, score
                 ))
@@ -100,7 +100,7 @@ class Cluster(Unit):
             obj (Cluster): Cluster object.
             x (np.ndarray): Data to use for clustering.
         """
-        return obj.fit_predict(x) # By default for most methods
+        return obj.fit_predict(x)  # By default for most methods
 
 
 class Clu_KMedoids(Cluster):
@@ -118,6 +118,6 @@ class Clu_KMeans(Cluster):
 class Clu_SpectralClustering(Cluster):
     def __init__(self, verbose=False, name='Spectral', **kwargs):
         super().__init__(verbose, name, **kwargs)
-        if affinity not in self.kwargs: # For consistency.
+        if affinity not in self.kwargs:  # For consistency.
             self.kwargs['affinity'] = 'nearest_neighbors'
         self._obj = SpectralClustering

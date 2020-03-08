@@ -11,10 +11,12 @@ COLORS = [
     '#3c7f33', '#51cc9e', '#337f62', '#519ecc', '#33627f', '#6051cc', '#3c337f'
 ]
 
+
 class Plotter:
     """
     Class used for plotting intermediary steps of a Pipeline object.
     """
+
     def __init__(self, pipe):
         """
         Args:
@@ -66,12 +68,14 @@ class Plotter:
             for label in self.pipe.markers:
                 lvl1_type = self.pipe.markers[label]['lvl1_type']
                 lvl1_sv = self.pipe.markers[label]['lvl1_sv']
-                lvl1_intersec_n =len(self.pipe.markers[label]['lvl1_intersec'])
+                lvl1_intersec_n = len(
+                    self.pipe.markers[label]['lvl1_intersec'])
                 lvl1_total = self.pipe.markers[label]['lvl1_total']
                 lvl2_type = self.pipe.markers[label]['lvl2_type']
                 lvl2_sv = self.pipe.markers[label]['lvl2_sv']
                 lvl2_total = self.pipe.markers[label]['lvl2_total']
-                lvl2_intersec_n =len(self.pipe.markers[label]['lvl2_intersec'])
+                lvl2_intersec_n = len(
+                    self.pipe.markers[label]['lvl2_intersec'])
 
                 if lvl1_type == "User Defined":
                     labels.append("{0}: {1}, sv={2:.2f}, IoU={3}/{4}".format(
@@ -79,21 +83,22 @@ class Plotter:
                     ))
                 else:
                     labels.append("Lvl1: {0}, sv={1:.2f}, IoU={2}/{3}".format(
-                            lvl1_type, lvl1_sv, lvl1_intersec_n, lvl1_total
-                        ) + "\nLvl2: {0}, sv={1:.2f}, IoU={2}/{3}".format(
-                            lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
-                        )
+                        lvl1_type, lvl1_sv, lvl1_intersec_n, lvl1_total
+                    ) + "\nLvl2: {0}, sv={1:.2f}, IoU={2}/{3}".format(
+                        lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
+                    )
                     )
 
         unq = len(np.unique(hue))
         pal = COLORS[:unq]
-        for i in range(len(COLORS), unq): # In case more colors are needed.
+        for i in range(len(COLORS), unq):  # In case more colors are needed.
             pal.append("#" + '%06x' % np.random.randint(16**6))
 
-        plt.figure(figsize=(10,5))
+        plt.figure(figsize=(10, 5))
         sns.scatterplot(x=x[:, 0], y=x[:, 1], hue=hue, palette=pal, linewidth=0,
-                                                            s=10, legend='full')
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0, labels=labels)
+                        s=10, legend='full')
+        plt.legend(bbox_to_anchor=(1.05, 1), loc=2,
+                   borderaxespad=0, labels=labels)
 
         sns.despine(left=True, bottom=True)
         plt.xticks([])
@@ -109,10 +114,10 @@ class Plotter:
             cols (int): Number of columns to use in the plot.
         """
         clu_method = self.pipe.config["methods"]["cluster"]
-        kwargs = self.pipe.clu.kwargs.copy() # Copy original kwargs
+        kwargs = self.pipe.clu.kwargs.copy()  # Copy original kwargs
         k = kwargs['n_clusters']
 
-        if not isinstance(k, tuple): # Single cluster_n
+        if not isinstance(k, tuple):  # Single cluster_n
             self.plot_clu()
             return
 
@@ -132,11 +137,12 @@ class Plotter:
             clu = wrap("cluster", clu_method)(**kwargs)
             labels = clu.get(self.pipe.x_emb, self.pipe.eval)
 
-            ax[i // cols][i % cols].scatter(emb[:, 0], emb[:, 1], s=.5, c=labels)
-            ax[i // cols][i %cols].set_title('k={0}, score={1:.2f}'.format(
-                                                kk, clu.score_list[0]))
-            ax[i // cols][i %cols].set_xticks([])
-            ax[i // cols][i %cols].set_yticks([])
+            ax[i // cols][i %
+                          cols].scatter(emb[:, 0], emb[:, 1], s=.5, c=labels)
+            ax[i // cols][i % cols].set_title('k={0}, score={1:.2f}'.format(
+                kk, clu.score_list[0]))
+            ax[i // cols][i % cols].set_xticks([])
+            ax[i // cols][i % cols].set_yticks([])
 
         # Remove unused boxes
         for i in range(len(ks), cols*rows):
@@ -212,7 +218,8 @@ class Plotter:
             ax[i][1].set_xlabel("p-value")
             ax[i][1].set_ylabel("mean difference")
             for j, txt in enumerate(names[:k]):
-                ax[i][1].text(x[j], diffs[j]+0.02, names[j], fontsize=10, rotation=90)
+                ax[i][1].text(x[j], diffs[j]+0.02, names[j],
+                              fontsize=10, rotation=90)
 
         fig.set_size_inches(10, n_clusters * 6)
         if save_path is not None:

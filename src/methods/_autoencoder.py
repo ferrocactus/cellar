@@ -13,6 +13,7 @@ class Autoencoder(nn.Module):
         non_linearity : Non -linearity to use between the layers. Default: None
                         If ``None``, then no non-linearity is added.
     """
+
     def __init__(self, input_dim, factor, output_dim, non_linearity=None):
         super(Autoencoder, self).__init__()
         assert 0 < factor < 1, "Factor value out of range"
@@ -26,14 +27,16 @@ class Autoencoder(nn.Module):
 
         self.encoder = nn.Sequential()
         for i, l in enumerate(layers):
-            self.encoder.add_module('Linear_{}'.format(i), nn.Linear(l[0], l[1]))
+            self.encoder.add_module(
+                'Linear_{}'.format(i), nn.Linear(l[0], l[1]))
             if i < len(layers) - 1 and non_linearity is not None:
                 self.encoder.add_module('{}_{}'.format(non_linearity, i),
                                         getattr(nn, non_linearity)())
 
         self.decoder = nn.Sequential()
         for i, l in enumerate(reversed(layers)):
-            self.decoder.add_module('Linear_{}'.format(i), nn.Linear(l[1], l[0]))
+            self.decoder.add_module(
+                'Linear_{}'.format(i), nn.Linear(l[1], l[0]))
             if i < len(layers) - 1 and non_linearity is not None:
                 self.decoder.add_module('{}_{}'.format(non_linearity, i),
                                         getattr(nn, non_linearity)())

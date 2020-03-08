@@ -10,7 +10,7 @@ import datetime
 
 class Pipeline(Unit):
     def __init__(self, x, config, verbose=False,
-                row_ids=None, col_ids=None):
+                 row_ids=None, col_ids=None):
         super().__init__(verbose)
         assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
         assert isinstance(config, str)
@@ -165,7 +165,8 @@ class Pipeline(Unit):
         elif code == 200:
             # labels assumed to be 2D with each array representing indices
             # of points that should belong together
-            self.x_emb, self.labels = self.ssclu.get(self.x, new_labels, self.clu, self.eval)
+            self.x_emb, self.labels = self.ssclu.get(
+                self.x, new_labels, self.clu, self.eval)
         elif code == 300:
             pass
             self.labels = self.ssclu.get(self.x_emb, ml, cl)

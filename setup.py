@@ -17,7 +17,7 @@ install_requires = [
 setup(
     name='cellar',
     packages=['cellar'],
-    package_dir={'':'src'},
+    package_dir={'': 'src'},
     version=1.0,
     description='Cell Identification Pipeline.',
     author='Euxhen Hasanaj',

@@ -9,6 +9,7 @@ class Eval(Unit):
     """
     Base class for Evaluation methods.
     """
+
     def __init__(self, verbose=False, name='Eval', **kwargs):
         """
         Args:
