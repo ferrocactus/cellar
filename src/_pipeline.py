@@ -150,7 +150,7 @@ class Pipeline(Unit):
 
     def update(self, new_labels=None, code=100):
         """
-        Given new_labels, update current labels according to code;
+        Given new_labels (1D, same size as labels), update according to code;
         Codes:
             100: Hard cluster. Update the given labels. Don't run clustering.
             200: Soft cluster. Run constrained clustering using new labels.

@@ -48,12 +48,18 @@ class SSClu_SeededKMeans(SSClu):
     Proceedings of the 19th International COnference on Machine Learning (ICML-2002),
     no. July, 2002, pp. 19–26.
     """
+
     def __init__(self, verbose=False, name='SS SeededKMeans', **kwargs):
         super().__init__(verbose, name, **kwargs)
 
     def get(self, x, labels):
         """
         Find the non-negative values and let them define the n_clusters.
+        Args:
+            x (np.ndarray): Data points (n_points x n_features)
+            labels (np.ndarray): Labels (n_points x 1)
+        Returns:
+            (np.ndarray): New labels after clustering (n_points x 1)
         """
         unq_labels = np.unique(labels[labels >= 0])
         n_clusters = len(unq_labels)
