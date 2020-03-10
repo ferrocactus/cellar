@@ -15,8 +15,8 @@ translation_dict = {
     "dim_reduction": {
         "PCA": Dim_PCA,
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE,
-        "Autoencoder": Dim_AE
+        "TSNE": Dim_TSNE
+        #"Autoencoder": Dim_AE
     },
     "cluster_eval": {
         "SilhouetteScore": Eval_SilhouetteScore,
