@@ -82,7 +82,7 @@ class SSClu_UMAP(SSClu):
         new_labels = clu.get(emb, eval)
         ind = np.where(labels != -1)
         new_labels[ind] = labels[ind]
-        return emb, new_labels
+        return new_labels
 
 
 class SSClu_COPKMeans(SSClu):

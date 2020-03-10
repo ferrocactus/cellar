@@ -152,26 +152,14 @@ class Pipeline(Unit):
         """
         Given new_labels, update current labels according to code;
         Codes:
-            100: Hard cluster. Simply update to given labels.
-            200: Hard constrained cluster. Run full constrained clustering
-                using ml (must-link) and cl (cannot-link) lists.
-            300: Soft constrained cluster. Run constrained clustering
-                using ml and cl but save most of the current structure.
-            400: New cluster. Rerun clustering with one extra cluster.
+            100: Hard cluster. Update the given labels. Don't run clustering.
+            200: Soft cluster. Run constrained clustering using new labels.
         """
+        # labels assumed to be 1D and same dimension as original labels
         if code == 100:
-            # labels assumed to be 1D and same dimension as original labels
             self.labels = new_labels
         elif code == 200:
-            # labels assumed to be 2D with each array representing indices
-            # of points that should belong together
             self.labels = self.ssclu.get(self.x, new_labels)
-        elif code == 300:
-            pass
-            self.labels = self.ssclu.get(self.x_emb, ml, cl)
-        elif code == 400:
-            self.clu.set_n_clusters(self.clu._n_clusters + 1)
-            self.labels = self.clu.get(self.x_emb, self.eval)
         else:
             raise ValueError("Invalid code.")
 
