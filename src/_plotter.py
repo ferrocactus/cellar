@@ -24,7 +24,7 @@ class Plotter:
         """
         self.pipe = pipe
 
-    def plot_dim(self, cumulative=True, save_path=None):
+    def plot_dim(self, cumulative=True, path=None):
         """
         Plots explained variance ratio per component.
         Args:
@@ -50,11 +50,11 @@ class Plotter:
 
         sns.despine()
         fig.set_size_inches(5*(cumulative + 1), 5)
-        if save_path is not None:
-            plt.savefig(save_path)
+        if path is not None:
+            plt.savefig(path)
         plt.show()
 
-    def plot_clu(self, use_markers=True, save_path=None):
+    def plot_clu(self, use_markers=True, path=None):
         """
         Plots the clusters in 2D for a single k.
         """
@@ -97,17 +97,17 @@ class Plotter:
         plt.figure(figsize=(10, 5))
         sns.scatterplot(x=x[:, 0], y=x[:, 1], hue=hue, palette=pal, linewidth=0,
                         s=10, legend='full')
-        plt.legend(bbox_to_anchor=(1.05, 1), loc=2,
+        lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2,
                    borderaxespad=0, labels=labels)
 
         sns.despine(left=True, bottom=True)
         plt.xticks([])
         plt.yticks([])
-        if save_path is not None:
-            plt.savefig(save_path)
+        if path is not None:
+            plt.savefig(path, bbox_extra_artists=(lgd,), bbox_inches='tight')
         plt.show()
 
-    def plot_clu_all(self, cols=3, save_path=None):
+    def plot_clu_all(self, cols=3, path=None):
         """
         Plots the clusters in 2D for different k.
         Args:
@@ -154,11 +154,11 @@ class Plotter:
             ax[i // cols][i % cols].set_yticks([])
 
         fig.set_size_inches(5 * cols, 5 * rows)
-        if save_path is not None:
-            plt.savefig(save_path)
+        if path is not None:
+            plt.savefig(path)
         plt.show()
 
-    def plot_eval(self, save_path=None):
+    def plot_eval(self, path=None):
         """
         Plots the scores of the clusters for different k. Branch if k is int.
         """
@@ -179,11 +179,11 @@ class Plotter:
         ax.set_ylabel('Score')
         sns.despine()
         fig.set_size_inches(10, 5)
-        if save_path is not None:
-            plt.savefig(save_path)
+        if path is not None:
+            plt.savefig(path)
         plt.show()
 
-    def plot_mark(self, convention="names", save_path=None):
+    def plot_mark(self, convention="names", path=None):
         """
         Plots marker information.
         """
@@ -222,6 +222,6 @@ class Plotter:
                               fontsize=10, rotation=90)
 
         fig.set_size_inches(10, n_clusters * 6)
-        if save_path is not None:
-            plt.savefig(save_path)
+        if path is not None:
+            plt.savefig(path)
         plt.show()

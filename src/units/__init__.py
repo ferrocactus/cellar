@@ -32,6 +32,7 @@ translation_dict = {
         "HyperGeom": Ide_HyperGeom
     },
     "ss_cluster": {
+        "SeededKMeans": SSClu_SeededKMeans,
         "UMAP": SSClu_UMAP,
         "COPKMeans": SSClu_COPKMeans,
         "PCKMeans": SSClu_PCKMeans

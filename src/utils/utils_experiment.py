@@ -36,9 +36,6 @@ def load_data(dataset):
     elif dataset == 'brain_micro':
         brain_micro = pd.read_csv('datasets/microarray_brain/curated_microarray.csv')
         return brain_micro.to_numpy()[:, 1:], brain_micro.columns.to_numpy()[1:]
-    elif dataset == 'super_brain':
-        brain_micro = pd.read_csv('datasets/superseded_brain/curated_microarray.csv')
-        return brain_micro.to_numpy()[:, 1:], brain_micro.columns.to_numpy()[1:]
     elif dataset == 'spellman':
         return pd.read_csv('datasets/Spellman.csv', index_col=0).to_numpy(), None
     else:
