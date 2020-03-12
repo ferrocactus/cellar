@@ -2,12 +2,61 @@ from ._unit import Unit
 
 from abc import abstractmethod
 import numpy as np
+from joblib import Parallel, delayed
 from scipy.stats import ttest_ind
 from statsmodels.stats.multitest import multipletests
 
 ALPHA = 0.05
 CORRECTION = 'hs'
-MARKERS_N = 0.05
+MARKERS_N = 200
+N_JOBS = None
+
+
+def _ttest_differential_expression(x_i, x_not_i,
+                                   alpha=ALPHA,
+                                   markers_n=MARKERS_N,
+                                   correction=CORRECTION):
+    """
+    Find significant genes in pop1 compared to pop2 using ttest.
+    Args:
+        x_i (np.ndarray) of size (n, n_features)
+        x_not_i (np.ndarray) of size (m, n_features)
+        alpha (float): Alpha value to use for hypothesis testing.
+        correction (string): Correction method to apply for multitest.
+        verbose (bool)
+    """
+    pvals = np.zeros(shape=(x_i.shape[1]))
+    diffs = np.zeros_like(pvals)
+
+    for j in range(x_i.shape[1]):  # current column index (gene)
+        x_ij = x_i[:, j]  # Not empty
+        x_not_ij = x_not_i[:, j]  # Not empty
+
+        # WARNING: ttest will throw error if cluster has single point
+        # Having equal_var=False runs Welch's t-test which assumes
+        # different n and different variances
+        t, pvals[j] = ttest_ind(x_ij, x_not_ij, equal_var=False)
+        diffs[j] = np.mean(x_ij) - np.mean(x_not_ij)
+
+    # Apply correction and update p-values to the corrected ones
+    decision, pvals, _, _ = multipletests(
+        pvals,
+        alpha=alpha,
+        method=correction,
+        is_sorted=False,
+        returnsorted=False
+    )
+
+    # Return the rejected null hypothesis which have the highest
+    # difference of means of x_ij and x_not_ij
+    rejected_hs = np.where(decision == True)[0]
+    sorted_diff_indices = np.flip(np.argsort(diffs[rejected_hs]))
+    final_indices = rejected_hs[sorted_diff_indices][:markers_n]
+
+    test_results = {'indices': final_indices,
+                    'pvals': pvals[final_indices],
+                    'diffs': diffs[final_indices]}
+    return test_results
 
 
 class Mark(Unit):
@@ -74,6 +123,7 @@ class Mark_TTest(Mark):
         self.alpha = kwargs.get('alpha', ALPHA)
         self.correction = kwargs.get('correction', CORRECTION)
         self.markers_n = kwargs.get('markers_n', MARKERS_N)
+        self.n_jobs = kwargs.get('n_jobs', N_JOBS)
 
     def get(self, x, labels, unq_labels=None):
         """
@@ -94,38 +144,30 @@ class Mark_TTest(Mark):
 
         test_results = {}
 
-        for i in unq_labels:  # label to consider
-            pvals = np.zeros(shape=(x.shape[1]))
-            diffs = np.zeros_like(pvals)
+        if self.n_jobs is None or self.n_jobs == 1:
+            for i in unq_labels:  # label to consider
+                x_i = x[np.where(labels == i)]
+                x_not_i = x[np.where(labels != i)]
 
-            for j in range(x.shape[1]):  # current column index (gene)
-                x_ij = x[np.where(labels == i), j].squeeze()  # Not empty
-                x_not_ij = x[np.where(labels != i), j].squeeze()  # Not empty
-
-                # WARNING: ttest will throw error if cluster has single point
-                # Having equal_var=False runs Welch's t-test which assumes
-                # different n and different variances
-                t, pvals[j] = ttest_ind(x_ij, x_not_ij, equal_var=False)
-                diffs[j] = np.mean(x_ij) - np.mean(x_not_ij)
-
-            # Apply correction and update p-values to the corrected ones
-            decision, pvals, _, _ = multipletests(
-                pvals,
-                alpha=self.alpha,
-                method=self.correction,
-                is_sorted=False,
-                returnsorted=False
+                test_results[i] = _ttest_differential_expression(
+                    x_i, x_not_i,
+                    alpha=self.alpha,
+                    markers_n=m,
+                    correction=self.correction
+                )
+                self.vprint(f"Finished finding markers for cluster={i}.")
+        else:
+            self.vprint("Running marker discovery in parallel.")
+            test_results = Parallel(n_jobs=self.n_jobs)(
+                delayed(_ttest_differential_expression)(
+                    x[np.where(labels == i)],
+                    x[np.where(labels != i)],
+                    alpha=self.alpha,
+                    markers_n=m,
+                    correction=self.correction
+                ) for i in unq_labels
             )
-
-            # Return the rejected null hypothesis which have the highest
-            # difference of means of x_ij and x_not_ij
-            rejected_hs = np.where(decision == True)[0]
-            sorted_diff_indices = np.flip(np.argsort(diffs[rejected_hs]))
-            final_indices = rejected_hs[sorted_diff_indices][:m]
-
-            test_results[i] = {'indices': final_indices,
-                               'pvals': pvals[final_indices],
-                               'diffs': diffs[final_indices]}
-            self.vprint("Finished finding markers for cluster {0}.".format(i))
+            self.vprint("Finished finding markers.")
+            test_results = dict(zip(unq_labels, test_results))
 
         return test_results
