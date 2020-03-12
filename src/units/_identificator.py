@@ -11,6 +11,36 @@ PATH = "markers/cell_type_marker.json"
 TISSUE = 'all'
 
 
+def _get_dict(path):
+    """
+    Reads json file and converts to dict. In case a list of paths
+    is provided instead, read them all and merge then into a single
+    dict. Assumes depth two.
+
+    Returns: dict.
+    """
+    if isinstance(path, str):
+        with open(path, "r") as f:
+            return json.load(f)
+    else:
+        d = {}
+        for path in path:
+            with open(path, "r") as f:
+                d_part = json.load(f)
+                for key in d_part:
+                    if key in d:
+                        for subkey in d_part[key]:
+                            if subkey in d[key]:
+                                # to remove duplicates
+                                d[key][subkey] = list(set().union(
+                                    d[key][subkey], d_part[key][subkey]))
+                            else:
+                                d[key][subkey] = d_part[key][subkey]
+                    else:
+                        d[key] = d_part[key]
+        return d
+
+
 class Ide(Unit):
     """
     Base class for gene identification methods.
@@ -66,7 +96,7 @@ class Ide_HyperGeom(Ide):
                     total (int): total number of names in dict[type]
         """
         x = x.copy()
-        lvl2 = self.get_dict()
+        lvl2 = _get_dict(self.path)
 
         # Construct lvl1 dict by merging all lvl2 dicts
         lvl1 = {}
@@ -124,24 +154,6 @@ class Ide_HyperGeom(Ide):
             x[key]['lvl2_total'] = total
             x[key]['lvl2_all'] = all_pops
         self.vprint("Finished finding lvl2 types.")
-
-    def get_dict(self):
-        """
-        Reads json file and converts to dict. In case a list of paths
-        is provided instead, read them all and merge then into a single
-        dict.
-
-        Returns: dict.
-        """
-        if isinstance(self.path, str):
-            with open(self.path, "r") as f:
-                return json.load(f)
-        else:
-            d = {}
-            for path in self.path:
-                with open(path, "r") as f:
-                    d = {**d, **json.load(f)}
-            return d
 
     def find_population(self, x, pops):
         """
