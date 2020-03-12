@@ -3,6 +3,7 @@ from src.methods import KMedoids
 
 from abc import abstractmethod
 import numpy as np
+from joblib import Parallel, delayed
 from sklearn.cluster import KMeans
 from sklearn.cluster import SpectralClustering
 
@@ -26,8 +27,8 @@ class Cluster(Unit):
         if 'n_clusters' not in kwargs:
             raise ValueError("n_clusters not provided.")
         super().__init__(verbose, name, **kwargs)
-        self._labels = None
         self._n_clusters = kwargs.get('n_clusters', N_CLUSTERS)
+        self.n_jobs = kwargs.get('n_jobs', None)
 
     def set_n_clusters(self, n_clusters):
         self._n_clusters = n_clusters
@@ -70,22 +71,36 @@ class Cluster(Unit):
             if len(k_list) < 1:
                 raise ValueError("Invalid k list encountered in clustering.")
 
-            self.score_list = np.zeros(len(k_list))
-            best_score = -np.Inf
-            for i, k in enumerate(k_list):  # Iterate over k
-                kwargs['n_clusters'] = k
-                labels = self.fit_predict(self._obj(**kwargs), x)
-                score = eval_obj.get(x, labels)
-                self.score_list[i] = score
-                if best_score < score:  # Update if best score found
-                    best_score, self._labels, self.n_clusters = score, labels, k
-                self.vprint("Finished clustering for k={0}. Score={1:.2f}.".format(
-                    k, score
-                ))
+            if self.n_jobs is None or self.n_jobs == 1:
+                self.score_list = np.zeros(len(k_list))
+                best_score = -np.Inf
+                for i, k in enumerate(k_list):  # Iterate over k
+                    kwargs['n_clusters'] = k
+                    labels = self.fit_predict(self._obj(**kwargs), x)
+                    score = eval_obj.get(x, labels)
+                    self.score_list[i] = score
+                    if best_score < score:  # Update if best score found
+                        best_score, self._labels, self.n_clusters = score, labels, k
+                    self.vprint("Finished clustering for k={0}. Score={1:.2f}.".format(
+                        k, score
+                    ))
+            else:
+                self.vprint("Running parallel executions of clustering " +
+                            f"using n_jobs={self.n_jobs}.")
+                labelss = Parallel(n_jobs=self.n_jobs)(
+                    delayed(self._obj(n_clusters=i).fit_predict)(x) for i in k_list)
+                self.score_list = Parallel(n_jobs=self.n_jobs)(
+                    delayed(eval_obj.get)(x, labels) for labels in labelss
+                )
+                best_index = np.argmax(self.score_list)
+                best_score = self.score_list[best_index]
+                self._labels = labelss[best_index]
+                self.n_clusters = k_list[best_index]
 
             self.vprint("Best score achieved for k={0} at {1:.2f}.".format(
                 self.n_clusters, best_score
             ))
+
         else:
             raise ValueError("Incorrect number of clusters used.")
         return self._labels
