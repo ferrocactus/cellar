@@ -45,7 +45,7 @@ class SSClu_SeededKMeans(SSClu):
     based on the average of the points with that label.
 
     Source: Basu, Sugato, et al. “Semi-Supervised Clustering by Seeding.”
-    Proceedings of the 19th International COnference on Machine Learning (ICML-2002),
+    Proceedings of the 19th International Conference on Machine Learning (ICML-2002),
     no. July, 2002, pp. 19–26.
     """
 
@@ -64,7 +64,7 @@ class SSClu_SeededKMeans(SSClu):
         unq_labels = np.unique(labels[labels >= 0])
         n_clusters = len(unq_labels)
         centroids = []
-        selv.vprint(f"Found {n_clusters} unique labels. Using seeded KMeans.")
+        self.vprint(f"Found {n_clusters} unique labels. Using seeded KMeans.")
 
         for i in range(n_clusters):
             centroid = np.mean(x[labels == unq_labels[i]], axis=0)
