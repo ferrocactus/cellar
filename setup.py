@@ -11,7 +11,8 @@ install_requires = [
     'tqdm',
     'kneed',
     'gtfparse',
-    'statsmodels'
+    'statsmodels',
+    'joblib'
 ]
 
 setup(

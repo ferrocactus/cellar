@@ -171,3 +171,20 @@ class Mark_TTest(Mark):
             test_results = dict(zip(unq_labels, test_results))
 
         return test_results
+
+    def get_subset(self, x, subset_indices):
+        """
+        Do differential expression for the points specified in subset_indices
+        versus the rest of the population.
+        """
+        m = int(self.markers_n*x.shape[1]
+                ) if self.markers_n < 1 else self.markers_n
+        mask = np.zeros(len(x), dtype=bool)
+        mask[subset_indices,] = True
+        return {'0': _ttest_differential_expression(
+            x[mask],
+            x[~mask],
+            alpha=self.alpha,
+            markers_n=m,
+            correction=self.correction
+        )}

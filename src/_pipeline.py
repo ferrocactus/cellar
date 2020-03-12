@@ -61,31 +61,40 @@ class Pipeline(Unit):
             self.verbose, **self.config["ss_cluster"]
         )
 
-    def run(self, indices=None):
-        if indices is not None:
-            x = self.x[indices, :]
-        else:
-            x = None
-        self.emb(x=x)
+    def run(self):
+        self.emb()
         self.cluster()
-        self.get_markers(x=x)
+        self.get_markers()
         self.convert()
         self.identify()
 
-    def emb(self, x=None):
-        self.x_emb = self.dim.get(self.x if x is None else x)
+    def emb(self):
+        self.x_emb = self.dim.get(self.x)
 
     def cluster(self):
         self.labels = self.clu.get(self.x_emb, self.eval)
 
-    def get_markers(self, x=None):
+    def get_markers(self):
         self.unq_labels = np.unique(self.labels)
         # 3. Differential expression
         self.markers = self.mark.get(
-            self.x if x is None else x,
+            self.x,
             self.labels,
             self.unq_labels
         )
+
+    def get_markers_subset(self, indices):
+        markers = self.mark.get_subset(self.x, indices)
+        # Convert
+        for marker in markers: # should be only 1
+            markers[marker]['inp_names'] = self.col_ids[
+                markers[marker]['indices']
+            ]
+            markers[marker]['outp_names'] = self.con.get(
+                markers[marker]['inp_names']
+            )
+        markers = self.ide.get(markers)
+        return markers
 
     def convert(self):
         for marker in self.markers:
