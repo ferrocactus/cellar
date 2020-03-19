@@ -89,13 +89,10 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
         y_list = Parallel(n_jobs=n_jobs)(
             delayed(getattr(obj_def(**kwargs_list[i]), method_name))(x)
             for i in range(len(k_list)))
-        print(len(y_list))
         # Run evaluation in parallel
         score_list = Parallel(n_jobs=n_jobs)(
             delayed(eval_obj.get)(x, y)
             for y in y_list)
-
-        print(score_list)
 
         # Find the best score
         top_index = np.argmax(score_list)
