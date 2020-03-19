@@ -1,8 +1,8 @@
-from ._unit import Unit
-
 from abc import abstractmethod
-from sklearn.metrics import silhouette_score
-from sklearn.metrics import davies_bouldin_score
+
+from sklearn.metrics import davies_bouldin_score, silhouette_score
+
+from ._unit import Unit
 
 
 class Eval(Unit):

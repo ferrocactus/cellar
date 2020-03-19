@@ -1,13 +1,16 @@
-from ._unit import Unit
-#from src.methods import Autoencoder
-
 from abc import abstractmethod
-from sklearn.decomposition import PCA
-from kneed import KneeLocator
-from umap import UMAP
-from sklearn.manifold import TSNE
+
 #import torch
 import numpy as np
+from kneed import KneeLocator
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from umap import UMAP
+
+from ._unit import Unit
+
+#from src.methods import Autoencoder
+
 
 PCA_EVR_MAX_N = 100
 N_COMPONENTS = 'knee'

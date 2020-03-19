@@ -1,10 +1,11 @@
-from ._unit import Unit
-
 from abc import abstractmethod
 
+import numpy as np
 from sklearn.cluster import KMeans
 from umap import UMAP
-import numpy as np
+
+from ._unit import Unit
+
 #from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 #from copkmeans.cop_kmeans import cop_kmeans
 

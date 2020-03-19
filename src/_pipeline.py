@@ -1,5 +1,5 @@
 from ._wrapper import wrap
-from .utils.utils_read import parse_config
+from .utils.read import parse_config
 from .units._unit import Unit
 
 import numpy as np
@@ -39,11 +39,11 @@ class Pipeline(Unit):
         self.dim = wrap("dim_reduction", dim_method)(
             self.verbose, **self.config["dim_reduction"]
         )
-        self.clu = wrap("cluster", clu_method)(
-            self.verbose, **self.config["cluster"]
-        )
         self.eval = wrap("cluster_eval", eval_method)(
             self.verbose, **self.config["cluster_eval"]
+        )
+        self.clu = wrap("cluster", clu_method)(
+            eval_obj=self.eval, **self.config["cluster"]
         )
         self.vis = wrap("dim_reduction", vis_method)(
             self.verbose, **self.config["visualization"]
@@ -72,7 +72,7 @@ class Pipeline(Unit):
         self.x_emb = self.dim.get(self.x)
 
     def cluster(self):
-        self.labels = self.clu.get(self.x_emb, self.eval)
+        self.labels = self.clu.get(self.x_emb)
 
     def get_markers(self):
         self.unq_labels = np.unique(self.labels)

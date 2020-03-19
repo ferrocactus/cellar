@@ -1,10 +1,11 @@
-from ._unit import Unit
-
 from abc import abstractmethod
+
 import numpy as np
 from joblib import Parallel, delayed
 from scipy.stats import ttest_ind
 from statsmodels.stats.multitest import multipletests
+
+from ._unit import Unit
 
 ALPHA = 0.05
 CORRECTION = 'hs'

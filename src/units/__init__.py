@@ -1,3 +1,4 @@
+from ._unit import Unit
 from ._cluster import *
 from ._dim_reduction import *
 from ._evaluation import *
@@ -10,7 +11,8 @@ translation_dict = {
     "cluster": {
         "KMedoids": Clu_KMedoids,
         "KMeans": Clu_KMeans,
-        "SpectralClustering": Clu_SpectralClustering
+        "SpectralClustering": Clu_SpectralClustering,
+        "DBSCAN": Clu_DBSCAN
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
