@@ -7,8 +7,6 @@ from ..log import setup_logger
 from ..units._evaluation import Eval_Silhouette
 from ..utils.validation import _effective_n_jobs
 
-logger = setup_logger('Cluster.Multiple')
-
 
 def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
                      attribute_name='n_clusters', eval_obj=None,
@@ -55,6 +53,7 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
         evaluated by eval_obj.
 
     """
+    logger = setup_logger('Cluster.Multiple')
 
     # Default evaluation object
     if eval_obj is None:

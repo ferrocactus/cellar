@@ -52,12 +52,12 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
         evaluated by eval_obj.
 
     """
-    logger = setup_logger('Cluster')
     # Determine type of n_clusters passed
     k, argtype = _effective_n_clusters(n_clusters)
 
     # If n_clusters determined to be single integer
     if argtype == 'int':
+        logger = setup_logger('Cluster.Single')
         y = obj_def(n_clusters=k, **kwargs).fit_predict(x)
         if eval_obj is not None:
             score = eval_obj.get(x, y)
