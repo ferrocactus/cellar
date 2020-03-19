@@ -1,8 +1,8 @@
 import logging
 
 import numpy as np
-from sklearn.cluster import (
-    DBSCAN, KMeans, SpectralClustering, AgglomerativeClustering)
+from sklearn.cluster import (DBSCAN, AgglomerativeClustering, Birch, KMeans,
+                             SpectralClustering)
 
 from ..methods import KMedoids
 from ..utils.validation import _effective_n_clusters
@@ -109,8 +109,6 @@ class Clu_KMedoids(Unit):
 
     def get(self, x):
         """
-        Clusters and returns labels.
-
         Parameters
         __________
         x: array, shape (n_samples, n_features)
@@ -165,8 +163,6 @@ class Clu_KMeans(Unit):
 
     def get(self, x):
         """
-        Clusters and returns labels.
-
         Parameters
         __________
         x: array, shape (n_samples, n_features)
@@ -223,8 +219,6 @@ class Clu_SpectralClustering(Unit):
 
     def get(self, x):
         """
-        Clusters and returns labels.
-
         Parameters
         __________
         x: array, shape (n_samples, n_features)
@@ -241,59 +235,6 @@ class Clu_SpectralClustering(Unit):
         return _get_wrapper(x, obj_def=SpectralClustering, n_clusters=self.n_clusters,
                             eval_obj=self.eval_obj, n_jobs=self.n_jobs,
                             **self.kwargs)
-
-
-class Clu_DBSCAN(Unit):
-    """
-    See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html
-    """
-
-    def __init__(self, eval_obj=None, n_jobs=None, **kwargs):
-        """
-        Parameters
-        __________
-
-        eval_obj: Eval or None, default None
-            Evaluation object to evaluate clustering.
-
-        n_jobs: Ignored
-
-        **kwargs: dictionary
-            Dictionary of parameters that will get passed to obj_def
-            when instantiating it.
-
-        """
-        self.eval_obj = eval_obj
-        self.kwargs = kwargs
-
-    def get(self, x):
-        """
-        Clusters and returns labels.
-
-        Parameters
-        __________
-        x: array, shape (n_samples, n_features)
-            The data array.
-
-        Returns
-        _______
-        y: array, shape (n_samples,)
-            List of labels that correspond to the best clustering k, as
-            evaluated by eval_obj.
-
-        """
-        logger.info("Initializing DBSCAN.")
-        y = DBSCAN(**self.kwargs).fit_predict(x)
-        unqy = len(np.unique(y))
-        noise = np.sum(y == -1)
-        if self.eval_obj is not None:
-            score = self.eval_obj.get(x, y)
-            logger.info(f"Found {unqy - (noise >= 1)} labels using DBSCAN."
-                        "Score={score:.2f}.")
-        else:
-            logger.info(f"Found {unqy} labels using DBSCAN.")
-        logger.info(f"Found {noise} noisy points. Assigning label -1.")
-        return y
 
 
 class Clu_Agglomerative(Unit):
@@ -332,8 +273,6 @@ class Clu_Agglomerative(Unit):
 
     def get(self, x):
         """
-        Clusters and returns labels.
-
         Parameters
         __________
         x: array, shape (n_samples, n_features)
@@ -350,3 +289,108 @@ class Clu_Agglomerative(Unit):
         return _get_wrapper(x, obj_def=AgglomerativeClustering,
                             n_clusters=self.n_clusters, eval_obj=self.eval_obj,
                             n_jobs=self.n_jobs, **self.kwargs)
+
+
+class Clu_Birch(Unit):
+    """
+    See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.Birch.html
+    """
+
+    def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
+                 eval_obj=None, n_jobs=None, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_clusters: array or int or tuple, dtype int, default [2, 4, 8, 16]
+            Array containing the different values of clusters to try,
+            or single int specifying the number of clusters,
+            or tuple of the form (a, b, c) which specifies a range
+            for (x=a; x<b; x+=c)
+
+        eval_obj: Eval or None, default None
+            Evaluation object to compare performance of different trials.
+
+        n_jobs: int or None, default None
+            Number of jobs to use if multithreading. See
+            https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj_def
+            when instantiating it.
+
+        """
+        self.n_clusters = n_clusters
+        self.eval_obj = eval_obj
+        self.n_jobs = n_jobs
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Parameters
+        __________
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+        y: array, shape (n_samples,)
+            List of labels that correspond to the best clustering k, as
+            evaluated by eval_obj.
+
+        """
+        logger.info("Initializing Birch Clustering.")
+        return _get_wrapper(x, obj_def=Birch, n_clusters=self.n_clusters,
+                            eval_obj=self.eval_obj, n_jobs=self.n_jobs,
+                            **self.kwargs)
+
+
+class Clu_DBSCAN(Unit):
+    """
+    See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html
+    """
+
+    def __init__(self, eval_obj=None, n_jobs=None, **kwargs):
+        """
+        Parameters
+        __________
+
+        eval_obj: Eval or None, default None
+            Evaluation object to evaluate clustering.
+
+        n_jobs: Ignored
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj_def
+            when instantiating it.
+
+        """
+        self.eval_obj = eval_obj
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Parameters
+        __________
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+        y: array, shape (n_samples,)
+            List of labels that correspond to the best clustering k, as
+            evaluated by eval_obj.
+
+        """
+        logger.info("Initializing DBSCAN.")
+        y = DBSCAN(**self.kwargs).fit_predict(x)
+        unqy = len(np.unique(y))
+        noise = np.sum(y == -1)
+        if self.eval_obj is not None:
+            score = self.eval_obj.get(x, y)
+            logger.info(f"Found {unqy - (noise >= 1)} labels using DBSCAN."
+                        f"Score={score:.2f}.")
+        else:
+            logger.info(f"Found {unqy} labels using DBSCAN.")
+        logger.info(f"Found {noise} noisy points. Assigning label -1.")
+        return y
