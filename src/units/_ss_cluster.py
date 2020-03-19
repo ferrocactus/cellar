@@ -50,8 +50,9 @@ class SSClu_SeededKMeans(SSClu):
     no. July, 2002, pp. 19–26.
     """
 
-    def __init__(self, verbose=False, name='SS SeededKMeans', **kwargs):
-        super().__init__(verbose, name, **kwargs)
+    def __init__(self, **kwargs):
+        self.name = 'SeededKMeans'
+        self.kwargs = kwargs
 
     def get(self, x, labels):
         """
@@ -65,7 +66,7 @@ class SSClu_SeededKMeans(SSClu):
         unq_labels = np.unique(labels[labels >= 0])
         n_clusters = len(unq_labels)
         centroids = []
-        self.vprint(f"Found {n_clusters} unique labels. Using seeded KMeans.")
+        self.logger.info(f"Found {n_clusters} unique labels. Using seeded KMeans.")
 
         for i in range(n_clusters):
             centroid = np.mean(x[labels == unq_labels[i]], axis=0)
@@ -79,12 +80,13 @@ class SSClu_SeededKMeans(SSClu):
 
 
 class SSClu_UMAP(SSClu):
-    def __init__(self, verbose=False, name='SS UMAP', **kwargs):
-        super().__init__(verbose, name, **kwargs)
+    def __init__(self, **kwargs):
+        self.name = 'SS_UMAP'
+        self.kwargs = kwargs
 
     def get(self, x, labels, clu, eval):
         umap = UMAP(**self.kwargs)
-        self.vprint("Finding embeddings.")
+        self.logger.info("Finding embeddings.")
         emb = umap.fit_transform(x, y=labels)
         new_labels = clu.get(emb, eval)
         ind = np.where(labels != -1)

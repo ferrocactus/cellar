@@ -4,12 +4,11 @@ import numpy as np
 from sklearn.cluster import (DBSCAN, AgglomerativeClustering, Birch, KMeans,
                              SpectralClustering)
 
+from ..log import setup_logger
 from ..methods import KMedoids
 from ..utils.validation import _effective_n_clusters
 from ._cluster_multiple import cluster_multiple
 from ._unit import Unit
-
-logger = logging.getLogger('Cluster')
 
 
 def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
@@ -53,6 +52,7 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
         evaluated by eval_obj.
 
     """
+    logger = setup_logger('Cluster')
     # Determine type of n_clusters passed
     k, argtype = _effective_n_clusters(n_clusters)
 
@@ -102,6 +102,7 @@ class Clu_KMedoids(Unit):
             when instantiating it.
 
         """
+        self.logger = setup_logger('KMedoids')
         self.n_clusters = n_clusters
         self.eval_obj = eval_obj
         self.n_jobs = n_jobs
@@ -121,7 +122,7 @@ class Clu_KMedoids(Unit):
             evaluated by eval_obj.
 
         """
-        logger.info("Initializing KMedoids.")
+        self.logger.info("Initializing KMedoids.")
         return _get_wrapper(x, obj_def=KMedoids, n_clusters=self.n_clusters,
                             eval_obj=self.eval_obj, n_jobs=self.n_jobs,
                             **self.kwargs)
@@ -156,6 +157,7 @@ class Clu_KMeans(Unit):
             when instantiating it.
 
         """
+        self.logger = setup_logger('KMeans')
         self.n_clusters = n_clusters
         self.eval_obj = eval_obj
         self.n_jobs = n_jobs
@@ -175,7 +177,7 @@ class Clu_KMeans(Unit):
             evaluated by eval_obj.
 
         """
-        logger.info("Initializing KMeans.")
+        self.logger.info("Initializing KMeans.")
         return _get_wrapper(x, obj_def=KMeans, n_clusters=self.n_clusters,
                             eval_obj=self.eval_obj, n_jobs=self.n_jobs,
                             **self.kwargs)
@@ -210,6 +212,7 @@ class Clu_SpectralClustering(Unit):
             when instantiating it.
 
         """
+        self.logger = setup_logger('Spectral Clustering')
         if 'affinity' not in kwargs:
             kwargs['affinity'] = 'nearest_neighbors'
         self.n_clusters = n_clusters
@@ -231,10 +234,10 @@ class Clu_SpectralClustering(Unit):
             evaluated by eval_obj.
 
         """
-        logger.info("Initializing SpectralClustering.")
-        return _get_wrapper(x, obj_def=SpectralClustering, n_clusters=self.n_clusters,
-                            eval_obj=self.eval_obj, n_jobs=self.n_jobs,
-                            **self.kwargs)
+        self.logger.info("Initializing SpectralClustering.")
+        return _get_wrapper(x, obj_def=SpectralClustering,
+                            n_clusters=self.n_clusters, eval_obj=self.eval_obj,
+                            n_jobs=self.n_jobs, **self.kwargs)
 
 
 class Clu_Agglomerative(Unit):
@@ -266,6 +269,7 @@ class Clu_Agglomerative(Unit):
             when instantiating it.
 
         """
+        self.logger = setup_logger('Agglomerative')
         self.n_clusters = n_clusters
         self.eval_obj = eval_obj
         self.n_jobs = n_jobs
@@ -285,7 +289,7 @@ class Clu_Agglomerative(Unit):
             evaluated by eval_obj.
 
         """
-        logger.info("Initializing Agglomerative Clustering.")
+        self.logger.info("Initializing Agglomerative Clustering.")
         return _get_wrapper(x, obj_def=AgglomerativeClustering,
                             n_clusters=self.n_clusters, eval_obj=self.eval_obj,
                             n_jobs=self.n_jobs, **self.kwargs)
@@ -320,6 +324,7 @@ class Clu_Birch(Unit):
             when instantiating it.
 
         """
+        self.logger = setup_logger('Birch')
         self.n_clusters = n_clusters
         self.eval_obj = eval_obj
         self.n_jobs = n_jobs
@@ -339,7 +344,7 @@ class Clu_Birch(Unit):
             evaluated by eval_obj.
 
         """
-        logger.info("Initializing Birch Clustering.")
+        self.logger.info("Initializing Birch Clustering.")
         return _get_wrapper(x, obj_def=Birch, n_clusters=self.n_clusters,
                             eval_obj=self.eval_obj, n_jobs=self.n_jobs,
                             **self.kwargs)
@@ -365,6 +370,7 @@ class Clu_DBSCAN(Unit):
             when instantiating it.
 
         """
+        self.logger = setup_logger('DBSCAN')
         self.eval_obj = eval_obj
         self.kwargs = kwargs
 
@@ -382,15 +388,15 @@ class Clu_DBSCAN(Unit):
             evaluated by eval_obj.
 
         """
-        logger.info("Initializing DBSCAN.")
+        self.logger.info("Initializing DBSCAN.")
         y = DBSCAN(**self.kwargs).fit_predict(x)
         unqy = len(np.unique(y))
         noise = np.sum(y == -1)
         if self.eval_obj is not None:
             score = self.eval_obj.get(x, y)
-            logger.info(f"Found {unqy - (noise >= 1)} labels using DBSCAN."
-                        f"Score={score:.2f}.")
+            self.logger.info(f"Found {unqy - (noise >= 1)} labels using DBSCAN."
+                             f"Score={score:.2f}.")
         else:
-            logger.info(f"Found {unqy} labels using DBSCAN.")
-        logger.info(f"Found {noise} noisy points. Assigning label -1.")
+            self.logger.info(f"Found {unqy} labels using DBSCAN.")
+        self.logger.info(f"Found {noise} noisy points. Assigning label -1.")
         return y

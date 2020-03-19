@@ -1,4 +1,4 @@
-from abc import abstractmethod
+import logging
 
 #import torch
 import numpy as np
@@ -8,12 +8,9 @@ from sklearn.manifold import TSNE
 from umap import UMAP
 
 from ._unit import Unit
+from ..log import setup_logger
 
 #from src.methods import Autoencoder
-
-
-PCA_EVR_MAX_N = 100
-N_COMPONENTS = 'knee'
 
 # Autoencoder
 N_COMPONENTS_AE = 15
@@ -25,87 +22,113 @@ LR = 1e-3
 WEIGHT_DECAY = 1e-5
 
 
-class Dim(Unit):
+class Dim_PCA(Unit):
     """
-    Base class for Dimensionality Reduction methods.
+    See https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
     """
 
-    def __init__(self, verbose=False, name='Dim', **kwargs):
+    def __init__(self, n_components='knee', n_components_max=200, **kwargs):
         """
-        Args:
-            verbose (bool): Printing flag.
-            **kwargs: Argument dict.
+        Parameters
+        __________
+
+        n_components: int, float or string, default 'knee'
+            Number of components to use for PCA. If int, use that exact
+            number of components. If float between 0 and 1, use that fraction
+            of n_features of x. If 'knee', use Knee Detector algorithm to
+            automatically figure out the n_components based on the curvature
+            of the explained variance ratio graph.
+
+        n_components_max: int, default 200
+            If is ignored if n_components is different than 'knee'.
+            Specifies the number of components to use for constructing the
+            initial graph of explained variance ratio.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj_def
+            when instantiating it.
         """
-        super().__init__(verbose, name, **kwargs)
+        self.logger = setup_logger('PCA')
+        self.n_components = n_components
+        self.n_components_max = n_components_max
+        self.kwargs = kwargs
 
-    @abstractmethod
-    def get(self, x):
+    def get(self, x, return_evr=False):
         """
-        Returns the embedding of x.
+        Runs clustering for multiple n_clusters.
 
-        Args:
-            x (np.ndarray): Data in matrix (n x d) form.
-        Returns:
-            (np.ndarray): The embedding of x.
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        return_evr: Bool
+            If set, function will also return an array of
+            explained variance ratios for every component.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        [y_axis]: array, if return_evr==True, shape (n_components_max,)
+            Explained Variance Ratio array.
+
         """
-        pass
+        self.logger.info("Initializing PCA.")
 
+        if self.n_components == 'knee':
+            n_components = min(self.n_components_max, np.min(x.shape))
+            obj = PCA(n_components=n_components, **self.kwargs).fit(x)
 
-class Dim_PCA(Dim):
-    def __init__(self, verbose=False, name='PCA', **kwargs):
-        super().__init__(verbose, name, **kwargs)
-        if 'n_components' not in kwargs:
-            raise ValueError("n_components not provided.")
-
-    def get(self, x):
-        if self.kwargs['n_components'] == 'knee':
-            temp_kwargs = self.kwargs.copy()
-            temp_kwargs['n_components'] = min(PCA_EVR_MAX_N, min(x.shape))
-            self.ev_pca = PCA(**temp_kwargs)
-            self.ev_pca.fit(x)
             # Construct axis for KneeLocator
-            x_axis = list(range(1, self.ev_pca.n_components_ + 1))
-            y_axis = self.ev_pca.explained_variance_ratio_
+            x_axis = list(range(1, obj.n_components_ + 1))
+            y_axis = obj.explained_variance_ratio_
             # Find knee
-            temp_kwargs['n_components'] = self.knee = KneeLocator(
-                x_axis,
-                y_axis,
-                curve='convex',  # approximately
-                direction='decreasing'  # sklearn PCA eigenvalues are sorted
-            ).knee
-            temp_kwargs['n_components'] = max(self.knee, 2)
-            self.vprint("Knee found at {0} components. Using n={1}.".format(
-                self.knee, temp_kwargs['n_components'])
-            )
-            self.pca = PCA(**temp_kwargs)
+            n_components = KneeLocator(x_axis, y_axis,
+                                       curve='convex',  # Approximately
+                                       direction='decreasing'
+                                       ).knee
+            n_components = max(n_components, 2)
+
+            self.logger.info(f"Knee found at {n_components}.")
+            x_emb = PCA(n_components=n_components,
+                        **self.kwargs).fit_transform(x)
         else:
-            self.pca = PCA(**self.kwargs)
-        return self.pca.fit_transform(x)
+            x_emb = PCA(n_components=self.n_components,
+                        **self.kwargs).fit_transform(x)
+
+        if return_evr == True:
+            return x_emb, y_axis
+        else:
+            return x_emb
 
 
-class Dim_UMAP(Dim):
-    def __init__(self, verbose=False, name='UMAP', **kwargs):
-        super().__init__(verbose, name, **kwargs)
-        if 'n_components' not in kwargs:
-            raise ValueError("n_components not provided.")
+class Dim_UMAP(Unit):
+    def __init__(self, **kwargs):
+        self.logger = setup_logger('UMAP')
+        self.kwargs = kwargs
 
     def get(self, x, y=None):
+        self.logger.info("Initializing UMAP.")
         self.umap = UMAP(**self.kwargs)
         return self.umap.fit_transform(x, y=y)
 
 
-class Dim_TSNE(Dim):
-    def __init__(self, verbose=False, name='TSNE', **kwargs):
-        super().__init__(verbose, name, **kwargs)
-        if 'n_components' not in kwargs:
-            raise ValueError("n_components not provided.")
+class Dim_TSNE(Unit):
+    def __init__(self, **kwargs):
+        self.logger = setup_logger('TSNE')
+        self.kwargs = kwargs
 
     def get(self, x, y=None):
+        self.logger.info("Initializing TSNE.")
         self.tsne = TSNE(**self.kwargs)
         return self.tsne.fit_transform(x)  # y is ignored
 
 
-# class Dim_AE(Dim):
+# class Dim_AE(Unit):
 #     """
 #     Use autoencoder to reduce dimensionality.
 #     """

@@ -1,5 +1,3 @@
-from abc import abstractmethod
-
 from sklearn.metrics import (calinski_harabasz_score, davies_bouldin_score,
                              silhouette_score)
 

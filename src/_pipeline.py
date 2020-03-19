@@ -11,7 +11,6 @@ import datetime
 class Pipeline(Unit):
     def __init__(self, x, config, verbose=False,
                  row_ids=None, col_ids=None):
-        super().__init__(verbose)
         assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
         assert isinstance(config, str)
         self.x = x
@@ -37,7 +36,7 @@ class Pipeline(Unit):
             raise ValueError("Pipe: Config file malformed or method missing.")
 
         self.dim = wrap("dim_reduction", dim_method)(
-            self.verbose, **self.config["dim_reduction"]
+            **self.config["dim_reduction"]
         )
         self.eval = wrap("cluster_eval", eval_method)(
             **self.config["cluster_eval"]
@@ -46,19 +45,19 @@ class Pipeline(Unit):
             eval_obj=self.eval, **self.config["cluster"]
         )
         self.vis = wrap("dim_reduction", vis_method)(
-            self.verbose, **self.config["visualization"]
+            **self.config["visualization"]
         )
         self.mark = wrap("markers", mark_method)(
-            self.verbose, **self.config["markers"]
+            **self.config["markers"]
         )
         self.con = wrap("conversion", con_method)(
-            self.verbose, **self.config["conversion"]
+            **self.config["conversion"]
         )
         self.ide = wrap("identification", ide_method)(
-            self.verbose, **self.config["identification"]
+            **self.config["identification"]
         )
         self.ssclu = wrap("ss_cluster", ssclu_method)(
-            self.verbose, **self.config["ss_cluster"]
+            **self.config["ss_cluster"]
         )
 
     def run(self):

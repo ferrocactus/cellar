@@ -3,10 +3,11 @@ import logging
 import numpy as np
 from joblib import Parallel, delayed
 
+from ..log import setup_logger
 from ..units._evaluation import Eval_Silhouette
 from ..utils.validation import _effective_n_jobs
 
-logger = logging.getLogger('Cluster.multiple')
+logger = setup_logger('Cluster.Multiple')
 
 
 def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
@@ -100,7 +101,7 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
 
         # Log scores
         for k, score in zip(k_list, score_list):
-            logger.info(f"Clustering with k={k}. Score={score:.2f}.")
+            logger.info(f"Finished clustering with k={k}. Score={score:.2f}.")
 
     logger.info(f"Finished clustering. Best score achieved for k={top_k}.")
 

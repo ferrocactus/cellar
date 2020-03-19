@@ -5,6 +5,7 @@ from joblib import Parallel, delayed
 from scipy.stats import ttest_ind
 from statsmodels.stats.multitest import multipletests
 
+from ..log import setup_logger
 from ._unit import Unit
 
 ALPHA = 0.05
@@ -60,42 +61,7 @@ def _ttest_differential_expression(x_i, x_not_i,
     return test_results
 
 
-class Mark(Unit):
-    """
-    Base class for Marker Finding methods.
-    """
-
-    def __init__(self, verbose=False, name='Mark', **kwargs):
-        """
-        Args:
-            verbose (bool): Printing flag.
-            **kwargs: Argument dict.
-        """
-        super().__init__(verbose, name, **kwargs)
-
-    @abstractmethod
-    def get(self, x, labels):
-        """
-        Args:
-            x (np.ndarray): 2D array
-            labels (np.ndarray): 2D array of labels
-        Returns:
-        dict: {
-            'label_1': {
-                'indices': np.zeros(MARKERS_N),
-                'pvals': np.zeros(MARKERS_N),
-                'diffs': np.zeros(MARKERS_N)
-            },
-            'label_2': {
-                ...
-            }
-            ...
-        }
-        """
-        pass
-
-
-class Mark_TTest(Mark):
+class Mark_TTest(Unit):
     """
     One-vs-all T-Test.
 
@@ -112,7 +78,7 @@ class Mark_TTest(Mark):
     choose the top_k genes which exhibit the highest difference of the means.
     """
 
-    def __init__(self, verbose=False, name='TTest', **kwargs):
+    def __init__(self, **kwargs):
         """
         Args:
             alpha (float): Alpha value to use for hypothesis testing.
@@ -120,11 +86,12 @@ class Mark_TTest(Mark):
             markers_n (int): Number of significant markers to return
                             (returned array could have less).
         """
-        super().__init__(verbose, name, **kwargs)
+        self.logger = setup_logger('TTest')
         self.alpha = kwargs.get('alpha', ALPHA)
         self.correction = kwargs.get('correction', CORRECTION)
         self.markers_n = kwargs.get('markers_n', MARKERS_N)
         self.n_jobs = kwargs.get('n_jobs', N_JOBS)
+        self.kwargs = kwargs
 
     def get(self, x, labels, unq_labels=None):
         """
@@ -136,12 +103,12 @@ class Mark_TTest(Mark):
         unq_labels = np.unique(labels) if unq_labels is None else unq_labels
         # To ensure non empty x_ij and x_not_ij
         if len(unq_labels) <= 1:
-            self.vprint("Only one label found. Cannot run t-test.")
+            self.logger.info("Only one label found. Cannot run t-test.")
             return {}
 
         m = int(self.markers_n*x.shape[1]
                 ) if self.markers_n < 1 else self.markers_n
-        self.vprint(f"Using {m} markers.")
+        self.logger.info(f"Using {m} markers.")
 
         test_results = {}
 
@@ -156,9 +123,9 @@ class Mark_TTest(Mark):
                     markers_n=m,
                     correction=self.correction
                 )
-                self.vprint(f"Finished finding markers for cluster={i}.")
+                self.logger.info(f"Finished finding markers for cluster={i}.")
         else:
-            self.vprint("Running marker discovery in parallel.")
+            self.logger.info("Running marker discovery in parallel.")
             test_results = Parallel(n_jobs=self.n_jobs)(
                 delayed(_ttest_differential_expression)(
                     x[np.where(labels == i)],
@@ -168,7 +135,7 @@ class Mark_TTest(Mark):
                     correction=self.correction
                 ) for i in unq_labels
             )
-            self.vprint("Finished finding markers.")
+            self.logger.info("Finished finding markers.")
             test_results = dict(zip(unq_labels, test_results))
 
         return test_results
@@ -181,7 +148,7 @@ class Mark_TTest(Mark):
         m = int(self.markers_n*x.shape[1]
                 ) if self.markers_n < 1 else self.markers_n
         mask = np.zeros(len(x), dtype=bool)
-        mask[subset_indices,] = True
+        mask[subset_indices, ] = True
         return {'0': _ttest_differential_expression(
             x[mask],
             x[~mask],

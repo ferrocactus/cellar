@@ -3,6 +3,7 @@ from abc import abstractmethod
 import numpy as np
 import pandas as pd
 
+from ..log import setup_logger
 from ..utils.experiment import parse
 from ._unit import Unit
 
@@ -15,15 +16,16 @@ class Con(Unit):
     Base class for converting marker names.
     """
 
-    def __init__(self, verbose=False, name='Con', **kwargs):
+    def __init__(self, **kwargs):
         """
         Args:
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, name, **kwargs)
+        self.logger = setup_logger('Converter')
         self.convention = kwargs.get('convention', CONVENTION)
         self.path = kwargs.get('path', PATH)
+        self.kwargs = kwargs
 
     def get(self, x):
         """

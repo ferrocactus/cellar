@@ -5,6 +5,7 @@ from functools import reduce
 import numpy as np
 from scipy.stats import hypergeom
 
+from ..log import setup_logger
 from ..utils.experiment import parse
 from ._unit import Unit
 
@@ -53,9 +54,10 @@ class Ide(Unit):
             verbose (bool): Printing flag.
             **kwargs: Argument dict.
         """
-        super().__init__(verbose, name, **kwargs)
+        self.logger = setup_logger('Identificator')
         self.path = kwargs.get('path', PATH)
         self.tissue = kwargs.get('tissue', TISSUE)
+        self.kwargs = kwargs
 
     @abstractmethod
     def get(self, x):
@@ -135,7 +137,7 @@ class Ide_HyperGeom(Ide):
             x[key][f'lvl{level}_intersec'] = intersec
             x[key][f'lvl{level}_total'] = total
             x[key][f'lvl{level}_all'] = all_pops
-        self.vprint(f"Finished finding lvl{level} types.")
+        self.logger.info(f"Finished finding lvl{level} types.")
 
     def process_tissue(self, x, tissue, level_dict):
         for key in x:
@@ -154,7 +156,7 @@ class Ide_HyperGeom(Ide):
             x[key]['lvl2_intersec'] = intersec
             x[key]['lvl2_total'] = total
             x[key]['lvl2_all'] = all_pops
-        self.vprint("Finished finding lvl2 types.")
+        self.logger.info("Finished finding lvl2 types.")
 
     def find_population(self, x, pops):
         """
