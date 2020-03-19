@@ -40,7 +40,7 @@ class Pipeline(Unit):
             self.verbose, **self.config["dim_reduction"]
         )
         self.eval = wrap("cluster_eval", eval_method)(
-            self.verbose, **self.config["cluster_eval"]
+            **self.config["cluster_eval"]
         )
         self.clu = wrap("cluster", clu_method)(
             eval_obj=self.eval, **self.config["cluster"]

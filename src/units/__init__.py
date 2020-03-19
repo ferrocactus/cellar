@@ -2,7 +2,8 @@ from ._unit import Unit
 from ._cluster import (Clu_KMeans, Clu_KMedoids, Clu_SpectralClustering,
                        Clu_Agglomerative, Clu_DBSCAN, Clu_Birch)
 from ._dim_reduction import Dim_PCA, Dim_UMAP, Dim_TSNE
-from ._evaluation import Eval_SilhouetteScore, Eval_DaviesBouldinScore
+from ._evaluation import (Eval_SilhouetteScore, Eval_DaviesBouldinScore,
+                          Eval_CalinskiHarabasz)
 from ._markers import Mark_TTest
 from ._converter import Con
 from ._identificator import Ide_HyperGeom
@@ -25,7 +26,8 @@ translation_dict = {
     },
     "cluster_eval": {
         "SilhouetteScore": Eval_SilhouetteScore,
-        "DaviesBouldinScore": Eval_DaviesBouldinScore
+        "DaviesBouldinScore": Eval_DaviesBouldinScore,
+        "CalinskiHarabasz": Eval_CalinskiHarabasz
     },
     "markers": {
         "TTest": Mark_TTest
@@ -54,6 +56,7 @@ __all__ = [
     'Dim_TSNE',
     'Eval_SilhouetteScore',
     'Eval_DaviesBouldinScore',
+    'Eval_CalinskiHarabasz',
     'Mark_TTest',
     'Con',
     'Ide_HyperGeom',
