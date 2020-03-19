@@ -12,7 +12,8 @@ translation_dict = {
         "KMedoids": Clu_KMedoids,
         "KMeans": Clu_KMeans,
         "SpectralClustering": Clu_SpectralClustering,
-        "DBSCAN": Clu_DBSCAN
+        "DBSCAN": Clu_DBSCAN,
+        "Agglomerative": Clu_Agglomerative
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
