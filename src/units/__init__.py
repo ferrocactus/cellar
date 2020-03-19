@@ -2,7 +2,7 @@ from ._unit import Unit
 from ._cluster import (Clu_KMeans, Clu_KMedoids, Clu_SpectralClustering,
                        Clu_Agglomerative, Clu_DBSCAN, Clu_Birch)
 from ._dim_reduction import Dim_PCA, Dim_UMAP, Dim_TSNE
-from ._evaluation import (Eval_SilhouetteScore, Eval_DaviesBouldinScore,
+from ._evaluation import (Eval_Silhouette, Eval_DaviesBouldin,
                           Eval_CalinskiHarabasz)
 from ._markers import Mark_TTest
 from ._converter import Con
@@ -25,8 +25,8 @@ translation_dict = {
         # "Autoencoder": Dim_AE
     },
     "cluster_eval": {
-        "SilhouetteScore": Eval_SilhouetteScore,
-        "DaviesBouldinScore": Eval_DaviesBouldinScore,
+        "Silhouette": Eval_Silhouette,
+        "DaviesBouldin": Eval_DaviesBouldin,
         "CalinskiHarabasz": Eval_CalinskiHarabasz
     },
     "markers": {
@@ -54,8 +54,8 @@ __all__ = [
     'Dim_PCA',
     'Dim_UMAP',
     'Dim_TSNE',
-    'Eval_SilhouetteScore',
-    'Eval_DaviesBouldinScore',
+    'Eval_Silhouette',
+    'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',
     'Mark_TTest',
     'Con',

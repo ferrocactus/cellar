@@ -6,7 +6,7 @@ from sklearn.metrics import (calinski_harabasz_score, davies_bouldin_score,
 from ._unit import Unit
 
 
-class Eval_SilhouetteScore(Unit):
+class Eval_Silhouette(Unit):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
@@ -14,7 +14,7 @@ class Eval_SilhouetteScore(Unit):
         return silhouette_score(x, labels, **self.kwargs)
 
 
-class Eval_DaviesBouldinScore(Unit):
+class Eval_DaviesBouldin(Unit):
     def __init__(self, **kwargs):
         self.kwargs = kwargs
 
