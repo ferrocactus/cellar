@@ -7,23 +7,23 @@ from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from umap import UMAP
 
-from ._unit import Unit
 from ..log import setup_logger
+from ._unit import Unit
 
 #from src.methods import Autoencoder
-
-# Autoencoder
-N_COMPONENTS_AE = 15
-EPOCHS = 5
-BATCH = 64
-FACTOR = 0.1
-ACTIVATION = 'ReLU'
-LR = 1e-3
-WEIGHT_DECAY = 1e-5
+# # Autoencoder
+# N_COMPONENTS_AE = 15
+# EPOCHS = 5
+# BATCH = 64
+# FACTOR = 0.1
+# ACTIVATION = 'ReLU'
+# LR = 1e-3
+# WEIGHT_DECAY = 1e-5
 
 
 class Dim_PCA(Unit):
     """
+    Reduces the dimensionality of the data.
     See https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
     """
 
@@ -45,7 +45,7 @@ class Dim_PCA(Unit):
             initial graph of explained variance ratio.
 
         **kwargs: dictionary
-            Dictionary of parameters that will get passed to obj_def
+            Dictionary of parameters that will get passed to obj
             when instantiating it.
         """
         self.logger = setup_logger('PCA')
@@ -53,7 +53,7 @@ class Dim_PCA(Unit):
         self.n_components_max = n_components_max
         self.kwargs = kwargs
 
-    def get(self, x, return_evr=False):
+    def get(self, x, y=None, return_evr=False):
         """
         Runs clustering for multiple n_clusters.
 
@@ -62,6 +62,8 @@ class Dim_PCA(Unit):
 
         x: array, shape (n_samples, n_features)
             The data array.
+
+        y: Ignored. Present for consistency.
 
         return_evr: Bool
             If set, function will also return an array of
@@ -107,25 +109,87 @@ class Dim_PCA(Unit):
 
 
 class Dim_UMAP(Unit):
-    def __init__(self, **kwargs):
+    def __init__(self, use_y=True, **kwargs):
+        """
+        Parameters
+        __________
+
+        use_y: Bool, default True
+            If set, will also pass labels to UMAP for constrained
+            dimensionality reduction.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
         self.logger = setup_logger('UMAP')
+        self.use_y = use_y
         self.kwargs = kwargs
 
     def get(self, x, y=None):
+        """
+        Reduces the dimensionality of the data.
+        See https://umap-learn.readthedocs.io/en/latest/
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        y: array, shape (n_samples,)
+            Array of labels. Will force UMAP to learn a low representation
+            of the data where formed clusters try to match those specified
+            in y as much as possible. If label is set to a negative number
+            it is not considered.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
         self.logger.info("Initializing UMAP.")
-        self.umap = UMAP(**self.kwargs)
-        return self.umap.fit_transform(x, y=y)
+        return UMAP(**self.kwargs).fit_transform(x, y=y)
 
 
 class Dim_TSNE(Unit):
     def __init__(self, **kwargs):
+        """
+        Parameters
+        __________
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
         self.logger = setup_logger('TSNE')
         self.kwargs = kwargs
 
     def get(self, x, y=None):
+        """
+        Reduces the dimensionality of the data.
+        See https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        y: Ignored. Present for consistency.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+        """
         self.logger.info("Initializing TSNE.")
-        self.tsne = TSNE(**self.kwargs)
-        return self.tsne.fit_transform(x)  # y is ignored
+        return TSNE(**self.kwargs).fit_transform(x)
 
 
 # class Dim_AE(Unit):

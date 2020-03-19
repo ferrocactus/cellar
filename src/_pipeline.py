@@ -1,26 +1,27 @@
-from ._wrapper import wrap
-from .utils.read import parse_config
-from .units._unit import Unit
+import datetime
+import pickle
 
 import numpy as np
 import pandas as pd
-import pickle
-import datetime
+
+from ._wrapper import wrap
+from .log import setup_logger
+from .units._unit import Unit
+from .utils.read import parse_config
 
 
 class Pipeline(Unit):
-    def __init__(self, x, config, verbose=False,
-                 row_ids=None, col_ids=None):
-        assert len(x.shape) == 2, "Pipe: Data needs to be of shape (n x d)."
+    def __init__(self, x, config, row_ids=None, col_ids=None):
+        if len(x.shape) != 2:
+            raise ValueError(
+                "Data needs to be of shape (n_samples, n_features).")
         assert isinstance(config, str)
         self.x = x
         self.config = parse_config(config)
-        self.verbose = verbose
         self.row_ids = row_ids.astype('U') if row_ids is not None else None
         self.col_ids = col_ids.astype('U') if col_ids is not None else None
         self.create_objects()
         self.updated = False
-        self.name = 'Pipe'
 
     def create_objects(self, methods=None):
         try:
@@ -85,7 +86,7 @@ class Pipeline(Unit):
     def get_markers_subset(self, indices):
         markers = self.mark.get_subset(self.x, indices)
         # Convert
-        for marker in markers: # should be only 1
+        for marker in markers:  # should be only 1
             markers[marker]['inp_names'] = self.col_ids[
                 markers[marker]['indices']
             ]

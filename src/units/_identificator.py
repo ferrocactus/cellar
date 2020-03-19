@@ -9,18 +9,30 @@ from ..log import setup_logger
 from ..utils.experiment import parse
 from ._unit import Unit
 
-PATH = "markers/cell_type_marker.json"
-TISSUE = 'all'
-
 
 def _get_dict(path):
     """
-    Reads json file and converts to dict. In case a list of paths
-    is provided instead, read them all and merge then into a single
-    dict. Assumes depth two.
+    Parameters
+    __________
 
-    Returns: dict.
+    path: string or array
+        Path to json file. In case a list of paths is provided instead,
+        read them all and merge then into a single dict. Assumes depth two.
+
+    Returns
+    _______
+    d: dict
+        Dictionary containing marker information.
+        d = {
+            key: {
+                subkey: [...],
+                ...
+            },
+            ...
+        }
     """
+    # TODO straighten up the spaghetti
+
     if isinstance(path, str):
         with open(path, "r") as f:
             return json.load(f)
@@ -43,25 +55,28 @@ def _get_dict(path):
         return d
 
 
-class Ide(Unit):
+class Ide_HyperGeom(Unit):
     """
-    Base class for gene identification methods.
+    Runs hypergeom to find matching populations. Compute for every label
+    in x, the pop in pops where x is most likely to have been drawn from.
+    It is assumed that the dictionary that is passed has two levels of
+    hierarchy of types. First determine the lvl1 type, then the lvl2 subtype.
     """
 
-    def __init__(self, verbose=False, name='Ide', **kwargs):
-        """
-        Args:
-            verbose (bool): Printing flag.
-            **kwargs: Argument dict.
-        """
-        self.logger = setup_logger('Identificator')
-        self.path = kwargs.get('path', PATH)
-        self.tissue = kwargs.get('tissue', TISSUE)
-        self.kwargs = kwargs
+    def __init__(self, path='markers/cell_type_marker.json', tissue='all'):
+        self.logger = setup_logger("HyperGeom")
+        self.path = path
+        self.tissue = tissue
 
-    @abstractmethod
     def get(self, x):
         """
+        Extended keys are: lvl1_type, lvl1_sv, lvl1_intersec, lvl1_total,
+                           lvl2_type, lvl2_sv, lvl2_intersec, lvl2_total
+                    type (string): identified type
+                    sv (float): survival value from Hypergeometric Test
+                    intersec (np.ndarray): array of names that overlap
+                    total (int): total number of names in dict[type]
+
         Returns the types of cells in x.
 
         Args:
@@ -72,31 +87,9 @@ class Ide(Unit):
                 },
                 ...
             }
+
         Returns:
             (dict): Extends x with new keys (returns copy).
-        """
-        pass
-
-
-class Ide_HyperGeom(Ide):
-    """
-    Runs hypergeom to find matching populations. Compute for every label
-    in x, the pop in pops where x is most likely to have been drawn from.
-    It is assumed that the dictionary that is passed has two levels of
-    hierarchy of types. First determine the lvl1 type, then the lvl2 subtype.
-    """
-
-    def __init__(self, verbose=False, name='HyperGeom', **kwargs):
-        super().__init__(verbose, name, **kwargs)
-
-    def get(self, x):
-        """
-        Extended keys are: lvl1_type, lvl1_sv, lvl1_intersec, lvl1_total,
-                           lvl2_type, lvl2_sv, lvl2_intersec, lvl2_total
-                    type (string): identified type
-                    sv (float): survival value from Hypergeometric Test
-                    intersec (np.ndarray): array of names that overlap
-                    total (int): total number of names in dict[type]
         """
         x = x.copy()
         lvl2 = _get_dict(self.path)
@@ -112,6 +105,7 @@ class Ide_HyperGeom(Ide):
             self.process_level(x, lvl1, level=1)
             self.process_level(x, lvl2, level=2)
         else:
+            self.logger.info(f"Running HyperGeom for {self.tissue} only.")
             self.process_tissue(x, tissue=self.tissue, level_dict=lvl2)
 
         return x

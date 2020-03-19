@@ -14,18 +14,45 @@ MARKERS_N = 200
 N_JOBS = None
 
 
-def _ttest_differential_expression(x_i, x_not_i,
-                                   alpha=ALPHA,
-                                   markers_n=MARKERS_N,
-                                   correction=CORRECTION):
+def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
+                                   correction='hs'):
     """
     Find significant genes in pop1 compared to pop2 using ttest.
-    Args:
-        x_i (np.ndarray) of size (n, n_features)
-        x_not_i (np.ndarray) of size (m, n_features)
-        alpha (float): Alpha value to use for hypothesis testing.
-        correction (string): Correction method to apply for multitest.
-        verbose (bool)
+
+    Parameters
+    __________
+
+    x_i: array, shape (n, n_features)
+        Target population.
+
+    x_not_i: array, shape (n_samples - n, n_features)
+        The rest of the population.
+
+    alpha: float, between 0 and 1
+        Alpha value to use for hypothesis testing.
+
+    markers_n: int
+        Number of top markers to return. Note: return number could be smaller.
+
+    correction: string
+        Correction method to apply for multitest.
+        See https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html
+
+    Returns
+    _______
+
+    test_results: dict
+        Dictionary of the form {
+            'indices': array, shape (<=markers_n,)
+            'pvals': array, shape (<=markers_n,)
+            'diffs': array, shape (<=markers_n,)
+        }
+        where indices correspond to the indices of the columns which
+        were found to be significant, pvals corresponds to the p-value
+        as returned by multipletests(ttest), and diffs corresponds to
+        the different in the means of the vectors x_in vs x_not_in
+        for the given significant columns.
+
     """
     pvals = np.zeros(shape=(x_i.shape[1]))
     diffs = np.zeros_like(pvals)
@@ -78,27 +105,58 @@ class Mark_TTest(Unit):
     choose the top_k genes which exhibit the highest difference of the means.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, alpha=0.05, markers_n=200, correction='hs', n_jobs=None):
         """
-        Args:
-            alpha (float): Alpha value to use for hypothesis testing.
-            correction (string): Correction method to apply for multitest.
-            markers_n (int): Number of significant markers to return
-                            (returned array could have less).
+        Parameters
+        __________
+
+        alpha: float, between 0 and 1
+        Alpha value to use for hypothesis testing.
+
+        markers_n: int
+            Number of top markers to return. Note: return number could be smaller.
+
+        correction: string
+            Correction method to apply for multitest.
+
+        n_jobs: int or None, default None
+            Number of jobs to use if multithreading. See
+            https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
+            If None or 1, will not run multithreading.
+
         """
         self.logger = setup_logger('TTest')
-        self.alpha = kwargs.get('alpha', ALPHA)
-        self.correction = kwargs.get('correction', CORRECTION)
-        self.markers_n = kwargs.get('markers_n', MARKERS_N)
-        self.n_jobs = kwargs.get('n_jobs', N_JOBS)
-        self.kwargs = kwargs
+        self.alpha = alpha
+        self.markers_n = markers_n
+        self.correction = correction
+        self.n_jobs = n_jobs
 
     def get(self, x, labels, unq_labels=None):
         """
-        Args:
-            unq_labels (np.ndarray): np.unique(labels).
+        Parameters
+        __________
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        labels: array, shape (n_samples,)
+            Labels of data points.
+
+        unq_labels: array or None, shape (np.unique(labels),)
+            Will get recomputed, but can pass as argument for performance.
+
+        Returns
+        _______
+
+        test_results: dict
+            Dictionary of the form {
+                label {
+                    'indices': array, shape (<=markers_n,)
+                    'pvals': array, shape (<=markers_n,)
+                    'diffs': array, shape (<=markers_n,)
+                },
+                ...
+            }
         """
-        assert len(x.shape) == 2
         # Infer unique labels from input
         unq_labels = np.unique(labels) if unq_labels is None else unq_labels
         # To ensure non empty x_ij and x_not_ij
