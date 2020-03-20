@@ -3,7 +3,7 @@ library(reticulate)
 use_virtualenv("~/code/py3.7", required=TRUE)
 ##############################################################################
 # Run this to import Pipeline into R, couldnt figure another way of doing it
-source_python('example.py')
+source_python('__init__.py')
 ##############################################################################
 # Read the data and the gene ids
 ids <- read.csv('datasets/spleen/spleen.csv', nrows = 1, header = FALSE)
