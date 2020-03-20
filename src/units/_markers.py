@@ -1,3 +1,4 @@
+import warnings
 from abc import abstractmethod
 
 import numpy as np
@@ -7,11 +8,6 @@ from statsmodels.stats.multitest import multipletests
 
 from ..log import setup_logger
 from ._unit import Unit
-
-ALPHA = 0.05
-CORRECTION = 'hs'
-MARKERS_N = 200
-N_JOBS = None
 
 
 def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
@@ -23,10 +19,10 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
     __________
 
     x_i: array, shape (n, n_features)
-        Target population.
+        Target population. (Assumed not empty)
 
     x_not_i: array, shape (n_samples - n, n_features)
-        The rest of the population.
+        The rest of the population. (Assumed not empty)
 
     alpha: float, between 0 and 1
         Alpha value to use for hypothesis testing.
@@ -57,14 +53,17 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
     pvals = np.zeros(shape=(x_i.shape[1]))
     diffs = np.zeros_like(pvals)
 
+    if x_i.shape[0] <= 1 or x_not_i.shape[0] <= 1:
+        warnings.warn("Array contains <=1 elements, ttest results may be inaccurate.")
+
     for j in range(x_i.shape[1]):  # current column index (gene)
-        x_ij = x_i[:, j]  # Not empty
-        x_not_ij = x_not_i[:, j]  # Not empty
+        x_ij = x_i[:, j]
+        x_not_ij = x_not_i[:, j]
 
         # WARNING: ttest will throw error if cluster has single point
         # Having equal_var=False runs Welch's t-test which assumes
         # different n and different variances
-        t, pvals[j] = ttest_ind(x_ij, x_not_ij, equal_var=False)
+        _, pvals[j] = ttest_ind(x_ij, x_not_ij, equal_var=False)
         diffs[j] = np.mean(x_ij) - np.mean(x_not_ij)
 
     # Apply correction and update p-values to the corrected ones
@@ -78,9 +77,15 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
 
     # Return the rejected null hypothesis which have the highest
     # difference of means of x_ij and x_not_ij
-    rejected_hs = np.where(decision == True)[0]
-    sorted_diff_indices = np.flip(np.argsort(diffs[rejected_hs]))
-    final_indices = rejected_hs[sorted_diff_indices][:markers_n]
+    diffs[diffs <= 0] = -np.Inf
+    diffs[np.where(decision == False)] = -np.Inf
+    sorted_diff_indices = np.flip(np.argsort(diffs))
+    last_positive = np.argmin(diffs[sorted_diff_indices] > 0)
+    # accept only positive differences since those are markers
+    # or until we reach markers_n
+    if last_positive == 0 and diffs[0] > 0:
+        last_positive = sorted_diff_indices.shape[0]
+    final_indices = sorted_diff_indices[:min(last_positive, markers_n)]
 
     test_results = {'indices': final_indices,
                     'pvals': pvals[final_indices],

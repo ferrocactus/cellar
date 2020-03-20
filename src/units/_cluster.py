@@ -15,8 +15,8 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
                  eval_obj=None, n_jobs=None, **kwargs):
     """
     Wrapper function for those classes which specify the number of clusters
-    in advance and also have fit_predict implements. Classes include:
-    KMedoids, KMeans, SpectralClustering.
+    in advance and also have fit_predict implemented. Classes include:
+    KMedoids, KMeans, SpectralClustering, AgglomerativeClustering, Birch.
 
     Parameters
     __________
