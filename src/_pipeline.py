@@ -12,7 +12,7 @@ from .utils.read import parse_config
 
 
 class Pipeline(Unit):
-    def __init__(self, x, config, row_ids=None, col_ids=None):
+    def __init__(self, x, config, col_ids=None):
         if type(x) != np.ndarray:
             x = np.array(x)
         if len(x.shape) != 2:
@@ -21,8 +21,7 @@ class Pipeline(Unit):
         assert isinstance(config, str)
         self.x = x
         self.config = parse_config(config)
-        self.row_ids = row_ids.astype('U') if row_ids is not None else None
-        self.col_ids = col_ids.astype('U') if col_ids is not None else None
+        self.col_ids = np.array(col_ids).astype('U').reshape(-1)
         self.create_objects()
         self.updated = False
 
@@ -76,7 +75,6 @@ class Pipeline(Unit):
 
     def cluster(self):
         self.labels = self.clu.get(self.x_emb)
-        print(self.labels.shape)
 
     def get_markers(self):
         self.unq_labels = np.unique(self.labels)
@@ -105,7 +103,7 @@ class Pipeline(Unit):
 
     def get_markers_subset(self, indices1, indices2=None):
         if indices2 is None:
-            markers = self.mark.get_subset(self.x, indices)
+            markers = self.mark.get_subset(self.x, indices1)
             # Convert
             for marker in markers:  # should be only 1
                 markers[marker]['inp_names'] = self.col_ids[
@@ -137,6 +135,11 @@ class Pipeline(Unit):
             return markers
 
     def enrich(self, indices1, indices2=None):
+        if type(indices1) != np.ndarray:
+            indices1 = np.array(indices1).astype(int).reshape(-1)
+        if indices2 is not None and type(indices2) != np.ndarray:
+            indices2 = np.array(indices2).astype(int).reshape(-1)
+
         markers = self.get_markers_subset(indices1=indices1, indices2=indices2)
         for key in markers:
             gseapy.enrichr(gene_list=markers[key]['outp_names'].tolist(),
@@ -196,6 +199,8 @@ class Pipeline(Unit):
             100: Hard cluster. Update the given labels. Don't run clustering.
             200: Soft cluster. Run constrained clustering using new labels.
         """
+        if type(new_labels) != np.ndarray:
+            new_labels = np.array(new_labels).astype(int).reshape(-1)
         # labels assumed to be 1D and same dimension as original labels
         if code == 100:
             self.labels = new_labels

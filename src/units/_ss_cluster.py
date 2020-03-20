@@ -4,39 +4,14 @@ import numpy as np
 from sklearn.cluster import KMeans
 from umap import UMAP
 
+from ..log import setup_logger
 from ._unit import Unit
 
 #from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
 #from copkmeans.cop_kmeans import cop_kmeans
 
 
-class SSClu(Unit):
-    """
-    Base class for Semi-Supervised Clustering.
-    """
-
-    def __init__(self, verbose=False, name='SSClu', **kwargs):
-        """
-        Args:
-            verbose (bool): Printing flag.
-            **kwargs: Argument dict.
-        """
-        super().__init__(verbose, name, **kwargs)
-
-    @abstractmethod
-    def get(self, x):
-        """
-        Returns the labels of x.
-
-        Args:
-            x (np.ndarray): Data in matrix (n x d) form.
-        Returns:
-            (np.ndarray): The labels of x.
-        """
-        pass
-
-
-class SSClu_SeededKMeans(SSClu):
+class SSClu_SeededKMeans(Unit):
     """
     Similar to KMeans, given a dataset x, generate e K-partitioning
     of x so that the KMeans objective is locally minimized. The difference
@@ -51,7 +26,7 @@ class SSClu_SeededKMeans(SSClu):
     """
 
     def __init__(self, **kwargs):
-        self.name = 'SeededKMeans'
+        self.logger = setup_logger('SeededKMeans')
         self.kwargs = kwargs
 
     def get(self, x, labels):
@@ -66,7 +41,8 @@ class SSClu_SeededKMeans(SSClu):
         unq_labels = np.unique(labels[labels >= 0])
         n_clusters = len(unq_labels)
         centroids = []
-        self.logger.info(f"Found {n_clusters} unique labels. Using seeded KMeans.")
+        self.logger.info(
+            f"Found {n_clusters} unique labels. Using seeded KMeans.")
 
         for i in range(n_clusters):
             centroid = np.mean(x[labels == unq_labels[i]], axis=0)
@@ -79,9 +55,9 @@ class SSClu_SeededKMeans(SSClu):
         return labels
 
 
-class SSClu_UMAP(SSClu):
+class SSClu_UMAP(Unit):
     def __init__(self, **kwargs):
-        self.name = 'SS_UMAP'
+        self.logger = setup_logger('UMAP')
         self.kwargs = kwargs
 
     def get(self, x, labels, clu, eval):
@@ -94,9 +70,9 @@ class SSClu_UMAP(SSClu):
         return new_labels
 
 
-class SSClu_COPKMeans(SSClu):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+class SSClu_COPKMeans(Unit):
+    def __init__(self, **kwargs):
+        pass
 
     def get(self, x, n, ml, cl):
         pass
@@ -104,9 +80,9 @@ class SSClu_COPKMeans(SSClu):
         return clusters
 
 
-class SSClu_PCKMeans(SSClu):
-    def __init__(self, verbose=False, **kwargs):
-        super().__init__(verbose, **kwargs)
+class SSClu_PCKMeans(Unit):
+    def __init__(self, **kwargs):
+        pass
 
     def get(self, x, n, ml, cl):
         pass
