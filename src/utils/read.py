@@ -39,7 +39,7 @@ def load_data(dataset):
     # return X, Y
     if dataset == 'spleen':
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
-        return ann.X, ann.var.index.to_numpy().astype('U')
+        return [ann.X, ann.var.index.to_numpy().astype('U')]
     elif dataset == 'brain':
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T

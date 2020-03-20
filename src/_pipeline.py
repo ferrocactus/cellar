@@ -3,6 +3,7 @@ import pickle
 
 import numpy as np
 import pandas as pd
+import gseapy
 
 from ._wrapper import wrap
 from .log import setup_logger
@@ -12,6 +13,8 @@ from .utils.read import parse_config
 
 class Pipeline(Unit):
     def __init__(self, x, config, row_ids=None, col_ids=None):
+        if type(x) != np.ndarray:
+            x = np.array(x)
         if len(x.shape) != 2:
             raise ValueError(
                 "Data needs to be of shape (n_samples, n_features).")
@@ -73,6 +76,7 @@ class Pipeline(Unit):
 
     def cluster(self):
         self.labels = self.clu.get(self.x_emb)
+        print(self.labels.shape)
 
     def get_markers(self):
         self.unq_labels = np.unique(self.labels)
@@ -82,19 +86,6 @@ class Pipeline(Unit):
             self.labels,
             self.unq_labels
         )
-
-    def get_markers_subset(self, indices):
-        markers = self.mark.get_subset(self.x, indices)
-        # Convert
-        for marker in markers:  # should be only 1
-            markers[marker]['inp_names'] = self.col_ids[
-                markers[marker]['indices']
-            ]
-            markers[marker]['outp_names'] = self.con.get(
-                markers[marker]['inp_names']
-            )
-        markers = self.ide.get(markers)
-        return markers
 
     def convert(self):
         for marker in self.markers:
@@ -111,6 +102,47 @@ class Pipeline(Unit):
     def get_emb_2d(self):
         self.x_emb_2d = self.vis.get(self.x_emb, self.labels)
         return self.x_emb_2d
+
+    def get_markers_subset(self, indices1, indices2=None):
+        if indices2 is None:
+            markers = self.mark.get_subset(self.x, indices)
+            # Convert
+            for marker in markers:  # should be only 1
+                markers[marker]['inp_names'] = self.col_ids[
+                    markers[marker]['indices']
+                ]
+                markers[marker]['outp_names'] = self.con.get(
+                    markers[marker]['inp_names']
+                )
+            markers = self.ide.get(markers)
+            return markers
+        else:
+            x1 = self.x[indices1]
+            labels1 = np.zeros((x1.shape[0],), dtype=int)
+            x2 = self.x[indices2]
+            labels2 = np.ones((x2.shape[0],), dtype=int)
+
+            x = np.concatenate([x1, x2])
+            labels = np.concatenate([labels1, labels2])
+
+            markers = self.mark.get(x, labels)
+            for marker in markers:
+                markers[marker]['inp_names'] = self.col_ids[
+                    markers[marker]['indices']
+                ]
+                markers[marker]['outp_names'] = self.con.get(
+                    markers[marker]['inp_names']
+                )
+            markers = self.ide.get(markers)
+            return markers
+
+    def enrich(self, indices1, indices2=None):
+        markers = self.get_markers_subset(indices1=indices1, indices2=indices2)
+        for key in markers:
+            gseapy.enrichr(gene_list=markers[key]['outp_names'].tolist(),
+                           description=key,
+                           format='png',
+                           gene_sets='Human_Gene_Atlas')
 
     def save_plot_info(self, path=None):
         """
