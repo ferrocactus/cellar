@@ -81,9 +81,12 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
     diffs[np.where(decision == False)] = -np.Inf
     sorted_diff_indices = np.flip(np.argsort(diffs))
     last_positive = np.argmin(diffs[sorted_diff_indices] > 0)
+
     # accept only positive differences since those are markers
     # or until we reach markers_n
-    if last_positive == 0 and diffs[0] > 0:
+
+    # argmin updates only if it finds something smaller
+    if last_positive == 0 and diffs[0] > 0: # everything is positive
         last_positive = sorted_diff_indices.shape[0]
     final_indices = sorted_diff_indices[:min(last_positive, markers_n)]
 

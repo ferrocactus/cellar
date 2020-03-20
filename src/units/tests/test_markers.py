@@ -11,25 +11,24 @@ from src.units._markers import _ttest_differential_expression
 
 class ttest(unittest.TestCase):
     def test_ttest_differential_expression(self):
-        alpha = 0.05
-        markers_n = 5
-        correction = 'hs'
-
+        # no significance
         x1 = np.random.random(size=(7, 20))
         test_results1 = _ttest_differential_expression(
-            x1, x1, alpha=alpha, markers_n=markers_n, correction=correction)
+            x1, x1, alpha=0.05, markers_n=5, correction='hs')
         assert_array_equal(np.array([]), test_results1['indices'])
 
+        # all significant
         x21 = np.ones(shape=(4, 20)) @ np.diag(np.arange(27, 7, -1))
         x22 = np.ones(shape=(3, 20)) * (-4)
         test_results2 = _ttest_differential_expression(
-            x21, x22, alpha=alpha, markers_n=markers_n, correction=correction)
-        assert_array_equal(np.arange(markers_n), test_results2['indices'])
+            x21, x22, alpha=0.05, markers_n=5, correction='hs')
+        assert_array_equal(np.arange(5), test_results2['indices'])
+        # all negatively significant
         test_results3 = _ttest_differential_expression(
-            x22, x21, alpha=alpha, markers_n=markers_n, correction=correction)
+            x22, x21, alpha=0.05, markers_n=5, correction='hs')
         assert_array_equal(np.array([]), test_results3['indices'])
 
-
+        # one significant, one negatively significant
         x31 = np.array(
             [[-1, -0.5, 1, 5],
              [-0.5, -1, 0.5, 5],
@@ -41,5 +40,5 @@ class ttest(unittest.TestCase):
              [1, 11, -1, -1]]
         )
         test_results4 = _ttest_differential_expression(
-            x31, x32, alpha=alpha, markers_n=markers_n, correction=correction)
+            x31, x32, alpha=0.05, markers_n=2, correction='hs')
         assert_array_equal(np.array([3]), test_results4['indices'])
