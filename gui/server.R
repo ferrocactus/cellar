@@ -41,7 +41,7 @@ server <- shinyServer(function(input, output, session) {
     #         clu_method=clu_method, eval_method=eval_method,
     #         clu_n_clusters=clu_n_clusters, ssc_method=ssc_method)
 
-    withProgress(message = 'Making plot', {
+    withProgress(message = 'Making plot', value = 0, {
       # Number of times we'll go through the loop
       n <- 6
 
@@ -49,29 +49,29 @@ server <- shinyServer(function(input, output, session) {
       x_emb = pipe$get_emb(
             method=dim_method, n_components=dim_n_components)
 
-      incProgress(2/n, detail = paste("Step: Clustering"))
+      incProgress(1/n, detail = paste("Step: Clustering"))
       labels <- pipe$get_labels(
             method=clu_method,
             eval_method=eval_method, n_clusters=clu_n_clusters,
             n_jobs=clu_n_jobs)
 
-      incProgress(3/n, detail = paste("Step: Finding markers"))
+      incProgress(1/n, detail = paste("Step: Finding markers"))
       markers <- pipe$get_markers(
             method='TTest',
             alpha=mark_alpha, markers_n=mark_markers_n,
             correction=mark_correction, n_jobs=mark_n_jobs)
 
-      incProgress(4/n, detail = paste("Step: Converting names"))
+      incProgress(1/n, detail = paste("Step: Converting names"))
       markers <- pipe$convert(
             method=con_method,
             convention=con_convention, path=con_path)
 
-      incProgress(5/n, detail = paste("Step: Identifying cells"))
+      incProgress(1/n, detail = paste("Step: Identifying cells"))
       markers <- pipe$identify(
             method="HyperGeom",
             path=ide_path, tissue=ide_tissue)
 
-      incProgress(6/n, detail = paste("Step: Visualizing"))
+      incProgress(1/n, detail = paste("Step: Visualizing"))
       x_emb_2d <- pipe$get_emb_2d(x_emb, y=labels, method=vis_method)
       df <- data.frame(x1 = x_emb_2d[, 1],
                       x2 = x_emb_2d[, 2],
