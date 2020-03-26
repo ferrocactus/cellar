@@ -4,8 +4,7 @@ import warnings
 warnings.filterwarnings("ignore")
 
 if __name__ == '__main__':
-    dataset = 'spleen'
-    X, ids = load_data(dataset)
+    X, ids = load_data('spleen')
     pipe = Pipeline(X, config='configs/config.ini', col_ids=ids)
     pipe.run()
 
