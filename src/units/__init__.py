@@ -13,7 +13,7 @@ translation_dict = {
     "cluster": {
         "KMeans": Clu_KMeans,
         "KMedoids": Clu_KMedoids,
-        "SpectralClustering": Clu_SpectralClustering,
+        "Spectral": Clu_SpectralClustering,
         "Agglomerative": Clu_Agglomerative,
         "DBSCAN": Clu_DBSCAN,
         "Birch": Clu_Birch

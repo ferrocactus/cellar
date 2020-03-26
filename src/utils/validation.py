@@ -1,14 +1,29 @@
+from ast import literal_eval
+
 import numpy as np
 
 
 def _effective_n_jobs(n_jobs):
+    if isinstance(n_jobs, str) and n_jobs is not None:
+        n_jobs = literal_eval(n_jobs)
+
     if n_jobs is None or n_jobs == 1:
         return 1
     else:
         return n_jobs
 
 
+def _effective_numerical_value(x):
+    if isinstance(x, str) and x is not None:
+        return literal_eval(x)
+    else:
+        return x
+
+
 def _effective_n_clusters(n_clusters):
+    if isinstance(n_clusters, str):
+        n_clusters = literal_eval(n_clusters)
+
     if isinstance(n_clusters, int):
         return n_clusters, 'int'
     elif isinstance(n_clusters, list) or isinstance(n_clusters, np.ndarray):

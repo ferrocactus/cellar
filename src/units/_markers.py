@@ -8,6 +8,7 @@ from statsmodels.stats.multitest import multipletests
 
 from ..log import setup_logger
 from ._unit import Unit
+from ..utils.validation import _effective_n_jobs
 
 
 def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
@@ -178,7 +179,7 @@ class Mark_TTest(Unit):
 
         test_results = {}
 
-        if self.n_jobs is None or self.n_jobs == 1:
+        if _effective_n_jobs(self.n_jobs) == 1:
             for i in unq_labels:  # label to consider
                 x_i = x[np.where(labels == i)]
                 x_not_i = x[np.where(labels != i)]
