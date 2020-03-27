@@ -123,6 +123,10 @@ class Dim_UMAP(Unit):
             when instantiating it.
 
         """
+        import warnings
+        from numba.errors import NumbaPerformanceWarning
+        warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
+
         self.logger = setup_logger('UMAP')
         self.use_y = use_y
         self.kwargs = kwargs
