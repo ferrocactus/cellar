@@ -39,4 +39,5 @@ git clone https://github.com/ferrocactus/cellar /home/cellar/package/
 
 RUN python3 /home/cellar/setup.py install
 
-# Need to install reticulate shiny shinyjs plotly from R
+# Need to install reticulate shiny shinyjs plotly V8 stringr BiocManager limma
+# from R

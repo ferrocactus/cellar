@@ -129,7 +129,8 @@ server <- shinyServer(function(input, output, session) {
     })
     return(df)
   })
-  
+  df <- isolate(get_plot_data())
+  markers<-pipe$markers
   ENTREZID=array()
   SYMBOL=array()
   for (i in 1:length(markers)){
@@ -147,7 +148,7 @@ server <- shinyServer(function(input, output, session) {
   ENTREZID=distinct(ENTREZID)
   hgnc_filt=data.frame(SYMBOL,ENTREZID)
   row.names(hgnc_filt)=as.character(SYMBOL[[1]])
-  df <- isolate(get_plot_data())
+  
   #get the gene expression data
   expr_data=matrix(pipe$x,ncol=length(pipe$col_ids),dimnames=list(1:length(pipe$x[,1]),pipe$col_ids))
   expr_data=data.frame(expr_data)
