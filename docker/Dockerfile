@@ -12,7 +12,8 @@ RUN apt-get update && apt-get install -y \
         python3-pip\
         curl\
         libssl-dev\
-        libcurl4-openssl-dev
+        libcurl4-openssl-dev\
+        libv8-dev
 
 RUN apt-key adv --keyserver keyserver.ubuntu.com\
                 --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
@@ -38,4 +39,4 @@ git clone https://github.com/ferrocactus/cellar /home/cellar/package/
 
 RUN python3 /home/cellar/setup.py install
 
-# Need to install reticulate shiny plotly from R
+# Need to install reticulate shiny shinyjs plotly from R
