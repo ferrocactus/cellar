@@ -61,9 +61,11 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
         y = obj_def(n_clusters=k, **kwargs).fit_predict(x)
         if eval_obj is not None:
             score = eval_obj.get(x, y)
-            logger.info(f"Finished clustering with k={k}. Score={score:.2f}.")
+            logger.info(
+                "Finished clustering with k={0}. Score={1:.2f}.".format(k,
+                                                                        score))
         else:
-            logger.info(f"Finished clustering with k={k}.")
+            logger.info("Finished clustering with k={0}.".format(k))
         return y
     # If n_clusters determined to be a list of integers
     elif argtype == 'list':
@@ -394,9 +396,11 @@ class Clu_DBSCAN(Unit):
         noise = np.sum(y == -1)
         if self.eval_obj is not None:
             score = self.eval_obj.get(x, y)
-            self.logger.info(f"Found {unqy - (noise >= 1)} labels using DBSCAN."
-                             f"Score={score:.2f}.")
+            self.logger.info(
+                "Found {0} labels using DBSCAN.".format(unqy-(noise >= 1)) +
+                "Score={0:.2f}.".format(score))
         else:
-            self.logger.info(f"Found {unqy} labels using DBSCAN.")
-        self.logger.info(f"Found {noise} noisy points. Assigning label -1.")
+            self.logger.info("Found {0} labels using DBSCAN.".format(unqy))
+        self.logger.info(
+            "Found {0} noisy points. Assigning label -1.".format(noise))
         return y

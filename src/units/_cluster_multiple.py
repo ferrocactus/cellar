@@ -75,9 +75,10 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
             if score > top_score:
                 top_y, top_score, top_k = y, score, k
 
-            logger.info(f"Finished clustering with k={k}. Score={score:.2f}.")
+            logger.info(
+                "Finished clustering with k={0}. Score={1:.2f}.".format(k, score))
     else:
-        logger.info(f"Running multiple threads with n_jobs={n_jobs}.")
+        logger.info("Running multiple threads with n_jobs={0}.".format(n_jobs))
 
         kwargs_list = []
         for i, k in enumerate(k_list):
@@ -100,8 +101,10 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
 
         # Log scores
         for k, score in zip(k_list, score_list):
-            logger.info(f"Finished clustering with k={k}. Score={score:.2f}.")
+            logger.info(
+                "Finished clustering with k={0}. Score={1:.2f}.".format(k, score))
 
-    logger.info(f"Finished clustering. Best score achieved for k={top_k}.")
+    logger.info(
+        "Finished clustering. Best score achieved for k={0}.".format(top_k))
 
     return top_y

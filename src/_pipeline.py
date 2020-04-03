@@ -25,7 +25,7 @@ def is_float(val):
 class Pipeline(Unit):
     def __init__(self, x='default', config='configs/config.ini', col_ids=None):
         if x == 'default':
-            x, col_ids = load_data('spleen')
+            x, col_ids = load_data('brain')
             print("Loaded data.")
         if type(x) != np.ndarray:
             x = np.array(x)
@@ -114,8 +114,8 @@ class Pipeline(Unit):
         self.labels = self.clu.get(x)
         return self.labels
 
-    def get_markers(self, x=None, y=None, method="TTest", alpha=0.05, markers_n=200,
-                    correction='hs', n_jobs=1):
+    def get_markers(self, x=None, y=None, method="TTest", alpha=0.05,
+                    markers_n=200, correction='hs', n_jobs=1):
         if x is None:
             x = self.x
         if y is None:
@@ -173,10 +173,10 @@ class Pipeline(Unit):
 
         if method == 'UMAP':
             self.vis = wrap("dim_reduction", method)(
-                n_components = 2,
-                n_neighbors = 15,
-                min_dist = 0,
-                metric = "euclidean"
+                n_components=2,
+                n_neighbors=15,
+                min_dist=0,
+                metric="euclidean"
             )
         else:
             self.vis = wrap("dim_reduction", method)()

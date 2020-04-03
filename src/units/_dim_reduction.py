@@ -95,7 +95,7 @@ class Dim_PCA(Unit):
                                        ).knee
             n_components = max(n_components, 2)
 
-            self.logger.info(f"Knee found at {n_components}.")
+            self.logger.info("Knee found at {0}.".format(n_components))
             x_emb = PCA(n_components=n_components,
                         **self.kwargs).fit_transform(x)
         else:

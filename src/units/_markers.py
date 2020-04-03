@@ -175,7 +175,7 @@ class Mark_TTest(Unit):
 
         m = int(self.markers_n*x.shape[1]
                 ) if self.markers_n < 1 else self.markers_n
-        self.logger.info(f"Using {m} markers.")
+        self.logger.info("Using {0} markers.".format(m))
 
         test_results = {}
 
@@ -190,7 +190,7 @@ class Mark_TTest(Unit):
                     markers_n=m,
                     correction=self.correction
                 )
-                self.logger.info(f"Finished finding markers for cluster={i}.")
+                self.logger.info("Finished finding markers for cluster={0}.".format(i))
         else:
             self.logger.info("Running marker discovery in parallel.")
             test_results = Parallel(n_jobs=self.n_jobs)(

@@ -2,18 +2,14 @@ library(reticulate)
 library(shiny)
 library(plotly)
 
-#ids <- read.csv('datasets/spleen/spleen.csv', nrows = 1, header = FALSE)
-#X <- read.csv('datasets/spleen/spleen.csv', skip = 1, header = FALSE)
-
 # Load python
-use_virtualenv("~/code/py3.7", required = TRUE)
-source_python('__init__.py')
+reticulate::use_virtualenv("renv", required = TRUE)
+reticulate::source_python('__init__.py')
 
 # Create pipeline
 pipe <- Pipeline()
 
 server <- shinyServer(function(input, output, session) {
-  ############################################################################
   get_plot_data <- isolate(function(){
     dim_method <- input$dim_method
     dim_n_components <- input$dim_n_components
@@ -89,7 +85,9 @@ server <- shinyServer(function(input, output, session) {
         df,
         x = df$x1, y = df$x2,
         text = ~paste("label: ", as.factor(df$y)),
-        color = as.factor(df$y)
+        color = as.factor(df$y),
+        mode = 'markers',
+        type = 'scatter'
       ) %>% layout(dragmode = "lasso")
     })
   })

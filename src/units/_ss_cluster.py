@@ -42,7 +42,7 @@ class SSClu_SeededKMeans(Unit):
         n_clusters = len(unq_labels)
         centroids = []
         self.logger.info(
-            f"Found {n_clusters} unique labels. Using seeded KMeans.")
+            "Found {0} unique labels. Using seeded KMeans.".format(n_clusters))
 
         for i in range(n_clusters):
             centroid = np.mean(x[labels == unq_labels[i]], axis=0)

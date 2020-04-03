@@ -214,7 +214,7 @@ class Plotter:
             x = np.arange(len(pvals[:k]))
             ax[i][1].scatter(x, diffs[:k], c=np.arange(len(pvals[:k])))
             ax[i][1].set_xticklabels(np.round(pvals[:k], 3))
-            ax[i][1].set_title(f"Cluster: {label}")
+            ax[i][1].set_title("Cluster: {0}".format(label))
             ax[i][1].set_xlabel("p-value")
             ax[i][1].set_ylabel("mean difference")
             for j, txt in enumerate(names[:k]):

@@ -3,6 +3,7 @@ from configparser import ConfigParser
 
 import anndata
 import gtfparse
+import pandas as pd
 
 
 def read_h5ad(filename):

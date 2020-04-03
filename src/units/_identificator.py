@@ -105,33 +105,34 @@ class Ide_HyperGeom(Unit):
             self.process_level(x, lvl1, level=1)
             self.process_level(x, lvl2, level=2)
         else:
-            self.logger.info(f"Running HyperGeom for {self.tissue} only.")
+            self.logger.info(
+                "Running HyperGeom for {0} only.".format(self.tissue))
             self.process_tissue(x, tissue=self.tissue, level_dict=lvl2)
 
         return x
 
     def process_level(self, x, level_dict, level):
         for key in x:
-            if level > 1 and x[key][f'lvl{level-1}_type'] == 'None':
+            if level > 1 and x[key]['lvl{0}_type'.format(level-1)] == 'None':
                 tp, sv, intersec, total = "None", 1, np.array([]), 0
             else:
                 if level > 1:
                     tp, sv, intersec, total, all_pops = self.find_population(
                         # x[key]['outp_names'],
-                        x[key][f'lvl{level-1}_intersec'],
-                        level_dict[x[key][f'lvl{level-1}_type']]
+                        x[key]['lvl{0}_intersec'.format(level-1)],
+                        level_dict[x[key]['lvl{0}_type'.format(level-1)]]
                     )
                 else:
                     tp, sv, intersec, total, all_pops = self.find_population(
                         x[key]['outp_names'],
                         level_dict
                     )
-            x[key][f'lvl{level}_type'] = tp
-            x[key][f'lvl{level}_sv'] = sv
-            x[key][f'lvl{level}_intersec'] = intersec
-            x[key][f'lvl{level}_total'] = total
-            x[key][f'lvl{level}_all'] = all_pops
-        self.logger.info(f"Finished finding lvl{level} types.")
+            x[key]['lvl{0}_type'.format(level)] = tp
+            x[key]['lvl{0}_sv'.format(level)] = sv
+            x[key]['lvl{0}_intersec'.format(level)] = intersec
+            x[key]['lvl{0}_total'.format(level)] = total
+            x[key]['lvl{0}_all'.format(level)] = all_pops
+        self.logger.info("Finished finding lvl{0} types.".format(level))
 
     def process_tissue(self, x, tissue, level_dict):
         for key in x:
