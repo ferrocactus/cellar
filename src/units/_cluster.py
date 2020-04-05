@@ -3,6 +3,7 @@ import logging
 import numpy as np
 from sklearn.cluster import (DBSCAN, AgglomerativeClustering, Birch, KMeans,
                              SpectralClustering)
+from sklearn.mixture import GaussianMixture
 
 from ..log import setup_logger
 from ..methods import KMedoids
@@ -11,8 +12,8 @@ from ._cluster_multiple import cluster_multiple
 from ._unit import Unit
 
 
-def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
+                 n_jobs=None, attribute_name='n_clusters', **kwargs):
     """
     Wrapper function for those classes which specify the number of clusters
     in advance and also have fit_predict implemented. Classes include:
@@ -40,6 +41,9 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
         Number of jobs to use if multithreading. See
         https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
 
+    attribute_name: string, default 'n_clusters'
+        Name of the obj.attribute_name that corresponds to n_clusters.
+
     **kwargs: dictionary
         Dictionary of parameters that will get passed to obj_def
         when instantiating it.
@@ -58,7 +62,8 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
     # If n_clusters determined to be single integer
     if argtype == 'int':
         logger = setup_logger('Cluster.Single')
-        y = obj_def(n_clusters=k, **kwargs).fit_predict(x)
+        kwargs[attribute_name] = k
+        y = obj_def(**kwargs).fit_predict(x)
         if eval_obj is not None:
             score = eval_obj.get(x, y)
             logger.info(
@@ -70,7 +75,7 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
     # If n_clusters determined to be a list of integers
     elif argtype == 'list':
         return cluster_multiple(
-            x, obj_def=obj_def, k_list=k, attribute_name='n_clusters',
+            x, obj_def=obj_def, k_list=k, attribute_name=attribute_name,
             eval_obj=eval_obj, method_name='fit_predict',
             n_jobs=n_jobs, **kwargs)
 
@@ -404,3 +409,58 @@ class Clu_DBSCAN(Unit):
         self.logger.info(
             "Found {0} noisy points. Assigning label -1.".format(noise))
         return y
+
+
+class Clu_GaussianMixture(Unit):
+    """
+    See https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html
+    """
+
+    def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
+                 eval_obj=None, n_jobs=None, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_clusters: array or int or tuple, dtype int, default [2, 4, 8, 16]
+            Array containing the different values of clusters to try,
+            or single int specifying the number of clusters,
+            or tuple of the form (a, b, c) which specifies a range
+            for (x=a; x<b; x+=c)
+
+        eval_obj: Eval or None, default None
+            Evaluation object to compare performance of different trials.
+
+        n_jobs: int or None, default None
+            Number of jobs to use if multithreading. See
+            https://joblib.readthedocs.io/en/latest/generated/joblib.Parallel.html.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj_def
+            when instantiating it.
+
+        """
+        self.logger = setup_logger('GaussianMixture')
+        self.n_clusters = n_clusters
+        self.eval_obj = eval_obj
+        self.n_jobs = n_jobs
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Parameters
+        __________
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+        y: array, shape (n_samples,)
+            List of labels that correspond to the best clustering k, as
+            evaluated by eval_obj.
+
+        """
+        self.logger.info("Initializing Gaussian Mixture Model.")
+        return _get_wrapper(x, obj_def=GaussianMixture, n_clusters=self.n_clusters,
+                            eval_obj=self.eval_obj, n_jobs=self.n_jobs,
+                            attribute_name='n_components', **self.kwargs)

@@ -59,7 +59,7 @@ class Plotter:
         Plots the clusters in 2D for a single k.
         """
         hue = self.pipe.labels
-        x = self.pipe.get_emb_2d()
+        x = self.pipe.get_emb_2d(y=self.pipe.labels)
         if x.shape[1] != 2:
             raise ValueError('Incorrect number of dimensions.')
 
