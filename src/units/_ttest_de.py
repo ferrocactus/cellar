@@ -1,8 +1,37 @@
 import warnings
 
 import numpy as np
+import scipy as sp
 from scipy.stats import ttest_ind
 from statsmodels.stats.multitest import multipletests
+
+
+def welch_ttest(x1, x2):
+    """
+    Welch t-test for multiple arrays.
+
+    Parameters
+    __________
+    x1: array, shape (n1, n_features)
+    x2: array, shape (n2, n_features)
+
+    Returns
+    _______
+    p: array, shape (n_features,)
+        p-values for every column in x
+
+    """
+    n1 = x1[:, 0].size
+    n2 = x2[:, 0].size
+    m1 = np.mean(x1, axis=0)
+    m2 = np.mean(x2, axis=0)
+    v1 = np.var(x1, axis=0, ddof=1)
+    v2 = np.var(x2, axis=0, ddof=1)
+    t = (m1 - m2) / np.sqrt(v1 / n1 + v2 / n2)
+    df = (v1 / n1 + v2 / n2)**2 / (v1**2 / (n1**2 * (n1 - 1))\
+                + v2**2 / (n2**2 * (n2 - 1)))
+    p = 2 * sp.stats.t.cdf(-abs(t), df)
+    return p
 
 
 def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
@@ -45,22 +74,11 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
         for the given significant columns.
 
     """
-    pvals = np.zeros(shape=(x_i.shape[1]))
-    diffs = np.zeros_like(pvals)
-
     if x_i.shape[0] <= 1 or x_not_i.shape[0] <= 1:
         warnings.warn(
             "Array contains <=1 elements, ttest results may be inaccurate.")
 
-    for j in range(x_i.shape[1]):  # current column index (gene)
-        x_ij = x_i[:, j]
-        x_not_ij = x_not_i[:, j]
-
-        # WARNING: ttest will throw error if cluster has single point
-        # Having equal_var=False runs Welch's t-test which assumes
-        # different n and different variances
-        _, pvals[j] = ttest_ind(x_ij, x_not_ij, equal_var=False)
-        diffs[j] = np.mean(x_ij) - np.mean(x_not_ij)
+    pvals = welch_ttest(x_i, x_not_i)
 
     # Apply correction and update p-values to the corrected ones
     decision, pvals, _, _ = multipletests(
@@ -73,6 +91,7 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
 
     # Return the rejected null hypothesis which have the highest
     # difference of means of x_ij and x_not_ij
+    diffs = np.mean(x_i, axis=0) - np.mean(x_not_i, axis=0)
     diffs[diffs <= 0] = -np.Inf
     diffs[np.where(decision == False)] = -np.Inf
     sorted_diff_indices = np.flip(np.argsort(diffs))
