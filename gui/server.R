@@ -164,6 +164,12 @@ server <- shinyServer(function(input, output, session) {
   pvals<-double(length = 4)
   hypergeom<-data.frame(markers,pvals)
   
+  #REQUIRED HS.c2 TO BE LOADED IN. FILE AND LOADING DESCRIBED IN EMAIL
+  msigdb_categories<-names(Hs.c2)
+  msigdb_pvals<-double(length = length(msigdb_categories))
+  msig_dispdat<-data.frame(msigdb_categories,msigdb_pvals)
+
+  
   #Adding tabset panel corresponds to each cluster
   
   for (i in 1:length(names(markers))){
