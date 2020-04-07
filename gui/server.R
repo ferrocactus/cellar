@@ -4,6 +4,7 @@ library(plotly)
 library(ggplot2)
 library(stringr)
 library(limma)
+library(GO.db)
 
 #ids <- read.csv('datasets/spleen/spleen.csv', nrows = 1, header = FALSE)
 #X <- read.csv('datasets/spleen/spleen.csv', skip = 1, header = FALSE)
@@ -157,6 +158,12 @@ server <- shinyServer(function(input, output, session) {
                     selected = NULL)
   updateSelectInput(session=session, inputId="newlabels", label = "Select label", choices =levels(as.factor(expr_data[,length(expr_data)])),selected=NULL)
   markers=pipe$markers
+  
+  #create object to store hypergeometric marker results
+  markers<-c("Blood - CD1C+ B dendritic cell","Kidney - Cancer Stem cell","Liver - CD4+ cytotoxic T cell","Kidney - ErythroBlast")
+  pvals<-double(length = 4)
+  hypergeom<-data.frame(markers,pvals)
+  
   #Adding tabset panel corresponds to each cluster
   
   for (i in 1:length(names(markers))){
@@ -292,12 +299,22 @@ server <- shinyServer(function(input, output, session) {
   #run default plot
   ##############################################################
   output$plot <- renderPlotly({
+    
+    #factorize cluster labels (discrete instead of continuous)
+    if (input$color == "cluster"){
+      plotcols = as.factor(expr_data[[input$color]])
+      
+    } else {
+      plotcols = expr_data[[input$color]]
+      
+    }
+    
     plot_ly(
       df,
       x = df$x1, y = df$x2,
       text = ~paste("label: ", as.factor(df$y)),
       #color = as.factor(df$y)
-      color = expr_data[[input$color]],
+      color = plotcols,
       key = row.names(df)
     ) %>% layout(dragmode = "lasso")
   })
@@ -398,7 +415,8 @@ server <- shinyServer(function(input, output, session) {
         output$GeneOntology <- renderPrint({
           geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
           gotable<-goana(geneids)
-          gotable[1:10,]
+          go_ord<-gotable[order(gotable$P.DE),]
+          go_ord[1:10,]
         })
         # DE gene buttons implementation:
         DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
@@ -430,7 +448,8 @@ server <- shinyServer(function(input, output, session) {
         output$KEGG <- renderPrint({
           geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
           keggtable<-kegga(geneids)
-          keggtable[1:10,]
+          kegg_ord<-keggtable[order(keggtable$P.DE),]
+          kegg_ord[1:10,]
         })
         output$Markers <- renderPrint({
           degenes<-rownames(toptable_sample[1:input$nogenes,])
@@ -438,7 +457,16 @@ server <- shinyServer(function(input, output, session) {
           hypergeom[2,2]<-phyper(length(intersect(degenes,c_intersections[[2]])),length(c_intersections[[2]]),ncol(scdata_subset)-1-length(c_intersections[[2]]),length(degenes),lower.tail = F)
           hypergeom[3,2]<-phyper(length(intersect(degenes,c_intersections[[3]])),length(c_intersections[[3]]),ncol(scdata_subset)-1-length(c_intersections[[3]]),length(degenes),lower.tail = F)
           hypergeom[4,2]<-phyper(length(intersect(degenes,c_intersections[[4]])),length(c_intersections[[4]]),ncol(scdata_subset)-1-length(c_intersections[[4]]),length(degenes),lower.tail = F)
-          hypergeom
+          hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+          hypergeom_ord
+        })
+        output$Msigdb <- renderPrint({
+        degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+        for (i in 1:nrow(msig_dispdat)) {
+          msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
+        }
+        msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+        msig_ord[1:10,]
         })
         toptable_sample[1:input$nogenes,]
       })
