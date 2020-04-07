@@ -81,6 +81,9 @@ ui <- pageWithSidebar(
                 tabPanel("Markers Intersect",
                          verbatimTextOutput("Markers")
                          ),
+                tabPanel("MSigDB C2",
+                         verbatimTextOutput("Msigdb")
+                        ),
                 tabPanel(
                   "Configurations",
                   splitLayout(
