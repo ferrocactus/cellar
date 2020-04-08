@@ -162,9 +162,9 @@ server <- shinyServer(function(input, output, session) {
   markers=pipe$markers
 
   #create object to store hypergeometric marker results
-  markers<-c("Blood - CD1C+ B dendritic cell","Kidney - Cancer Stem cell","Liver - CD4+ cytotoxic T cell","Kidney - ErythroBlast")
+  marker_list<-c("Blood - CD1C+ B dendritic cell","Kidney - Cancer Stem cell","Liver - CD4+ cytotoxic T cell","Kidney - ErythroBlast")
   pvals<-double(length = 4)
-  hypergeom<-data.frame(markers,pvals)
+  hypergeom<-data.frame(marker_list,pvals)
 
   #REQUIRED HS.c2 TO BE LOADED IN. FILE AND LOADING DESCRIBED IN EMAIL
   msigdb_categories<-names(Hs.c2)
