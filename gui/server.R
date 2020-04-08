@@ -9,6 +9,8 @@ library(GO.db)
 #ids <- read.csv('datasets/spleen/spleen.csv', nrows = 1, header = FALSE)
 #X <- read.csv('datasets/spleen/spleen.csv', skip = 1, header = FALSE)
 
+load.Rdata('Hs.c2')
+
 # Load python
 
 #use_virtualenv("modAL")
@@ -25,7 +27,7 @@ getPage<-function(genename) {
   return(browseURL(url))
 }
 
-intersect<-function (x, y) 
+intersect<-function (x, y)
 {
   y <- as.vector(y)
   unique(y[match(as.vector(x), y, 0L)])
@@ -52,14 +54,14 @@ server <- shinyServer(function(input, output, session) {
       # return a safeError if a parsing error occurs
       stop(safeError(e))
     }
-    
+
     #js$reset()
   )
-    
+
   })
-  
-  
-  
+
+
+
   #start of data fetching and processing
   observeEvent(input$reset, {js$reset()})
   plotid=0
@@ -149,7 +151,7 @@ server <- shinyServer(function(input, output, session) {
   ENTREZID=distinct(ENTREZID)
   hgnc_filt=data.frame(SYMBOL,ENTREZID)
   row.names(hgnc_filt)=as.character(SYMBOL[[1]])
-  
+
   #get the gene expression data
   expr_data=matrix(pipe$x,ncol=length(pipe$col_ids),dimnames=list(1:length(pipe$x[,1]),pipe$col_ids))
   expr_data=data.frame(expr_data)
@@ -158,20 +160,20 @@ server <- shinyServer(function(input, output, session) {
                     selected = NULL)
   updateSelectInput(session=session, inputId="newlabels", label = "Select label", choices =levels(as.factor(expr_data[,length(expr_data)])),selected=NULL)
   markers=pipe$markers
-  
+
   #create object to store hypergeometric marker results
   markers<-c("Blood - CD1C+ B dendritic cell","Kidney - Cancer Stem cell","Liver - CD4+ cytotoxic T cell","Kidney - ErythroBlast")
   pvals<-double(length = 4)
   hypergeom<-data.frame(markers,pvals)
-  
+
   #REQUIRED HS.c2 TO BE LOADED IN. FILE AND LOADING DESCRIBED IN EMAIL
   msigdb_categories<-names(Hs.c2)
   msigdb_pvals<-double(length = length(msigdb_categories))
   msig_dispdat<-data.frame(msigdb_categories,msigdb_pvals)
 
-  
+
   #Adding tabset panel corresponds to each cluster
-  
+
   for (i in 1:length(names(markers))){
     if (i==1)
     {
@@ -187,10 +189,10 @@ server <- shinyServer(function(input, output, session) {
                 target= as.character(i-2)
       )
     }
-  } 
-  
- 
-  ##Adding intersection buttons 
+  }
+
+
+  ##Adding intersection buttons
   # step 1 c_intersection is a list of intersections in each cluster
   c_intersections <- list("")
   clusters<-length(names(markers))
@@ -232,11 +234,11 @@ server <- shinyServer(function(input, output, session) {
       }
     }
   }
-  ##Step4: Adding buttons into corresponding tabpanels 
+  ##Step4: Adding buttons into corresponding tabpanels
   for (i in 1:length(c_intersections)){
     for (j in 1:length(c_intersections[[i]])){
       textt<-c_intersections[[i]][j]
-      
+
       for (k in 1:length(total_intersections)){
         if (identical(total_intersections[k],as.character(strsplit(c_intersections[[i]][j],"-")))){
           #showNotification(textt,duration=NULL)
@@ -257,7 +259,7 @@ server <- shinyServer(function(input, output, session) {
     X = 1:length(total_intersections),
     FUN = function(i){
       observeEvent(input[[total_intersections[i]]], {
-        
+
         rr=i
         for (j in 1:length(total_intersections)){
           if (identical(total_intersections[j],as.character(strsplit(total_intersections[i],"-")))){
@@ -265,7 +267,7 @@ server <- shinyServer(function(input, output, session) {
             break
           }
         }
-        
+
         showNotification(paste("showing ", total_intersections[rr],"'s expression",sep=""),duration=5)
         output$plot <- renderPlotly({
           plot_ly(
@@ -287,8 +289,8 @@ server <- shinyServer(function(input, output, session) {
       })
     }
   )
-  
-  
+
+
   ###################################################################
   #gene card
   observeEvent(input$search, {
@@ -300,21 +302,21 @@ server <- shinyServer(function(input, output, session) {
     }
   })
   #gene card
-  
-  
+
+
   #run default plot
   ##############################################################
   output$plot <- renderPlotly({
-    
+
     #factorize cluster labels (discrete instead of continuous)
     if (input$color == "cluster"){
       plotcols = as.factor(expr_data[[input$color]])
-      
+
     } else {
       plotcols = expr_data[[input$color]]
-      
+
     }
-    
+
     plot_ly(
       df,
       x = df$x1, y = df$x2,
@@ -325,14 +327,14 @@ server <- shinyServer(function(input, output, session) {
     ) %>% layout(dragmode = "lasso")
   })
   ############################################################################
-  
+
   newlabs<-df[,3]
   names(newlabs)<-rownames(df)
   #plotdata<-data.frame(plotdata)
   #plotdata$key<-row.names(plotdata)
   #labeldats<-levels(as.factor(pipe$labels))
   labeldats<-levels(as.factor(df[,3]))
-  
+
   observe({
     x <- input$text
     #Can use character(0) to remove all choices
@@ -346,33 +348,33 @@ server <- shinyServer(function(input, output, session) {
       )
     })
   })
-  
+
   #Title of the plot
   Title <- reactive({
     paste("Value of ", input$gene )
   })
-  
+
   # output caption to ptibt title
   output$caption <- renderText({
     Title()
   })
   output$brush <- renderPrint({
     d <- event_data("plotly_selected")
-  
+
     observeEvent(input$labelupd, {
       newlabs[d$key]<-as.integer(input$newlabels)
-      
+
       #(newlabs[d$key])
-      
+
       output$Plot2<-renderPlotly({
-        
+
         plot_ly(
           df,
           x=df[,1],y=df[,2],
           text = ~paste("label: ", as.factor(newlabs)),
           color = as.factor(newlabs)
         )%>% layout(dragmode = "lasso")
-        
+
       })
     })
   })
@@ -381,7 +383,7 @@ server <- shinyServer(function(input, output, session) {
   })
     observeEvent(event_data("plotly_click",priority = "event"), {
       cldat <- event_data("plotly_click")
-      
+
       #clnewdat<-sc_data_newclusts$labels
       #plotdata[,3]
       selectedi="No selection"
@@ -389,7 +391,7 @@ server <- shinyServer(function(input, output, session) {
       #showNotification(as.character(round(cldat$x,5)),duration=NULL)
       #showNotification(as.character(selectedi),duration=NULL)
       updateTabsetPanel(session, "switcher", selected = as.character(selectedi))
-      
+
       i=df[,3][cldat$pointNumber]
       # if (previous_i!=-1){
       #   for (j in 1:length(c_intersections[[i]])){
@@ -400,8 +402,8 @@ server <- shinyServer(function(input, output, session) {
       # }
       #showNotification(as.character(clnewdat[cldat$pointNumber+1]), duration = NULL)
     })
-    
-    
+
+
     ##DE GENE IMPLEMENTATION
     scdata_subset=expr_data
     observeEvent(input$getdegenes,{
@@ -487,10 +489,10 @@ server <- shinyServer(function(input, output, session) {
   # #UPDATE
   # ############################################################################
   # observeEvent(input$update, {
-  #   
+  #
   #   plotid<-plotid+1
   #  # withReactiveDomain(as.character(plotid),{
-  #   
+  #
   #   df<-NULL
   #   for (i in length(total_intersections)){
   #     removeUI(selector=paste("#",total_intersections,sep=""))
@@ -498,7 +500,7 @@ server <- shinyServer(function(input, output, session) {
   #   for (i in 1:clusters){
   #     removeTab(inputId="switcher", target=as.character(i-1))
   #   }
-  #   
+  #
   #   # insertUI(selector="#placeholder",where="afterEnd",
   #   #          tabsetPanel(
   #   #            id = "switcher",
@@ -529,10 +531,10 @@ server <- shinyServer(function(input, output, session) {
   #                 target= as.character(i-2)
   #       )
   #     }
-  #   } 
-  #   
-  #   
-  #   ##Adding intersection buttons 
+  #   }
+  #
+  #
+  #   ##Adding intersection buttons
   #   # step 1 c_intersection is a list of intersections in each cluster
   #   c_intersections <- list("")
   #   clusters<-length(names(markers))
@@ -574,11 +576,11 @@ server <- shinyServer(function(input, output, session) {
   #       }
   #     }
   #   }
-  #   ##Step4: Adding buttons into corresponding tabpanels 
+  #   ##Step4: Adding buttons into corresponding tabpanels
   #   for (i in 1:length(c_intersections)){
   #     for (j in 1:length(c_intersections[[i]])){
   #       textt<-c_intersections[[i]][j]
-  #       
+  #
   #       for (k in 1:length(total_intersections)){
   #         if (identical(total_intersections[k],as.character(strsplit(c_intersections[[i]][j],"-")))){
   #           #showNotification(textt,duration=NULL)
@@ -599,7 +601,7 @@ server <- shinyServer(function(input, output, session) {
   #     X = 1:length(total_intersections),
   #     FUN = function(i){
   #       observeEvent(input[[total_intersections[i]]], {
-  #         
+  #
   #         rr=i
   #         for (j in 1:length(total_intersections)){
   #           if (identical(total_intersections[j],as.character(strsplit(total_intersections[i],"-")))){
@@ -607,7 +609,7 @@ server <- shinyServer(function(input, output, session) {
   #             break
   #           }
   #         }
-  #         
+  #
   #         #showNotification(paste("showing ", total_intersections[rr],"'s expression",sep=""),duration=5)
   #         output$plot <- renderPlotly({
   #           plot_ly(
@@ -629,11 +631,11 @@ server <- shinyServer(function(input, output, session) {
   #       })
   #     }
   #   )
-  #   
-  #   
-  #   updateSelectInput(session=session, inputId="color", label= "Select color value" ,choices = names(expr_data), 
+  #
+  #
+  #   updateSelectInput(session=session, inputId="color", label= "Select color value" ,choices = names(expr_data),
   #                     selected = NULL)                                                                   ### and update color values that can be selected
-  #   
+  #
   #   output$plot <- renderPlotly({
   #     plot_ly(
   #       df,
@@ -644,7 +646,7 @@ server <- shinyServer(function(input, output, session) {
   #   })
   #   observeEvent(event_data("plotly_click",priority = "event"), {
   #     cldat <- event_data("plotly_click")
-  #     
+  #
   #     #clnewdat<-sc_data_newclusts$labels
   #     #plotdata[,3]
   #     selectedi="No selection"
@@ -653,7 +655,7 @@ server <- shinyServer(function(input, output, session) {
   #     #showNotification(as.character(round(df$x1[[1]],5)),duration=NULL)
   #     #showNotification(as.character(selectedi),duration=NULL)
   #     updateTabsetPanel(session, "switcher", selected = as.character(selectedi))
-  #     
+  #
   #     i=df[,3][cldat$pointNumber]
   #   })
   #   ##DE GENE IMPLEMENTATION
