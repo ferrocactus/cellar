@@ -21,12 +21,13 @@ def welch_ttest(x1, x2):
         p-values for every column in x
 
     """
+    eps = 1e-9
     n1 = x1[:, 0].size
     n2 = x2[:, 0].size
     m1 = np.mean(x1, axis=0)
     m2 = np.mean(x2, axis=0)
-    v1 = np.var(x1, axis=0, ddof=1)
-    v2 = np.var(x2, axis=0, ddof=1)
+    v1 = np.var(x1, axis=0, ddof=1) + eps # add eps to avoid division by 0
+    v2 = np.var(x2, axis=0, ddof=1) + eps # add eps to avoid division by 0
     t = (m1 - m2) / np.sqrt(v1 / n1 + v2 / n2)
     df = (v1 / n1 + v2 / n2)**2 / (v1**2 / (n1**2 * (n1 - 1))\
                 + v2**2 / (n2**2 * (n2 - 1)))
