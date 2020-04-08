@@ -63,15 +63,14 @@ ui <- pageWithSidebar(
 
                 tabPanel("Main Plot",
                          h3(textOutput("caption")),
-                         plotlyOutput("plot")
+                         plotlyOutput("plot"),
+                         uiOutput("deinfo"),
+                         verbatimTextOutput("genes"),
+                         uiOutput("DEbuttons")
                         ),
                 tabPanel("Updated Plot",
                          verbatimTextOutput("brush"),
                          plotlyOutput("Plot2")
-                         ),
-                tabPanel("DE genes",
-                         #verbatimTextOutput("click"),
-                         verbatimTextOutput("genes")
                          ),
                 tabPanel("Gene Ontology",
                          verbatimTextOutput("GeneOntology")
@@ -171,6 +170,11 @@ ui <- pageWithSidebar(
                     "Choose a constrained clustering method:",
                     choices = c("SeededKMeans")
                   ),
+                  selectInput(
+                    "dataset",
+                    "Choose a dataset:",
+                    choices = list.files("datasets")
+                  ),
                   useShinyjs(),                                           # Include shinyjs in the UI
                   extendShinyjs(text = jsResetCode),                      # Add the js code to the page
                   actionButton("reset", "Run with current configuration")
@@ -179,8 +183,9 @@ ui <- pageWithSidebar(
 
 
     ),
-     uiOutput("DEbuttons"),
+     
      tags$div(id="placeholder"),
+     h3("Clusters and Intersections"),
      tabsetPanel(
        id = "switcher",
        tabPanel("No selection", "No selection")

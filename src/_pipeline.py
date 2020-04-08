@@ -27,6 +27,9 @@ class Pipeline(Unit):
         if x == 'default':
             x, col_ids = load_data('brain')
             print("Loaded data.")
+        if type(x) == str:
+            x, col_ids = load_data(x)
+            print("Loaded data.")    
         if type(x) != np.ndarray:
             x = np.array(x)
         if len(x.shape) != 2:
