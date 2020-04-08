@@ -9,7 +9,7 @@ library(GO.db)
 #ids <- read.csv('datasets/spleen/spleen.csv', nrows = 1, header = FALSE)
 #X <- read.csv('datasets/spleen/spleen.csv', skip = 1, header = FALSE)
 
-load.Rdata('Hs.c2')
+load('gui/Hs.c2')
 
 # Load python
 
