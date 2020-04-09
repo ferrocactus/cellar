@@ -7,10 +7,6 @@ from umap import UMAP
 from ..log import setup_logger
 from ._unit import Unit
 
-#from active_semi_clustering.semi_supervised.pairwise_constraints import PCKMeans
-#from copkmeans.cop_kmeans import cop_kmeans
-
-
 class SSClu_SeededKMeans(Unit):
     """
     Similar to KMeans, given a dataset x, generate e K-partitioning
@@ -21,8 +17,8 @@ class SSClu_SeededKMeans(Unit):
     based on the average of the points with that label.
 
     Source: Basu, Sugato, et al. “Semi-Supervised Clustering by Seeding.”
-    Proceedings of the 19th International Conference on Machine Learning (ICML-2002),
-    no. July, 2002, pp. 19–26.
+    Proceedings of the 19th International Conference on Machine Learning
+    (ICML-2002), no. July, 2002, pp. 19–26.
     """
 
     def __init__(self, **kwargs):
@@ -68,24 +64,3 @@ class SSClu_UMAP(Unit):
         ind = np.where(labels != -1)
         new_labels[ind] = labels[ind]
         return new_labels
-
-
-class SSClu_COPKMeans(Unit):
-    def __init__(self, **kwargs):
-        pass
-
-    def get(self, x, n, ml, cl):
-        pass
-        clusters, _ = cop_kmeans(x, k=n, ml=ml, cl=cl)
-        return clusters
-
-
-class SSClu_PCKMeans(Unit):
-    def __init__(self, **kwargs):
-        pass
-
-    def get(self, x, n, ml, cl):
-        pass
-        pckmeans = PCKMeans(n_clusters=n)
-        pckmeans.fit(x, ml=ml, cl=cl)
-        return pckmeans.labels_

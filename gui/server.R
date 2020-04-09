@@ -1,10 +1,10 @@
 library(reticulate)
 library(shiny)
 library(plotly)
-library(ggplot2)
-library(stringr)
-library(limma)
-library(GO.db)
+#library(ggplot2)
+#library(stringr)
+#library(limma)
+#library(GO.db)
 
 
 load('gui/Hs.c2')
@@ -25,36 +25,39 @@ intersect<-function (x, y)
   y <- as.vector(y)
   unique(y[match(as.vector(x), y, 0L)])
 }
-################################################################################## end of functions
+############################################# end of functions
 
 dataset="brain"
 
-################################################################################################################# server 
+################################################################# server
 server <- shinyServer(function(input, output, session) {
-  
-  
+  ############# Toggling logic ##############################
+  shinyjs::onclick("togglemain",
+    {shinyjs::toggle(id = "mainpanel", anim = TRUE);
+    shinyjs::hide(id = "configuration", anim = TRUE)})
+
+  shinyjs::onclick("toggleconfig",
+    {shinyjs::toggle(id = "configuration", anim = TRUE);
+    shinyjs::hide(id = "mainpanel", anim = TRUE)})
+
+  #if (FALSE) {
   # Create pipeline
   pipe <- Pipeline(x=dataset)
-  
+
   # rerun the app if "run with new configuration button" pressed (this can avoid observing previous events)
   observeEvent(input$reset, {js$reset()})
-  
-  
-  
-  
-  ######################################################## function of reading dataset and return dataframe df
+
+  #################################### function of reading dataset and return dataframe df
   get_plot_data <- isolate(function(){
     dim_method <- input$dim_method
     dim_n_components <- input$dim_n_components
     clu_method <- input$clu_method
     eval_method <- input$eval_method
     clu_n_clusters <- input$clu_n_clusters
-    clu_n_jobs <- input$clu_n_jobs
     mark_method <- 'TTest'
     mark_alpha <- input$mark_alpha
     mark_markers_n <- input$mark_markers_n
     mark_correction <- input$mark_correction
-    mark_n_jobs <- input$mark_n_jobs
     con_method <- 'Converter'
     con_convention <- input$con_convention
     #con_path <- input$con_path
@@ -77,14 +80,13 @@ server <- shinyServer(function(input, output, session) {
       incProgress(1/n, detail = paste("Step: Clustering"))
       labels <- pipe$get_labels(
             method=clu_method,
-            eval_method=eval_method, n_clusters=clu_n_clusters,
-            n_jobs=clu_n_jobs)
+            eval_method=eval_method, n_clusters=clu_n_clusters)
 
       incProgress(1/n, detail = paste("Step: Finding markers"))
       markers <- pipe$get_markers(
             method='TTest',
             alpha=mark_alpha, markers_n=mark_markers_n,
-            correction=mark_correction, n_jobs=mark_n_jobs)
+            correction=mark_correction)
 
       incProgress(1/n, detail = paste("Step: Converting names"))
       markers <- pipe$convert(
@@ -104,8 +106,8 @@ server <- shinyServer(function(input, output, session) {
     })
     return(df)
   })
-  ############################################################################ end of reading dataset function
-  
+  ################################################ end of reading dataset function
+
   ######################################################### user upload file
   observeEvent(input$file1,{
     req(input$file1)
@@ -128,9 +130,9 @@ server <- shinyServer(function(input, output, session) {
     )
   })
   ######################################################### end of file uploading function
-  
-  
-  ############################################################################## data processing 
+
+
+  ############################################################################## data processing
   df <- isolate(get_plot_data())
   markers<-pipe$markers  # the dictionary includes information of each cluster (including DE genes and intersections)
 
@@ -152,22 +154,22 @@ server <- shinyServer(function(input, output, session) {
   names(newlabs)<-rownames(df)
   labeldats<-levels(as.factor(df[,3]))
   ###################################################################################### data processing
-  
+
   ########################### selecting dataset function
   ### change global variable dataset when the new dataset is selected
   observeEvent(input$dataset,{
     assign("dataset", input$dataset, envir = .GlobalEnv)
   })
   ###### then next time "run with current configuration" is clicked, the new dataset will be used
-  
-  
+
+
   ###################################################################################### SIDEBAR PANEL
-  
+
   ### select color value
   updateSelectInput(session=session, inputId="color", label = "Select colour value:", choices = c("cluster",names(expr_data)),
                     selected = NULL)
-  
-  ### change label  
+
+  ### change label
   # select
   updateSelectInput(session=session, inputId="newlabels", label = "Select label", choices =levels(as.factor(expr_data[,length(expr_data)])),selected=NULL)
   # input new label
@@ -184,8 +186,8 @@ server <- shinyServer(function(input, output, session) {
       )
     })
   })
-  ### end of change label 
-  
+  ### end of change label
+
   ###  gene card
   observeEvent(input$search, {
     if (input$searchgene %in% names(expr_data)){
@@ -195,16 +197,16 @@ server <- shinyServer(function(input, output, session) {
       showNotification("Gene name does not exit")
     }
   })
-    
+
   ###
-  
-  
+
+
   ############################################################################## END OF SIDEBAR PANEL
-  
-  
+
+
   ######################################################################################### MAIN PANEL
-  
-  
+
+
   ### run default plot
   output$plot <- renderPlotly({
     #factorize cluster labels (discrete instead of continuous)
@@ -223,18 +225,18 @@ server <- shinyServer(function(input, output, session) {
     ) %>% layout(dragmode = "lasso",title=paste("Value of ",input$color,sep=""))
   })
   ###
-  
-  
+
+
   # ### Title of the plot
   # Title <- reactive({
   #   paste("Value of ", input$gene )
   # })
-  # 
+  #
   # ### output caption to ptibt title
   # output$caption <- renderText({
   #   Title()
   # })
-  
+
   ### showing updated plot
   output$brush <- renderPrint({
     d <- event_data("plotly_selected")
@@ -248,10 +250,10 @@ server <- shinyServer(function(input, output, session) {
           color = as.factor(newlabs)
         )%>% layout(dragmode = "lasso",title=paste("Value of ",input$labelupd,sep=""))
       })
-      
+
     })
   })
-  
+
   ############################################## DE GENE IMPLEMENTATION
   scdata_subset=expr_data
   observeEvent(input$getdegenes,{
@@ -276,7 +278,7 @@ server <- shinyServer(function(input, output, session) {
         go_ord<-gotable[order(gotable$P.DE),]
         go_ord[1:10,]
       })
-      
+
       ### DE gene buttons implementation:
       output$deinfo <- renderUI({
         h3("DE gene information:")
@@ -309,7 +311,7 @@ server <- shinyServer(function(input, output, session) {
           )
         })
       ## end of maintaining buttons
-      
+
       ############################################################################ constructing hgnc_filt using informations in the marker
       ENTREZID=array()
       SYMBOL=array()
@@ -329,7 +331,7 @@ server <- shinyServer(function(input, output, session) {
       hgnc_filt=data.frame(SYMBOL,ENTREZID)
       row.names(hgnc_filt)=as.character(SYMBOL[[1]])
       ############################################################################ end of constructing hgnc_filt dataframe of genename,id
-      
+
       ### KEGG panel
       output$KEGG <- renderPrint({
         geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
@@ -337,7 +339,7 @@ server <- shinyServer(function(input, output, session) {
         kegg_ord<-keggtable[order(keggtable$P.DE),]
         kegg_ord[1:10,]
       })
-      
+
       ### Markers panel
       output$Markers <- renderPrint({
         degenes<-rownames(toptable_sample[1:input$nogenes,])
@@ -348,7 +350,7 @@ server <- shinyServer(function(input, output, session) {
         hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
         hypergeom_ord
       })
-      
+
       ### Msigdb panel
       output$Msigdb <- renderPrint({
         degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
@@ -361,10 +363,10 @@ server <- shinyServer(function(input, output, session) {
       toptable_sample[1:input$nogenes,]
     })
   })
-  
-  
-  
-  #################################################################BOTTOM OF MAIN PANEL:  
+
+
+
+  #################################################################BOTTOM OF MAIN PANEL:
   #############################Adding tabset panel corresponds to each cluster (at the bottom of the main panel)
   for (i in 1:length(names(markers))){
     if (i==1)
@@ -383,7 +385,7 @@ server <- shinyServer(function(input, output, session) {
     }
   }
   ### end of tabset panel implementation
-  
+
   ### update tabset panel according to the point selected
   observeEvent(event_data("plotly_click",priority = "event"), {
     cldat <- event_data("plotly_click")
@@ -501,8 +503,8 @@ server <- shinyServer(function(input, output, session) {
   # output$cc <- reactive({
   #   event_data("plotly_click")
   # })
+  #}
 
-    
 })
 
 
