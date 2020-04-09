@@ -31,7 +31,7 @@ ui <- pageWithSidebar(
           .shiny-split-layout > div {
             overflow: visible;
           }
-          .btn {
+          .sidebtn {
             display: block;
             width: 100%;
           }
@@ -44,6 +44,8 @@ ui <- pageWithSidebar(
             font-weight: bold;
             height: 50px;
             border-radius: 0;
+            width: 100%;
+            display: block;
           }
           .panelbody {
             margin-left: 20px;
@@ -69,21 +71,21 @@ ui <- pageWithSidebar(
 
       splitLayout(
         textInput("text", "New label", placeholder = "Enter label to add..."),
-        actionButton("labeladd", "Add", style="margin-top:25px")
+        actionButton("labeladd", "Add", style="margin-top:25px", class="sidebtn")
       ),
 
       splitLayout(
         selectInput("newlabels", "Select labels", choices = 0),
-        actionButton("labelupd", "Update Labels", style="margin-top:25px")
+        actionButton("labelupd", "Update Labels", style="margin-top:25px", class="sidebtn")
       ),
 
-      actionButton("getdegenes", "Get DE genes"),
+      actionButton("getdegenes", "Get DE genes", class="sidebtn"),
 
       uiOutput("genecard"),
       htmlOutput("inc"),
       splitLayout(
         textInput("searchgene", "Search Gene card", placeholder = "Enter gene..."),
-        actionButton("search", "Search Card", style="margin-top:25px")
+        actionButton("search", "Search Card", style="margin-top:25px", class="sidebtn")
       ),
 
       fileInput("file1", "Choose CSV File",
@@ -97,12 +99,14 @@ ui <- pageWithSidebar(
 
 
     ######################## Config Block #########################################
-    actionButton("toggleconfig", "Configuration", class="panelhead"),
+    actionButton("toggleconfig", "Configuration", class="panelhead", class="sidebtn"),
 
     shinyjs::hidden(
-      actionButton("reset", "Run with current configuration"),
-
       div(id = "configuration", class = "panelbody",
+        actionButton("reset", "Run with current configuration",
+                    class="sidebtn",
+                    style="margin-bottom: 20px;"),
+
         splitLayout(
           cellWidths = c("60%", "40%"),
           selectInput("dim_method",
@@ -224,8 +228,7 @@ ui <- pageWithSidebar(
 
     tags$div(id = "placeholder"),
     h3("Clusters and Intersections"),
-    tabsetPanel(id = "switcher",
-      tabPanel("No selection", "No selection")
+    tabsetPanel(id = "switcher", tabPanel("No selection", "No selection")
 # tabPanel("0", "Cluster0 Genes",tags$div(id = 'placeholder1')),
 # tabPanel("1", "Cluster1 Genes",tags$div(id = 'placeholder2')),
 # tabPanel("2", "Cluster2 Genes",tags$div(id = 'placeholder3')),
