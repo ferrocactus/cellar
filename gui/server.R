@@ -1,10 +1,10 @@
 library(reticulate)
 library(shiny)
 library(plotly)
-#library(ggplot2)
-#library(stringr)
-#library(limma)
-#library(GO.db)
+library(ggplot2)
+library(stringr)
+library(limma)
+library(GO.db)
 
 
 load('gui/Hs.c2')
