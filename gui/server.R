@@ -27,7 +27,7 @@ intersect<-function (x, y)
 }
 ############################################# end of functions
 
-dataset="brain"
+dataset="default"
 
 ################################################################# server
 server <- shinyServer(function(input, output, session) {
@@ -113,15 +113,25 @@ server <- shinyServer(function(input, output, session) {
     req(input$file1)
     tryCatch(
       {
-        f <- read.csv(input$file1$datapath,
-                      #header = input$header,
-                      #sep = input$sep,
-                      #quote = input$quote)
-        )
-        fname=strsplit(input$file1$name,".",fixed=TRUE)[[1]][1]
-        dir.create(paste(getwd(),"/datasets/",fname,sep=""))
-        write.csv(f,paste(getwd(),"/datasets/",fname,"/",fname,sep=""))
-        showNotification("File uploaded. Now you can specify the new dataset in the configuration")
+          withProgress(message = 'Please wait...', value = 0, {
+                # Number of times we'll go through the loop
+                n <- 2
+
+                incProgress(1/n, detail = paste("Reading file"))
+                f <- read.csv(input$file1$datapath,
+                              #header = input$header,
+                              #sep = input$sep,
+                              #quote = input$quote)
+                )
+
+                incProgress(1/n, detail = paste("Writing file"))
+
+                fname=strsplit(input$file1$name,".",fixed=TRUE)[[1]][1]
+                dir.create(paste(getwd(),"/datasets/",fname,sep=""))
+                write.csv(f,paste(getwd(),"/datasets/",fname,"/",fname,".csv",sep=""))
+                #showNotification("File uploaded. Now you can specify the new dataset in the configuration")
+                assign("dataset", fname, envir = .GlobalEnv)
+           })
       },
       error = function(e) {
         # return a safeError if a parsing error occurs
@@ -157,9 +167,9 @@ server <- shinyServer(function(input, output, session) {
 
   ########################### selecting dataset function
   ### change global variable dataset when the new dataset is selected
-  observeEvent(input$dataset,{
-    assign("dataset", input$dataset, envir = .GlobalEnv)
-  })
+  #observeEvent(input$dataset,{
+  #  assign("dataset", input$dataset, envir = .GlobalEnv)
+  #})
   ###### then next time "run with current configuration" is clicked, the new dataset will be used
 
 

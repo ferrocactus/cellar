@@ -25,7 +25,7 @@ def is_float(val):
 class Pipeline(Unit):
     def __init__(self, x='default', config='configs/config.ini', col_ids=None):
         if x == 'default':
-            x, col_ids = load_data('brain')
+            x, col_ids = load_data('default')
             print("Loaded data.")
         if type(x) == str:
             x, col_ids = load_data(x)
