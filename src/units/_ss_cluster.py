@@ -4,6 +4,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from umap import UMAP
 
+from ..methods._kmeans import KMeans as ConstrainedKMeans
 from ..log import setup_logger
 from ._unit import Unit
 
@@ -25,12 +26,13 @@ class SSClu_SeededKMeans(Unit):
         self.logger = setup_logger('SeededKMeans')
         self.kwargs = kwargs
 
-    def get(self, x, labels):
+    def get(self, x, labels, mask):
         """
         Find the non-negative values and let them define the n_clusters.
         Args:
             x (np.ndarray): Data points (n_points x n_features)
             labels (np.ndarray): Labels (n_points x 1)
+            mask: ignored, used for consistencyd
         Returns:
             (np.ndarray): New labels after clustering (n_points x 1)
         """
@@ -48,6 +50,51 @@ class SSClu_SeededKMeans(Unit):
 
         kmeans = KMeans(n_clusters=n_clusters, init=centroids, n_init=1)
         labels = kmeans.fit_predict(x)
+        return labels
+
+
+class SSClu_ConstrainedKMeans(Unit):
+    def __init__(self, **kwargs):
+        self.logger = setup_logger('ConstrainedKMeans')
+        self.kwargs = kwargs
+
+    def get(self, x, labels, mask):
+        unq_labels = np.unique(labels)
+        n_clusters = len(unq_labels)
+
+        mask = mask.astype(np.int32)
+        labels = labels.astype(np.int32)
+
+        constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
+                                    mask=mask, fixed_labels=labels)
+        labels = constrainedkmeans.fit_predict(x)
+        return labels
+
+
+class SSClu_ConstrainedSeededKMeans(Unit):
+    def __init__(self, **kwargs):
+        self.logger = setup_logger('ConstrainedSeededKMeans')
+        self.kwargs = kwargs
+
+    def get(self, x, labels, mask):
+        unq_labels = np.unique(labels)
+        n_clusters = len(unq_labels)
+        centroids = []
+        self.logger.info(
+            "Found {0} unique labels. Using constrained seeded KMeans.".format(n_clusters))
+
+        for i in range(n_clusters):
+            centroid = np.mean(x[labels == unq_labels[i]], axis=0)
+            centroids.append(centroid)
+
+        centroids = np.array(centroids)
+        mask = mask.astype(np.int32)
+        labels = labels.astype(np.int32)
+
+        constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
+                                    init=centroids, n_init=1,
+                                    mask=mask, fixed_labels=labels)
+        labels = constrainedkmeans.fit_predict(x)
         return labels
 
 

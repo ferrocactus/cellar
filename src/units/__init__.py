@@ -9,6 +9,8 @@ from ._markers import Mark_TTest
 from ._converter import Con
 from ._identificator import Ide_HyperGeom
 from ._ss_cluster import SSClu_SeededKMeans
+from ._ss_cluster import SSClu_ConstrainedKMeans
+from ._ss_cluster import SSClu_ConstrainedSeededKMeans
 
 translation_dict = {
     "cluster": {
@@ -41,7 +43,9 @@ translation_dict = {
         "HyperGeom": Ide_HyperGeom
     },
     "ss_cluster": {
-        "SeededKMeans": SSClu_SeededKMeans
+        "SeededKMeans": SSClu_SeededKMeans,
+        "ConstrainedKMeans": SSClu_ConstrainedKMeans,
+        "ConstrainedSeededKMeans": SSClu_ConstrainedSeededKMeans
     }
 }
 
@@ -63,5 +67,7 @@ __all__ = [
     'Mark_TTest',
     'Con',
     'Ide_HyperGeom',
-    'SSClu_SeededKMeans'
+    'SSClu_SeededKMeans',
+    'SSClu_ConstrainedKMeans',
+    'SSClu_ConstrainedSeededKMeans'
 ]

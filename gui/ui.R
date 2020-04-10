@@ -183,7 +183,7 @@ ui <- pageWithSidebar(
         selectInput(
           "ssc_method",
           "Choose a constrained clustering method:",
-          choices = c("SeededKMeans")
+          choices = c("SeededKMeans", "ConstrainedKMeans", "ConstrainedSeededKMeans")
         ),
 
         selectInput(

@@ -29,7 +29,7 @@ class Pipeline(Unit):
             print("Loaded data.")
         if type(x) == str:
             x, col_ids = load_data(x)
-            print("Loaded data.")    
+            print("Loaded data.")
         if type(x) != np.ndarray:
             x = np.array(x)
         if len(x.shape) != 2:
@@ -65,7 +65,7 @@ class Pipeline(Unit):
             mark_correction='hs', mark_n_jobs=1, con_method="Converter",
             con_convention='id-to-name', con_path="markers/gene_id_name.csv",
             ide_method='HyperGeom', ide_path='markers/cell_type_marker.json',
-            ide_tissue='all', ssc_method='SeededKMeans'
+            ide_tissue='all'
             ):
         self.x_emb = self.get_emb(
             self.x, method=dim_method, n_components=dim_n_components)
@@ -169,6 +169,18 @@ class Pipeline(Unit):
         markers = markers.copy()
         self.markers = self.ide.get(markers)
         return self.markers
+
+    def update(self, x=None, new_labels=None, method='SeededKMeans', **kwargs):
+        if x is None:
+            x = self.x_emb
+
+        self.ssclu = wrap("ss_cluster", method)()
+
+        self.labels = self.ssclu.get(x, new_labels, **kwargs)
+
+        self.get_markers()
+        self.convert()
+        self.identify()
 
     def get_emb_2d(self, x=None, y=None, method='UMAP'):
         if x is None:
@@ -276,27 +288,6 @@ class Pipeline(Unit):
         with open(path, "wb") as f:
             pickle.dump(self, f)
         return path
-
-    def update(self, new_labels=None, code=100):
-        """
-        Given new_labels (1D, same size as labels), update according to code;
-        Codes:
-            100: Hard cluster. Update the given labels. Don't run clustering.
-            200: Soft cluster. Run constrained clustering using new labels.
-        """
-        if type(new_labels) != np.ndarray:
-            new_labels = np.array(new_labels).astype(int).reshape(-1)
-        # labels assumed to be 1D and same dimension as original labels
-        if code == 100:
-            self.labels = new_labels
-        elif code == 200:
-            self.labels = self.ssclu.get(self.x, new_labels)
-        else:
-            raise ValueError("Invalid code.")
-
-        self.get_markers()
-        self.convert()
-        self.identify()
 
     def get(self):
         return self.x_emb_2d, self.labels, self.markers
