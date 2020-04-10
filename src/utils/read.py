@@ -52,4 +52,6 @@ def load_data(dataset):
     elif dataset == 'spellman':
         return pd.read_csv('datasets/Spellman.csv', index_col=0).to_numpy(), None
     else:
-        raise FileNotFoundError('Dataset not supported.')
+        df = pd.read_csv(
+            'datasets/{0}/{0}.csv'.format(dataset), index_col=0, header=None).T
+        return df.to_numpy(), df.columns.to_numpy()
