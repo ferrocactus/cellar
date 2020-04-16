@@ -184,7 +184,7 @@ server <- shinyServer(function(input, output, session) {
   updateSelectInput(session=session, inputId="newlabels", label = "Select label", choices =levels(as.factor(expr_data[,length(expr_data)])),selected=NULL)
   # input new label
   observe({
-    x <- input$text
+    x <- input$newlabelbox
     #Can use character(0) to remove all choices
     #labeldats<-reactive({value = labchoices})
     observeEvent(input$labeladd, {
