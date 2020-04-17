@@ -19,7 +19,9 @@ mainpanel <- div(
     ),
 
     actionButton("getdegenes", "Get DE genes", class="sidebtn"),
-
+    actionButton("subset1", "store subset"),
+    actionButton("subset2", "store subset"),
+    actionButton("DEsubsets", "DE genes subsets"),
     uiOutput("genecard"),
     htmlOutput("inc"),
     splitLayout(

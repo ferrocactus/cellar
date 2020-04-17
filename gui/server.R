@@ -266,60 +266,96 @@ server <- shinyServer(function(input, output, session) {
 
   ############################################## DE GENE IMPLEMENTATION
   scdata_subset=expr_data
-  observeEvent(input$getdegenes,{
-    output$genes <- renderPrint({
-      withProgress(message = 'calculating DE genes', value = 0, {
-      d <- event_data("plotly_selected")
-      selecteddat<-scdata_subset[as.numeric(d$key),2:ncol(scdata_subset)]
-      restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
-      #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-      labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
-      alldat<-rbind(selecteddat,restdat)
-      alldat<-data.frame(alldat,labelsdat)
-      modmat<-model.matrix(~labelsdat,data = alldat)
-      newfit<-lmFit(t(alldat[,1:ncol(alldat)-1]),design = modmat)
-      eb_newfit<-eBayes(newfit)
-      #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
-      toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
-      })
-      output$GeneOntology <- renderPrint({
-        geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-        gotable<-goana(geneids)
-        go_ord<-gotable[order(gotable$P.DE),]
-        go_ord[1:10,]
-      })
-
-      ### DE gene buttons implementation:
-      output$deinfo <- renderUI({
-        h3("DE gene information:")
-      })
-      DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
-      output$DEbuttons <- renderUI({
+  assign("s1", NULL, envir = .GlobalEnv)
+  assign("s2", NULL, envir = .GlobalEnv)
+  observeEvent(input$subset1,{
+    d <- event_data("plotly_selected")
+    assign("s1", d, envir = .GlobalEnv)
+    showNotification("subset1 stored")
+  })
+  observeEvent(input$subset2,{
+    d <- event_data("plotly_selected")
+    assign("s2", d, envir = .GlobalEnv)
+    showNotification("subset2 stored")
+    assign("sets", 0, envir = .GlobalEnv)
+    assign("set", 0, envir = .GlobalEnv)
+    toListen <- reactive({
+      list(input$getdegenes,input$DEsubsets)
+      
+    })
+    
+    observeEvent(toListen(),{
+      selecteddat=NULL
+      if (input$getdegenes>set){
+        assign("set", sets+1, envir = .GlobalEnv)
+        d <- event_data("plotly_selected")
+        selecteddat<-scdata_subset[as.numeric(d$key),2:ncol(scdata_subset)]
+        restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
+        showNotification("DE genes one subset")
+      }
+      if (input$DEsubsets>sets){
+        assign("sets", set+1, envir = .GlobalEnv)
+        
+        selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
+        restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
+        showNotification("DE genes two subsets")
+      }
+      else
+      {
+        
+      }
+      output$genes <- renderPrint({
+        withProgress(message = 'calculating DE genes', value = 0, {
+          
+          #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
+          labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
+          alldat<-rbind(selecteddat,restdat)
+          alldat<-data.frame(alldat,labelsdat)
+          modmat<-model.matrix(~labelsdat,data = alldat)
+          newfit<-lmFit(t(alldat[,1:ncol(alldat)-1]),design = modmat)
+          eb_newfit<-eBayes(newfit)
+          #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
+          toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
+        })
+        
+        output$GeneOntology <- renderPrint({
+          geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+          gotable<-goana(geneids)
+          go_ord<-gotable[order(gotable$P.DE),]
+          go_ord[1:10,]
+        })
+        
+        ### DE gene buttons implementation:
+        output$deinfo <- renderUI({
+          h3("DE gene information:")
+        })
+        DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
+        output$DEbuttons <- renderUI({
+          lapply(
+            X = 1:length(DEgenes),
+            FUN = function(i){
+              actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
+            }
+          )
+        })
+        ### maintain DE gene buttons
         lapply(
           X = 1:length(DEgenes),
           FUN = function(i){
-            actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
-          }
-        )
-      })
-      ### maintain DE gene buttons
-      lapply(
-        X = 1:length(DEgenes),
-        FUN = function(i){
-          observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
-            showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
-            output$plot <- renderPlotly({
-              plot_ly(
-                df,
-                x = df$x1, y = df$x2,
-                text = ~paste("label: ", as.factor(df$y)),
-                color = (scdata_subset[[DEgenes[i]]]),
-                key = row.names(df)
-              )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
-            })
-          }
-          )
-        })
+            observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
+              showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
+              output$plot <- renderPlotly({
+                plot_ly(
+                  df,
+                  x = df$x1, y = df$x2,
+                  text = ~paste("label: ", as.factor(df$y)),
+                  color = (scdata_subset[[DEgenes[i]]]),
+                  key = row.names(df)
+                )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
+              })
+            }
+            )
+          })
       ## end of maintaining buttons
 
       ############################################################################ constructing hgnc_filt using informations in the marker
@@ -510,11 +546,8 @@ server <- shinyServer(function(input, output, session) {
   )
   ###########################################################################  end of adding and maintaining intersection buttons
   ###################################################################################### END OF MAIN PANEL
-  # output$cc <- reactive({
-  #   event_data("plotly_click")
-  # })
-  #}
 
+  })
 })
 
 
@@ -760,4 +793,4 @@ server <- shinyServer(function(input, output, session) {
   #   })
   # ############################################################################
   # }#end of obs event expression
-  # )# end of observe event
+# )# end of observe event
