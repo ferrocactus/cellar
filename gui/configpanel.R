@@ -63,19 +63,30 @@ configpanel <- div(
                     choices = options$tissue),
         textInput(inputId = "ide_path",
                   label = "Path (dont use)",
-                  value = '')
+                  value = "")
     ),
 
     selectInput(
         "vis_method",
-        "Choose a visualization method:",
+        "Visualization method:",
         choices = options$vis
     ),
 
-    selectInput(
-        "ssc_method",
-        "Choose a constrained clustering method:",
-        choices = options$ssclu
+    actionButton(
+        "ssclurun", "Run constrained clustering",
+        class="sidebtn"
+    ),
+
+    splitLayout(
+        cellWidths = c("60%", "40%"),
+        selectInput(
+            "ssc_method",
+            "Constrained clustering method:",
+            choices = options$ssclu
+        ),
+        textInput(inputId = "savedClusters",
+                  label = "Clusters to preserve",
+                  value = "")
     ),
 
     #selectInput(

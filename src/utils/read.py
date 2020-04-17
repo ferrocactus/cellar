@@ -42,11 +42,10 @@ def load_data(dataset):
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
         return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy()
+    elif dataset == 'spleen':
+        ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
+        return [ann.X, ann.var.index.to_numpy().astype('U')]
     else:
         df = pd.read_csv(
             'datasets/{0}/{0}.csv'.format(dataset), index_col=0, header=None).T
         return df.to_numpy(), df.columns.to_numpy()
-    # Skipped
-    if dataset == 'spleen':
-        ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
-        return [ann.X, ann.var.index.to_numpy().astype('U')]

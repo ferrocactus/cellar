@@ -177,10 +177,7 @@ class Pipeline(Unit):
         self.ssclu = wrap("ss_cluster", method)()
 
         self.labels = self.ssclu.get(x, new_labels, **kwargs)
-
-        self.get_markers()
-        self.convert()
-        self.identify()
+        return self.labels
 
     def get_emb_2d(self, x=None, y=None, method='UMAP'):
         if x is None:
