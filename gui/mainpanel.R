@@ -19,15 +19,19 @@ mainpanel <- div(
     ),
 
     actionButton("getdegenes", "Get DE genes", class="sidebtn"),
-    actionButton("subset1", "store subset"),
-    actionButton("subset2", "store subset"),
-    actionButton("DEsubsets", "DE genes subsets"),
     uiOutput("genecard"),
     htmlOutput("inc"),
     splitLayout(
         textInput("searchgene", "Search Gene card",
                   placeholder = "Enter gene"),
         actionButton("search", "Search Card", class="sidebtn")
+    ),
+
+    splitLayout(
+        cellWidths = c("40%", "40%", "20%"),
+        actionButton("subset1", "Store Subset 1", class = "sidebtn"),
+        actionButton("subset2", "Store Subset 2", class = "sidebtn"),
+        actionButton("DEsubsets", "DE", class = "sidebtn")
     ),
 
     fileInput(

@@ -8,276 +8,146 @@ library(GO.db)
 library(rjson)
 
 
+source_python('__init__.py')
+pipe <- Pipeline(x = "default")
+
 load('gui/Hs.c2')
 
-#load python
-source_python('__init__.py')
-
-
-################################################################################## functions
-## getpage function for genecard
-getPage<-function(genename) {
-  url <- paste("https://www.genecards.org/cgi-bin/carddisp.pl?gene=",genename,sep="")
-  return(browseURL(url))
-}
-
-intersect<-function (x, y)
-{
-  y <- as.vector(y)
-  unique(y[match(as.vector(x), y, 0L)])
-}
-############################################# end of functions
-
-dataset="default"
+source("gui/functions.R")
+source("gui/pipe_functions.R")
 
 ################################################################# server
 server <- shinyServer(function(input, output, session) {
-  ############# Toggling logic ##############################
-  shinyjs::onclick("togglemain",
-    {shinyjs::toggle(id = "mainpanel", anim = TRUE);
-    shinyjs::hide(id = "configuration", anim = TRUE)})
 
-  shinyjs::onclick("toggleconfig",
-    {shinyjs::toggle(id = "configuration", anim = TRUE);
-    shinyjs::hide(id = "mainpanel", anim = TRUE)})
-
-  #if (FALSE) {
-  # Create pipeline
-  pipe <- Pipeline(x=dataset)
-
-  # rerun the app if "run with new configuration button" pressed (this can avoid observing previous events)
-  observeEvent(input$reset, {js$reset()})
-
-  #################################### function of reading dataset and return dataframe df
-  get_plot_data <- isolate(function(){
-    dim_method <- input$dim_method
-    dim_n_components <- input$dim_n_components
-    clu_method <- input$clu_method
-    eval_method <- input$eval_method
-    clu_n_clusters <- input$clu_n_clusters
-    mark_method <- 'TTest'
-    mark_alpha <- input$mark_alpha
-    mark_markers_n <- input$mark_markers_n
-    mark_correction <- input$mark_correction
-    con_method <- 'Converter'
-    con_convention <- input$con_convention
-    #con_path <- input$con_path
-    con_path <- 'markers/gene_id_name.csv'
-    ide_method <- 'HyperGeom'
-    #ide_path <- input$ide_path
-    ide_path <- 'markers/cell_type_marker.json'
-    ide_tissue <- input$ide_tissue
-    vis_method <- input$vis_method
-    ssc_method <- input$ssc_method
-
-    withProgress(message = 'Making plot', value = 0, {
-      # Number of times we'll go through the loop
-      n <- 6
-
-      incProgress(1/n, detail = paste("Step: PCA"))
-      x_emb = pipe$get_emb(
-            method=dim_method, n_components=dim_n_components)
-
-      incProgress(1/n, detail = paste("Step: Clustering"))
-      labels <- pipe$get_labels(
-            method=clu_method,
-            eval_method=eval_method, n_clusters=clu_n_clusters)
-
-      incProgress(1/n, detail = paste("Step: Finding markers"))
-      markers <- pipe$get_markers(
-            method='TTest',
-            alpha=mark_alpha, markers_n=mark_markers_n,
-            correction=mark_correction)
-
-      incProgress(1/n, detail = paste("Step: Converting names"))
-      markers <- pipe$convert(
-            method=con_method,
-            convention=con_convention, path=con_path)
-
-      incProgress(1/n, detail = paste("Step: Identifying cells"))
-      markers <- pipe$identify(
-            method="HyperGeom",
-            path=ide_path, tissue=ide_tissue)
-
-      incProgress(1/n, detail = paste("Step: Visualizing"))
-      x_emb_2d <- pipe$get_emb_2d(x_emb, y=labels, method=vis_method)
-      df <- data.frame(x1 = x_emb_2d[, 1],
-                      x2 = x_emb_2d[, 2],
-                      y = labels)
+    # Toggling of menus
+    shinyjs::onclick("togglemain", {
+        shinyjs::toggle(id = "mainpanel", anim = TRUE);
+        shinyjs::hide(id = "configuration", anim = TRUE)
     })
-    return(df)
-  })
-  ################################################ end of reading dataset function
 
-  ######################################################### user upload file
-  observeEvent(input$file1,{
-    req(input$file1)
-    tryCatch(
-      {
-          withProgress(message = 'Please wait...', value = 0, {
-                # Number of times we'll go through the loop
-                n <- 2
+    shinyjs::onclick("toggleconfig", {
+        shinyjs::toggle(id = "configuration", anim = TRUE);
+        shinyjs::hide(id = "mainpanel", anim = TRUE)
+    })
 
-                incProgress(1/n, detail = paste("Reading file"))
-                f <- read.csv(input$file1$datapath,
-                              #header = input$header,
-                              #sep = input$sep,
-                              #quote = input$quote)
-                )
+    # rerun the app if "run with new configuration button" pressed
+    # (this can avoid observing previous events)
+    observeEvent(input$runconfigbtn, {
+        js$reset()
+    })
 
-                incProgress(1/n, detail = paste("Writing file"))
+    # Upload dataset
+    observeEvent(input$file1, {
+        req(input$file1)
+        tryCatch({
+            writeDataset(input$file1$datapath, input$file1$name)
+        }, error = function(e) {
+            stop(safeError(e))
+        })
+    })
 
-                fname=strsplit(input$file1$name,".",fixed=TRUE)[[1]][1]
-                dir.create(paste(getwd(),"/datasets/",fname,sep=""))
-                write.csv(f,paste(getwd(),"/datasets/",fname,"/",fname,".csv",sep=""))
-                #showNotification("File uploaded. Now you can specify the new dataset in the configuration")
-                assign("dataset", fname, envir = .GlobalEnv)
-           })
-      },
-      error = function(e) {
-        # return a safeError if a parsing error occurs
-        stop(safeError(e))
-      }
+    df <- isolate(runPipe(pipe, input))
+    # the dictionary includes information of each cluster
+    # (including DE genes and intersections)
+    markers <- pipe$markers
+
+    #get the gene expression data
+    expr_data = data.frame(
+        matrix(pipe$x, ncol = length(pipe$col_ids),
+               dimnames = list(1:length(pipe$x[,1]), pipe$col_ids))
     )
-  })
-  ######################################################### end of file uploading function
+    expr_data$cluster = df$y
+
+    ##read in the marker from JSON
+    hypergeom <- getHypergeom("markers/cell_type_marker.json")
+
+    #Requires HS.c2 to be loaded.
+    msigdb_categories <- names(Hs.c2)
+    msigdb_pvals <- double(length = length(msigdb_categories))
+    msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
+    newlabs <- df[, 3]
+    names(newlabs) <- rownames(df)
+    labeldats <- levels(as.factor(df[,3]))
+
+    # select color value
+    updateSelectInput(session = session,
+                      inputId = "color",
+                      label = "Select colour value:",
+                      choices = c("cluster", names(expr_data)),
+                      selected = NULL)
+
+    # change label
+    updateSelectInput(session = session,
+                      inputId = "newlabels",
+                      label = "Select label",
+                      choices = levels(as.factor(expr_data[,length(expr_data)])),
+                      selected = NULL)
 
 
-  ############################################################################## data processing
-  df <- isolate(get_plot_data())
-  markers<-pipe$markers  # the dictionary includes information of each cluster (including DE genes and intersections)
-
-  #get the gene expression data
-  expr_data=matrix(pipe$x,ncol=length(pipe$col_ids),dimnames=list(1:length(pipe$x[,1]),pipe$col_ids))
-  expr_data=data.frame(expr_data)
-  expr_data$cluster=df$y
-  markers=pipe$markers
-  ##create object to store hypergeometric marker results
-  
-  ##read in the marker from JSON
-  marker_genelists <- fromJSON(file = "markers/cell_type_marker.json")
-
-  ##create a new list to store marker genes
-  markers_genelists_list<-list()
-
-  for (i in 1:length(marker_genelists)) {
-    for (j in 1:length(marker_genelists[[i]])) {
-      markers_genelists_list[[paste(names(marker_genelists)[i],names(marker_genelists[[i]])[j],sep = " - ")]]<-marker_genelists[[i]][[j]]
-    }
-  }
-
-  #create hypergeon object
-  marker_list_names<-names(markers_genelists_list)
-  pvals<-double(length = length(markers_genelists_list))
-  hypergeom<-data.frame(marker_list_names,pvals)
-
-  #REQUIRED HS.c2 TO BE LOADED IN. FILE AND LOADING DESCRIBED IN EMAIL
-  msigdb_categories<-names(Hs.c2)
-  msigdb_pvals<-double(length = length(msigdb_categories))
-  msig_dispdat<-data.frame(msigdb_categories,msigdb_pvals)
-  newlabs<-df[,3]
-  names(newlabs)<-rownames(df)
-  labeldats<-levels(as.factor(df[,3]))
-  ###################################################################################### data processing
-
-  ########################### selecting dataset function
-  ### change global variable dataset when the new dataset is selected
-  #observeEvent(input$dataset,{
-  #  assign("dataset", input$dataset, envir = .GlobalEnv)
-  #})
-  ###### then next time "run with current configuration" is clicked, the new dataset will be used
-
-
-  ###################################################################################### SIDEBAR PANEL
-
-  ### select color value
-  updateSelectInput(session=session, inputId="color", label = "Select colour value:", choices = c("cluster",names(expr_data)),
-                    selected = NULL)
-
-  ### change label
-  # select
-  updateSelectInput(session=session, inputId="newlabels", label = "Select label", choices =levels(as.factor(expr_data[,length(expr_data)])),selected=NULL)
-  # input new label
-  observe({
-    x <- input$newlabelbox
-    #Can use character(0) to remove all choices
-    #labeldats<-reactive({value = labchoices})
-    observeEvent(input$labeladd, {
-      labeldats<<-union(labeldats,x)
-      # Can also set the label and select items
-      updateSelectInput(session, "newlabels",
-                        label = paste("Select input label", length(x)),
-                        choices = labeldats
-      )
+    # input new label
+    observe({
+        x <- input$newlabelbox
+        #Can use character(0) to remove all choices
+        #labeldats<-reactive({value = labchoices})
+        observeEvent(input$labeladd, {
+            labeldats <<- union(labeldats, x)
+            # Can also set the label and select items
+            updateSelectInput(session,
+                              "newlabels",
+                              label = paste("Select input label", length(x)),
+                              choices = labeldats)
+        })
     })
-  })
-  ### end of change label
-
-  ###  gene card
-  observeEvent(input$search, {
-    if (input$searchgene %in% names(expr_data)){
-      getPage(input$searchgene)
-    }
-    else{
-      showNotification("Gene name does not exit")
-    }
-  })
-
-  ###
 
 
-  ############################################################################## END OF SIDEBAR PANEL
+    # gene card
+    observeEvent(input$search, {
+        if (input$searchgene %in% names(expr_data)) {
+            getPage(input$searchgene) # function in functions.R
+        }
+        else {
+            showNotification("Gene name does not exist.")
+        }
+    })
 
+    ############################################## MAIN PANEL
 
-  ######################################################################################### MAIN PANEL
-  
-  
-  ### run default plot
-  output$plot <- renderPlotly({
-    #factorize cluster labels (discrete instead of continuous)
-    if (input$color == "cluster"){
-      plotcols = as.factor(expr_data[[input$color]])
-    } else {
-      plotcols = expr_data[[input$color]]
-    }
-    plot_ly(
-      df,
-      x = df$x1, y = df$x2,
-      text = ~paste("label: ", as.factor(df$y)),
-      #color = as.factor(df$y)
-      color = plotcols,
-      key = row.names(df)
-    ) %>% layout(dragmode = "lasso",title=paste("Value of ",input$color,sep=""))
-  })
-  ###
-
-
-  # ### Title of the plot
-  # Title <- reactive({
-  #   paste("Value of ", input$gene )
-  # })
-  #
-  # ### output caption to ptibt title
-  # output$caption <- renderText({
-  #   Title()
-  # })
-
-  ### showing updated plot
-  output$brush <- renderPrint({
-    d <- event_data("plotly_selected")
-    observeEvent(input$labelupd, {
-      newlabs[d$key]<-as.integer(input$newlabels)
-      output$Plot2<-renderPlotly({
+    ### run default plot
+    output$plot <- renderPlotly({
+        #factorize cluster labels (discrete instead of continuous)
+        if (input$color == "cluster") {
+            plotcols = as.factor(expr_data[[input$color]])
+        } else {
+            plotcols = expr_data[[input$color]]
+        }
         plot_ly(
-          df,
-          x=df[,1],y=df[,2],
-          text = ~paste("label: ", as.factor(newlabs)),
-          color = as.factor(newlabs)
-        )%>% layout(dragmode = "lasso",title=paste("Value of ",input$labelupd,sep=""))
-      })
-
+            df,
+            x = df$x1,
+            y = df$x2,
+            text = ~paste("label: ", as.factor(df$y)),
+            color = plotcols,
+            key = row.names(df)
+        ) %>% layout(dragmode = "lasso",
+                     title = paste("Value of ", input$color, sep=""))
     })
-  })
+
+    ### updated plot
+    output$brush <- renderPrint({
+        d <- event_data("plotly_selected")
+        observeEvent(input$labelupd, {
+            newlabs[d$key] <- as.integer(input$newlabels)
+            output$Plot2 <- renderPlotly({
+                plot_ly(
+                    df,
+                    x = df[, 1],
+                    y = df[, 2],
+                    text = ~paste("label: ", as.factor(newlabs)),
+                    color = as.factor(newlabs)
+                ) %>% layout(dragmode = "lasso",
+                            title = paste("Value of ", input$labelupd, sep=""))
+            })
+        })
+    })
 
   ############################################## DE GENE IMPLEMENTATION
   scdata_subset=expr_data
@@ -296,9 +166,9 @@ server <- shinyServer(function(input, output, session) {
     assign("set", 0, envir = .GlobalEnv)
     toListen <- reactive({
       list(input$getdegenes,input$DEsubsets)
-      
+
     })
-    
+
     observeEvent(toListen(),{
       selecteddat=NULL
       if (input$getdegenes>set){
@@ -310,18 +180,18 @@ server <- shinyServer(function(input, output, session) {
       }
       if (input$DEsubsets>sets){
         assign("sets", set+1, envir = .GlobalEnv)
-        
+
         selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
         restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
         showNotification("DE genes two subsets")
       }
       else
       {
-        
+
       }
       output$genes <- renderPrint({
         withProgress(message = 'calculating DE genes', value = 0, {
-          
+
           #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
           labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
           alldat<-rbind(selecteddat,restdat)
@@ -332,14 +202,14 @@ server <- shinyServer(function(input, output, session) {
           #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
           toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
         })
-        
+
         output$GeneOntology <- renderPrint({
           geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
           gotable<-goana(geneids)
           go_ord<-gotable[order(gotable$P.DE),]
           go_ord[1:10,]
         })
-        
+
         ### DE gene buttons implementation:
         output$deinfo <- renderUI({
           h3("DE gene information:")

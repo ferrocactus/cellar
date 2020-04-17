@@ -5,7 +5,7 @@ configpanel <- div(
     class = "panelbody",
 
     actionButton(
-        "reset", "Run with current configuration",
+        "runconfigbtn", "Run with current configuration",
         class="sidebtn"
     ),
 
