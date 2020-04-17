@@ -5,6 +5,7 @@ library(ggplot2)
 library(stringr)
 library(limma)
 library(GO.db)
+library(rjson)
 
 
 load('gui/Hs.c2')
@@ -152,9 +153,23 @@ server <- shinyServer(function(input, output, session) {
   expr_data$cluster=df$y
   markers=pipe$markers
   ##create object to store hypergeometric marker results
-  marker_list<-c("Blood - CD1C+ B dendritic cell","Kidney - Cancer Stem cell","Liver - CD4+ cytotoxic T cell","Kidney - ErythroBlast")
-  pvals<-double(length = 4)
-  hypergeom<-data.frame(marker_list,pvals)
+  
+  ##read in the marker from JSON
+  marker_genelists <- fromJSON(file = "markers/cell_type_marker.json")
+
+  ##create a new list to store marker genes
+  markers_genelists_list<-list()
+
+  for (i in 1:length(marker_genelists)) {
+    for (j in 1:length(marker_genelists[[i]])) {
+      markers_genelists_list[[paste(names(marker_genelists)[i],names(marker_genelists[[i]])[j],sep = " - ")]]<-marker_genelists[[i]][[j]]
+    }
+  }
+
+  #create hypergeon object
+  marker_list_names<-names(markers_genelists_list)
+  pvals<-double(length = length(markers_genelists_list))
+  hypergeom<-data.frame(marker_list_names,pvals)
 
   #REQUIRED HS.c2 TO BE LOADED IN. FILE AND LOADING DESCRIBED IN EMAIL
   msigdb_categories<-names(Hs.c2)
@@ -216,49 +231,7 @@ server <- shinyServer(function(input, output, session) {
 
   ######################################################################################### MAIN PANEL
   
-  #get the marker list intersections
-    # step 1 c_intersection is a list of intersections in each cluster
-  c_intersections <- list("")
-  clusters<-length(names(markers))
-  for (i in 1:length(names(markers))){
-    intersection <- markers[[as.character(i-1)]][["lvl1_intersec"]]
-    #intersection <- strsplit(str_replace_all(intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
-    intersection <- list(intersection)
-    c_intersections <- append(c_intersections,intersection)
-  }
-  c_intersections[1]<-NULL
-  #step 2 total_intersection is the total gene in the intersection
-  total_intersections=c()
-  c_seen=c()
-  for (i in 1:length(c_intersections)){
-    for (j in 1:length(c_intersections[[i]])){
-      total_intersections <- c(total_intersections,c_intersections[[i]][j])
-    }
-  }
-  #step3 add a symbol to gene names that appear twice.
-  #so we won't have duplicated button IDs later
-  flag<-0
-  tmp=c()
-  c_updated <- c()
-  for (x in 1:length(c_intersections)){
-    for (k in 1:length(c_intersections)){
-      for (i in 1:length(c_intersections[[k]])){
-        for (j in 1:length(total_intersections)){
-          if ((c_intersections[[k]][i] %in% c_seen)==FALSE){
-            c_seen<-c(c_seen,c_intersections[[k]][i])
-            c_updated<-c(c_updated,k*1000+i)
-          }
-          if (identical(c_intersections[[k]][i] , total_intersections[j]) && (c_intersections[[k]][i] %in% c_seen) && (((k*1000+i) %in% c_updated)==FALSE)){
-            c_intersections[[k]][i]<-paste(c_intersections[[k]][i],"-",sep="")
-            total_intersections<-c(total_intersections,c_intersections[[k]][i])
-            c_seen<-c(c_seen,c_intersections[[k]][i])
-            c_updated<-c(c_updated,k*1000+i)
-          }
-        }
-      }
-    }
-  }
-
+  
   ### run default plot
   output$plot <- renderPlotly({
     #factorize cluster labels (discrete instead of continuous)
@@ -431,12 +404,12 @@ server <- shinyServer(function(input, output, session) {
       ### Markers panel
       output$Markers <- renderPrint({
         degenes<-rownames(toptable_sample[1:input$nogenes,])
-        hypergeom[1,2]<-phyper(length(intersect(degenes,c_intersections[[1]])),length(c_intersections[[1]]),ncol(scdata_subset)-1-length(c_intersections[[1]]),length(degenes),lower.tail = F)
-        hypergeom[2,2]<-phyper(length(intersect(degenes,c_intersections[[2]])),length(c_intersections[[2]]),ncol(scdata_subset)-1-length(c_intersections[[2]]),length(degenes),lower.tail = F)
-        hypergeom[3,2]<-phyper(length(intersect(degenes,c_intersections[[3]])),length(c_intersections[[3]]),ncol(scdata_subset)-1-length(c_intersections[[3]]),length(degenes),lower.tail = F)
-        hypergeom[4,2]<-phyper(length(intersect(degenes,c_intersections[[4]])),length(c_intersections[[4]]),ncol(scdata_subset)-1-length(c_intersections[[4]]),length(degenes),lower.tail = F)
+        for (i in 1:nrow(hypergeom)) {
+          hypergeom[i,1]<-names(markers_genelists_list)[i]
+          hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
+        }
         hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
-        hypergeom_ord
+        hypergeom_ord[1:10,]
       })
 
       ### Msigdb panel
@@ -492,7 +465,48 @@ server <- shinyServer(function(input, output, session) {
   ############################# end of tabset panel
 
   ##########################################################################  Adding intersection buttons to corresponding tab panel
-
+  #get the marker list intersections
+    # step 1 c_intersection is a list of intersections in each cluster
+  c_intersections <- list("")
+  clusters<-length(names(markers))
+  for (i in 1:length(names(markers))){
+    intersection <- markers[[as.character(i-1)]][["lvl1_intersec"]]
+    #intersection <- strsplit(str_replace_all(intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
+    intersection <- list(intersection)
+    c_intersections <- append(c_intersections,intersection)
+  }
+  c_intersections[1]<-NULL
+  #step 2 total_intersection is the total gene in the intersection
+  total_intersections=c()
+  c_seen=c()
+  for (i in 1:length(c_intersections)){
+    for (j in 1:length(c_intersections[[i]])){
+      total_intersections <- c(total_intersections,c_intersections[[i]][j])
+    }
+  }
+  #step3 add a symbol to gene names that appear twice.
+  #so we won't have duplicated button IDs later
+  flag<-0
+  tmp=c()
+  c_updated <- c()
+  for (x in 1:length(c_intersections)){
+    for (k in 1:length(c_intersections)){
+      for (i in 1:length(c_intersections[[k]])){
+        for (j in 1:length(total_intersections)){
+          if ((c_intersections[[k]][i] %in% c_seen)==FALSE){
+            c_seen<-c(c_seen,c_intersections[[k]][i])
+            c_updated<-c(c_updated,k*1000+i)
+          }
+          if (identical(c_intersections[[k]][i] , total_intersections[j]) && (c_intersections[[k]][i] %in% c_seen) && (((k*1000+i) %in% c_updated)==FALSE)){
+            c_intersections[[k]][i]<-paste(c_intersections[[k]][i],"-",sep="")
+            total_intersections<-c(total_intersections,c_intersections[[k]][i])
+            c_seen<-c(c_seen,c_intersections[[k]][i])
+            c_updated<-c(c_updated,k*1000+i)
+          }
+        }
+      }
+    }
+  }
   ##Step4: Adding buttons into corresponding tabpanels
   for (i in 1:length(c_intersections)){
     for (j in 1:length(c_intersections[[i]])){
