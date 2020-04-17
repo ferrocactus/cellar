@@ -64,3 +64,22 @@ getHypergeom <- function(path) {
 
     return(hypergeom)
 }
+
+getMarkerGeneList <- function(path) {
+    marker_genelists <- fromJSON(file = path)
+    ##create a new list to store marker genes
+    markers_genelists_list <- list()
+
+    for (i in 1:length(marker_genelists)) {
+        for (j in 1:length(marker_genelists[[i]])) {
+            markers_genelists_list[[paste(
+                names(marker_genelists)[i],
+                names(marker_genelists[[i]])[j],
+                sep = " - "
+            )]] <- marker_genelists[[i]][[j]]
+        }
+    }
+
+    return(markers_genelists_list)
+
+}
