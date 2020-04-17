@@ -80,6 +80,7 @@ server <- shinyServer(function(input, output, session) {
 
     ##read in the marker from JSON
     hypergeom <- getHypergeom("markers/cell_type_marker.json")
+    markers_genelists_list <- getMarkerGeneList("markers/cell_type_marker.json")
 
     #Requires HS.c2 to be loaded.
     msigdb_categories <- names(Hs.c2)
