@@ -103,7 +103,7 @@ class Pipeline(Unit):
         return self.x_emb
 
     def get_labels(self, x=None, method="KMeans", eval_method="Silhouette",
-                   n_clusters='(3, 5, 1)', n_jobs=-1, **kwargs):
+                   n_clusters='(3, 5, 1)', n_jobs=1, **kwargs):
         if x is None:
             x = self.x_emb
 

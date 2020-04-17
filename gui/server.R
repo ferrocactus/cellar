@@ -162,6 +162,7 @@ server <- shinyServer(function(input, output, session) {
     d <- event_data("plotly_selected")
     assign("s2", d, envir = .GlobalEnv)
     showNotification("subset2 stored")
+  })
     assign("sets", 0, envir = .GlobalEnv)
     assign("set", 0, envir = .GlobalEnv)
     toListen <- reactive({
@@ -434,7 +435,7 @@ server <- shinyServer(function(input, output, session) {
   ###################################################################################### END OF MAIN PANEL
 
   })
-})
+
 
 
 
