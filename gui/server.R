@@ -215,7 +215,49 @@ server <- shinyServer(function(input, output, session) {
 
 
   ######################################################################################### MAIN PANEL
-
+  
+  #get the marker list intersections
+    # step 1 c_intersection is a list of intersections in each cluster
+  c_intersections <- list("")
+  clusters<-length(names(markers))
+  for (i in 1:length(names(markers))){
+    intersection <- markers[[as.character(i-1)]][["lvl1_intersec"]]
+    #intersection <- strsplit(str_replace_all(intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
+    intersection <- list(intersection)
+    c_intersections <- append(c_intersections,intersection)
+  }
+  c_intersections[1]<-NULL
+  #step 2 total_intersection is the total gene in the intersection
+  total_intersections=c()
+  c_seen=c()
+  for (i in 1:length(c_intersections)){
+    for (j in 1:length(c_intersections[[i]])){
+      total_intersections <- c(total_intersections,c_intersections[[i]][j])
+    }
+  }
+  #step3 add a symbol to gene names that appear twice.
+  #so we won't have duplicated button IDs later
+  flag<-0
+  tmp=c()
+  c_updated <- c()
+  for (x in 1:length(c_intersections)){
+    for (k in 1:length(c_intersections)){
+      for (i in 1:length(c_intersections[[k]])){
+        for (j in 1:length(total_intersections)){
+          if ((c_intersections[[k]][i] %in% c_seen)==FALSE){
+            c_seen<-c(c_seen,c_intersections[[k]][i])
+            c_updated<-c(c_updated,k*1000+i)
+          }
+          if (identical(c_intersections[[k]][i] , total_intersections[j]) && (c_intersections[[k]][i] %in% c_seen) && (((k*1000+i) %in% c_updated)==FALSE)){
+            c_intersections[[k]][i]<-paste(c_intersections[[k]][i],"-",sep="")
+            total_intersections<-c(total_intersections,c_intersections[[k]][i])
+            c_seen<-c(c_seen,c_intersections[[k]][i])
+            c_updated<-c(c_updated,k*1000+i)
+          }
+        }
+      }
+    }
+  }
 
   ### run default plot
   output$plot <- renderPlotly({
@@ -450,47 +492,7 @@ server <- shinyServer(function(input, output, session) {
   ############################# end of tabset panel
 
   ##########################################################################  Adding intersection buttons to corresponding tab panel
-  # step 1 c_intersection is a list of intersections in each cluster
-  c_intersections <- list("")
-  clusters<-length(names(markers))
-  for (i in 1:length(names(markers))){
-    intersection <- markers[[as.character(i-1)]][["lvl1_intersec"]]
-    #intersection <- strsplit(str_replace_all(intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
-    intersection <- list(intersection)
-    c_intersections <- append(c_intersections,intersection)
-  }
-  c_intersections[1]<-NULL
-  #step 2 total_intersection is the total gene in the intersection
-  total_intersections=c()
-  c_seen=c()
-  for (i in 1:length(c_intersections)){
-    for (j in 1:length(c_intersections[[i]])){
-      total_intersections <- c(total_intersections,c_intersections[[i]][j])
-    }
-  }
-  #step3 add a symbol to gene names that appear twice.
-  #so we won't have duplicated button IDs later
-  flag<-0
-  tmp=c()
-  c_updated <- c()
-  for (x in 1:length(c_intersections)){
-    for (k in 1:length(c_intersections)){
-      for (i in 1:length(c_intersections[[k]])){
-        for (j in 1:length(total_intersections)){
-          if ((c_intersections[[k]][i] %in% c_seen)==FALSE){
-            c_seen<-c(c_seen,c_intersections[[k]][i])
-            c_updated<-c(c_updated,k*1000+i)
-          }
-          if (identical(c_intersections[[k]][i] , total_intersections[j]) && (c_intersections[[k]][i] %in% c_seen) && (((k*1000+i) %in% c_updated)==FALSE)){
-            c_intersections[[k]][i]<-paste(c_intersections[[k]][i],"-",sep="")
-            total_intersections<-c(total_intersections,c_intersections[[k]][i])
-            c_seen<-c(c_seen,c_intersections[[k]][i])
-            c_updated<-c(c_updated,k*1000+i)
-          }
-        }
-      }
-    }
-  }
+
   ##Step4: Adding buttons into corresponding tabpanels
   for (i in 1:length(c_intersections)){
     for (j in 1:length(c_intersections[[i]])){
