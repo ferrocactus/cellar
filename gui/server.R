@@ -39,12 +39,16 @@ server <- shinyServer(function(input, output, session) {
 
     # Upload dataset
     observeEvent(input$file1, {
-        req(input$file1)
-        tryCatch({
-            writeDataset(input$file1$datapath, input$file1$name)
-        }, error = function(e) {
-            stop(safeError(e))
-        })
+      req(input$file1)
+      tryCatch({
+        writeDataset(input$file1$datapath, input$file1$name)
+        #assign("pipe", dt, envir = .GlobalEnv)
+        pipe <- Pipeline(x='tmp')
+        
+        unlink(paste(getwd(), "/datasets/tmp", sep=""), recursive = TRUE)
+      }, error = function(e) {
+        stop(safeError(e))
+      })
     })
 
     df <- isolate(runPipe(pipe, input))
@@ -145,181 +149,257 @@ server <- shinyServer(function(input, output, session) {
     })
 
     ############################################## DE GENE IMPLEMENTATION
-    scdata_subset = expr_data
-
+    scdata_subset=expr_data
     assign("s1", NULL, envir = .GlobalEnv)
     assign("s2", NULL, envir = .GlobalEnv)
-
-    observeEvent(input$subset1, {
-        d <- event_data("plotly_selected")
-        assign("s1", d, envir = .GlobalEnv)
-        showNotification("subset1 stored")
+    observeEvent(input$subset1,{
+      d <- event_data("plotly_selected")
+      assign("s1", d, envir = .GlobalEnv)
+      showNotification("subset1 stored")
     })
-
-    observeEvent(input$subset2, {
-        d <- event_data("plotly_selected")
-        assign("s2", d, envir = .GlobalEnv)
-        showNotification("subset2 stored")
+    observeEvent(input$subset2,{
+      d <- event_data("plotly_selected")
+      assign("s2", d, envir = .GlobalEnv)
+      showNotification("subset2 stored")
     })
-
     assign("sets", 0, envir = .GlobalEnv)
     assign("set", 0, envir = .GlobalEnv)
-
     toListen <- reactive({
-        list(input$getdegenes, input$DEsubsets)
+      list(input$getdegenes,input$DEsubsets)
+      
     })
-
-    observeEvent(toListen(), {
-        selecteddat = NULL
-        if (input$getdegenes>set){
-            assign("set", sets+1, envir = .GlobalEnv)
-            d <- event_data("plotly_selected")
-            selecteddat<-scdata_subset[as.numeric(d$key),2:ncol(scdata_subset)]
-            restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
-            showNotification("DE genes one subset")
-        }
-
-        if (input$DEsubsets>sets){
-            assign("sets", set + 1, envir = .GlobalEnv)
-            selecteddat <- scdata_subset[as.numeric(s1$key),
-                                         2:ncol(scdata_subset)]
-            restdat <- scdata_subset[as.numeric(s2$key),
-                                     2:ncol(scdata_subset)]
-            showNotification("DE genes two subsets")
-        } else {
-
-        }
-
+    
+    observeEvent(toListen(),{
+      selecteddat=NULL
+      if (input$getdegenes>set){
+        assign("set", sets+1, envir = .GlobalEnv)
+        d <- event_data("plotly_selected")
+        selecteddat<-scdata_subset[as.numeric(d$key),2:ncol(scdata_subset)]
+        restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
+        #showNotification("DE genes one subset")
         output$genes <- renderPrint({
-            withProgress(message = 'calculating DE genes', value = 0, {
-                #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-                labelsdat <- as.factor(c(rep("selected", nrow(selecteddat)),
-                                         rep("notselected",nrow(restdat))))
-                alldat <- rbind(selecteddat, restdat)
-                alldat <- data.frame(alldat, labelsdat)
-                modmat <- model.matrix(~labelsdat, data = alldat)
-                newfit <- lmFit(t(alldat[,1:ncol(alldat) - 1]),
-                                design = modmat)
-                eb_newfit <- eBayes(newfit)
-                #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
-                toptable_sample<-topTable(eb_newfit,
-                                          number = ncol(alldat) - 1)
-            })
-
-            output$GeneOntology <- renderPrint({
-                geneids <- hgnc_filt[
-                                rownames(toptable_sample[1:input$nogenes,]), 2]
-                gotable <- goana(geneids)
-                go_ord <- gotable[order(gotable$P.DE),]
-                go_ord[1:10,]
-            })
-
-            ### DE gene buttons implementation:
-            output$deinfo <- renderUI({
-                h3("DE gene information:")
-            })
-            # a vector of characters
-            DEgenes <- rownames(toptable_sample[1:input$nogenes,])
-
-            output$DEbuttons <- renderUI({
-                lapply(
-                    X = 1:length(DEgenes),
-                    FUN = function(i){
-                        actionButton(paste(DEgenes[i]," ",seq=""),
-                                     paste(DEgenes[i]," ",seq=""))
-                    }
-                )
-            })
-
-            ### maintain DE gene buttons
-            lapply(X = 1:length(DEgenes), FUN = function(i){
-                observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
-                    showNotification(paste(
-                            "showing ", DEgenes[i],"'s expression",sep=""),
-                        duration=5)
-
-                    output$plot <- renderPlotly({
-                        plot_ly(
-                            df,
-                            x = df$x1,
-                            y = df$x2,
-                            text = ~paste("label: ", as.factor(df$y)),
-                            color = (scdata_subset[[DEgenes[i]]]),
-                            key = row.names(df)
-                        ) %>% layout(dragmode = "lasso",
-                            title=paste("Value of ", DEgenes[i], sep = ""))
-                    })
+          withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
+            
+            #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
+            labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
+            alldat<-rbind(selecteddat,restdat)
+            alldat<-data.frame(alldat,labelsdat)
+            modmat<-model.matrix(~labelsdat,data = alldat)
+            newfit<-lmFit(t(alldat[,1:ncol(alldat)-1]),design = modmat)
+            eb_newfit<-eBayes(newfit)
+            #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
+            toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
+          })
+          
+          output$GeneOntology <- renderPrint({
+            geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+            gotable<-goana(geneids)
+            go_ord<-gotable[order(gotable$P.DE),]
+            go_ord[1:10,]
+          })
+          
+          ### DE gene buttons implementation:
+          output$deinfo <- renderUI({
+            h3("DE gene information:")
+          })
+          DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
+          output$DEbuttons <- renderUI({
+            lapply(
+              X = 1:length(DEgenes),
+              FUN = function(i){
+                actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
+              }
+            )
+          })
+          ### maintain DE gene buttons
+          lapply(
+            X = 1:length(DEgenes),
+            FUN = function(i){
+              observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
+                showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
+                output$plot <- renderPlotly({
+                  plot_ly(
+                    df,
+                    x = df$x1, y = df$x2,
+                    text = ~paste("label: ", as.factor(df$y)),
+                    color = (scdata_subset[[DEgenes[i]]]),
+                    key = row.names(df)
+                  )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
                 })
+              }
+              )
             })
-            ## end of maintaining buttons
-
-            ########## constructing hgnc_filt using informations in the marker
-            ENTREZID = array()
-            SYMBOL = array()
-
-            for (i in 1:length(markers)) {
-                ENTREZID = c(ENTREZID, markers[[as.character(i-1)]][["indices"]])
-                SYMBOL = c(SYMBOL, markers[[as.character(i-1)]][["outp_names"]])
+          ## end of maintaining buttons
+          
+          ############################################################################ constructing hgnc_filt using informations in the marker
+          ENTREZID=array()
+          SYMBOL=array()
+          for (i in 1:length(markers)){
+            ENTREZID=c(ENTREZID,markers[[as.character(i-1)]][["indices"]])
+            SYMBOL=c(SYMBOL,markers[[as.character(i-1)]][["outp_names"]])
+          }
+          for (i in 1:length(SYMBOL)){
+            if (is.na(SYMBOL[i])){
+              SYMBOL[i]="NA"
             }
-
-            for (i in 1:length(SYMBOL)) {
-                if (is.na(SYMBOL[i])){
-                    SYMBOL[i] = "NA"
-                }
+          }
+          SYMBOL=data.frame(SYMBOL)
+          ENTREZID=data.frame(ENTREZID)
+          SYMBOL=distinct(SYMBOL)
+          ENTREZID=distinct(ENTREZID)
+          hgnc_filt=data.frame(SYMBOL,ENTREZID)
+          row.names(hgnc_filt)=as.character(SYMBOL[[1]])
+          ############################################################################ end of constructing hgnc_filt dataframe of genename,id
+          
+          ### KEGG panel
+          output$KEGG <- renderPrint({
+            geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+            keggtable<-kegga(geneids)
+            kegg_ord<-keggtable[order(keggtable$P.DE),]
+            kegg_ord[1:10,]
+          })
+          
+          ### Markers panel
+          output$Markers <- renderPrint({
+            degenes<-rownames(toptable_sample[1:input$nogenes,])
+            for (i in 1:nrow(hypergeom)) {
+              hypergeom[i,1]<-names(markers_genelists_list)[i]
+              hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
             }
-
-            SYMBOL = data.frame(SYMBOL)
-            ENTREZID = data.frame(ENTREZID)
-            SYMBOL = distinct(SYMBOL)
-            ENTREZID = distinct(ENTREZID)
-            hgnc_filt = data.frame(SYMBOL, ENTREZID)
-            row.names(hgnc_filt) = as.character(SYMBOL[[1]])
-            ############ end of constructing hgnc_filt dataframe of genename,id
-
-            ### KEGG panel
-            output$KEGG <- renderPrint({
-                geneids <- hgnc_filt[
-                            rownames(toptable_sample[1:input$nogenes,]), 2]
-                keggtable <- kegga(geneids)
-                kegg_ord <- keggtable[order(keggtable$P.DE),]
-                kegg_ord[1:10,]
-            })
-
-            ### Markers panel
-            output$Markers <- renderPrint({
-                degenes <- rownames(toptable_sample[1:input$nogenes,])
-                for (i in 1:nrow(hypergeom)) {
-                    hypergeom[i,1] <- names(markers_genelists_list)[i]
-                    hypergeom[i,2] <- phyper(
-                        length(intersect(degenes,markers_genelists_list[[i]])),
-                        length(markers_genelists_list[[i]]),
-                        ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),
-                        length(degenes),lower.tail = F
-                    )
-                }
-                hypergeom_ord <- hypergeom[order(hypergeom$pvals),]
-                hypergeom_ord[1:10,]
-            })
-
-            ### Msigdb panel
-            output$Msigdb <- renderPrint({
-                degenes <- hgnc_filt[
-                            rownames(toptable_sample[1:input$nogenes,]), 2]
-                for (i in 1:nrow(msig_dispdat)) {
-                    msig_dispdat[i,2] <- phyper(
-                        length(intersect(degenes,Hs.c2[[i]])),
-                        length(Hs.c2[[i]]),
-                        ncol(scdata_subset)-1-length(Hs.c2[[i]]),
-                        length(degenes),
-                        lower.tail = F
-                    )
-                }
-                msig_ord <- msig_dispdat[order(msig_dispdat$msigdb_pvals),]
-                msig_ord[1:10,]
-            })
-            toptable_sample[1:input$nogenes,]
+            hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+            hypergeom_ord[1:10,]
+          })
+          
+          ### Msigdb panel
+          output$Msigdb <- renderPrint({
+            degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+            for (i in 1:nrow(msig_dispdat)) {
+              msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
+            }
+            msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+            msig_ord[1:10,]
+          })
+          toptable_sample[1:input$nogenes,]
         })
+      }
+      if (input$DEsubsets>sets){
+        assign("sets", set+1, envir = .GlobalEnv)
+        
+        selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
+        restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
+        #showNotification("DE genes two subsets")
+        output$genes <- renderPrint({
+          withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
+            
+            #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
+            labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
+            alldat<-rbind(selecteddat,restdat)
+            alldat<-data.frame(alldat,labelsdat)
+            modmat<-model.matrix(~labelsdat,data = alldat)
+            newfit<-lmFit(t(alldat[,1:ncol(alldat)-1]),design = modmat)
+            eb_newfit<-eBayes(newfit)
+            #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
+            toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
+          })
+          
+          output$GeneOntology <- renderPrint({
+            geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+            gotable<-goana(geneids)
+            go_ord<-gotable[order(gotable$P.DE),]
+            go_ord[1:10,]
+          })
+          
+          ### DE gene buttons implementation:
+          output$deinfo <- renderUI({
+            h3("DE gene information:")
+          })
+          DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
+          output$DEbuttons <- renderUI({
+            lapply(
+              X = 1:length(DEgenes),
+              FUN = function(i){
+                actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
+              }
+            )
+          })
+          ### maintain DE gene buttons
+          lapply(
+            X = 1:length(DEgenes),
+            FUN = function(i){
+              observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
+                showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
+                output$plot <- renderPlotly({
+                  plot_ly(
+                    df,
+                    x = df$x1, y = df$x2,
+                    text = ~paste("label: ", as.factor(df$y)),
+                    color = (scdata_subset[[DEgenes[i]]]),
+                    key = row.names(df)
+                  )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
+                })
+              }
+              )
+            })
+          ## end of maintaining buttons
+          
+          ############################################################################ constructing hgnc_filt using informations in the marker
+          ENTREZID=array()
+          SYMBOL=array()
+          for (i in 1:length(markers)){
+            ENTREZID=c(ENTREZID,markers[[as.character(i-1)]][["indices"]])
+            SYMBOL=c(SYMBOL,markers[[as.character(i-1)]][["outp_names"]])
+          }
+          for (i in 1:length(SYMBOL)){
+            if (is.na(SYMBOL[i])){
+              SYMBOL[i]="NA"
+            }
+          }
+          SYMBOL=data.frame(SYMBOL)
+          ENTREZID=data.frame(ENTREZID)
+          SYMBOL=distinct(SYMBOL)
+          ENTREZID=distinct(ENTREZID)
+          hgnc_filt=data.frame(SYMBOL,ENTREZID)
+          row.names(hgnc_filt)=as.character(SYMBOL[[1]])
+          ############################################################################ end of constructing hgnc_filt dataframe of genename,id
+          
+          ### KEGG panel
+          output$KEGG <- renderPrint({
+            geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+            keggtable<-kegga(geneids)
+            kegg_ord<-keggtable[order(keggtable$P.DE),]
+            kegg_ord[1:10,]
+          })
+          
+          ### Markers panel
+          output$Markers <- renderPrint({
+            degenes<-rownames(toptable_sample[1:input$nogenes,])
+            for (i in 1:nrow(hypergeom)) {
+              hypergeom[i,1]<-names(markers_genelists_list)[i]
+              hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
+            }
+            hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+            hypergeom_ord[1:10,]
+          })
+          
+          ### Msigdb panel
+          output$Msigdb <- renderPrint({
+            degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+            for (i in 1:nrow(msig_dispdat)) {
+              msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
+            }
+            msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+            msig_ord[1:10,]
+          })
+          toptable_sample[1:input$nogenes,]
+        })
+      }
+      else
+      {
+        
+      }
+      
     })
+    
 
     ######################################BOTTOM OF MAIN PANEL:
     # Adding tabset panel corresponds to each Cluster

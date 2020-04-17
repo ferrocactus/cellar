@@ -1,3 +1,7 @@
+library(reticulate)
+source_python('__init__.py')
+
+
 ## getpage function for genecard
 getPage <- function(genename) {
     url <- paste("https://www.genecards.org/cgi-bin/carddisp.pl?gene=",
@@ -11,30 +15,32 @@ intersect <- function(x, y) {
 }
 
 # File upload
+# File upload
 writeDataset <- function(path, name) {
     withProgress(
         message = 'Please wait...',
         value = 0,
         {
             incProgress(1/2, detail = paste("Reading file"))
-
+            
             f <- read.csv(path,
                           #header = input$header,
                           #sep = input$sep,
                           #quote = input$quote)
             )
-
-            incProgress(1/2, detail = paste("Writing file"))
-
+            
+            incProgress(1/2, detail = paste("Processing file"))
+            
             fname <- strsplit(name, ".", fixed = TRUE)[[1]][1]
-            dir.create(paste(getwd(), "/datasets/", fname, sep=""))
-            write.csv(f, paste(getwd(), "/datasets/", fname, "/",
-                               fname, ".csv", sep = ""))
-            assign("dataset", fname, envir = .GlobalEnv)
+            dir.create(paste(getwd(), "/datasets/tmp", sep=""))
+            write.csv(f, paste(getwd(), "/datasets/tmp/tmp.csv", sep = ""))
+            # assign("dataset", fname, envir = .GlobalEnv)
+            #p=Pipeline(x ='tmp')
+            
         }
     )
+    #p
 }
-
 # Get Hypergeom
 getHypergeom <- function(path) {
     marker_genelists <- fromJSON(file = path)
