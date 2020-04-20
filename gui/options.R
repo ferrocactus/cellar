@@ -18,5 +18,5 @@ options <- list(
                   "Placenta", "Eye", "Heart", "Embryo", "Skeletal muscle",
                   "Brain"),
     "vis" = c("UMAP", "TSNE"),
-    "ssclu" = c("SeededKMeans", "ConstrainedKMeans", "ConstrainedSeededKMeans")
+    "ssclu" = c("ConstrainedKMeans", "SeededKMeans", "ConstrainedSeededKMeans")
 )
