@@ -33,7 +33,7 @@ mainpanel <- div(
         actionButton("subset2", "Store Subset 2", class = "sidebtn"),
         actionButton("DEsubsets", "DE", class = "sidebtn")
     ),
-
+    #actionButton("disable","Disable buttons"),
     fileInput(
         "file1", "Choose CSV File",
         multiple = FALSE,

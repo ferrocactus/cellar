@@ -26,6 +26,7 @@ ui <- pageWithSidebar(
     mainPanel(
         tabsetPanel(
             type = "tabs",
+            id = "tabset",
             tabPanel(
                 "Main Plot",
                 h3(textOutput("caption")),
