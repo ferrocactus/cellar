@@ -78,10 +78,10 @@ runSSClu <- function(pipe, labels, input) {
 
     withProgress(message = 'Please wait', value = 0, {
         # Number of times we'll go through the loop
-        n <- 6
+        n <- 5
 
-        incProgress(1/n, detail = paste("Step: PCA"))
-        x_emb = pipe$get_emb(method=dim_method, n_components=dim_n_components)
+        #incProgress(1/n, detail = paste("Step: PCA"))
+        #x_emb = pipe$get_emb(method=dim_method, n_components=dim_n_components)
 
         incProgress(1/n, detail = paste("Step: Clustering"))
         if (ssc_method == "SeededKMeans") {
@@ -107,7 +107,7 @@ runSSClu <- function(pipe, labels, input) {
                                  tissue=ide_tissue)
 
         incProgress(1/n, detail = paste("Step: Visualizing"))
-        x_emb_2d <- pipe$get_emb_2d(x_emb, y=labels, method=vis_method)
+        x_emb_2d <- pipe$get_emb_2d(y=labels, method=vis_method)
         df <- data.frame(x1 = x_emb_2d[, 1],
                          x2 = x_emb_2d[, 2],
                          y = labels)

@@ -173,6 +173,11 @@ class Pipeline(Unit):
     def update(self, x=None, new_labels=None, method='SeededKMeans', **kwargs):
         if x is None:
             x = self.x_emb
+        elif type(x) != np.ndarray:
+            x = np.asarray(x)
+
+        if type(new_labels) != np.ndarray:
+            new_labels = np.asarray(new_labels)
 
         self.ssclu = wrap("ss_cluster", method)()
 
