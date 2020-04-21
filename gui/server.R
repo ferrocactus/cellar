@@ -17,6 +17,12 @@ source("gui/pipe_functions.R") # runPipe
 
 ################################################################# server
 server <- shinyServer(function(input, output, session) {
+    # Keep connection alive
+    output$clock <- renderText({
+        invalidateLater(5000)
+        Sys.time()
+    })
+
     env=environment()
     # Toggling of menus
     shinyjs::onclick("togglemain", {
