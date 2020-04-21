@@ -380,10 +380,16 @@ server <- shinyServer(function(input, output, session) {
               })
 
               output$GeneOntology <- renderPrint({
+                withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
+                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
                 gotable<-goana(geneids)
+                incProgress(3/3, detail = paste("Step: Getting Geneontology"))
                 go_ord<-gotable[order(gotable$P.DE),]
+                showNotification("GeneOntology calculation finished")
                 go_ord[1:10,]
+                })
               })
 
               ### DE gene buttons implementation:
@@ -449,32 +455,54 @@ server <- shinyServer(function(input, output, session) {
 
               ### KEGG panel
               output$KEGG <- renderPrint({
-                geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                keggtable<-kegga(geneids)
-                kegg_ord<-keggtable[order(keggtable$P.DE),]
-                kegg_ord[1:10,]
+                withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
+                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
+                  keggtable<-kegga(geneids)
+                  incProgress(3/3, detail = paste("Step: Formating"))
+                  kegg_ord<-keggtable[order(keggtable$P.DE),]
+                  showNotification("KEGG calculation finished")
+                  kegg_ord[1:10,]
+                })
               })
 
               ### Markers panel
               output$Markers <- renderPrint({
+                withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 degenes<-rownames(toptable_sample[1:input$nogenes,])
+                incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
                 for (i in 1:nrow(hypergeom)) {
                   hypergeom[i,1]<-names(markers_genelists_list)[i]
                   hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
                 }
+                incProgress(3/3, detail = paste("Step: Presenting"))
                 hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+                showNotification("Markers Intersect calculation finished")
                 hypergeom_ord[1:10,]
+                })
               })
 
               ### Msigdb panel
               output$Msigdb <- renderPrint({
+                withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                incProgress(2/3, detail = paste("Step: Calculating"))
                 for (i in 1:nrow(msig_dispdat)) {
                   msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
                 }
+                incProgress(3/3, detail = paste("Step: Presenting"))
                 msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+                showNotification("Msigdb calculation finished")
                 msig_ord[1:10,]
+                
+                })
               })
+              
+              
+              
               toptable_sample[1:input$nogenes,]
             })
           }
@@ -512,10 +540,16 @@ server <- shinyServer(function(input, output, session) {
               })
 
               output$GeneOntology <- renderPrint({
-                geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                gotable<-goana(geneids)
-                go_ord<-gotable[order(gotable$P.DE),]
-                go_ord[1:10,]
+                withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
+                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
+                  gotable<-goana(geneids)
+                  incProgress(3/3, detail = paste("Step: Getting Geneontology"))
+                  go_ord<-gotable[order(gotable$P.DE),]
+                  showNotification("Gene Ontology calculation finished")
+                  go_ord[1:10,]
+                })
               })
 
               ### DE gene buttons implementation:
@@ -548,7 +582,7 @@ server <- shinyServer(function(input, output, session) {
                     })
                   }
                   )
-                  assign("debuttons",o,envir = env)
+                  assign("debuttons",c(debuttons,o),envir = env)
 
                 })
               ## end of maintaining buttons
@@ -572,36 +606,54 @@ server <- shinyServer(function(input, output, session) {
               hgnc_filt=data.frame(SYMBOL,ENTREZID)
               row.names(hgnc_filt)=as.character(SYMBOL[[1]])
               ############################################################################ end of constructing hgnc_filt dataframe of genename,id
-
+              
               ### KEGG panel
               output$KEGG <- renderPrint({
+                withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
+                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
                 keggtable<-kegga(geneids)
+                incProgress(3/3, detail = paste("Step: Formating"))
                 kegg_ord<-keggtable[order(keggtable$P.DE),]
+                showNotification("KEGG calculation finished")
                 kegg_ord[1:10,]
+                })
               })
 
               ### Markers panel
               output$Markers <- renderPrint({
+                withProgress(message = 'calculating Marker Intersect',detail=NULL, value = 0, {
+                incProgress(1/3, detail = paste("Step: Getting DE genes"))
                 degenes<-rownames(toptable_sample[1:input$nogenes,])
+                incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
                 for (i in 1:nrow(hypergeom)) {
                   hypergeom[i,1]<-names(markers_genelists_list)[i]
                   hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
                 }
+                incProgress(3/3, detail = paste("Step: Presenting"))
                 hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+                showNotification("Markers Intersect calculation finished")
                 hypergeom_ord[1:10,]
+                })
               })
 
               ### Msigdb panel
               output$Msigdb <- renderPrint({
+                withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
+                  incProgress(1/3, detail = paste("Step: Getting DE genes"))
                 degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
                 for (i in 1:nrow(msig_dispdat)) {
                   msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
                 }
+                incProgress(3/3, detail = paste("Step: Presenting"))
                 msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+                showNotification("Msigdb calculation finished")
                 msig_ord[1:10,]
               })
               toptable_sample[1:input$nogenes,]
+              })
             })
           }
           else
