@@ -10,6 +10,7 @@ library(rjson)
 
 source_python('__init__.py')
 load('gui/Hs.c2')
+load('gui/Go_kegg_lists')
 
 # Load utility functions
 source("gui/functions.R") # getPage, intersect, writeDataset, getHypergeom
@@ -173,6 +174,15 @@ server <- shinyServer(function(input, output, session) {
                 msigdb_categories <- names(Hs.c2)
                 msigdb_pvals <- double(length = length(msigdb_categories))
                 msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
+                
+                go_categories <- names(Hs.c5)
+                go_pvals <- double(length = length(go_categories))
+                go_dispdat <- data.frame(go_categories, go_pvals)
+                
+                kegg_categories <- kegg_id_toname[names(kegg_genelists)]
+                kegg_pvals <- double(length = length(kegg_categories))
+                kegg_dispdat <- data.frame(kegg_categories, kegg_pvals)
+                
                 newlabs <- df[, 3]
                 names(newlabs) <- rownames(df)
                 labeldats <- levels(as.factor(df[,3]))
@@ -540,13 +550,16 @@ server <- shinyServer(function(input, output, session) {
               })
 
               output$GeneOntology <- renderPrint({
+                  
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
                   incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                  gotable<-goana(geneids)
+                  for (i in 1:nrow(go_dispdat)) {
+                    go_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c5[[i]])),length(Hs.c5[[i]]),ncol(scdata_subset)-1-length(Hs.c5[[i]]),length(degenes),lower.tail = F)
+                  }
                   incProgress(3/3, detail = paste("Step: Getting Geneontology"))
-                  go_ord<-gotable[order(gotable$P.DE),]
+                  go_ord<-go_dispdat[order(go_dispdat$go_pvals),]
                   showNotification("Gene Ontology calculation finished")
                   go_ord[1:10,]
                 })
@@ -611,11 +624,13 @@ server <- shinyServer(function(input, output, session) {
               output$KEGG <- renderPrint({
                 withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
                 incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
                 incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                keggtable<-kegga(geneids)
+                for (i in 1:nrow(kegg_dispdat)) {
+                  kegg_dispdat[i,2]<-phyper(length(intersect(degenes,kegg_genelists[[i]])),length(kegg_genelists[[i]]),ncol(scdata_subset)-1-length(kegg_genelists[[i]]),length(degenes),lower.tail = F)
+                }
                 incProgress(3/3, detail = paste("Step: Formating"))
-                kegg_ord<-keggtable[order(keggtable$P.DE),]
+                kegg_ord<-kegg_dispdat[order(kegg_dispdat$kegg_pvals),]
                 showNotification("KEGG calculation finished")
                 kegg_ord[1:10,]
                 })
