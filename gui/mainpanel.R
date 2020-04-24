@@ -38,6 +38,6 @@ mainpanel <- div(
         "file1", "Choose CSV File",
         multiple = FALSE,
         accept = c("text/csv",
-                   "text/comma-separated-values,text/plain", ".csv")
+                   "text/comma-separated-values,text/plain", ".csv", ".h5ad")
     )
 )

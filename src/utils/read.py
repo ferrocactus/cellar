@@ -45,7 +45,11 @@ def load_data(dataset):
     elif dataset == 'spleen':
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return [ann.X, ann.var.index.to_numpy().astype('U')]
-    else:
-        df = pd.read_csv(
-            'datasets/{0}/{0}.csv'.format(dataset), index_col=0, header=None).T
+    elif dataset[-4:] == 'h5ad':
+        ann = anndata.read_h5ad(dataset)
+        return [ann.X, ann.var.index.to_numpy().astype('U')]
+    elif dataset[-3:] == 'csv':
+        df = pd.read_csv(dataset, index_col=0, header=None).T
         return df.to_numpy(), df.columns.to_numpy()
+    else:
+        return "error"

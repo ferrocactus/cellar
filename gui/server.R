@@ -53,13 +53,33 @@ server <- shinyServer(function(input, output, session) {
     assign("sst",NULL, envir = env)
     ss=FALSE
     assign("ss",FALSE, envir=env)
+    dataset = "default"
+    assign("dataset", "default", envir=env)
     #SESSION-WISE VARIABLES
+
+    # Upload dataset
+    observeEvent(input$file1, {
+        req(input$file1)
+        #print(input$file1)
+        tryCatch({
+            #writeDataset(input$file1$datapath, input$file1$name)
+            #assign("pipe", dt, envir = .GlobalEnv)
+            dataset = "tmp"
+            assign("dataset", input$file1$datapath, envir=env)
+            #pipe <- Pipeline(x='tmp')
+
+            #unlink(paste(getwd(), "/datasets/tmp", sep=""), recursive = TRUE)
+        }, error = function(e) {
+            stop(safeError(e))
+        })
+    })
+
 
     # rerun the app if "run with new configuration button" pressed
     # (this can avoid observing previous events)
     observeEvent(input$runconfigbtn, {
         assign("ss", FALSE, envir = env)
-        pipe <- Pipeline(x = "default")
+        pipe <- Pipeline(x = dataset)
         df <- isolate(runPipe(pipe, input))
         #assign("df", isolate(runPipe(pipe, input)), envir = env)
         ################################### RUN WITH CURRENT CONFIG
@@ -174,15 +194,15 @@ server <- shinyServer(function(input, output, session) {
                 msigdb_categories <- names(Hs.c2)
                 msigdb_pvals <- double(length = length(msigdb_categories))
                 msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
-                
+
                 go_categories <- names(Hs.c5)
                 go_pvals <- double(length = length(go_categories))
                 go_dispdat <- data.frame(go_categories, go_pvals)
-                
+
                 kegg_categories <- kegg_id_toname[names(kegg_genelists)]
                 kegg_pvals <- double(length = length(kegg_categories))
                 kegg_dispdat <- data.frame(kegg_categories, kegg_pvals)
-                
+
                 newlabs <- df[, 3]
                 names(newlabs) <- rownames(df)
                 labeldats <- levels(as.factor(df[,3]))
@@ -218,20 +238,6 @@ server <- shinyServer(function(input, output, session) {
                     })
                 })
             }
-        })
-
-        # Upload dataset
-        observeEvent(input$file1, {
-            req(input$file1)
-            tryCatch({
-                writeDataset(input$file1$datapath, input$file1$name)
-                #assign("pipe", dt, envir = .GlobalEnv)
-                pipe <- Pipeline(x='tmp')
-
-                unlink(paste(getwd(), "/datasets/tmp", sep=""), recursive = TRUE)
-            }, error = function(e) {
-                stop(safeError(e))
-            })
         })
 
 
@@ -507,12 +513,12 @@ server <- shinyServer(function(input, output, session) {
                 msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
                 showNotification("Msigdb calculation finished")
                 msig_ord[1:10,]
-                
+
                 })
               })
-              
-              
-              
+
+
+
               toptable_sample[1:input$nogenes,]
             })
           }
@@ -550,7 +556,7 @@ server <- shinyServer(function(input, output, session) {
               })
 
               output$GeneOntology <- renderPrint({
-                  
+
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                   degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
@@ -619,7 +625,7 @@ server <- shinyServer(function(input, output, session) {
               hgnc_filt=data.frame(SYMBOL,ENTREZID)
               row.names(hgnc_filt)=as.character(SYMBOL[[1]])
               ############################################################################ end of constructing hgnc_filt dataframe of genename,id
-              
+
               ### KEGG panel
               output$KEGG <- renderPrint({
                 withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
