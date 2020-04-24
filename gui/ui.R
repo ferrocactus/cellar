@@ -42,19 +42,23 @@ ui <- pageWithSidebar(
             ),
             tabPanel(
                 "Gene Ontology",
-                verbatimTextOutput("GeneOntology")
+                tableOutput("GeneOntology"),
+                downloadButton("downloadGO", "Download GO table")
             ),
             tabPanel(
                 "KEGG",
-                verbatimTextOutput("KEGG")
+                tableOutput("KEGG"),
+                downloadButton("downloadKEGG", "Download KEGG table")
             ),
             tabPanel(
                 "Markers Intersect",
-                verbatimTextOutput("Markers")
+                tableOutput("Markers"),
+                downloadButton("downloadMKS", "Download Markers intersect table")
             ),
             tabPanel(
                 "MSigDB C2",
-                verbatimTextOutput("Msigdb")
+                tableOutput("Msigdb"),
+                downloadButton("downloadMSIG", "Download MsigDB enrichment table")
             )
         ),
         tags$div(id = "placeholder"),
