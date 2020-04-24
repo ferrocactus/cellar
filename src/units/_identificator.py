@@ -115,6 +115,9 @@ class Ide_HyperGeom(Unit):
         for key in x:
             if level > 1 and x[key]['lvl{0}_type'.format(level-1)] == 'None':
                 tp, sv, intersec, total = "None", 1, np.array([]), 0
+                all_pops = {'svs': np.array([]),
+                            'intersecs': np.array([]),
+                            'lens': np.array([])}
             else:
                 if level > 1:
                     tp, sv, intersec, total, all_pops = self.find_population(
