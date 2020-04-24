@@ -395,7 +395,7 @@ server <- shinyServer(function(input, output, session) {
                 toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
               })
 
-              output$GeneOntology <- renderPrint({
+              output$GeneOntology <- renderTable({
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
                 incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
@@ -404,9 +404,17 @@ server <- shinyServer(function(input, output, session) {
                 incProgress(3/3, detail = paste("Step: Getting Geneontology"))
                 go_ord<-gotable[order(gotable$P.DE),]
                 showNotification("GeneOntology calculation finished")
+                output$downloadGO <- downloadHandler(
+                    filename = function() {
+                        paste("GO_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                        write.csv(go_ord, file, row.names = FALSE)
+                    }
+                )
                 go_ord[1:10,]
                 })
-              })
+              },bordered = T)
 
               ### DE gene buttons implementation:
               output$deinfo <- renderUI({
@@ -470,7 +478,7 @@ server <- shinyServer(function(input, output, session) {
               ##### end of constructing hgnc_filt dataframe of genename,id
 
               ### KEGG panel
-              output$KEGG <- renderPrint({
+              output$KEGG <- renderTable({
                 withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                   geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
@@ -479,12 +487,20 @@ server <- shinyServer(function(input, output, session) {
                   incProgress(3/3, detail = paste("Step: Formating"))
                   kegg_ord<-keggtable[order(keggtable$P.DE),]
                   showNotification("KEGG calculation finished")
+                  output$downloadKEGG <- downloadHandler(
+                    filename = function() {
+                        paste("KEGG_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                        write.csv(kegg_ord, file, row.names = FALSE)
+                    }
+                  )
                   kegg_ord[1:10,]
                 })
-              })
+              },bordered = T)
 
               ### Markers panel
-              output$Markers <- renderPrint({
+              output$Markers <- renderTable({
                 withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 degenes<-rownames(toptable_sample[1:input$nogenes,])
@@ -496,12 +512,20 @@ server <- shinyServer(function(input, output, session) {
                 incProgress(3/3, detail = paste("Step: Presenting"))
                 hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
                 showNotification("Markers Intersect calculation finished")
+                output$downloadMKS <- downloadHandler(
+                    filename = function() {
+                        paste("Markers_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                        write.csv(hypergeom_ord, file, row.names = FALSE)
+                    }
+                  )
                 hypergeom_ord[1:10,]
                 })
-              })
+              },bordered = T)
 
               ### Msigdb panel
-              output$Msigdb <- renderPrint({
+              output$Msigdb <- renderTable({
                 withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
@@ -512,10 +536,18 @@ server <- shinyServer(function(input, output, session) {
                 incProgress(3/3, detail = paste("Step: Presenting"))
                 msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
                 showNotification("Msigdb calculation finished")
+                output$downloadMSIG <- downloadHandler(
+                    filename = function() {
+                        paste("MsigDB_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                        write.csv(msig_ord, file, row.names = FALSE)
+                    }
+                  )
                 msig_ord[1:10,]
 
                 })
-              })
+              },bordered = T)
 
 
 
