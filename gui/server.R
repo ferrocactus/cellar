@@ -6,7 +6,6 @@ library(stringr)
 library(limma)
 library(GO.db)
 library(rjson)
-library(Seurat)
 
 source_python('__init__.py')
 load('gui/Hs.c2')
@@ -24,7 +23,7 @@ server <- shinyServer(function(input, output, session) {
         Sys.time()
     })
 
-    
+
     # Toggling of menus
     shinyjs::onclick("togglemain", {
         shinyjs::toggle(id = "mainpanel", anim = TRUE);
@@ -58,7 +57,7 @@ server <- shinyServer(function(input, output, session) {
     assign("dataset", "default", envir=env)
     #END OF SESSION-WISE VARIABLES
 
-    # Upload dataset 
+    # Upload dataset
     # when a dataset is uploaded, write it into the "datasets" folder
     # users can choose it when run another configuration
     observeEvent(input$file1, {
@@ -72,12 +71,12 @@ server <- shinyServer(function(input, output, session) {
               if (files[i]==fname)
               {
                 flag=1
-              
+
               }
             }
             if (flag==1){
               showNotification("Dataset already exists")
-             
+
             }
             else{
                 writeDataset(input$file1$datapath, input$file1$name)
@@ -87,7 +86,7 @@ server <- shinyServer(function(input, output, session) {
                                 label = "Choose a dataset:",
                                 choices = list.files("datasets"),
                                 #selected = NULL)
-                                showNotification("Dataset uploaded")  
+                                showNotification("Dataset uploaded")
                 )
             }
             #assign("dataset", input$file1$datapath, envir=env)
@@ -100,7 +99,7 @@ server <- shinyServer(function(input, output, session) {
     # rerun the app if "run with new configuration button" pressed
     # (this can avoid observing previous events)
     observeEvent(input$runconfigbtn, {
-    
+
         assign("ss", FALSE, envir = env)
         dataset=as.character(input$dataset)
         showNotification(paste("Dataset: ",dataset,sep=""))

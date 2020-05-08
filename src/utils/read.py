@@ -5,7 +5,6 @@ import anndata
 import gtfparse
 import pandas as pd
 
-os.chdir("D:/ziv/cellar")
 def read_h5ad(filename):
     ann = anndata.read_h5ad(filename)
     return ann
@@ -77,5 +76,5 @@ def write_data(dataset,path):
         pd.write_csv(df,str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None)
     else:
         return "error"
-    
+
     return
