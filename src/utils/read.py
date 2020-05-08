@@ -1,11 +1,11 @@
 from ast import literal_eval
 from configparser import ConfigParser
-
+import os
 import anndata
 import gtfparse
 import pandas as pd
 
-
+os.chdir("D:/ziv/cellar")
 def read_h5ad(filename):
     ann = anndata.read_h5ad(filename)
     return ann
@@ -38,7 +38,7 @@ def read_config(dataset):
 
 def load_data(dataset):
     # return X, Y
-    if dataset == 'default':
+    if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
         return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy()
@@ -46,10 +46,36 @@ def load_data(dataset):
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return [ann.X, ann.var.index.to_numpy().astype('U')]
     elif dataset[-4:] == 'h5ad':
-        ann = anndata.read_h5ad(dataset)
+        filename=dataset[0:-5]
+        ann = anndata.read_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
         return [ann.X, ann.var.index.to_numpy().astype('U')]
     elif dataset[-3:] == 'csv':
-        df = pd.read_csv(dataset, index_col=0, header=None).T
+        filename=dataset[0:-4]
+        df = pd.read_csv(str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None).T
         return df.to_numpy(), df.columns.to_numpy()
     else:
         return "error"
+'''
+def upload(path):
+    if dataset[-4:] == 'h5ad':
+        filename=dataset[0:-5]
+        ann = anndata.read_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+        ann.write_h5ad()
+'''
+
+def write_data(dataset,path):
+
+    if path[-4:] == 'h5ad':
+        filename=dataset[0:-5]
+        ann = anndata.read_h5ad(str(path))
+        os.mkdir("datasets/"+filename)
+        ann.write_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+    elif path[-3:] == 'csv':
+        filename=dataset[0:-4]
+        os.mkdir("datasets/"+filename)
+        df = pd.read_csv(str(path)).T
+        pd.write_csv(df,str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None)
+    else:
+        return "error"
+    
+    return

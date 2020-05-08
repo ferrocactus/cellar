@@ -89,11 +89,11 @@ configpanel <- div(
                   value = "")
     ),
 
-    #selectInput(
-    #  "dataset",
-    #  "Choose a dataset:",
-    #  choices = list.files("datasets")
-    #),
+    selectInput(
+      "dataset",
+      "Choose a dataset:",
+      choices = list.files("datasets")
+    ),
     useShinyjs(), # Include shinyjs in the UI
     extendShinyjs(text = jsResetCode) # Add the js code to the page
 )

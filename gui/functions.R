@@ -1,6 +1,7 @@
 library(reticulate)
-source_python('__init__.py')
 
+source_python('__init__.py')
+source_python('src/utils/read.py')
 
 ## getpage function for genecard
 getPage <- function(genename) {
@@ -21,26 +22,50 @@ writeDataset <- function(path, name) {
         message = 'Please wait...',
         value = 0,
         {
-            incProgress(1/2, detail = paste("Reading file"))
-            
-            f <- read.csv(path,
-                          #header = input$header,
-                          #sep = input$sep,
-                          #quote = input$quote)
-            )
-            
-            incProgress(1/2, detail = paste("Processing file"))
+            #incProgress(1/3, detail = paste("Catching file"))
+            # 
+            #f <- read.csv(path,
+            #               #header = input$header,
+            #               #sep = input$sep,
+            #               #quote = input$quote)
+            #)
+            #f<-load_data(name)[1]
+            #incProgress(1/4, detail = paste("Processing file"))
             
             fname <- strsplit(name, ".", fixed = TRUE)[[1]][1]
-            dir.create(paste(getwd(), "/datasets/tmp", sep=""))
-            write.csv(f, paste(getwd(), "/datasets/tmp/tmp.csv", sep = ""))
-            # assign("dataset", fname, envir = .GlobalEnv)
-            #p=Pipeline(x ='tmp')
+            type <- strsplit(name, ".", fixed = TRUE)[[1]][2]
+            
+            
+            #dir.create(paste(getwd(), "/datasets/tmp", sep=""))
+            #write.csv(f, paste(getwd(), "/datasets/tmp/tmp.csv", sep = ""))
+            
+            
+            
+            
+            # incProgress(2/3, detail = paste("Saving file"))
+            # dir.create(paste(getwd(), "/datasets/",as.character(fname), sep=""))
+             if (type=="csv"){
+                 f <- read.csv(path,
+                                #header = input$header,
+                                #sep = input$sep,
+                                #quote = input$quote)
+                 )
+                 dir.create(paste(getwd(), "/datasets/",fname,"/", sep=""))
+                 write.csv(f, paste(getwd(), "/datasets/",as.character(fname),"/",as.character(fname),".csv",sep=""))
+             }
+             else{
+                 if (type=="h5ad"){
+                     write_data(name,path)
+                 }
+             }
+            
+            
             
         }
     )
     #p
 }
+
 # Get Hypergeom
 getHypergeom <- function(path) {
     marker_genelists <- fromJSON(file = path)

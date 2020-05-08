@@ -6,7 +6,7 @@ library(stringr)
 library(limma)
 library(GO.db)
 library(rjson)
-
+library(Seurat)
 
 source_python('__init__.py')
 load('gui/Hs.c2')
@@ -24,7 +24,7 @@ server <- shinyServer(function(input, output, session) {
         Sys.time()
     })
 
-    env=environment()
+    
     # Toggling of menus
     shinyjs::onclick("togglemain", {
         shinyjs::toggle(id = "mainpanel", anim = TRUE);
@@ -37,6 +37,7 @@ server <- shinyServer(function(input, output, session) {
     })
 
     #SESSION-WISE VARIABLES
+    env=environment()
     degenenames=NULL
     assign("degenenames",NULL,envir = env)
     firstflag=1
@@ -55,20 +56,41 @@ server <- shinyServer(function(input, output, session) {
     assign("ss",FALSE, envir=env)
     dataset = "default"
     assign("dataset", "default", envir=env)
-    #SESSION-WISE VARIABLES
+    #END OF SESSION-WISE VARIABLES
 
-    # Upload dataset
+    # Upload dataset 
+    # when a dataset is uploaded, write it into the "datasets" folder
+    # users can choose it when run another configuration
     observeEvent(input$file1, {
         req(input$file1)
         #print(input$file1)
         tryCatch({
-            #writeDataset(input$file1$datapath, input$file1$name)
-            #assign("pipe", dt, envir = .GlobalEnv)
-            dataset = "tmp"
-            assign("dataset", input$file1$datapath, envir=env)
-            #pipe <- Pipeline(x='tmp')
-
-            #unlink(paste(getwd(), "/datasets/tmp", sep=""), recursive = TRUE)
+            fname <- strsplit(as.character(input$file1$name), ".", fixed = TRUE)[[1]][1]
+            files <- list.files("datasets")
+            flag=0
+            for (i in 1:length(files)){
+              if (files[i]==fname)
+              {
+                flag=1
+              
+              }
+            }
+            if (flag==1){
+              showNotification("Dataset already exists")
+             
+            }
+            else{
+                writeDataset(input$file1$datapath, input$file1$name)
+                #dataset = "tmp"
+                updateSelectInput(session = session,
+                                inputId = "dataset",
+                                label = "Choose a dataset:",
+                                choices = list.files("datasets"),
+                                #selected = NULL)
+                                showNotification("Dataset uploaded")  
+                )
+            }
+            #assign("dataset", input$file1$datapath, envir=env)
         }, error = function(e) {
             stop(safeError(e))
         })
@@ -78,7 +100,11 @@ server <- shinyServer(function(input, output, session) {
     # rerun the app if "run with new configuration button" pressed
     # (this can avoid observing previous events)
     observeEvent(input$runconfigbtn, {
+    
         assign("ss", FALSE, envir = env)
+        dataset=as.character(input$dataset)
+        showNotification(paste("Dataset: ",dataset,sep=""))
+        print(dataset)
         pipe <- Pipeline(x = dataset)
         df <- isolate(runPipe(pipe, input))
         #assign("df", isolate(runPipe(pipe, input)), envir = env)
