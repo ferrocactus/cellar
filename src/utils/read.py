@@ -37,6 +37,7 @@ def read_config(dataset):
 
 def load_data(dataset):
     # return X, Y
+    
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
@@ -44,16 +45,18 @@ def load_data(dataset):
     elif dataset == 'spleen':
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return [ann.X, ann.var.index.to_numpy().astype('U')]
-    elif dataset[-4:] == 'h5ad':
-        filename=dataset[0:-5]
-        ann = anndata.read_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
-        return [ann.X, ann.var.index.to_numpy().astype('U')]
-    elif dataset[-3:] == 'csv':
-        filename=dataset[0:-4]
-        df = pd.read_csv(str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None).T
-        return df.to_numpy(), df.columns.to_numpy()
     else:
-        return "error"
+        dataset=os.listdir("datasets/"+dataset)[0]
+        if dataset[-4:] == 'h5ad':
+            filename=dataset[0:-5]
+            ann = anndata.read_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+            return [ann.X, ann.var.index.to_numpy().astype('U')]
+        elif dataset[-3:] == 'csv':
+            filename=dataset[0:-4]
+            df = pd.read_csv(str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None).T
+            return df.to_numpy(), df.columns.to_numpy()
+        else:
+            return "error"
 '''
 def upload(path):
     if dataset[-4:] == 'h5ad':
@@ -73,7 +76,7 @@ def write_data(dataset,path):
         filename=dataset[0:-4]
         os.mkdir("datasets/"+filename)
         df = pd.read_csv(str(path)).T
-        pd.write_csv(df,str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None)
+        pd.write_csv(df.to_numpy(),str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None)
     else:
         return "error"
 
