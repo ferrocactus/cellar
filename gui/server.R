@@ -62,11 +62,11 @@ server <- shinyServer(function(input, output, session) {
     # users can choose it when run another configuration
     observeEvent(input$file1, {
         req(input$file1)
-        #print(input$file1)
+        
         tryCatch({
             fname <- strsplit(as.character(input$file1$name), ".", fixed = TRUE)[[1]][1]
             files <- list.files("datasets")
-            flag=0
+            flag=0## check if the dataset is already there
             for (i in 1:length(files)){
               if (files[i]==fname)
               {
@@ -74,7 +74,7 @@ server <- shinyServer(function(input, output, session) {
 
               }
             }
-            if (flag==1){
+            if (flag==1){# if the dataset already exists
               showNotification("Dataset already exists")
 
             }

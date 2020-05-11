@@ -57,26 +57,35 @@ def load_data(dataset):
             return df.to_numpy(), df.columns.to_numpy()
         else:
             return "error"
-'''
-def upload(path):
-    if dataset[-4:] == 'h5ad':
-        filename=dataset[0:-5]
-        ann = anndata.read_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
-        ann.write_h5ad()
-'''
 
-def write_data(dataset,path):
 
+def upload(dataset,path):
     if path[-4:] == 'h5ad':
         filename=dataset[0:-5]
-        ann = anndata.read_h5ad(str(path))
-        os.mkdir("datasets/"+filename)
-        ann.write_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+        df = anndata.read_h5ad(str(path))
+
     elif path[-3:] == 'csv':
         filename=dataset[0:-4]
-        os.mkdir("datasets/"+filename)
-        df = pd.read_csv(str(path)).T
-        pd.write_csv(df.to_numpy(),str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None)
+        df = pd.read_csv(str(path))
+ 
+    else:
+        return "error"
+
+    return filename,df
+
+def mkdir(filename):
+    os.mkdir("datasets/"+filename)
+
+
+def write_data(dataset,path,filename,df):
+
+    if path[-4:] == 'h5ad':
+
+        df.write_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+    elif path[-3:] == 'csv':
+
+        df = pd.read_csv(str(path))
+        df.to_csv(str("datasets/"+filename+"/"+filename+".csv"), index=False)
     else:
         return "error"
 

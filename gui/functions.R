@@ -22,44 +22,17 @@ writeDataset <- function(path, name) {
         message = 'Please wait...',
         value = 0,
         {
-            #incProgress(1/3, detail = paste("Catching file"))
-            # 
-            #f <- read.csv(path,
-            #               #header = input$header,
-            #               #sep = input$sep,
-            #               #quote = input$quote)
-            #)
-            #f<-load_data(name)[1]
-            #incProgress(1/4, detail = paste("Processing file"))
-            
-            fname <- strsplit(name, ".", fixed = TRUE)[[1]][1]
-            type <- strsplit(name, ".", fixed = TRUE)[[1]][2]
-            
-            
-            #dir.create(paste(getwd(), "/datasets/tmp", sep=""))
-            #write.csv(f, paste(getwd(), "/datasets/tmp/tmp.csv", sep = ""))
+            incProgress(1/4, detail = paste("Processing file"))
+            l<-upload(name,path)
+            filename<-l[[1]]
+            df<-l[[2]]
+            incProgress(2/4, detail = paste("Processing file"))
+            mkdir(filename)
             
             
             
-            
-            # incProgress(2/3, detail = paste("Saving file"))
-            # dir.create(paste(getwd(), "/datasets/",as.character(fname), sep=""))
-             if (type=="csv"){
-                 f <- read.csv(path,
-                                #header = input$header,
-                                #sep = input$sep,
-                                #quote = input$quote)
-                 )
-                 dir.create(paste(getwd(), "/datasets/",fname,"/", sep=""))
-                 write.csv(f, paste(getwd(), "/datasets/",as.character(fname),"/",as.character(fname),".csv",sep=""))
-             }
-             else{
-                 if (type=="h5ad"){
-                     write_data(name,path)
-                 }
-             }
-            
-            
+            incProgress(3/4, detail = paste("Saving file"))
+            write_data(name,path,filename,df)   # use python to write h5ad file
             
         }
     )
