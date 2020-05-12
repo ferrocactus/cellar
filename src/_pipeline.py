@@ -5,6 +5,8 @@ from ast import literal_eval
 import numpy as np
 import pandas as pd
 import gseapy
+import anndata
+import scanpy
 
 from ._wrapper import wrap
 from .log import setup_logger
@@ -110,6 +112,7 @@ class Pipeline(Unit):
         n_clusters = env(n_clusters)
         n_jobs = env(n_jobs)
 
+        self.clu_method = method
         self.eval = wrap("cluster_eval", eval_method)()
         self.clu = wrap("cluster", method)(
             eval_obj=self.eval, n_clusters=n_clusters, n_jobs=n_jobs, **kwargs
@@ -187,6 +190,13 @@ class Pipeline(Unit):
     def get_emb_2d(self, x=None, y=None, method='UMAP'):
         if x is None:
             x = self.x_emb
+
+        if self.clu_method == "Scanpy":
+            ann = anndata.AnnData(X=self.x_emb)
+            scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
+            scanpy.tl.umap(ann)
+            self.x_emb_2d = ann.obsm['X_umap']
+            return self.x_emb_2d
 
         if method == 'UMAP':
             self.vis = wrap("dim_reduction", method)(

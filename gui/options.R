@@ -8,7 +8,7 @@ defaults <- list(
 options <- list(
     "dim" = c("PCA", "UMAP", "TSNE"),
     "clu" = c("KMeans", "KMedoids", "Spectral", "Agglomerative", "Birch",
-              "DBSCAN", "GaussianMixture"),
+              "DBSCAN", "GaussianMixture", "Leiden", "Scanpy"),
     "eval" = c("Silhouette", "DaviesBouldin", "CalinskiHarabasz"),
     "correction" = c("holm-sidak", "bonferroni", "sidak", "holm",
                      "simes-hochberg", "hommel", "fdr_bh", "fdr_by",
