@@ -1,9 +1,14 @@
 import logging
 
+import anndata
+import leidenalg
+import igraph
 import numpy as np
+import scanpy
 from sklearn.cluster import (DBSCAN, AgglomerativeClustering, Birch, KMeans,
                              SpectralClustering)
 from sklearn.mixture import GaussianMixture
+from sklearn.neighbors import kneighbors_graph
 
 from ..log import setup_logger
 from ..methods import KMedoids
@@ -464,3 +469,88 @@ class Clu_GaussianMixture(Unit):
         return _get_wrapper(x, obj_def=GaussianMixture, n_clusters=self.n_clusters,
                             eval_obj=self.eval_obj, n_jobs=self.n_jobs,
                             attribute_name='n_components', **self.kwargs)
+
+
+class Clu_Leiden(Unit):
+    """
+    See https://github.com/vtraag/leidenalg
+    """
+
+    def __init__(self, n_neighbors=10, **kwargs):
+        """
+        Parameters
+        __________
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj_def
+            when instantiating it.
+
+        """
+        self.logger = setup_logger('Leiden')
+        self.n_neighbors = n_neighbors
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Parameters
+        __________
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+        y: array, shape (n_samples,)
+            List of labels that correspond to the best clustering k, as
+            evaluated by eval_obj.
+
+        """
+        self.logger.info("Initializing Leiden Clustering.")
+        kn = kneighbors_graph(x, n_neighbors=self.n_neighbors)
+        ig = igraph.Graph.Adjacency(kn.toarray().tolist())
+        part = leidenalg.find_partition(
+            ig, leidenalg.ModularityVertexPartition)
+        return np.array(part.membership)
+
+
+class Clu_Scanpy(Unit):
+    """
+    See https://scanpy.readthedocs.io
+    """
+
+    def __init__(self, **kwargs):
+        """
+        Parameters
+        __________
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj_def
+            when instantiating it.
+
+        """
+        self.logger = setup_logger('Scanpy')
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Parameters
+        __________
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+        y: array, shape (n_samples,)
+            List of labels that correspond to the best clustering k, as
+            evaluated by eval_obj.
+
+        """
+
+        self.logger.info("Initializing Scanpy.")
+        ann = anndata.AnnData(X=x)
+        #sc.pp.filter_cells(adata, min_genes=200)
+        #sc.pp.filter_genes(adata, min_cells=3)
+        #sc.pp.normalize_total(adata, target_sum=1e4)
+        #sc.pp.log1p(adata)
+        #scanpy.tl.pca(adata, svd_solver='arpack')
+        scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
+        #sc.tl.umap(adata)
+        scanpy.tl.leiden(ann)
+        return np.squeeze(np.array(ann.obs))

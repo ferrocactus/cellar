@@ -1,7 +1,7 @@
 from ._unit import Unit
 from ._cluster import (Clu_KMeans, Clu_KMedoids, Clu_SpectralClustering,
                        Clu_Agglomerative, Clu_DBSCAN, Clu_Birch,
-                       Clu_GaussianMixture)
+                       Clu_GaussianMixture, Clu_Leiden, Clu_Scanpy)
 from ._dim_reduction import Dim_PCA, Dim_UMAP, Dim_TSNE
 from ._evaluation import (Eval_Silhouette, Eval_DaviesBouldin,
                           Eval_CalinskiHarabasz)
@@ -20,7 +20,9 @@ translation_dict = {
         "Agglomerative": Clu_Agglomerative,
         "DBSCAN": Clu_DBSCAN,
         "Birch": Clu_Birch,
-        "GaussianMixture": Clu_GaussianMixture
+        "GaussianMixture": Clu_GaussianMixture,
+        "Leiden": Clu_Leiden,
+        "Scanpy": Clu_Scanpy
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
@@ -58,6 +60,8 @@ __all__ = [
     'Clu_DBSCAN',
     'Clu_Birch',
     'Clu_GaussianMixture',
+    'Clu_Leiden',
+    'Clu_Scanpy',
     'Dim_PCA',
     'Dim_UMAP',
     'Dim_TSNE',
