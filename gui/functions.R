@@ -56,9 +56,18 @@ getHypergeom <- function(path) {
     }
 
     #create hypergeon object
+    
+    
     marker_list_names <- names(markers_genelists_list)
-    pvals <- double(length = length(markers_genelists_list))
-    hypergeom <- data.frame(marker_list_names, pvals)
+    
+    marker_n<-integer(length = length(marker_list_names))
+    marker_nde<-integer(length = length(marker_list_names))
+    marker_pvals<-double(length = length(marker_list_names))
+  
+    hypergeom<-data.frame(marker_list_names,marker_n)
+    hypergeom<-data.frame(hypergeom,marker_nde)
+    hypergeom<-data.frame(hypergeom,marker_pvals)
+    colnames(hypergeom)<-c("NAME","N","Intersect Length","P Value")
 
     return(hypergeom)
 }
