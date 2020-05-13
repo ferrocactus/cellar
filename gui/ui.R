@@ -1,6 +1,5 @@
 library(shiny)
 library(plotly)
-library(shinyjs)
 
 jsResetCode <- "shinyjs.reset = function() {history.go(0)}"
 
@@ -46,7 +45,7 @@ ui <- pageWithSidebar(
                 plotlyOutput("Plot2")
             ),
             tabPanel(
-                "Top Expressed Genes", 
+                "Top Expressed Genes",
                  verbatimTextOutput("topgenes")
             ),
             tabPanel(

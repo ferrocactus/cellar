@@ -63,7 +63,7 @@ server <- shinyServer(function(input, output, session) {
     # users can choose it when run another configuration
     observeEvent(input$file1, {
         req(input$file1)
-        
+
         tryCatch({
             fname <- strsplit(as.character(input$file1$name), ".", fixed = TRUE)[[1]][1]
             files <- list.files("datasets")
@@ -216,7 +216,7 @@ server <- shinyServer(function(input, output, session) {
                 hypergeom <- getHypergeom("markers/cell_type_marker.json")
                 markers_genelists_list <- getMarkerGeneList(
                                         "markers/cell_type_marker.json")
-                
+
 
                 newlabs <- df[, 3]
                 names(newlabs) <- rownames(df)
@@ -274,7 +274,7 @@ server <- shinyServer(function(input, output, session) {
         msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
         newlabs <- df[, 3]
         names(newlabs) <- rownames(df)
-        
+
         msigdb_categories <- names(Hs.c2)
         msigdb_n <-integer(length = length(msigdb_categories))
         msigdb_nde<-integer(length = length(msigdb_categories))
@@ -283,7 +283,7 @@ server <- shinyServer(function(input, output, session) {
         msig_dispdat<-data.frame(msig_dispdat,msigdb_nde)
         msig_dispdat<-data.frame(msig_dispdat,msigdb_pvals)
         colnames(msig_dispdat)<-c("NAME","N","Intersect Length","P Value")
-  
+
         go_categories <- names(Hs.c5)
         go_n<-integer(length = length(go_categories))
         go_nde<-integer(length = length(go_categories))
@@ -292,21 +292,21 @@ server <- shinyServer(function(input, output, session) {
         go_dispdat<-data.frame(go_dispdat,go_nde)
         go_dispdat<-data.frame(go_dispdat,go_pvals)
         colnames(go_dispdat)<-c("NAME","N","Intersect Length","P Value")
-  
+
         kegg_categories <- kegg_id_toname[names(kegg_genelists)]
         kegg_n<-integer(length = length(kegg_categories))
         kegg_nde<-integer(length = length(kegg_categories))
         kegg_pvals <- double(length = length(kegg_categories))
-  
+
         kegg_dispdat <- data.frame(kegg_categories, kegg_n)
         kegg_dispdat<-data.frame(kegg_dispdat,kegg_nde)
         kegg_dispdat<-data.frame(kegg_dispdat,kegg_pvals)
         colnames(kegg_dispdat)<-c("NAME","N","Intersect Length","P Value")
-        
+
         hypergeom <- getHypergeom("markers/cell_type_marker.json")
         markers_genelists_list <- getMarkerGeneList(
                                      "markers/cell_type_marker.json")
-        
+
         cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
         labeldats<-c(levels(as.factor(expr_data[,length(expr_data)])),cell_ontology_names)
 
@@ -319,7 +319,7 @@ server <- shinyServer(function(input, output, session) {
                           selected = NULL)
 
         # change label
-        
+
         updateSelectInput(session = session,
                           inputId = "newlabels",
                           label = "Select label",
@@ -583,13 +583,13 @@ server <- shinyServer(function(input, output, session) {
                 hypergeom_ord[1:10,]
                 })
               },bordered = T)
-              
+
               #Top expressed genes
               output$topgenes<-renderPrint({
-                aveexpr<-colMeans(selecteddat)
+                aveeexpr<-colMeans(selecteddat[,2:ncol(selecteddat)],na.rm = T)
                 aveexpr_sort<-sort(aveexpr,decreasing = T)
                 aveexpr[1:input$nogenes]
-              })  
+              })
               ### Msigdb panel
               output$Msigdb <- renderTable({
                 withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
@@ -643,7 +643,7 @@ server <- shinyServer(function(input, output, session) {
             #showNotification("DE genes two subsets")
             output$genes <- renderPrint({
               withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
-                
+
                 #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
                 labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
                 alldat<-rbind(selecteddat,restdat)
@@ -654,7 +654,7 @@ server <- shinyServer(function(input, output, session) {
                 #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
                 toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
               })
-              
+
               output$GeneOntology <- renderTable({
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
@@ -675,7 +675,7 @@ server <- shinyServer(function(input, output, session) {
                   go_ord[1:10,]
                 })
               },bordered = T)
-              
+
               ### DE gene buttons implementation:
               output$deinfo <- renderUI({
                 h3("DE gene information:")
@@ -694,11 +694,11 @@ server <- shinyServer(function(input, output, session) {
                 )
               })
               ### maintain DE gene buttons
-              
+
               lapply(
                 X = 1:length(DEgenes),
                 FUN = function(i){
-                  
+
                   o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
                     showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
                     output$plot <- renderPlotly({
@@ -712,11 +712,11 @@ server <- shinyServer(function(input, output, session) {
                     })
                   }
                   )
-                  
+
                   assign("debuttons",c(debuttons,isolate(o)),envir =env)
                 })
               ## end of maintaining buttons
-              
+
               ##### constructing hgnc_filt using informations in the marker
               ENTREZID=array()
               SYMBOL=array()
@@ -736,7 +736,7 @@ server <- shinyServer(function(input, output, session) {
               hgnc_filt=data.frame(SYMBOL,ENTREZID)
               row.names(hgnc_filt)=as.character(SYMBOL[[1]])
               ##### end of constructing hgnc_filt dataframe of genename,id
-              
+
               ### KEGG panel
               output$KEGG <- renderTable({
                 withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
@@ -758,7 +758,7 @@ server <- shinyServer(function(input, output, session) {
                   kegg_ord[1:10,]
                 })
               },bordered = T)
-              
+
               ### Markers panel
               output$Markers <- renderTable({
                 withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
@@ -783,7 +783,7 @@ server <- shinyServer(function(input, output, session) {
                   hypergeom_ord[1:10,]
                 })
               },bordered = T)
-              
+
               ### Msigdb panel
               output$Msigdb <- renderTable({
                 withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
@@ -805,19 +805,19 @@ server <- shinyServer(function(input, output, session) {
                     }
                   )
                   msig_ord[1:10,]
-                  
+
                 })
               },bordered = T)
-              
-              
-              
+
+
+
               toptable_sample[1:input$nogenes,]
             })
-            
-       
-     
-      
-           
+
+
+
+
+
           }
           else
           {
@@ -872,9 +872,9 @@ server <- shinyServer(function(input, output, session) {
           #   }
           # }
         })
-        
-        
-        
+
+
+
         assign("switcher",c(switcher,o),envir = env)
         ##############  Adding intersection buttons to corresponding tab panel
         # get the marker list intersections

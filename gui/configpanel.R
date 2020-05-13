@@ -94,6 +94,6 @@ configpanel <- div(
       "Choose a dataset:",
       choices = list.files("datasets")
     ),
-    useShinyjs(), # Include shinyjs in the UI
-    extendShinyjs(text = jsResetCode) # Add the js code to the page
+    shinyjs::useShinyjs(), # Include shinyjs in the UI
+    #shinyjs::extendShinyjs(text = jsResetCode) # Add the js code to the page
 )

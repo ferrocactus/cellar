@@ -28,12 +28,12 @@ writeDataset <- function(path, name) {
             df<-l[[2]]
             incProgress(2/4, detail = paste("Processing file"))
             mkdir(filename)
-            
-            
-            
+
+
+
             incProgress(3/4, detail = paste("Saving file"))
             write_data(name,path,filename,df)   # use python to write h5ad file
-            
+
         }
     )
     #p
@@ -56,14 +56,14 @@ getHypergeom <- function(path) {
     }
 
     #create hypergeon object
-    
-    
+
+
     marker_list_names <- names(markers_genelists_list)
-    
+
     marker_n<-integer(length = length(marker_list_names))
     marker_nde<-integer(length = length(marker_list_names))
     marker_pvals<-double(length = length(marker_list_names))
-  
+
     hypergeom<-data.frame(marker_list_names,marker_n)
     hypergeom<-data.frame(hypergeom,marker_nde)
     hypergeom<-data.frame(hypergeom,marker_pvals)
