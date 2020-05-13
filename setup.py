@@ -13,7 +13,9 @@ install_requires = [
     'statsmodels',
     'joblib',
     'gseapy',
-    'anndata'
+    'anndata',
+    'leidenalg',
+    'scanpy'
 ]
 
 setup(
