@@ -363,8 +363,8 @@ server <- shinyServer(function(input, output, session) {
 
         ############################################## DE GENE IMPLEMENTATION
         scdata_subset=expr_data
-        assign("s1", NULL, envir = env)
-        assign("s2", NULL, envir = env)
+        assign("s1", NULL, envir = env)  ##
+        assign("s2", NULL, envir = env)  ##
         sst1<-observeEvent(input$subset1,{
           d <- event_data("plotly_selected")
           assign("s1", d, envir = env)
@@ -600,7 +600,7 @@ server <- shinyServer(function(input, output, session) {
             #showNotification("DE genes two subsets")
             output$genes <- renderPrint({
               withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
-
+                
                 #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
                 labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
                 alldat<-rbind(selecteddat,restdat)
@@ -611,28 +611,37 @@ server <- shinyServer(function(input, output, session) {
                 #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
                 toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
               })
-
-              output$GeneOntology <- renderPrint({
-
+              
+              output$GeneOntology <- renderTable({
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
                   incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                  for (i in 1:nrow(go_dispdat)) {
-                    go_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c5[[i]])),length(Hs.c5[[i]]),ncol(scdata_subset)-1-length(Hs.c5[[i]]),length(degenes),lower.tail = F)
-                  }
+                  gotable<-goana(geneids)
                   incProgress(3/3, detail = paste("Step: Getting Geneontology"))
-                  go_ord<-go_dispdat[order(go_dispdat$go_pvals),]
-                  showNotification("Gene Ontology calculation finished")
+                  go_ord<-gotable[order(gotable$P.DE),]
+                  showNotification("GeneOntology calculation finished")
+                  output$downloadGO <- downloadHandler(
+                    filename = function() {
+                      paste("GO_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                      write.csv(go_ord, file, row.names = FALSE)
+                    }
+                  )
                   go_ord[1:10,]
                 })
-              })
-
+              },bordered = T)
+              
               ### DE gene buttons implementation:
               output$deinfo <- renderUI({
                 h3("DE gene information:")
               })
               DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
+              for (i in 1:length(DEgenes))
+              {
+                assign("degenenames",c(degenenames,paste(DEgenes[i]," ",seq="")),envir=env)
+              }
               output$DEbuttons <- renderUI({
                 lapply(
                   X = 1:length(DEgenes),
@@ -642,9 +651,11 @@ server <- shinyServer(function(input, output, session) {
                 )
               })
               ### maintain DE gene buttons
+              
               lapply(
                 X = 1:length(DEgenes),
                 FUN = function(i){
+                  
                   o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
                     showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
                     output$plot <- renderPlotly({
@@ -658,12 +669,12 @@ server <- shinyServer(function(input, output, session) {
                     })
                   }
                   )
-                  assign("debuttons",c(debuttons,o),envir = env)
-
+                  
+                  assign("debuttons",c(debuttons,isolate(o)),envir =env)
                 })
               ## end of maintaining buttons
-
-              ############################################################################ constructing hgnc_filt using informations in the marker
+              
+              ##### constructing hgnc_filt using informations in the marker
               ENTREZID=array()
               SYMBOL=array()
               for (i in 1:length(markers)){
@@ -681,58 +692,89 @@ server <- shinyServer(function(input, output, session) {
               ENTREZID=distinct(ENTREZID)
               hgnc_filt=data.frame(SYMBOL,ENTREZID)
               row.names(hgnc_filt)=as.character(SYMBOL[[1]])
-              ############################################################################ end of constructing hgnc_filt dataframe of genename,id
-
+              ##### end of constructing hgnc_filt dataframe of genename,id
+              
               ### KEGG panel
-              output$KEGG <- renderPrint({
+              output$KEGG <- renderTable({
                 withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
-                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                for (i in 1:nrow(kegg_dispdat)) {
-                  kegg_dispdat[i,2]<-phyper(length(intersect(degenes,kegg_genelists[[i]])),length(kegg_genelists[[i]]),ncol(scdata_subset)-1-length(kegg_genelists[[i]]),length(degenes),lower.tail = F)
-                }
-                incProgress(3/3, detail = paste("Step: Formating"))
-                kegg_ord<-kegg_dispdat[order(kegg_dispdat$kegg_pvals),]
-                showNotification("KEGG calculation finished")
-                kegg_ord[1:10,]
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
+                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
+                  keggtable<-kegga(geneids)
+                  incProgress(3/3, detail = paste("Step: Formating"))
+                  kegg_ord<-keggtable[order(keggtable$P.DE),]
+                  showNotification("KEGG calculation finished")
+                  output$downloadKEGG <- downloadHandler(
+                    filename = function() {
+                      paste("KEGG_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                      write.csv(kegg_ord, file, row.names = FALSE)
+                    }
+                  )
+                  kegg_ord[1:10,]
                 })
-              })
-
+              },bordered = T)
+              
               ### Markers panel
-              output$Markers <- renderPrint({
-                withProgress(message = 'calculating Marker Intersect',detail=NULL, value = 0, {
-                incProgress(1/3, detail = paste("Step: Getting DE genes"))
-                degenes<-rownames(toptable_sample[1:input$nogenes,])
-                incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
-                for (i in 1:nrow(hypergeom)) {
-                  hypergeom[i,1]<-names(markers_genelists_list)[i]
-                  hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
-                }
-                incProgress(3/3, detail = paste("Step: Presenting"))
-                hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
-                showNotification("Markers Intersect calculation finished")
-                hypergeom_ord[1:10,]
+              output$Markers <- renderTable({
+                withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
+                  degenes<-rownames(toptable_sample[1:input$nogenes,])
+                  incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
+                  for (i in 1:nrow(hypergeom)) {
+                    hypergeom[i,1]<-names(markers_genelists_list)[i]
+                    hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
+                  }
+                  incProgress(3/3, detail = paste("Step: Presenting"))
+                  hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+                  showNotification("Markers Intersect calculation finished")
+                  output$downloadMKS <- downloadHandler(
+                    filename = function() {
+                      paste("Markers_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                      write.csv(hypergeom_ord, file, row.names = FALSE)
+                    }
+                  )
+                  hypergeom_ord[1:10,]
                 })
-              })
-
+              },bordered = T)
+              
               ### Msigdb panel
-              output$Msigdb <- renderPrint({
+              output$Msigdb <- renderTable({
                 withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
-                  incProgress(1/3, detail = paste("Step: Getting DE genes"))
-                degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                for (i in 1:nrow(msig_dispdat)) {
-                  msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
-                }
-                incProgress(3/3, detail = paste("Step: Presenting"))
-                msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
-                showNotification("Msigdb calculation finished")
-                msig_ord[1:10,]
-              })
+                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
+                  degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  incProgress(2/3, detail = paste("Step: Calculating"))
+                  for (i in 1:nrow(msig_dispdat)) {
+                    msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
+                  }
+                  incProgress(3/3, detail = paste("Step: Presenting"))
+                  msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+                  showNotification("Msigdb calculation finished")
+                  output$downloadMSIG <- downloadHandler(
+                    filename = function() {
+                      paste("MsigDB_data", ".csv", sep = "")
+                    },
+                    content = function(file) {
+                      write.csv(msig_ord, file, row.names = FALSE)
+                    }
+                  )
+                  msig_ord[1:10,]
+                  
+                })
+              },bordered = T)
+              
+              
+              
               toptable_sample[1:input$nogenes,]
-              })
             })
+            
+       
+     
+      
+           
           }
           else
           {
