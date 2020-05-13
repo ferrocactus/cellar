@@ -6,6 +6,11 @@ jsResetCode <- "shinyjs.reset = function() {history.go(0)}"
 
 source("gui/mainpanel.R") # mainpanel
 source("gui/configpanel.R") # configpanel
+load('gui/cell_ontology')
+
+#INCLUDE THIS IN THE LABEL DROPDOWN
+cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
+
 
 ui <- pageWithSidebar(
     headerPanel("Clustering visualization"),
@@ -39,6 +44,10 @@ ui <- pageWithSidebar(
                 "Updated Plot",
                 verbatimTextOutput("brush"),
                 plotlyOutput("Plot2")
+            ),
+            tabPanel(
+                "Top Expressed Genes", 
+                 verbatimTextOutput("topgenes")
             ),
             tabPanel(
                 "Gene Ontology",
