@@ -11,6 +11,7 @@ source_python('__init__.py')
 load('gui/Hs.c2')
 load('gui/Go_kegg_lists')
 load('gui/cell_ontology')
+load('gui/keggidtoname')
 
 # Load utility functions
 source("gui/functions.R") # getPage, intersect, writeDataset, getHypergeom
