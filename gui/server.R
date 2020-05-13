@@ -586,11 +586,11 @@ server <- shinyServer(function(input, output, session) {
               },bordered = T)
 
               #Top expressed genes
-              output$topgenes<-renderPrint({
-                aveeexpr<-colMeans(selecteddat[,2:ncol(selecteddat)],na.rm = T)
-                aveexpr_sort<-sort(aveexpr,decreasing = T)
-                aveexpr[1:input$nogenes]
-              })
+              #output$topgenes<-renderPrint({
+               # aveeexpr<-colMeans(selecteddat[,2:ncol(selecteddat)],na.rm = T)
+                #aveexpr_sort<-sort(aveexpr,decreasing = T)
+                #aveexpr[1:input$nogenes]
+              #})
               ### Msigdb panel
               output$Msigdb <- renderTable({
                 withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
