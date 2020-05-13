@@ -787,6 +787,9 @@ server <- shinyServer(function(input, output, session) {
           #   }
           # }
         })
+        
+        
+        
         assign("switcher",c(switcher,o),envir = env)
         ##############  Adding intersection buttons to corresponding tab panel
         # get the marker list intersections
@@ -799,6 +802,9 @@ server <- shinyServer(function(input, output, session) {
           intersection <- markers[[as.character(i - 1)]][["lvl1_intersec"]]
           #intersection <- strsplit(str_replace_all(
           #           intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
+          if (isEmpty(intersection)){       ##intersection could be "numeric(0)" if there is no intersection in this cluster
+            intersection=" "
+          }
           intersection <- list(intersection)
           c_intersections <- append(c_intersections, intersection)
         }
@@ -824,7 +830,7 @@ server <- shinyServer(function(input, output, session) {
           for (k in 1:length(c_intersections)) {
             for (i in 1:length(c_intersections[[k]])) {
               for (j in 1:length(total_intersections)) {
-                if ((c_intersections[[k]][i] %in% c_seen) == FALSE){
+                if ((c_intersections[[k]][i] %in% c_seen) == FALSE ){
                   c_seen <- c(c_seen, c_intersections[[k]][i])
                   c_updated <- c(c_updated, k * 1000 + i)
                 }
@@ -859,12 +865,13 @@ server <- shinyServer(function(input, output, session) {
                 break
               }
             }
-
-            insertUI(
-              selector = paste("#placeholder",as.character(i-1),sep=""),
-              #where = "afterEnd",
-              ui = actionButton(c_intersections[[i]][j],textt)
-            )
+            if (substr(c_intersections[[i]][j],1,1)!=" "){
+              insertUI(
+                selector = paste("#placeholder",as.character(i-1),sep=""),
+                #where = "afterEnd",
+                ui = actionButton(c_intersections[[i]][j],textt)
+              )
+            }
           }
         }
 
