@@ -10,6 +10,7 @@ library(rjson)
 source_python('__init__.py')
 load('gui/Hs.c2')
 load('gui/Go_kegg_lists')
+load('gui/cell_ontology')
 
 # Load utility functions
 source("gui/functions.R") # getPage, intersect, writeDataset, getHypergeom
@@ -215,18 +216,7 @@ server <- shinyServer(function(input, output, session) {
                 hypergeom <- getHypergeom("markers/cell_type_marker.json")
                 markers_genelists_list <- getMarkerGeneList(
                                         "markers/cell_type_marker.json")
-                #Requires HS.c2 to be loaded.
-                msigdb_categories <- names(Hs.c2)
-                msigdb_pvals <- double(length = length(msigdb_categories))
-                msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
-
-                go_categories <- names(Hs.c5)
-                go_pvals <- double(length = length(go_categories))
-                go_dispdat <- data.frame(go_categories, go_pvals)
-
-                kegg_categories <- kegg_id_toname[names(kegg_genelists)]
-                kegg_pvals <- double(length = length(kegg_categories))
-                kegg_dispdat <- data.frame(kegg_categories, kegg_pvals)
+                
 
                 newlabs <- df[, 3]
                 names(newlabs) <- rownames(df)
@@ -284,7 +274,41 @@ server <- shinyServer(function(input, output, session) {
         msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
         newlabs <- df[, 3]
         names(newlabs) <- rownames(df)
-        labeldats <- levels(as.factor(df[,3]))
+        
+        msigdb_categories <- names(Hs.c2)
+        msigdb_n <-integer(length = length(msigdb_categories))
+        msigdb_nde<-integer(length = length(msigdb_categories))
+        msigdb_pvals <- double(length = length(msigdb_categories))
+        msig_dispdat <- data.frame(msigdb_categories, msigdb_n)
+        msig_dispdat<-data.frame(msig_dispdat,msigdb_nde)
+        msig_dispdat<-data.frame(msig_dispdat,msigdb_pvals)
+        colnames(msig_dispdat)<-c("NAME","N","Intersect Length","P Value")
+  
+        go_categories <- names(Hs.c5)
+        go_n<-integer(length = length(go_categories))
+        go_nde<-integer(length = length(go_categories))
+        go_pvals <- double(length = length(go_categories))
+        go_dispdat <- data.frame(go_categories, go_n)
+        go_dispdat<-data.frame(go_dispdat,go_nde)
+        go_dispdat<-data.frame(go_dispdat,go_pvals)
+        colnames(go_dispdat)<-c("NAME","N","Intersect Length","P Value")
+  
+        kegg_categories <- kegg_id_toname[names(kegg_genelists)]
+        kegg_n<-integer(length = length(kegg_categories))
+        kegg_nde<-integer(length = length(kegg_categories))
+        kegg_pvals <- double(length = length(kegg_categories))
+  
+        kegg_dispdat <- data.frame(kegg_categories, kegg_n)
+        kegg_dispdat<-data.frame(kegg_dispdat,kegg_nde)
+        kegg_dispdat<-data.frame(kegg_dispdat,kegg_pvals)
+        colnames(kegg_dispdat)<-c("NAME","N","Intersect Length","P Value")
+        
+        hypergeom <- getHypergeom("markers/cell_type_marker.json")
+        markers_genelists_list <- getMarkerGeneList(
+                                     "markers/cell_type_marker.json")
+        
+        cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
+        labeldats<-c(levels(as.factor(expr_data[,length(expr_data)])),cell_ontology_names)
 
         ############################################################
         # select color value
@@ -295,10 +319,11 @@ server <- shinyServer(function(input, output, session) {
                           selected = NULL)
 
         # change label
+        
         updateSelectInput(session = session,
                           inputId = "newlabels",
                           label = "Select label",
-                          choices = levels(as.factor(expr_data[,length(expr_data)])),
+                          choices = labeldats,
                           selected = NULL)
 
         # input new label
@@ -423,11 +448,15 @@ server <- shinyServer(function(input, output, session) {
               output$GeneOntology <- renderTable({
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
                 incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
                 incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                gotable<-goana(geneids)
+                for (i in 1:nrow(go_dispdat)) {
+                    go_dispdat[i,2]<-length(Hs.c5[[i]])
+                    go_dispdat[i,3]<-length(intersect(degenes,Hs.c5[[i]]))
+                    go_dispdat[i,4]<-phyper(length(intersect(degenes,Hs.c5[[i]])),length(Hs.c5[[i]]),ncol(scdata_subset)-1-length(Hs.c5[[i]]),length(degenes),lower.tail = F)
+                }
                 incProgress(3/3, detail = paste("Step: Getting Geneontology"))
-                go_ord<-gotable[order(gotable$P.DE),]
+                go_ord<-go_dispdat[order(go_dispdat[,4]),]
                 showNotification("GeneOntology calculation finished")
                 output$downloadGO <- downloadHandler(
                     filename = function() {
@@ -437,7 +466,7 @@ server <- shinyServer(function(input, output, session) {
                         write.csv(go_ord, file, row.names = FALSE)
                     }
                 )
-                go_ord[1:10,]
+                head(go_ord,n = 10)
                 })
               },bordered = T)
 
@@ -506,11 +535,15 @@ server <- shinyServer(function(input, output, session) {
               output$KEGG <- renderTable({
                 withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
                   incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+                  degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
                   incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                  keggtable<-kegga(geneids)
+                  for (i in 1:nrow(kegg_dispdat)) {
+                    kegg_dispdat[i,2]<-length(kegg_genelists[[i]])
+                    kegg_dispdat[i,3]<-length(intersect(degenes,kegg_genelists[[i]]))
+                    kegg_dispdat[i,4]<-phyper(length(intersect(degenes,kegg_genelists[[i]])),length(kegg_genelists[[i]]),ncol(scdata_subset)-1-length(kegg_genelists[[i]]),length(degenes),lower.tail = F)
+                  }
                   incProgress(3/3, detail = paste("Step: Formating"))
-                  kegg_ord<-keggtable[order(keggtable$P.DE),]
+                  kegg_ord<-kegg_dispdat[order(kegg_dispdat[,4]),]
                   showNotification("KEGG calculation finished")
                   output$downloadKEGG <- downloadHandler(
                     filename = function() {
@@ -520,7 +553,7 @@ server <- shinyServer(function(input, output, session) {
                         write.csv(kegg_ord, file, row.names = FALSE)
                     }
                   )
-                  kegg_ord[1:10,]
+                  head(kegg_ord,n=10)
                 })
               },bordered = T)
 
@@ -531,11 +564,13 @@ server <- shinyServer(function(input, output, session) {
                 degenes<-rownames(toptable_sample[1:input$nogenes,])
                 incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
                 for (i in 1:nrow(hypergeom)) {
-                  hypergeom[i,1]<-names(markers_genelists_list)[i]
-                  hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
+                    hypergeom[i,1]<-names(markers_genelists_list)[i]
+                    hypergeom[i,2]<-length(markers_genelists_list[[i]])
+                    hypergeom[i,3]<-length(intersect(degenes,markers_genelists_list[[i]]))
+                    hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
                 }
                 incProgress(3/3, detail = paste("Step: Presenting"))
-                hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
+                hypergeom_ord<-hypergeom[order(hypergeom[,4]),]
                 showNotification("Markers Intersect calculation finished")
                 output$downloadMKS <- downloadHandler(
                     filename = function() {
@@ -548,7 +583,13 @@ server <- shinyServer(function(input, output, session) {
                 hypergeom_ord[1:10,]
                 })
               },bordered = T)
-
+              
+              #Top expressed genes
+              output$topgenes<-renderPrint({
+                aveexpr<-colMeans(selecteddat)
+                aveexpr_sort<-sort(aveexpr,decreasing = T)
+                aveexpr[1:input$nogenes]
+              })  
               ### Msigdb panel
               output$Msigdb <- renderTable({
                 withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
@@ -556,10 +597,12 @@ server <- shinyServer(function(input, output, session) {
                 degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
                 incProgress(2/3, detail = paste("Step: Calculating"))
                 for (i in 1:nrow(msig_dispdat)) {
-                  msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
+                    msig_dispdat[i,2]<-length(Hs.c2[[i]])
+                    msig_dispdat[i,3]<-length(intersect(degenes,Hs.c2[[i]]))
+                    msig_dispdat[i,4]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
                 }
                 incProgress(3/3, detail = paste("Step: Presenting"))
-                msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
+                msig_ord<-msig_dispdat[order(msig_dispdat[,4]),]
                 showNotification("Msigdb calculation finished")
                 output$downloadMSIG <- downloadHandler(
                     filename = function() {
