@@ -44,10 +44,10 @@ ui <- pageWithSidebar(
                 verbatimTextOutput("brush"),
                 plotlyOutput("Plot2")
             ),
-            tabPanel(
-                "Top Expressed Genes",
-                 verbatimTextOutput("topgenes")
-            ),
+            #tabPanel(
+             #   "Top Expressed Genes",
+              #   verbatimTextOutput("topgenes")
+            #),
             tabPanel(
                 "Gene Ontology",
                 tableOutput("GeneOntology"),
