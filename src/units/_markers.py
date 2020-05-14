@@ -2,7 +2,7 @@ import numpy as np
 from joblib import Parallel, delayed
 
 from ..log import setup_logger
-from ..utils.validation import _effective_n_jobs
+from ..utils.validation import _validate_n_jobs
 from ._ttest_de import _ttest_differential_expression
 from ._unit import Unit
 
@@ -89,7 +89,7 @@ class Mark_TTest(Unit):
 
         test_results = {}
 
-        if _effective_n_jobs(self.n_jobs) == 1:
+        if _validate_n_jobs(self.n_jobs) == 1:
             for i in unq_labels:  # label to consider
                 x_i = x[np.where(labels == i)]
                 x_not_i = x[np.where(labels != i)]

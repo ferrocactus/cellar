@@ -5,7 +5,7 @@ from joblib import Parallel, delayed
 
 from ..log import setup_logger
 from ..units._evaluation import Eval_Silhouette
-from ..utils.validation import _effective_n_jobs
+from ..utils.validation import _validate_n_jobs
 
 
 def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
@@ -60,7 +60,7 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
         eval_obj = Eval_Silhouette()
 
     # If n_jobs = -1, run all threads
-    n_jobs = _effective_n_jobs(n_jobs)
+    n_jobs = _validate_n_jobs(n_jobs)
 
     if n_jobs == 1:
         top_y, top_score, top_k = None, -np.Inf, -1

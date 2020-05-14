@@ -3,48 +3,6 @@ from ast import literal_eval
 import numpy as np
 
 
-def _effective_n_jobs(n_jobs):
-    if isinstance(n_jobs, str) and n_jobs is not None:
-        n_jobs = literal_eval(n_jobs)
-
-    if n_jobs is None or n_jobs == 1:
-        return 1
-    else:
-        return n_jobs
-
-
-def _effective_numerical_value(x):
-    if isinstance(x, str) and x is not None:
-        return literal_eval(x)
-    else:
-        return x
-
-
-def _effective_n_clusters(n_clusters):
-    if isinstance(n_clusters, str):
-        n_clusters = literal_eval(n_clusters)
-
-    if isinstance(n_clusters, int):
-        return n_clusters, 'int'
-    elif isinstance(n_clusters, list) or isinstance(n_clusters, np.ndarray):
-        if len(n_clusters) == 1:
-            return n_clusters[0], 'int'
-        elif len(n_clusters) == 0:
-            raise ValueError("Incorrect list of clusters. Got empty list.")
-        else:
-            return n_clusters, 'list'
-    elif isinstance(n_clusters, tuple):
-        k_list = list(range(*n_clusters))
-        if len(k_list) == 1:
-            return k_list[0], 'int'
-        elif len(k_list) == 0:
-            raise ValueError("Incorrect range of clusters. Got empty range.")
-        else:
-            return k_list, 'list'
-    else:
-        raise ValueError("Incorrect format for clusters specified.")
-
-
 def _validate_dim_n_components(dim_n_components, h, w):
     if isinstance(dim_n_components, str):
         if dim_n_components != 'knee':
@@ -82,7 +40,6 @@ def _validate_clu_n_clusters(clu_n_clusters, h):
             clu_n_clusters = literal_eval(clu_n_clusters)
         except:
             raise ValueError("Incorrect format for the number of clusters.")
-
 
     if isinstance(clu_n_clusters, float):
         clu_n_clusters = int(clu_n_clusters)
@@ -129,6 +86,8 @@ def _validate_n_jobs(n_jobs):
             raise ValueError("Number of jobs is too high.")
         elif n_jobs == 0:
             raise ValueError("Number of jobs is 0.")
+    elif n_jobs is None:
+        n_jobs = 1
     elif n_jobs is not None:
         raise ValueError("Incorrect number of jobs specified.")
 

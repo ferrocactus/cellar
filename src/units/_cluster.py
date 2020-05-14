@@ -5,14 +5,17 @@ import leidenalg
 import igraph
 import numpy as np
 import scanpy
-from sklearn.cluster import (DBSCAN, AgglomerativeClustering, Birch, KMeans,
-                             SpectralClustering)
+from sklearn.cluster import KMeans
+from sklearn.cluster import SpectralClustering
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.cluster import DBSCAN
+from sklearn.cluster import Birch
 from sklearn.mixture import GaussianMixture
 from sklearn.neighbors import kneighbors_graph
 
 from ..log import setup_logger
 from ..methods import KMedoids
-from ..utils.validation import _effective_n_clusters
+from ..utils.validation import _validate_clu_n_clusters
 from ._cluster_multiple import cluster_multiple
 from ._unit import Unit
 
@@ -62,10 +65,10 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
 
     """
     # Determine type of n_clusters passed
-    k, argtype = _effective_n_clusters(n_clusters)
+    k = _validate_clu_n_clusters(n_clusters, x.shape[0])
 
     # If n_clusters determined to be single integer
-    if argtype == 'int':
+    if isinstance(k, int):
         logger = setup_logger('Cluster.Single')
         kwargs[attribute_name] = k
         y = obj_def(**kwargs).fit_predict(x)
@@ -78,7 +81,7 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
             logger.info("Finished clustering with k={0}.".format(k))
         return y
     # If n_clusters determined to be a list of integers
-    elif argtype == 'list':
+    elif isinstance(k, list):
         return cluster_multiple(
             x, obj_def=obj_def, k_list=k, attribute_name=attribute_name,
             eval_obj=eval_obj, method_name='fit_predict',

@@ -16,7 +16,6 @@ from .log import setup_logger
 from .units._unit import Unit
 from .utils.read import parse_config
 from .utils.read import load_data
-from .utils.validation import _effective_numerical_value
 from .utils.validation import _validate_dim_n_components
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_n_jobs
@@ -24,14 +23,6 @@ from .utils.validation import _validate_mark_alpha
 from .utils.validation import _validate_mark_markers_n
 from .utils.validation import _validate_mark_correction
 from .utils.validation import _validate_con_convention
-
-
-def is_float(val):
-    try:
-        num = float(val)
-    except ValueError:
-        return False
-    return True
 
 
 class Pipeline(Unit):
