@@ -508,6 +508,7 @@ class Clu_Leiden(Unit):
         ig = igraph.Graph.Adjacency(kn.toarray().tolist())
         part = leidenalg.find_partition(
             ig, leidenalg.ModularityVertexPartition)
+        self.logger.info(f"Found {len(np.unique(part.membership))} clusters.")
         return np.array(part.membership)
 
 

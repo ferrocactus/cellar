@@ -1,4 +1,4 @@
-from ._wrapper import wrap
+from .units import wrap
 
 from matplotlib import pyplot as plt
 import seaborn as sns

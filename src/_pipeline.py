@@ -8,7 +8,7 @@ import gseapy
 import anndata
 import scanpy
 
-from ._wrapper import wrap
+from .units import wrap
 from .log import setup_logger
 from .units._unit import Unit
 from .utils.read import parse_config
@@ -62,7 +62,7 @@ class Pipeline(Unit):
 
     def run(self, dim_method='PCA', dim_n_components='knee',
             clu_method='KMeans', eval_method='Silhouette',
-            clu_n_clusters='(3, 5, 1)', clu_n_jobs=-1,
+            clu_n_clusters='(3, 5, 1)', clu_n_jobs=1,
             mark_method='TTest', mark_alpha=0.05, mark_markers_n=200,
             mark_correction='hs', mark_n_jobs=1, con_method="Converter",
             con_convention='id-to-name', con_path="markers/gene_id_name.csv",

@@ -15,7 +15,8 @@ install_requires = [
     'gseapy',
     'anndata',
     'leidenalg',
-    'scanpy'
+    'scanpy',
+    'Cluster_Ensembles'
 ]
 
 setup(
