@@ -107,7 +107,13 @@ server <- shinyServer(function(input, output, session) {
         showNotification(paste("Dataset: ",dataset,sep=""))
         print(dataset)
         pipe <- Pipeline(x = dataset)
-        df <- isolate(runPipe(pipe, input))
+
+        tryCatch({
+            df <- isolate(runPipe(pipe, input))
+          }, error = function(e) {
+            df <- "An error occurred."
+          }
+        )
 
         if (is.character(df) & length(df) == 1) {
           showNotification(df)
@@ -209,7 +215,12 @@ server <- shinyServer(function(input, output, session) {
         ############################ END OF DISABLing PREVIOUS EVENTS
         observeEvent(input$ssclurun, {
             if(exists("updated_new_labels")) {
-                df <- runSSClu(pipe, updated_new_labels, input)
+                tryCatch({
+                  df <- runSSClu(pipe, updated_new_labels, input)
+                }, error = function(e) {
+                  df <- "An error occurred."
+                })
+
                 if (is.character(df) & length(df) == 1) {
                   showNotification(df)
                 } else {
