@@ -408,12 +408,14 @@ server <- shinyServer(function(input, output, session) {
           list(input$getdegenes,input$DEsubsets)
 
         })
-
+        
+        
 
 
 
         observeEvent(toListen(),{
           selecteddat=NULL
+          flag=0
           if (input$getdegenes>set){
             if (input$getdegenes==0)
             {
@@ -431,9 +433,37 @@ server <- shinyServer(function(input, output, session) {
             d <- event_data("plotly_selected")
             selecteddat<-scdata_subset[as.numeric(d$key),2:ncol(scdata_subset)]
             restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
-            #showNotification("DE genes one subset")
+            flag=1
+          }
+            
+          if (input$DEsubsets>sets){
+              if (input$DEsubsets==0)
+              {
+                  return()
+              }
+              if (length(debuttons)>0){
+                  for (i in 1:length(debuttons)){
+                      debuttons[[i]]$destroy()
+                      #debuttons[[1]]<-NULL
+                  }
+              }
+              assign("debuttons",NULL,envir=env) # disable previous buttons
+              
+              
+              assign("sets", sets+1, envir = env)
+              
+              selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
+              restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
+              flag=1
+            }
+           
+          ### finisehd calculating selected data and rest data
+         ### start calculating DE genes
+            if (flag==1){
             output$genes <- renderPrint({
-              withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
+                
+                
+              #withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
 
                 #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
                 labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
@@ -444,7 +474,7 @@ server <- shinyServer(function(input, output, session) {
                 eb_newfit<-eBayes(newfit)
                 #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
                 toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
-              })
+             # })
 
               output$GeneOntology <- renderTable({
                 withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
@@ -473,43 +503,43 @@ server <- shinyServer(function(input, output, session) {
 
               ### DE gene buttons implementation:
               output$deinfo <- renderUI({
-                h3("DE gene information:")
+                  h3("DE gene information:")
               })
               DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
               for (i in 1:length(DEgenes))
               {
-                assign("degenenames",c(degenenames,paste(DEgenes[i]," ",seq="")),envir=env)
+                  assign("degenenames",c(degenenames,paste(DEgenes[i]," ",seq="")),envir=env)
               }
               output$DEbuttons <- renderUI({
-                lapply(
-                  X = 1:length(DEgenes),
-                  FUN = function(i){
-                    actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
-                  }
-                )
+                  lapply(
+                      X = 1:length(DEgenes),
+                      FUN = function(i){
+                          actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
+                      }
+                  )
               })
               ### maintain DE gene buttons
-
+              
               lapply(
-                X = 1:length(DEgenes),
-                FUN = function(i){
-
-                  o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
-                    showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
-                    output$plot <- renderPlotly({
-                      plot_ly(
-                        df,
-                        x = df$x1, y = df$x2,
-                        text = ~paste("label: ", as.factor(df$y)),
-                        color = (scdata_subset[[DEgenes[i]]]),
-                        key = row.names(df)
-                      )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
-                    })
-                  }
-                  )
-
-                  assign("debuttons",c(debuttons,isolate(o)),envir =env)
-                })
+                  X = 1:length(DEgenes),
+                  FUN = function(i){
+                      
+                      o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
+                          showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
+                          output$plot <- renderPlotly({
+                              plot_ly(
+                                  df,
+                                  x = df$x1, y = df$x2,
+                                  text = ~paste("label: ", as.factor(df$y)),
+                                  color = (scdata_subset[[DEgenes[i]]]),
+                                  key = row.names(df)
+                              )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
+                          })
+                      }
+                      )
+                      
+                      assign("debuttons",c(debuttons,isolate(o)),envir =env)
+                  })
               ## end of maintaining buttons
 
               ##### constructing hgnc_filt using informations in the marker
@@ -623,210 +653,8 @@ server <- shinyServer(function(input, output, session) {
               toptable_sample[1:input$nogenes,]
             })
           }
-          if (input$DEsubsets>sets){
-            if (input$DEsubsets==0)
-            {
-              return()
-            }
-            if (length(debuttons)>0){
-              for (i in 1:length(debuttons)){
-                debuttons[[i]]$destroy()
-                #debuttons[[1]]<-NULL
-              }
-            }
-            assign("debuttons",NULL,envir=env) # disable previous buttons
-
-
-            assign("sets", sets+1, envir = env)
-
-            selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
-            restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
-            #showNotification("DE genes two subsets")
-            output$genes <- renderPrint({
-              withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
-
-                #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-                labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
-                alldat<-rbind(selecteddat,restdat)
-                alldat<-data.frame(alldat,labelsdat)
-                modmat<-model.matrix(~labelsdat,data = alldat)
-                newfit<-lmFit(t(alldat[,1:ncol(alldat)-1]),design = modmat)
-                eb_newfit<-eBayes(newfit)
-                #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
-                toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
-              })
-
-              output$GeneOntology <- renderTable({
-                withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
-                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                  incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                  gotable<-goana(geneids)
-                  incProgress(3/3, detail = paste("Step: Getting Geneontology"))
-                  go_ord<-gotable[order(gotable$P.DE),]
-                  showNotification("GeneOntology calculation finished")
-                  output$downloadGO <- downloadHandler(
-                    filename = function() {
-                      paste("GO_data", ".csv", sep = "")
-                    },
-                    content = function(file) {
-                      write.csv(go_ord, file, row.names = FALSE)
-                    }
-                  )
-                  go_ord[1:10,]
-                })
-              },bordered = T)
-
-              ### DE gene buttons implementation:
-              output$deinfo <- renderUI({
-                h3("DE gene information:")
-              })
-              DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
-              for (i in 1:length(DEgenes))
-              {
-                assign("degenenames",c(degenenames,paste(DEgenes[i]," ",seq="")),envir=env)
-              }
-              output$DEbuttons <- renderUI({
-                lapply(
-                  X = 1:length(DEgenes),
-                  FUN = function(i){
-                    actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
-                  }
-                )
-              })
-              ### maintain DE gene buttons
-
-              lapply(
-                X = 1:length(DEgenes),
-                FUN = function(i){
-
-                  o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
-                    showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
-                    output$plot <- renderPlotly({
-                      plot_ly(
-                        df,
-                        x = df$x1, y = df$x2,
-                        text = ~paste("label: ", as.factor(df$y)),
-                        color = (scdata_subset[[DEgenes[i]]]),
-                        key = row.names(df)
-                      )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
-                    })
-                  }
-                  )
-
-                  assign("debuttons",c(debuttons,isolate(o)),envir =env)
-                })
-              ## end of maintaining buttons
-
-              ##### constructing hgnc_filt using informations in the marker
-              ENTREZID=array()
-              SYMBOL=array()
-              for (i in 1:length(markers)){
-                ENTREZID=c(ENTREZID,markers[[as.character(i-1)]][["indices"]])
-                SYMBOL=c(SYMBOL,markers[[as.character(i-1)]][["outp_names"]])
-              }
-              for (i in 1:length(SYMBOL)){
-                if (is.na(SYMBOL[i])){
-                  SYMBOL[i]="NA"
-                }
-              }
-              SYMBOL=data.frame(SYMBOL)
-              ENTREZID=data.frame(ENTREZID)
-              SYMBOL=distinct(SYMBOL)
-              ENTREZID=distinct(ENTREZID)
-              hgnc_filt=data.frame(SYMBOL,ENTREZID)
-              row.names(hgnc_filt)=as.character(SYMBOL[[1]])
-              ##### end of constructing hgnc_filt dataframe of genename,id
-
-              ### KEGG panel
-              output$KEGG <- renderTable({
-                withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
-                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  geneids<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                  incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
-                  keggtable<-kegga(geneids)
-                  incProgress(3/3, detail = paste("Step: Formating"))
-                  kegg_ord<-keggtable[order(keggtable$P.DE),]
-                  showNotification("KEGG calculation finished")
-                  output$downloadKEGG <- downloadHandler(
-                    filename = function() {
-                      paste("KEGG_data", ".csv", sep = "")
-                    },
-                    content = function(file) {
-                      write.csv(kegg_ord, file, row.names = FALSE)
-                    }
-                  )
-                  kegg_ord[1:10,]
-                })
-              },bordered = T)
-
-              ### Markers panel
-              output$Markers <- renderTable({
-                withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
-                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  degenes<-rownames(toptable_sample[1:input$nogenes,])
-                  incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
-                  for (i in 1:nrow(hypergeom)) {
-                    hypergeom[i,1]<-names(markers_genelists_list)[i]
-                    hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
-                  }
-                  incProgress(3/3, detail = paste("Step: Presenting"))
-                  hypergeom_ord<-hypergeom[order(hypergeom$pvals),]
-                  showNotification("Markers Intersect calculation finished")
-                  output$downloadMKS <- downloadHandler(
-                    filename = function() {
-                      paste("Markers_data", ".csv", sep = "")
-                    },
-                    content = function(file) {
-                      write.csv(hypergeom_ord, file, row.names = FALSE)
-                    }
-                  )
-                  hypergeom_ord[1:10,]
-                })
-              },bordered = T)
-
-              ### Msigdb panel
-              output$Msigdb <- renderTable({
-                withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
-                  incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-                  degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
-                  incProgress(2/3, detail = paste("Step: Calculating"))
-                  for (i in 1:nrow(msig_dispdat)) {
-                    msig_dispdat[i,2]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
-                  }
-                  incProgress(3/3, detail = paste("Step: Presenting"))
-                  msig_ord<-msig_dispdat[order(msig_dispdat$msigdb_pvals),]
-                  showNotification("Msigdb calculation finished")
-                  output$downloadMSIG <- downloadHandler(
-                    filename = function() {
-                      paste("MsigDB_data", ".csv", sep = "")
-                    },
-                    content = function(file) {
-                      write.csv(msig_ord, file, row.names = FALSE)
-                    }
-                  )
-                  msig_ord[1:10,]
-
-                })
-              },bordered = T)
-
-
-
-              toptable_sample[1:input$nogenes,]
-            })
-
-
-
-
-
-          }
-          else
-          {
-
-          }
-
         })
-
+        
 
         ######################################BOTTOM OF MAIN PANEL:
         # Adding tabset panel corresponds to each Cluster
@@ -998,9 +826,71 @@ server <- shinyServer(function(input, output, session) {
             })
             assign("intersectbuttons",c(intersectbuttons,o),envir = env)
           })
+     ###end of intersections
+        
+        
+        
+        ########################################START OF CHANGING CLUSTERS NAMES
+        updateSelectInput(session = session,
+                          inputId = "chgcluster",
+                          label = "Cluster to Rename",
+                          choices = c(1:(length(c_intersections)-1)),
+                          #selected = NULL)
+        )
+        observeEvent(input$chg,{
+          removeUI(selector= paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))
+          
+          insertTab(
+            inputId = "switcher",
+            position = "after",
+            tabPanel(
+              input$newcluster,
+              paste("Cluster ",input$newcluster," intersections",seq=""),
+              tags$div(id = paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))),
+            target = as.character(length(c_intersections)-2)
+          )
+          i=length(c_intersections)
+          for (j in 1:length(c_intersections[[i]])){
+            textt<-c_intersections[[i]][j]
 
+            for (k in 1:length(total_intersections)){
+              if (identical(
+                total_intersections[k],
+                as.character(strsplit(c_intersections[[i]][j], "-")))) {
+                #showNotification(textt,duration=NULL)
+                textt <- total_intersections[k]
+                #showNotification(textt,duration=NULL)
+                break
+              }
+            }
+            if (substr(c_intersections[[i]][j],1,1)!=" "){
+              insertUI(
+                selector = paste("#placeholder",as.character(i-1),sep=""),
+                #where = "afterEnd",
+                ui = actionButton(c_intersections[[i]][j],textt)
+              )
+            }
+          }
+        })
+        
+        #########################################END OF CHANGING CLUSTERS NAMES
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
     })
-
+   
+    
+    
+    
     ####################################    END OF RUN CURRENT CONFIG
 
 

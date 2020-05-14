@@ -33,9 +33,16 @@ mainpanel <- div(
         actionButton("subset2", "Store Subset 2", class = "sidebtn"),
         actionButton("DEsubsets", "DE", class = "sidebtn")
     ),
+    
+    splitLayout(
+        cellWidths = c("50%", "50%"),
+        selectInput("chgcluster","Cluster to Rename",choice = 0),
+        textInput("newcluster", "New Name", value = "", width = NULL, placeholder = NULL)
+    ),
+    actionButton("chg","Apply Change"),
     #actionButton("disable","Disable buttons"),
     fileInput(
-        "file1", "Choose CSV File",
+        "file1", "Choose CSV/h5ad File",
         multiple = FALSE,
         accept = c("text/csv",
                    "text/comma-separated-values,text/plain", ".csv", ".h5ad")
