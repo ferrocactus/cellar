@@ -108,6 +108,10 @@ server <- shinyServer(function(input, output, session) {
         print(dataset)
         pipe <- Pipeline(x = dataset)
         df <- isolate(runPipe(pipe, input))
+
+        if (is.character(df) & length(df) == 1) {
+          showNotification(df)
+        } else {
         #assign("df", isolate(runPipe(pipe, input)), envir = env)
         ################################### RUN WITH CURRENT CONFIG
 
@@ -206,6 +210,9 @@ server <- shinyServer(function(input, output, session) {
         observeEvent(input$ssclurun, {
             if(exists("updated_new_labels")) {
                 df <- runSSClu(pipe, updated_new_labels, input)
+                if (is.character(df) & length(df) == 1) {
+                  showNotification(df)
+                } else {
                 markers <- pipe$markers
                 #get the gene expression data
                 expr_data = data.frame(
@@ -253,6 +260,7 @@ server <- shinyServer(function(input, output, session) {
                         title = paste("Value of ", input$labelupd, sep=""))
                     })
                 })
+            }
             }
         })
 
@@ -408,8 +416,8 @@ server <- shinyServer(function(input, output, session) {
           list(input$getdegenes,input$DEsubsets)
 
         })
-        
-        
+
+
 
 
 
@@ -435,7 +443,7 @@ server <- shinyServer(function(input, output, session) {
             restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
             flag=1
           }
-            
+
           if (input$DEsubsets>sets){
               if (input$DEsubsets==0)
               {
@@ -448,21 +456,21 @@ server <- shinyServer(function(input, output, session) {
                   }
               }
               assign("debuttons",NULL,envir=env) # disable previous buttons
-              
-              
+
+
               assign("sets", sets+1, envir = env)
-              
+
               selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
               restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
               flag=1
             }
-           
+
           ### finisehd calculating selected data and rest data
          ### start calculating DE genes
             if (flag==1){
             output$genes <- renderPrint({
-                
-                
+
+
               #withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
 
                 #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
@@ -519,11 +527,11 @@ server <- shinyServer(function(input, output, session) {
                   )
               })
               ### maintain DE gene buttons
-              
+
               lapply(
                   X = 1:length(DEgenes),
                   FUN = function(i){
-                      
+
                       o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
                           showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
                           output$plot <- renderPlotly({
@@ -537,7 +545,7 @@ server <- shinyServer(function(input, output, session) {
                           })
                       }
                       )
-                      
+
                       assign("debuttons",c(debuttons,isolate(o)),envir =env)
                   })
               ## end of maintaining buttons
@@ -654,7 +662,7 @@ server <- shinyServer(function(input, output, session) {
             })
           }
         })
-        
+
 
         ######################################BOTTOM OF MAIN PANEL:
         # Adding tabset panel corresponds to each Cluster
@@ -827,9 +835,9 @@ server <- shinyServer(function(input, output, session) {
             assign("intersectbuttons",c(intersectbuttons,o),envir = env)
           })
      ###end of intersections
-        
-        
-        
+
+
+
         ########################################START OF CHANGING CLUSTERS NAMES
         updateSelectInput(session = session,
                           inputId = "chgcluster",
@@ -839,7 +847,7 @@ server <- shinyServer(function(input, output, session) {
         )
         observeEvent(input$chg,{
           removeUI(selector= paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))
-          
+
           insertTab(
             inputId = "switcher",
             position = "after",
@@ -872,25 +880,25 @@ server <- shinyServer(function(input, output, session) {
             }
           }
         })
-        
+
         #########################################END OF CHANGING CLUSTERS NAMES
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-    })
-   
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
+    }})
+
+
+
+
     ####################################    END OF RUN CURRENT CONFIG
 
 
