@@ -57,8 +57,22 @@ translation_dict = {
         "SeededKMeans": SSClu_SeededKMeans,
         "ConstrainedKMeans": SSClu_ConstrainedKMeans,
         "ConstrainedSeededKMeans": SSClu_ConstrainedSeededKMeans
+    },
+    "visualization": {
+        "UMAP": Dim_UMAP,
+        "TSNE": Dim_TSNE
     }
 }
+
+
+def _method_exists(step, method):
+    """
+    Check if method in step has been implemented.
+    """
+    if step not in translation_dict:
+        raise NotImplementedError("{0} step not implemented.".format(step))
+    if method not in translation_dict[step]:
+        raise NotImplementedError("{0} method not implemented.".format(method))
 
 
 def wrap(step, method):
@@ -72,15 +86,17 @@ def wrap(step, method):
     Returns:
         object (Unit): Object of the right type.
     """
-    if step not in translation_dict:
-        raise NotImplementedError("{0} step not implemented.".format(step))
-    if method not in translation_dict[step]:
-        raise NotImplementedError("{0} method not implemented.".format(method))
+    try:
+        _method_exists(step, method)
+    except NotImplementedError:
+        print(f"{method} in {step} is not implemented.")
+        return 404
     return translation_dict[step][method]
 
 
 __all__ = [
     'translation_dict',
+    '_method_exists',
     'wrap',
     'Clu_KMeans',
     'Clu_KMedoids',

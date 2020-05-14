@@ -16,7 +16,8 @@ install_requires = [
     'anndata',
     'leidenalg',
     'scanpy',
-    'Cluster_Ensembles'
+    'Cluster_Ensembles',
+    'psutil'
 ]
 
 setup(

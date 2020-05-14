@@ -108,6 +108,9 @@ server <- shinyServer(function(input, output, session) {
         print(dataset)
         pipe <- Pipeline(x = dataset)
         df <- isolate(runPipe(pipe, input))
+        if (is.character(df) & length(df) == 1) {
+          showNotification(df)
+        } else {
         #assign("df", isolate(runPipe(pipe, input)), envir = env)
         ################################### RUN WITH CURRENT CONFIG
 
@@ -998,7 +1001,7 @@ server <- shinyServer(function(input, output, session) {
             })
             assign("intersectbuttons",c(intersectbuttons,o),envir = env)
           })
-
+    }
     })
 
     ####################################    END OF RUN CURRENT CONFIG

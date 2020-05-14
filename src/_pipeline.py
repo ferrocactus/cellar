@@ -1,6 +1,8 @@
 import datetime
 import pickle
 from ast import literal_eval
+import traceback
+import sys
 
 import numpy as np
 import pandas as pd
@@ -9,11 +11,19 @@ import anndata
 import scanpy
 
 from .units import wrap
+from .units import _method_exists
 from .log import setup_logger
 from .units._unit import Unit
 from .utils.read import parse_config
 from .utils.read import load_data
-from .utils.validation import _effective_numerical_value as env
+from .utils.validation import _effective_numerical_value
+from .utils.validation import _validate_dim_n_components
+from .utils.validation import _validate_clu_n_clusters
+from .utils.validation import _validate_n_jobs
+from .utils.validation import _validate_mark_alpha
+from .utils.validation import _validate_mark_markers_n
+from .utils.validation import _validate_mark_correction
+from .utils.validation import _validate_con_convention
 
 
 def is_float(val):
@@ -39,6 +49,7 @@ class Pipeline(Unit):
                 "Data needs to be of shape (n_samples, n_features).")
         assert isinstance(config, str)
         self.x = x
+        self.params = False
         self.config = parse_config(config)
         self.col_ids = np.array(col_ids).astype('U').reshape(-1)
         self.create_objects()
@@ -59,6 +70,47 @@ class Pipeline(Unit):
         self.ssclu = wrap("ss_cluster", ssclu_method)(
             **self.config["ss_cluster"]
         )
+
+    def validate_params(self, dim_method='PCA', dim_n_components='knee',
+            clu_method='KMeans', eval_method='Silhouette',
+            clu_n_clusters='(3, 5, 1)', clu_n_jobs=1,
+            mark_method='TTest', mark_alpha=0.05, mark_markers_n=200,
+            mark_correction='hs', mark_n_jobs=1, con_method="Converter",
+            con_convention='id-to-name', con_path="markers/gene_id_name.csv",
+            ide_method='HyperGeom', ide_path='markers/cell_type_marker.json',
+            ide_tissue='all', vis_method='UMAP', ssc_method=None):
+
+        try:
+            _method_exists('dim_reduction', dim_method)
+            _validate_dim_n_components(dim_n_components, *self.x.shape)
+            _method_exists('cluster', clu_method)
+            _method_exists('cluster_eval', eval_method)
+            _validate_clu_n_clusters(clu_n_clusters, self.x.shape[0])
+            _validate_n_jobs(clu_n_jobs)
+            _method_exists('markers', mark_method)
+            _validate_mark_alpha(mark_alpha)
+            _validate_mark_markers_n(mark_markers_n, self.x.shape[1])
+            _validate_mark_correction(mark_correction)
+            _validate_n_jobs(mark_n_jobs)
+            _method_exists('conversion', con_method)
+            _validate_con_convention(con_convention)
+            _method_exists('identification', ide_method)
+            _method_exists('visualization', vis_method)
+            if ssc_method is not None:
+                _method_exists('ss_cluster', ssc_method)
+        except NotImplementedError as nie:
+            print(str(nie))
+            return str(nie)
+        except ValueError as ve:
+            print(str(ve))
+            return str(ve)
+        except Exception as e:
+            print(str(e))
+            traceback.print_exc(file=sys.stdout)
+            return "A problem occurred."
+
+        return "good"
+
 
     def run(self, dim_method='PCA', dim_n_components='knee',
             clu_method='KMeans', eval_method='Silhouette',
@@ -94,8 +146,11 @@ class Pipeline(Unit):
         if x is None:
             x = self.x
 
-        if is_float(n_components):
-            n_components = literal_eval(n_components)
+        n_components = _validate_dim_n_components(n_components, *self.x.shape)
+        if hasattr(self, 'x_emb') and self.n_components == n_components:
+            return self.x_emb
+
+        self.n_components = n_components
 
         self.dim = wrap("dim_reduction", method)(
             n_components=n_components,
@@ -109,8 +164,8 @@ class Pipeline(Unit):
         if x is None:
             x = self.x_emb
 
-        n_clusters = env(n_clusters)
-        n_jobs = env(n_jobs)
+        n_clusters = _validate_clu_n_clusters(n_clusters, self.x.shape[0])
+        n_jobs = _validate_n_jobs(n_jobs)
 
         self.clu_method = method
         self.eval = wrap("cluster_eval", eval_method)()
@@ -127,9 +182,9 @@ class Pipeline(Unit):
         if y is None:
             y = self.labels
 
-        alpha = env(alpha)
-        markers_n = env(markers_n)
-        n_jobs = env(n_jobs)
+        alpha = _validate_mark_alpha(alpha)
+        markers_n = _validate_mark_markers_n(markers_n, self.x.shape[1])
+        n_jobs = _validate_n_jobs(n_jobs)
 
         self.mark = wrap("markers", method)(
             alpha=alpha, markers_n=markers_n,
@@ -146,6 +201,8 @@ class Pipeline(Unit):
             markers = self.markers
         if col_ids is None:
             col_ids = self.col_ids
+
+        convention = _validate_con_convention(convention)
 
         self.con = wrap("conversion", method)(
             convention=convention, path=path)
@@ -199,14 +256,14 @@ class Pipeline(Unit):
             return self.x_emb_2d
 
         if method == 'UMAP':
-            self.vis = wrap("dim_reduction", method)(
+            self.vis = wrap("visualization", method)(
                 n_components=2,
                 n_neighbors=15,
                 min_dist=0,
                 metric="euclidean"
             )
         else:
-            self.vis = wrap("dim_reduction", method)()
+            self.vis = wrap("visualization", method)()
 
         return self.vis.get(x, y)
 
