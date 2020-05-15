@@ -850,47 +850,47 @@ server <- shinyServer(function(input, output, session) {
 
 
         ########################################START OF CHANGING CLUSTERS NAMES
-        updateSelectInput(session = session,
-                          inputId = "chgcluster",
-                          label = "Cluster to Rename",
-                          choices = c(1:(length(c_intersections)-1)),
-                          #selected = NULL)
-        )
-        observeEvent(input$chg,{
-          removeUI(selector= paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))
-
-          insertTab(
-            inputId = "switcher",
-            position = "after",
-            tabPanel(
-              input$newcluster,
-              paste("Cluster ",input$newcluster," intersections",seq=""),
-              tags$div(id = paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))),
-            target = as.character(length(c_intersections)-2)
-          )
-          i=length(c_intersections)
-          for (j in 1:length(c_intersections[[i]])){
-            textt<-c_intersections[[i]][j]
-
-            for (k in 1:length(total_intersections)){
-              if (identical(
-                total_intersections[k],
-                as.character(strsplit(c_intersections[[i]][j], "-")))) {
-                #showNotification(textt,duration=NULL)
-                textt <- total_intersections[k]
-                #showNotification(textt,duration=NULL)
-                break
-              }
-            }
-            if (substr(c_intersections[[i]][j],1,1)!=" "){
-              insertUI(
-                selector = paste("#placeholder",as.character(i-1),sep=""),
-                #where = "afterEnd",
-                ui = actionButton(c_intersections[[i]][j],textt)
-              )
-            }
-          }
-        })
+        # updateSelectInput(session = session,
+        #                   inputId = "chgcluster",
+        #                   label = "Cluster to Rename",
+        #                   choices = c(1:(length(c_intersections)-1)),
+        #                   #selected = NULL)
+        # )
+        # observeEvent(input$chg,{
+        #   removeUI(selector= paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))
+        # 
+        #   insertTab(
+        #     inputId = "switcher",
+        #     position = "after",
+        #     tabPanel(
+        #       input$newcluster,
+        #       paste("Cluster ",input$newcluster," intersections",seq=""),
+        #       tags$div(id = paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))),
+        #     target = as.character(length(c_intersections)-2)
+        #   )
+        #   i=length(c_intersections)
+        #   for (j in 1:length(c_intersections[[i]])){
+        #     textt<-c_intersections[[i]][j]
+        # 
+        #     for (k in 1:length(total_intersections)){
+        #       if (identical(
+        #         total_intersections[k],
+        #         as.character(strsplit(c_intersections[[i]][j], "-")))) {
+        #         #showNotification(textt,duration=NULL)
+        #         textt <- total_intersections[k]
+        #         #showNotification(textt,duration=NULL)
+        #         break
+        #       }
+        #     }
+        #     if (substr(c_intersections[[i]][j],1,1)!=" "){
+        #       insertUI(
+        #         selector = paste("#placeholder",as.character(i-1),sep=""),
+        #         #where = "afterEnd",
+        #         ui = actionButton(c_intersections[[i]][j],textt)
+        #       )
+        #     }
+        #   }
+        # })
 
         #########################################END OF CHANGING CLUSTERS NAMES
 
