@@ -41,6 +41,12 @@ mainpanel <- div(
     # ),
     # actionButton("chg","Apply Change"),
     #actionButton("disable","Disable buttons"),
+    
+     splitLayout(
+
+         selectInput("cluforanalysis", "Select clusters", choices = c("")),
+         actionButton("runanalysis", "Run analysis for clusters", class="sidebtn")
+     ),
     fileInput(
         "file1", "Choose CSV/h5ad File",
         multiple = FALSE,

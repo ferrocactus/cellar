@@ -429,6 +429,13 @@ server <- shinyServer(function(input, output, session) {
      
 
         ############################################## DE GENE IMPLEMENTATION
+          ### update select input for cluster selection
+          updateSelectInput(session = session,
+                            inputId = "cluforanalysis",
+                            label = "Select clusters",
+                            choices = levels(as.factor(expr_data$cluster)),
+                            selected = NULL)
+          
         scdata_subset=expr_data
         assign("s1", NULL, envir = env)  ##
         assign("s2", NULL, envir = env)  ##
@@ -445,8 +452,9 @@ server <- shinyServer(function(input, output, session) {
         assign("sst",c(sst,sst1,sst2),envir = env)
         assign("sets", 0, envir = env)
         assign("set", 0, envir = env)
+        assign("clu", 0, envir = env)
         toListen <- reactive({
-          list(input$getdegenes,input$DEsubsets)
+          list(input$getdegenes,input$DEsubsets,input$runanalysis)
 
         })
 
@@ -496,8 +504,34 @@ server <- shinyServer(function(input, output, session) {
               selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
               restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
               flag=1
+          }
+          
+          ############ for cluster analysis
+          if (input$runanalysis>clu){
+            if (input$runanalysis==0)
+            {
+              return()
             }
-
+            if (length(debuttons)>0){
+              for (i in 1:length(debuttons)){
+                debuttons[[i]]$destroy()
+                #debuttons[[1]]<-NULL
+              }
+            }
+            assign("debuttons",NULL,envir=env) # disable previous buttons
+            
+            
+            assign("clu", clu+1, envir = env)
+            
+            idxes<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
+            
+            selecteddat<-scdata_subset[idxes,2:ncol(scdata_subset)]
+            
+            restdat<-scdata_subset[-idxes,2:ncol(scdata_subset)]
+            flag=1
+          }
+          
+          
           ### finisehd calculating selected data and rest data
          ### start calculating DE genes
             if (flag==1){
@@ -875,6 +909,13 @@ server <- shinyServer(function(input, output, session) {
             })
             assign("intersectbuttons",c(intersectbuttons,o),envir = env)
           })
+        
+        #### cluster analysis
+        
+        
+        
+        
+        
      ###end of intersections
 
 
