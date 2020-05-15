@@ -480,8 +480,8 @@ server <- shinyServer(function(input, output, session) {
 
             assign("set", set+1, envir = env)
             d <- event_data("plotly_selected")
-            selecteddat<-scdata_subset[as.numeric(d$key),2:ncol(scdata_subset)]
-            restdat<-scdata_subset[-as.numeric(d$key),2:ncol(scdata_subset)]
+            selecteddat<-scdata_subset[as.numeric(d$key),1:ncol(scdata_subset)-1]
+            restdat<-scdata_subset[-as.numeric(d$key),1:ncol(scdata_subset)-1]
             flag=1
           }
 
@@ -501,8 +501,8 @@ server <- shinyServer(function(input, output, session) {
 
               assign("sets", sets+1, envir = env)
 
-              selecteddat<-scdata_subset[as.numeric(s1$key),2:ncol(scdata_subset)]
-              restdat<-scdata_subset[as.numeric(s2$key),2:ncol(scdata_subset)]
+              selecteddat<-scdata_subset[as.numeric(s1$key),1:ncol(scdata_subset)-1]
+              restdat<-scdata_subset[as.numeric(s2$key),1:ncol(scdata_subset)-1]
               flag=1
           }
           
@@ -525,9 +525,9 @@ server <- shinyServer(function(input, output, session) {
             
             idxes<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
             
-            selecteddat<-scdata_subset[idxes,2:ncol(scdata_subset)]
+            selecteddat<-scdata_subset[idxes,1:ncol(scdata_subset)-1]
             
-            restdat<-scdata_subset[-idxes,2:ncol(scdata_subset)]
+            restdat<-scdata_subset[-idxes,1:ncol(scdata_subset)-1]
             flag=1
           }
           
