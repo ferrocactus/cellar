@@ -393,7 +393,7 @@ server <- shinyServer(function(input, output, session) {
         output$brush <- renderPrint({
           d <- event_data("plotly_selected")
           observeEvent(input$labelupd, {
-            newlabs[d$key] <- as.integer(input$newlabels)
+            newlabs[d$key] <- as.character(input$newlabels)
             assign("updated_new_labels", newlabs, envir = env)
             output$Plot2 <- renderPlotly({
               plot_ly(
