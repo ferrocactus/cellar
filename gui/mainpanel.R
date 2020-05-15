@@ -44,7 +44,7 @@ mainpanel <- div(
     
      
     selectInput("cluforanalysis", "Select clusters", choices = c("")),
-    actionButton("runanalysis", "Run analysis for clusters", class="sidebtn")
+    actionButton("runanalysis", "Run analysis for clusters", class="sidebtn"),
  
     fileInput(
         "file1", "Choose CSV/h5ad File",
