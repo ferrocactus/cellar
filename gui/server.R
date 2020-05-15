@@ -511,7 +511,15 @@ server <- shinyServer(function(input, output, session) {
                 alldat<-rbind(selecteddat,restdat)
                 alldat<-data.frame(alldat,labelsdat)
                 modmat<-model.matrix(~labelsdat,data = alldat)
-                newfit<-lmFit(t(alldat[,1:ncol(alldat)-1]),design = modmat)
+                t=t(alldat[,1:ncol(alldat)-1])
+                if (class(t[2,2])=="character"){
+                  nr=dim(t)[[1]]
+                  nc=dim(t)[[2]]
+                  t=sapply(t, as.numeric)
+                  t=matrix(t,nr,nc)
+                }
+                newfit<-lmFit(t,design = modmat)
+                
                 eb_newfit<-eBayes(newfit)
                 #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
                 toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
