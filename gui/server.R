@@ -39,6 +39,13 @@ server <- shinyServer(function(input, output, session) {
 
     #SESSION-WISE VARIABLES
     env=environment()
+    
+    new_labels=NULL 
+    assign("new_labels",NULL,envir = env)
+    selected_cells=NULL
+    assign("selected_cells",NULL,envir = env)
+    
+    
     degenenames=NULL
     assign("degenenames",NULL,envir = env)
     firstflag=1
@@ -258,18 +265,23 @@ server <- shinyServer(function(input, output, session) {
                 })
 
                 ### updated plot
-                output$brush <- renderPrint({
-                    d <- event_data("plotly_selected")
-                    newlabs[d$key] <- as.integer(input$newlabels)
-                    #assign("updated_new_labels", newlabs, envir = env)
-                    output$Plot2 <- renderPlotly({
-                      plot_ly(
-                        df, x = df[, 1], y = df[, 2],
-                        text = ~paste("label: ", as.factor(newlabs)),
-                        color = as.factor(newlabs)
-                      ) %>% layout(dragmode = "lasso",
-                        title = paste("Value of ", input$labelupd, sep=""))
-                    })
+                observeEvent(input$labelupd, {
+                  d <- event_data("plotly_selected")
+                  
+                  showNotification(as.character(input$newlabels))
+                  
+                  newlabs[d$key]<<-as.character(input$newlabels)
+                  
+                  
+                  assign("updated_new_labels", newlabs, envir = env)
+                  output$Plot2 <- renderPlotly({
+                    plot_ly(
+                      df, x = df[, 1], y = df[, 2],
+                      text = ~paste("label: ", as.factor(newlabs)),
+                      color = as.factor(newlabs)
+                    ) %>% layout(dragmode = "lasso",
+                                 title = paste("Value of ", input$labelupd, sep=""))
+                  })
                 })
             }
             }
@@ -293,6 +305,7 @@ server <- shinyServer(function(input, output, session) {
         msigdb_pvals <- double(length = length(msigdb_categories))
         msig_dispdat <- data.frame(msigdb_categories, msigdb_pvals)
         newlabs <- df[, 3]
+        assign("newlabs",df[, 3],envir = env)
         names(newlabs) <- rownames(df)
 
         msigdb_categories <- names(Hs.c2)
@@ -388,12 +401,21 @@ server <- shinyServer(function(input, output, session) {
           ) %>% layout(dragmode = "lasso",
                        title = paste("Value of ", input$color, sep=""))
         })
-
+        
+    
+        
+        
         ### updated plot
-        output$brush <- renderPrint({
-          d <- event_data("plotly_selected")
+   
+  
           observeEvent(input$labelupd, {
-            newlabs[d$key] <- as.character(input$newlabels)
+            d <- event_data("plotly_selected")
+  
+            showNotification(as.character(input$newlabels))
+            
+            newlabs[d$key]<<-as.character(input$newlabels)
+           
+            
             assign("updated_new_labels", newlabs, envir = env)
             output$Plot2 <- renderPlotly({
               plot_ly(
@@ -404,7 +426,7 @@ server <- shinyServer(function(input, output, session) {
                            title = paste("Value of ", input$labelupd, sep=""))
             })
           })
-        })
+     
 
         ############################################## DE GENE IMPLEMENTATION
         scdata_subset=expr_data
