@@ -61,7 +61,7 @@ runPipe <- function(pipe, input) {
                                 tissue=ide_tissue)
 
         incProgress(1/n, detail = paste("Step: Visualizing"))
-        x_emb_2d <- pipe$get_emb_2d(x_emb, y=labels, method=vis_method)
+        x_emb_2d <- pipe$get_emb_2d(x_emb, method=vis_method)
         df <- data.frame(x1 = x_emb_2d[, 1],
                             x2 = x_emb_2d[, 2],
                             y = labels)
@@ -135,7 +135,7 @@ runSSClu <- function(pipe, labels, input) {
                                  tissue=ide_tissue)
 
         incProgress(1/n, detail = paste("Step: Visualizing"))
-        x_emb_2d <- pipe$get_emb_2d(y=labels, method=vis_method)
+        x_emb_2d <- pipe$get_emb_2d(method=vis_method)
         df <- data.frame(x1 = x_emb_2d[, 1],
                          x2 = x_emb_2d[, 2],
                          y = labels)
