@@ -43,7 +43,8 @@ mainpanel <- div(
     #actionButton("disable","Disable buttons"),
     
      
-    selectInput("cluforanalysis", "Select clusters", choices = c("")),
+    selectInput("cluforanalysis", "Choose cluster", choices = c("")),
+    actionButton("cluster_label","Update cluster label"),
     actionButton("runanalysis", "Run analysis for clusters", class="sidebtn"),
  
     fileInput(

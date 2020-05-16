@@ -45,6 +45,11 @@ server <- shinyServer(function(input, output, session) {
     selected_cells=NULL
     assign("selected_cells",NULL,envir = env)
     
+    cluster_selection_button=NULL
+    assign("cluster_selection_button",NULL,envir = env)
+    
+    selected_cluster=0
+    assign("selected_cluster",0,envir = env)
     
     degenenames=NULL
     assign("degenenames",NULL,envir = env)
@@ -286,7 +291,9 @@ server <- shinyServer(function(input, output, session) {
             }
             }
         })
-
+        ####################### End of clearing previous events
+        
+        
 
         # the dictionary includes information of each cluster
         # (including DE genes and intersections)
@@ -343,7 +350,7 @@ server <- shinyServer(function(input, output, session) {
         cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
         labeldats<-c(levels(as.factor(expr_data[,length(expr_data)])),cell_ontology_names)
 
-        ############################################################
+        ############################################################ End of pipeline data processing
         # select color value
         updateSelectInput(session = session,
                           inputId = "color",
@@ -402,18 +409,41 @@ server <- shinyServer(function(input, output, session) {
                        title = paste("Value of ", input$color, sep=""))
         })
         
-    
+        ### observe cluster selection
+        observeEvent(input$cluster_label  ,{
+          showNotification(as.character(input$newlabels))
+          showNotification("Updated labels according to cluster selection.")
+          keys<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
+          newlabs[keys]<<-as.character(input$newlabels)
+          assign("updated_new_labels", newlabs, envir = env)
+          output$Plot2 <- renderPlotly({
+            plot_ly(
+              df, x = df[, 1], y = df[, 2],
+              text = ~paste("label: ", as.factor(newlabs)),
+              color = as.factor(newlabs)
+            ) %>% layout(dragmode = "lasso",
+                         title = paste("Value of ", input$labelupd, sep=""))
+          })
+          
+        })
+        
+        
+        
         
         
         ### updated plot
-   
+        
   
-          observeEvent(input$labelupd, {
+        observeEvent(input$labelupd, {
             d <- event_data("plotly_selected")
   
             showNotification(as.character(input$newlabels))
             
+            
             newlabs[d$key]<<-as.character(input$newlabels)
+            showNotification("Update labels according to lasso selection.")
+                
+            
            
             
             assign("updated_new_labels", newlabs, envir = env)
@@ -428,7 +458,7 @@ server <- shinyServer(function(input, output, session) {
           })
      
 
-        ############################################## DE GENE IMPLEMENTATION
+        ########################################################################### DE GENE IMPLEMENTATION
           ### update select input for cluster selection
           updateSelectInput(session = session,
                             inputId = "cluforanalysis",
@@ -739,7 +769,7 @@ server <- shinyServer(function(input, output, session) {
         })
 
 
-        ######################################BOTTOM OF MAIN PANEL:
+        ###############################################################BOTTOM OF MAIN PANEL: (CLUSTERS & INTERSECTIONS)
         # Adding tabset panel corresponds to each Cluster
         # (at the bottom of the main panel)
 
