@@ -689,7 +689,7 @@ server <- shinyServer(function(input, output, session) {
                     hypergeom[i,1]<-names(markers_genelists_list)[i]
                     hypergeom[i,2]<-length(markers_genelists_list[[i]])
                     hypergeom[i,3]<-length(intersect(degenes,markers_genelists_list[[i]]))
-                    hypergeom[i,2]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
+                    hypergeom[i,4]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
                 }
                 incProgress(3/3, detail = paste("Step: Presenting"))
                 hypergeom_ord<-hypergeom[order(hypergeom[,4]),]
