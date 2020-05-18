@@ -1,37 +1,32 @@
 library(shiny)
+library(shinydashboard)
 library(plotly)
+library(shinyjs)
 
-jsResetCode <- "shinyjs.reset = function() {history.go(0)}"
+source("gui/datasetmenu.R") #datasetmenu
+source("gui/mainmenu.R") #mainmenu
+source("gui/configmenu.R") #configmenu
 
-source("gui/datasetpanel.R") # datasetpanel
-source("gui/mainpanel.R") # mainpanel
-source("gui/configpanel.R") # configpanel
 load('gui/cell_ontology')
 
-#INCLUDE THIS IN THE LABEL DROPDOWN
 cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
 
+header <- dashboardHeader(
+    titleWidth = 400,
+    title = "Cellar"
+)
 
-ui <- pageWithSidebar(
-    headerPanel("Clustering visualization"),
+sidebar <- dashboardSidebar(
+    width = 400,
+    sidebarMenu(
+        datasetmenu,
+        mainmenu,
+        configmenu
+    )
+)
 
-    sidebarPanel(
-        id="sidebarpanel",
-        includeCSS("gui/style.css"),
-        width = 3,
-
-        actionButton("toggledataset", "Dataset", class="panelhead"),
-        datasetpanel,
-
-        actionButton("togglemain", "Main Panel", class="panelhead"),
-        shinyjs::hidden(mainpanel),
-
-        actionButton("toggleconfig", "Configuration", class="panelhead"),
-        shinyjs::hidden(configpanel)
-    ),
-
-    # Main panel for displaying outputs
-    mainPanel(
+body <- dashboardBody(
+    tags$head(includeCSS("./gui/custom.css")),
         tabsetPanel(
             type = "tabs",
             id = "tabset",
@@ -83,5 +78,6 @@ ui <- pageWithSidebar(
                 downloadButton("downloadMSIG", "Download MsigDB enrichment table")
             )
         )
-    )
 )
+
+ui <- dashboardPage(header, sidebar, body, skin='green')

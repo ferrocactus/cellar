@@ -19,32 +19,6 @@ source("gui/pipe_functions.R") # runPipe
 
 ################################################################# server
 server <- shinyServer(function(input, output, session) {
-    # Keep connection alive
-    output$clock <- renderText({
-        invalidateLater(5000)
-        Sys.time()
-    })
-
-
-    # Toggling of menus
-    shinyjs::onclick("toggledataset", {
-        shinyjs::toggle(id = "datasetpanel", anim = TRUE);
-        shinyjs::hide(id = "mainpanel", anim = TRUE);
-        shinyjs::hide(id = "configpanel", anim = TRUE);
-    })
-
-    shinyjs::onclick("togglemain", {
-        shinyjs::toggle(id = "mainpanel", anim = TRUE);
-        shinyjs::hide(id = "datasetpanel", anim = TRUE);
-        shinyjs::hide(id = "configpanel", anim = TRUE);
-    })
-
-    shinyjs::onclick("toggleconfig", {
-        shinyjs::toggle(id = "configpanel", anim = TRUE);
-        shinyjs::hide(id = "datasetpanel", anim = TRUE);
-        shinyjs::hide(id = "mainpanel", anim = TRUE);
-    })
-
     #SESSION-WISE VARIABLES
     env=environment()
 

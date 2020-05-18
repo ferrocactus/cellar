@@ -1,0 +1,38 @@
+:root {
+  --green: rgb(0, 166, 90);
+  --darkgreen: rgb(0, 141, 76);
+  --lightgreen: rgb(0, 180, 110);
+}
+
+section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-input.action-link {
+    background-color: var(--green) !important;
+    color: white !important;
+    border-color: var(--darkgreen) !important;
+}
+
+section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:hover .shiny-bound-input.action-link :hover {
+    background-color: var(--lightgreen) !important;
+}
+
+.selectize-control .selectize-dropdown {
+    position: static !important;
+}
+
+.shiny-split-layout {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.scdbtn {
+    margin-right: 0 !important;
+    margin-left: 0 !important;
+}
+
+.highbtn {
+    margin-top: 37px !important;
+    width: 80% !important;
+}
+
+.longbtn {
+    width: 87% !important;
+}
