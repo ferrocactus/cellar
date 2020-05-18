@@ -27,30 +27,38 @@ server <- shinyServer(function(input, output, session) {
 
 
     # Toggling of menus
+    shinyjs::onclick("toggledataset", {
+        shinyjs::toggle(id = "datasetpanel", anim = TRUE);
+        shinyjs::hide(id = "mainpanel", anim = TRUE);
+        shinyjs::hide(id = "configpanel", anim = TRUE);
+    })
+
     shinyjs::onclick("togglemain", {
         shinyjs::toggle(id = "mainpanel", anim = TRUE);
-        shinyjs::hide(id = "configuration", anim = TRUE)
+        shinyjs::hide(id = "datasetpanel", anim = TRUE);
+        shinyjs::hide(id = "configpanel", anim = TRUE);
     })
 
     shinyjs::onclick("toggleconfig", {
-        shinyjs::toggle(id = "configuration", anim = TRUE);
-        shinyjs::hide(id = "mainpanel", anim = TRUE)
+        shinyjs::toggle(id = "configpanel", anim = TRUE);
+        shinyjs::hide(id = "datasetpanel", anim = TRUE);
+        shinyjs::hide(id = "mainpanel", anim = TRUE);
     })
 
     #SESSION-WISE VARIABLES
     env=environment()
-    
-    new_labels=NULL 
+
+    new_labels=NULL
     assign("new_labels",NULL,envir = env)
     selected_cells=NULL
     assign("selected_cells",NULL,envir = env)
-    
+
     cluster_selection_button=NULL
     assign("cluster_selection_button",NULL,envir = env)
-    
+
     selected_cluster=0
     assign("selected_cluster",0,envir = env)
-    
+
     degenenames=NULL
     assign("degenenames",NULL,envir = env)
     firstflag=1
@@ -167,7 +175,6 @@ server <- shinyServer(function(input, output, session) {
           for (i in 1:clusters){
               removeTab(inputId="switcher", target=as.character(i-1))
           }
-          output$deinfo<-NULL
           output$DEbuttons<-NULL
           output$plot<-NULL
           output$brush<-NULL
@@ -272,12 +279,12 @@ server <- shinyServer(function(input, output, session) {
                 ### updated plot
                 observeEvent(input$labelupd, {
                   d <- event_data("plotly_selected")
-                  
+
                   showNotification(as.character(input$newlabels))
-                  
+
                   newlabs[d$key]<<-as.character(input$newlabels)
-                  
-                  
+
+
                   assign("updated_new_labels", newlabs, envir = env)
                   output$Plot2 <- renderPlotly({
                     plot_ly(
@@ -292,8 +299,8 @@ server <- shinyServer(function(input, output, session) {
             }
         })
         ####################### End of clearing previous events
-        
-        
+
+
 
         # the dictionary includes information of each cluster
         # (including DE genes and intersections)
@@ -408,7 +415,7 @@ server <- shinyServer(function(input, output, session) {
           ) %>% layout(dragmode = "lasso",
                        title = paste("Value of ", input$color, sep=""))
         })
-        
+
         ### observe cluster selection
         observeEvent(input$cluster_label  ,{
           showNotification(as.character(input$newlabels))
@@ -424,28 +431,28 @@ server <- shinyServer(function(input, output, session) {
             ) %>% layout(dragmode = "lasso",
                          title = paste("Value of ", input$labelupd, sep=""))
           })
-          
+
         })
-        
-        
-        
-        
-        
+
+
+
+
+
         ### updated plot
-        
-  
+
+
         observeEvent(input$labelupd, {
             d <- event_data("plotly_selected")
-  
+
             showNotification(as.character(input$newlabels))
-            
-            
+
+
             newlabs[d$key]<<-as.character(input$newlabels)
             showNotification("Update labels according to lasso selection.")
-                
-            
-           
-            
+
+
+
+
             assign("updated_new_labels", newlabs, envir = env)
             output$Plot2 <- renderPlotly({
               plot_ly(
@@ -456,7 +463,7 @@ server <- shinyServer(function(input, output, session) {
                            title = paste("Value of ", input$labelupd, sep=""))
             })
           })
-     
+
 
         ########################################################################### DE GENE IMPLEMENTATION
           ### update select input for cluster selection
@@ -465,7 +472,7 @@ server <- shinyServer(function(input, output, session) {
                             label = "Select clusters",
                             choices = levels(as.factor(expr_data$cluster)),
                             selected = NULL)
-          
+
         scdata_subset=expr_data
         assign("s1", NULL, envir = env)  ##
         assign("s2", NULL, envir = env)  ##
@@ -535,7 +542,7 @@ server <- shinyServer(function(input, output, session) {
               restdat<-scdata_subset[as.numeric(s2$key),1:ncol(scdata_subset)-1]
               flag=1
           }
-          
+
           ############ for cluster analysis
           if (input$runanalysis>clu){
             if (input$runanalysis==0)
@@ -549,19 +556,19 @@ server <- shinyServer(function(input, output, session) {
               }
             }
             assign("debuttons",NULL,envir=env) # disable previous buttons
-            
-            
+
+
             assign("clu", clu+1, envir = env)
-            
+
             idxes<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
-            
+
             selecteddat<-scdata_subset[idxes,1:ncol(scdata_subset)-1]
-            
+
             restdat<-scdata_subset[-idxes,1:ncol(scdata_subset)-1]
             flag=1
           }
-          
-          
+
+
           ### finisehd calculating selected data and rest data
          ### start calculating DE genes
             if (flag==1){
@@ -583,7 +590,7 @@ server <- shinyServer(function(input, output, session) {
                   t=matrix(t,nr,nc)
                 }
                 newfit<-lmFit(t,design = modmat)
-                
+
                 eb_newfit<-eBayes(newfit)
                 #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
                 toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
@@ -615,9 +622,6 @@ server <- shinyServer(function(input, output, session) {
               },bordered = T)
 
               ### DE gene buttons implementation:
-              output$deinfo <- renderUI({
-                  h3("DE gene information:")
-              })
               DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
               for (i in 1:length(DEgenes))
               {
@@ -939,13 +943,13 @@ server <- shinyServer(function(input, output, session) {
             })
             assign("intersectbuttons",c(intersectbuttons,o),envir = env)
           })
-        
+
         #### cluster analysis
-        
-        
-        
-        
-        
+
+
+
+
+
      ###end of intersections
 
 
@@ -959,7 +963,7 @@ server <- shinyServer(function(input, output, session) {
         # )
         # observeEvent(input$chg,{
         #   removeUI(selector= paste("#placeholder",as.character(as.numeric(input$chgcluster)-1),sep=""))
-        # 
+        #
         #   insertTab(
         #     inputId = "switcher",
         #     position = "after",
@@ -972,7 +976,7 @@ server <- shinyServer(function(input, output, session) {
         #   i=length(c_intersections)
         #   for (j in 1:length(c_intersections[[i]])){
         #     textt<-c_intersections[[i]][j]
-        # 
+        #
         #     for (k in 1:length(total_intersections)){
         #       if (identical(
         #         total_intersections[k],

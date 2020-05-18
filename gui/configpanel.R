@@ -1,7 +1,7 @@
 source("gui/options.R") # options, defaults
 
 configpanel <- div(
-    id = "configuration",
+    id = "configpanel",
     class = "panelbody",
 
     actionButton(
