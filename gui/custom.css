@@ -14,6 +14,18 @@ section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:ho
     background-color: var(--lightgreen) !important;
 }
 
+h2 {
+    font-size:18px !important;
+}
+
+h3 {
+    font-size:16px !important;
+}
+
+.wrapper {
+    overflow-y: hidden !important;
+}
+
 .shiny-split-layout {
     padding: 0 !important;
     margin: 0 !important;
