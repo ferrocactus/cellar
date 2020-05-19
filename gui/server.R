@@ -613,25 +613,30 @@ server <- shinyServer(function(input, output, session) {
         #### and realizing related functions
         output$genes <- renderPrint({
 
-          #withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
-          #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-          labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
-          alldat<-rbind(selecteddat,restdat)
-          alldat<-data.frame(alldat,labelsdat)
-          modmat<-model.matrix(~labelsdat,data = alldat)
-          t=t(alldat[,1:ncol(alldat)-1])
-          if (class(t[2,2])=="character"){
-            nr=dim(t)[[1]]
-            nc=dim(t)[[2]]
-            t=sapply(t, as.numeric)
-            t=matrix(t,nr,nc)
-          }
-          newfit<-lmFit(t,design = modmat)
-
-          eb_newfit<-eBayes(newfit)
-          #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
-          toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
-          # })
+          withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
+            #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
+            
+            incProgress(1/5, detail = paste("Step: Fetching 2 sets"))
+            labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
+            alldat<-rbind(selecteddat,restdat)
+            alldat<-data.frame(alldat,labelsdat)
+            modmat<-model.matrix(~labelsdat,data = alldat)
+            incProgress(2/5, detail = paste("Step: Processing data"))
+            t=t(alldat[,1:ncol(alldat)-1])
+            if (class(t[2,2])=="character"){
+              nr=dim(t)[[1]]
+              nc=dim(t)[[2]]
+              t=sapply(t, as.numeric)
+              t=matrix(t,nr,nc)
+            }
+            incProgress(3/5, detail = paste("Step: Calculating"))
+            newfit<-lmFit(t,design = modmat)
+            
+            eb_newfit<-eBayes(newfit)
+            incProgress(4/5, detail = paste("Step: Rendering table"))
+            #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
+            toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
+          }) ## end of calculating DE progress
 
           output$GeneOntology <- renderTable({
             withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
@@ -639,7 +644,7 @@ server <- shinyServer(function(input, output, session) {
               degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
               degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
               degenes<-gene_ids_all[degenes_int,3]
-              incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
+              incProgress(2/3, detail = paste("Step: Calculating "))
               for (i in 1:nrow(go_dispdat)) {
                 go_dispdat[i,2]<-length(Hs.c5[[i]])
                 go_dispdat[i,3]<-length(intersect(degenes,Hs.c5[[i]]))
@@ -726,7 +731,7 @@ server <- shinyServer(function(input, output, session) {
               degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
               degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
               degenes<-gene_ids_all[degenes_int,3]
-              incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
+              incProgress(2/3, detail = paste("Step: Calculating "))
               for (i in 1:nrow(kegg_dispdat)) {
                 kegg_dispdat[i,2]<-length(kegg_genelists[[i]])
                 kegg_dispdat[i,3]<-length(intersect(degenes,kegg_genelists[[i]]))
