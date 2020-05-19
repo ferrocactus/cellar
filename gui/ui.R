@@ -3,11 +3,11 @@ library(shinydashboard)
 library(plotly)
 library(shinyjs)
 
-source("gui/datasetmenu.R") #datasetmenu
-source("gui/mainmenu.R") #mainmenu
-source("gui/configmenu.R") #configmenu
+source("gui/sidebar/datasetmenu.R") #datasetmenu
+source("gui/sidebar/mainmenu.R") #mainmenu
+source("gui/sidebar/configmenu.R") #configmenu
 
-load('gui/cell_ontology')
+load('gui/obj/cell_ontology')
 
 cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
 
@@ -28,7 +28,7 @@ sidebar <- dashboardSidebar(
 
 body <- dashboardBody(
     useShinyjs(),
-    tags$head(includeCSS("./gui/custom.css")),
+    tags$head(includeCSS("gui/styles/style.css")),
     # Don't scroll to top after clicking anything
     #tags$script(HTML(
     #    "

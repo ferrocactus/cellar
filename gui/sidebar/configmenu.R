@@ -1,6 +1,6 @@
 library(shiny)
 
-source("gui/options.R")
+source("gui/sidebar/options.R")
 
 configmenu <- menuItem(
     "Configuration",

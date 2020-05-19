@@ -8,11 +8,11 @@ library(GO.db)
 library(rjson)
 
 source_python('__init__.py')
-load('gui/Hs.c2')
-load('gui/Go_kegg_lists')
-load('gui/cell_ontology')
-load('gui/keggidtoname')
-load('gui/gene_ids_all')
+load('gui/obj/Hs.c2')
+load('gui/obj/Go_kegg_lists')
+load('gui/obj/cell_ontology')
+load('gui/obj/keggidtoname')
+load('gui/obj/gene_ids_all')
 
 # Load utility functions
 source("gui/functions.R") # getPage, intersect, writeDataset, getHypergeom
