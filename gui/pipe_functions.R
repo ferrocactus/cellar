@@ -10,13 +10,13 @@ runPipe <- function(pipe, input) {
     mark_markers_n <- input$mark_markers_n
     mark_correction <- input$mark_correction
     con_method <- 'Converter'
-    con_convention <- input$con_convention
+    con_convention <- 'id-to-name'
     #con_path <- input$con_path
     con_path <- 'markers/gene_id_name.csv'
     ide_method <- 'HyperGeom'
     #ide_path <- input$ide_path
     ide_path <- 'markers/cell_type_marker.json'
-    ide_tissue <- input$ide_tissue
+    ide_tissue <- 'all'
     vis_method <- input$vis_method
 
     msg = pipe$validate_params(dim_method=dim_method,

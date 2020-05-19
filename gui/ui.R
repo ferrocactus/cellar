@@ -17,6 +17,7 @@ header <- dashboardHeader(
 )
 
 sidebar <- dashboardSidebar(
+    useShinyjs(),
     width = 400,
     sidebarMenu(
         datasetmenu,
@@ -26,15 +27,16 @@ sidebar <- dashboardSidebar(
 )
 
 body <- dashboardBody(
+    useShinyjs(),
     tags$head(includeCSS("./gui/custom.css")),
     # Don't scroll to top after clicking anything
-    tags$script(HTML(
-        "
-        $(document).on('click', function(e) {
-           e.preventDefault();
-        });
-        "
-    )),
+    #tags$script(HTML(
+    #    "
+    #    $(document).on('click', function(e) {
+    #       e.preventDefault();
+    #    });
+    #    "
+    #)),
     tabsetPanel(
         type = "tabs",
         id = "tabset",

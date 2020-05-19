@@ -15,84 +15,152 @@ configmenu <- menuItem(
                 class="sidebtn longbtn"
             ),
 
-            splitLayout(
-                cellWidths = c("60%", "40%"),
-                selectInput("dim_method",
-                            "Dimensionality reduction:",
-                            choices = options$dim),
-                textInput(inputId = "dim_n_components",
-                          label = "# of components",
-                          value = defaults$dim)
-            ),
-
-            splitLayout(
-                cellWidths = c("60%", "40%"),
-                selectInput("clu_method", "Clustering method:",
-                            choices = options$clu),
-                textInput(inputId = "clu_n_clusters",
-                          label = "# of clusters",
-                          value = defaults$clu)
-            ),
-
-            selectInput(
-                "eval_method", "Clustering evaluation method:",
-                choices = options$eval
-            ),
-
-            splitLayout(
-                cellWidths = c("34%", "33%", "33%"),
-                textInput(inputId = "mark_alpha",
-                          label = "alpha",
-                          value = defaults$mark_alpha),
-                textInput(inputId = "mark_markers_n",
-                          label = "# of markers",
-                          value = defaults$mark_no),
-                selectInput("mark_correction",
-                            "Correction",
-                            choices = options$correction)
-            ),
-
-            splitLayout(
-                cellWidths = c("50%", "50%"),
-                selectInput("con_convention",
-                            "Converter convention",
-                            choices = options$converter),
-                textInput(inputId = "con_path",
-                          label = "Path (dont use)",
-                          value = '')
-            ),
-
-            splitLayout(
-                cellWidths = c("50%", "50%"),
-                selectInput("ide_tissue",
-                            "Converter convention",
-                            choices = options$tissue),
-                textInput(inputId = "ide_path",
-                          label = "Path (dont use)",
-                          value = "")
-            ),
-
-            selectInput(
-                "vis_method",
-                "Visualization method:",
-                choices = options$vis
-            ),
-
-            actionButton(
-                "ssclurun", "Run constrained clustering",
-                class="sidebtn longbtn"
-            ),
-
-            splitLayout(
-                cellWidths = c("60%", "40%"),
-                selectInput(
-                    "ssc_method",
-                    "Constrained clustering:",
-                    choices = options$ssclu
+            div(
+                class = "div_step div_dim",
+                list(
+                    selectInput(
+                        "dim_method",
+                        "Dimensionality reduction",
+                        choices=options$dim
+                    ),
+                    splitLayout(
+                        cellWidths = c("60%", "47%"),
+                        radioButtons(
+                            "dim_options",
+                            "Number of components",
+                            choices = c(
+                                "Automatic" = "pca_auto",
+                                "Manual" = "pca_manual"
+                            ),
+                            inline = TRUE,
+                            selected = 'pca_auto',
+                        ),
+                        textInput(
+                            inputId = "dim_n_components",
+                            label = NULL,
+                            value = defaults$dim
+                        )
+                    )
                 ),
-                textInput(inputId = "savedClusters",
-                          label = "Clusters to preserve",
-                          value = "")
+                HTML('<hr class="line">')
+            ),
+
+            div(
+                class = "div_step div_clu",
+                list(
+                    selectInput(
+                        "clu_method",
+                        "Clustering",
+                        choices = options$clu
+                    ),
+                    splitLayout(
+                        cellWidths = c("50%", "50%"),
+                        textInput(
+                            "clu_n_clusters",
+                            "Number of clusters",
+                            value = defaults$clu
+                        ),
+                        selectInput(
+                            "eval_method",
+                            "Evaluation:",
+                            choices = options$eval
+                        )
+                    ),
+                    conditionalPanel(
+                        condition = "input.clu_method == 'Ensemble'",
+                        div(
+                            class = "multicol",
+                            checkboxGroupInput(
+                                "ensemble_checkbox",
+                                label = NULL,
+                                choices = c(
+                                    options$clu_ensemble
+                                )
+                            )
+                        )
+                    )
+                ),
+                HTML('<hr class="line">')
+            ),
+
+            div(
+                class = "div_step div_mark",
+                list(
+                    selectInput(
+                        "de_method",
+                        "DE",
+                        choices = options$de
+                    ),
+                    splitLayout(
+                        cellWidths = c("25%", "25%", "50%"),
+                        textInput(inputId = "mark_alpha",
+                                  label = "alpha",
+                                  value = defaults$mark_alpha),
+                        textInput(inputId = "mark_markers_n",
+                                  label = "markers",
+                                  value = defaults$mark_no),
+                        selectInput("mark_correction",
+                                    "Correction",
+                                    choices = options$correction)
+                    )
+                ),
+                HTML('<hr class="line">')
+            ),
+
+            #splitLayout(
+            #    cellWidths = c("50%", "50%"),
+            #    selectInput("con_convention",
+            #                "Converter convention",
+            #                choices = options$converter),
+            #    textInput(inputId = "con_path",
+            #              label = "Path (dont use)",
+            #              value = '')
+            #),
+
+            #splitLayout(
+            #    cellWidths = c("50%", "50%"),
+            #    selectInput("ide_tissue",
+            #                "Converter convention",
+            #                choices = options$tissue),
+            #    textInput(inputId = "ide_path",
+            #              label = "Path (dont use)",
+            #              value = "")
+            #),
+
+            div(
+                class = "div_step div_vis",
+                list(
+                    selectInput(
+                        "vis_method",
+                        "Visualization method:",
+                        choices = options$vis
+                    )
+                ),
+                HTML('<hr class="line">')
+            ),
+
+            div(
+                class = "div_step div_ssclu",
+                list(
+                    actionButton(
+                        "ssclurun", "Run constrained clustering",
+                        class="sidebtn longbtn"
+                    ),
+
+                    splitLayout(
+                        cellWidths = c("60%", "40%"),
+                        selectInput(
+                            "ssc_method",
+                            "Constrained clustering",
+                            choices = options$ssclu
+                        ),
+                        textInput(
+                            inputId = "savedClusters",
+                            label = "Preserve",
+                            value = "1,2"
+                        )
+                    )
+                )
             )
         )
     )
