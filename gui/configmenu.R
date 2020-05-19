@@ -92,7 +92,7 @@ configmenu <- menuItem(
                         choices = options$de
                     ),
                     splitLayout(
-                        cellWidths = c("25%", "25%", "50%"),
+                        cellWidths = c("25%", "25%", "48%"),
                         textInput(inputId = "mark_alpha",
                                   label = "alpha",
                                   value = defaults$mark_alpha),
