@@ -12,6 +12,7 @@ load('gui/Hs.c2')
 load('gui/Go_kegg_lists')
 load('gui/cell_ontology')
 load('gui/keggidtoname')
+load('gui/gene_ids_all')
 
 # Load utility functions
 source("gui/functions.R") # getPage, intersect, writeDataset, getHypergeom
@@ -21,18 +22,18 @@ source("gui/pipe_functions.R") # runPipe
 server <- shinyServer(function(input, output, session) {
   #SESSION-WISE VARIABLES
   env=environment()
-  
+
   new_labels=NULL
   assign("new_labels",NULL,envir = env)
   selected_cells=NULL
   assign("selected_cells",NULL,envir = env)
-  
+
   cluster_selection_button=NULL
   assign("cluster_selection_button",NULL,envir = env)
-  
+
   selected_cluster=0
   assign("selected_cluster",0,envir = env)
-  
+
   degenenames=NULL
   assign("degenenames",NULL,envir = env)
   firstflag=1
@@ -52,13 +53,13 @@ server <- shinyServer(function(input, output, session) {
   dataset = "default"
   assign("dataset", "default", envir=env)
   #END OF SESSION-WISE VARIABLES
-  
+
   # Upload dataset
   # when a dataset is uploaded, write it into the "datasets" folder
   # users can choose it when run another configuration
   observeEvent(input$file1, {
     req(input$file1)
-    
+
     tryCatch({
       fname <- strsplit(as.character(input$file1$name), ".", fixed = TRUE)[[1]][1]
       files <- list.files("datasets")
@@ -67,12 +68,12 @@ server <- shinyServer(function(input, output, session) {
         if (files[i]==fname)
         {
           flag=1
-          
+
         }
       }
       if (flag==1){# if the dataset already exists
         showNotification("Dataset already exists")
-        
+
       }
       else{
         writeDataset(input$file1$datapath, input$file1$name)
@@ -90,31 +91,31 @@ server <- shinyServer(function(input, output, session) {
       stop(safeError(e))
     })
   })
-  
-  
+
+
   # rerun the app if "run with new configuration button" pressed
   # (this can avoid observing previous events)
   observeEvent(input$runconfigbtn, {
-    
+
     assign("ss", FALSE, envir = env)
     dataset=as.character(input$dataset)
     showNotification(paste("Dataset: ",dataset,sep=""))
     print(dataset)
     pipe <- Pipeline(x = dataset)
-    
+
     tryCatch({
       df <- isolate(runPipe(pipe, input))
     }, error = function(e) {
       df <- "An error occurred."
     }
     )
-    
+
     if (is.character(df) & length(df) == 1) {
       showNotification(df)
     } else {
       #assign("df", isolate(runPipe(pipe, input)), envir = env)
       ################################### RUN WITH CURRENT CONFIG
-      
+
       ################################# DISABLE PREVIOUS EVENTS
       #disable observing buttons
       if (length(sst)>0){
@@ -143,7 +144,7 @@ server <- shinyServer(function(input, output, session) {
         }
         assign("switcher",NULL,envir = env)
       }
-      
+
       #delete previous UIs
       if (firstflag==0){
         for (i in 1:clusters){
@@ -198,12 +199,12 @@ server <- shinyServer(function(input, output, session) {
         #     )
         #   )
         # )
-        
-        
+
+
         #removeUI(selector="div:has(> #DEbuttons)")
-        
+
       }
-      
+
       assign("firstflag",0,envir = env)
       ############################ END OF DISABLing PREVIOUS EVENTS
       observeEvent(input$ssclurun, {
@@ -213,7 +214,7 @@ server <- shinyServer(function(input, output, session) {
           }, error = function(e) {
             df <- "An error occurred."
           })
-          
+
           if (is.character(df) & length(df) == 1) {
             showNotification(df)
           } else {
@@ -228,12 +229,12 @@ server <- shinyServer(function(input, output, session) {
             hypergeom <- getHypergeom("markers/cell_type_marker.json")
             markers_genelists_list <- getMarkerGeneList(
               "markers/cell_type_marker.json")
-            
-            
+
+
             newlabs <- df[, 3]
             names(newlabs) <- rownames(df)
             labeldats <- levels(as.factor(df[,3]))
-            
+
             output$plot <- renderPlotly({
               #factorize cluster labels (discrete instead of continuous)
               if (input$color == "cluster") {
@@ -249,16 +250,16 @@ server <- shinyServer(function(input, output, session) {
               ) %>% layout(dragmode = "lasso",
                            title = paste("Value of ", input$color, sep=""))
             })
-            
+
             ### updated plot
             observeEvent(input$labelupd, {
               #d <- event_data("plotly_selected")
               keys<-s1
               keysNotification(as.character(input$newlabels))
-              
+
               newlabs[keys]<<-as.character(input$newlabels)
-              
-              
+
+
               assign("updated_new_labels", newlabs, envir = env)
               output$Plot2 <- renderPlotly({
                 plot_ly(
@@ -273,9 +274,9 @@ server <- shinyServer(function(input, output, session) {
         }
       })
       ####################### End of clearing previous events
-      
-      
-      
+
+
+
       # the dictionary includes information of each cluster
       # (including DE genes and intersections)
       markers <- pipe$markers
@@ -295,7 +296,7 @@ server <- shinyServer(function(input, output, session) {
       newlabs <- df[, 3]
       assign("newlabs",df[, 3],envir = env)
       names(newlabs) <- rownames(df)
-      
+
       msigdb_categories <- names(Hs.c2)
       msigdb_n <-integer(length = length(msigdb_categories))
       msigdb_nde<-integer(length = length(msigdb_categories))
@@ -304,7 +305,7 @@ server <- shinyServer(function(input, output, session) {
       msig_dispdat<-data.frame(msig_dispdat,msigdb_nde)
       msig_dispdat<-data.frame(msig_dispdat,msigdb_pvals)
       colnames(msig_dispdat)<-c("NAME","N","Intersect Length","P Value")
-      
+
       go_categories <- names(Hs.c5)
       go_n<-integer(length = length(go_categories))
       go_nde<-integer(length = length(go_categories))
@@ -313,24 +314,24 @@ server <- shinyServer(function(input, output, session) {
       go_dispdat<-data.frame(go_dispdat,go_nde)
       go_dispdat<-data.frame(go_dispdat,go_pvals)
       colnames(go_dispdat)<-c("NAME","N","Intersect Length","P Value")
-      
+
       kegg_categories <- kegg_id_toname[names(kegg_genelists)]
       kegg_n<-integer(length = length(kegg_categories))
       kegg_nde<-integer(length = length(kegg_categories))
       kegg_pvals <- double(length = length(kegg_categories))
-      
+
       kegg_dispdat <- data.frame(kegg_categories, kegg_n)
       kegg_dispdat<-data.frame(kegg_dispdat,kegg_nde)
       kegg_dispdat<-data.frame(kegg_dispdat,kegg_pvals)
       colnames(kegg_dispdat)<-c("NAME","N","Intersect Length","P Value")
-      
+
       hypergeom <- getHypergeom("markers/cell_type_marker.json")
       markers_genelists_list <- getMarkerGeneList(
         "markers/cell_type_marker.json")
-      
+
       cell_ontology_names<-paste(cell_ont_full$id,cell_ont_full$name,sep = " ")
       labeldats<-c(levels(as.factor(expr_data[,length(expr_data)])),cell_ontology_names)
-      
+
       ############################################################ End of pipeline data processing
       # select color value
       updateSelectInput(session = session,
@@ -338,15 +339,15 @@ server <- shinyServer(function(input, output, session) {
                         label = "Select colour value:",
                         choices = c("cluster", names(expr_data)),
                         selected = NULL)
-      
+
       # change label
-      
+
       updateSelectInput(session = session,
                         inputId = "newlabels",
                         label = "Select label",
                         choices = labeldats,
                         selected = NULL)
-      
+
       # input new label
       observe({
         x <- input$newlabelbox
@@ -361,8 +362,8 @@ server <- shinyServer(function(input, output, session) {
                             choices = labeldats)
         })
       })
-      
-      
+
+
       ##### gene card
       observeEvent(input$search, {
         if (input$searchgene %in% names(expr_data)) {
@@ -372,7 +373,7 @@ server <- shinyServer(function(input, output, session) {
           showNotification("Gene name does not exist.")
         }
       })
-      
+
       ########################################## PLOTTING
       output$plot <- renderPlotly({
         #factorize cluster labels (discrete instead of continuous)
@@ -390,14 +391,14 @@ server <- shinyServer(function(input, output, session) {
         ) %>% layout(dragmode = "lasso",
                      title = paste("Value of ", input$color, sep=""))
       })
-      
-      
-      ################################# storing selected cells 
+
+
+      ################################# storing selected cells
       assign("s1", NULL, envir = env)  ##
       assign("s2", NULL, envir = env)  ##
       cell_count=0
       cell_count2=0
-      assign("cell_count", 0, envir = env)  
+      assign("cell_count", 0, envir = env)
       assign("cell_cuont2", 0, envir = env)
       sst1<-observeEvent(input$subset1,{
         d <- event_data("plotly_selected")
@@ -415,18 +416,18 @@ server <- shinyServer(function(input, output, session) {
         keys<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
         assign("s1", keys, envir = env)
         cell_count=length(keys)
-        
+
         showNotification(paste(as.character(cell_count)," cells stored in subset 1.",sep=""))
       })
-      observeEvent(input$cluster_store2,{   ## cluster storing 2 
+      observeEvent(input$cluster_store2,{   ## cluster storing 2
         keys<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
         assign("s2", keys, envir = env)
         cell_count2=length(keys)
         showNotification(paste(as.character(cell_count2)," cells stored in subset 2.",sep=""))
       })
-      
-      
-      
+
+
+
       ### observe cluster selection
       # observeEvent(input$cluster_label  ,{
       #   showNotification(as.character(input$newlabels))
@@ -442,28 +443,28 @@ server <- shinyServer(function(input, output, session) {
       #     ) %>% layout(dragmode = "lasso",
       #                  title = paste("Value of ", input$labelupd, sep=""))
       #   })
-      # 
+      #
       # })
-      
-      
-      
-      
-      
+
+
+
+
+
       ### updated plot
-      
-      
+
+
       observeEvent(input$labelupd, {
         #d <- event_data("plotly_selected")
         keys<-s1
         showNotification(as.character(input$newlabels))
-        
-        
+
+
         newlabs[keys]<<-as.character(input$newlabels)
         showNotification("Updating labels")
-        
-        
-        
-        
+
+
+
+
         assign("updated_new_labels", newlabs, envir = env)
         output$Plot2 <- renderPlotly({
           plot_ly(
@@ -474,8 +475,8 @@ server <- shinyServer(function(input, output, session) {
                        title = paste("Value of ", input$labelupd, sep=""))
         })
       })
-      
-      
+
+
       ########################################################################### DE GENE IMPLEMENTATION
       ### update select input for cluster selection
       updateSelectInput(session = session,
@@ -483,12 +484,22 @@ server <- shinyServer(function(input, output, session) {
                         label = "Select clusters",
                         choices = levels(as.factor(expr_data$cluster)),
                         selected = NULL)
-      
-      
-      
-      
+
+
+
+
       scdata_subset=expr_data
-      
+
+      if (length(intersect(rownames(scdata_subset),gene_ids_all[,1]))>0){
+        rownames(gene_ids_all)<-gene_ids_all[,1]
+      } else if (length(intersect(rownames(scdata_subset),gene_ids_all[,2]))>0){
+        rownames(gene_ids_all)<-gene_ids_all[,2]
+      } else if (length(intersect(rownames(scdata_subset),gene_ids_all[,3]))>0){
+        rownames(gene_ids_all)<-gene_ids_all[,3]
+      } else {
+        showNotification("Invalid gene ids, functional analysis cannot be performed")
+      }
+
       assign("sst",c(sst,sst1,sst2),envir = env)
       assign("sets", 0, envir = env)
       assign("set", 0, envir = env)
@@ -496,30 +507,30 @@ server <- shinyServer(function(input, output, session) {
       # toListen <- reactive({
       #   list(input$getdegenes,input$DEsubsets,input$runanalysis)
       # })
-      
-      
-      
+
+
+
       observeEvent(input$getdegenes,{
         selecteddat=NULL
-        
-        
+
+
         cell_count=length(s1)
         cell_count2=length(s2)
         #### get selected data and rest data
-        
+
         if (cell_count2==0){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
           selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
           restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
           showNotification("DE genes of subset1 against the rest")
-          
+
         }
         else if(cell_count==0){
           keys=s2
           selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
           restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
           showNotification("DE genes of subset2 against the rest")
-          
+
         }
         else{                 ## 2 subsets
           keys=s1
@@ -528,9 +539,9 @@ server <- shinyServer(function(input, output, session) {
           restdat<-scdata_subset[as.numeric(keys2),1:ncol(scdata_subset)-1]
           showNotification("DE genes of 2 subsets ")
         }
-        
-        
-        
+
+
+
         ############# destroy previous DE gene buttons
         if (length(debuttons)>0){
           for (i in 1:length(debuttons)){
@@ -540,12 +551,12 @@ server <- shinyServer(function(input, output, session) {
         }
         assign("debuttons",NULL,envir=env)  # disable previous buttons
         ###end of dealing with previous buttons
-        
-        
+
+
         #### start calculating DE genes
         #### and realizing related functions
         output$genes <- renderPrint({
-          
+
           #withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
           #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
           labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
@@ -560,16 +571,18 @@ server <- shinyServer(function(input, output, session) {
             t=matrix(t,nr,nc)
           }
           newfit<-lmFit(t,design = modmat)
-          
+
           eb_newfit<-eBayes(newfit)
           #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
           toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
           # })
-          
+
           output$GeneOntology <- renderTable({
             withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
+              degenes<-gene_ids_all[degenes_int,3]
               incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
               for (i in 1:nrow(go_dispdat)) {
                 go_dispdat[i,2]<-length(Hs.c5[[i]])
@@ -590,7 +603,7 @@ server <- shinyServer(function(input, output, session) {
               head(go_ord,n = 10)
             })
           },bordered = T)
-          
+
           ### DE gene buttons implementation:
           DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
           for (i in 1:length(DEgenes))
@@ -606,11 +619,11 @@ server <- shinyServer(function(input, output, session) {
             )
           })
           ### maintain DE gene buttons
-          
+
           lapply(
             X = 1:length(DEgenes),
             FUN = function(i){
-              
+
               o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
                 showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
                 output$plot <- renderPlotly({
@@ -625,11 +638,11 @@ server <- shinyServer(function(input, output, session) {
                 })
               }
               )
-              
+
               assign("debuttons",c(debuttons,isolate(o)),envir =env)
             })
           ## end of maintaining buttons
-          
+
           ##### constructing hgnc_filt using informations in the marker
           ENTREZID=array()
           SYMBOL=array()
@@ -649,12 +662,14 @@ server <- shinyServer(function(input, output, session) {
           hgnc_filt=data.frame(SYMBOL,ENTREZID)
           row.names(hgnc_filt)=as.character(SYMBOL[[1]])
           ##### end of constructing hgnc_filt dataframe of genename,id
-          
+
           ### KEGG panel
           output$KEGG <- renderTable({
             withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
+              degenes<-gene_ids_all[degenes_int,3]
               incProgress(2/3, detail = paste("Step: Calculating (takes about 20 seconds)"))
               for (i in 1:nrow(kegg_dispdat)) {
                 kegg_dispdat[i,2]<-length(kegg_genelists[[i]])
@@ -675,12 +690,14 @@ server <- shinyServer(function(input, output, session) {
               head(kegg_ord,n=10)
             })
           },bordered = T)
-          
+
           ### Markers panel
           output$Markers <- renderTable({
             withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
+              degenes<-gene_ids_all[degenes_int,1]
               incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
               for (i in 1:nrow(hypergeom)) {
                 hypergeom[i,1]<-names(markers_genelists_list)[i]
@@ -702,7 +719,7 @@ server <- shinyServer(function(input, output, session) {
               hypergeom_ord[1:10,]
             })
           },bordered = T)
-          
+
           #Top expressed genes
           #output$topgenes<-renderPrint({
           # aveeexpr<-colMeans(selecteddat[,2:ncol(selecteddat)],na.rm = T)
@@ -713,7 +730,9 @@ server <- shinyServer(function(input, output, session) {
           output$Msigdb <- renderTable({
             withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes<-hgnc_filt[rownames(toptable_sample[1:input$nogenes,]),2]
+              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
+              degenes<-gene_ids_all[degenes_int,3]
               incProgress(2/3, detail = paste("Step: Calculating"))
               for (i in 1:nrow(msig_dispdat)) {
                 msig_dispdat[i,2]<-length(Hs.c2[[i]])
@@ -732,15 +751,15 @@ server <- shinyServer(function(input, output, session) {
                 }
               )
               msig_ord[1:10,]
-              
+
             })
           },bordered = T)
           toptable_sample[1:input$nogenes,]
         })
       })   ###end of get de gene button
-      
-      
-      
+
+
+
       # selecteddat=NULL
       # flag=0
       # if (input$getdegenes>set){
@@ -755,42 +774,42 @@ server <- shinyServer(function(input, output, session) {
       #   }
       # }
       #assign("debuttons",NULL,envir=env)  # disable previous buttons
-      
+
       #assign("set", set+1, envir = env)
-      
+
       
       #flag=1
     }
-    
+
     # if (input$DEsubsets>sets){
     #     if (input$DEsubsets==0)
     #     {
     #         return()
     #     }
-    
-    
-    
-    
+
+
+
+
     #assign("sets", sets+1, envir = env)
-    
-    
+
+
     #     flag=1
     # }
-    
-    
-    
+
+
+
     # cluster_selection: idxes<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
-    
-    
+
+
     ### finisehd calculating selected data and rest data
     ### start calculating DE genes
-    
-    
-    
+
+
+
     ###############################################################BOTTOM OF MAIN PANEL: (CLUSTERS & INTERSECTIONS)
     # Adding tabset panel corresponds to each Cluster
     # (at the bottom of the main panel)
-    
+
     for (i in 1:length(names(markers))) {
       if (i == 1) {
         insertTab(
@@ -815,7 +834,7 @@ server <- shinyServer(function(input, output, session) {
         )
       }
     }
-    
+
     ### update tabset panel according to the point selected
     o<-observeEvent(event_data("plotly_click", priority = "event"), {
       cldat <- event_data("plotly_click")
@@ -823,7 +842,7 @@ server <- shinyServer(function(input, output, session) {
       selectedi <- filter(df, round(x1, 5) == round(cldat$x, 5))$y
       updateTabsetPanel(session, "switcher", selected=as.character(selectedi))
       i = df[, 3][cldat$pointNumber]
-      
+
       # if (previous_i!=-1){
       #   for (j in 1:length(c_intersections[[i]])){
       #     removeUI(
@@ -832,17 +851,17 @@ server <- shinyServer(function(input, output, session) {
       #   }
       # }
     })
-    
-    
-    
+
+
+
     assign("switcher",c(switcher,o),envir = env)
     ##############  Adding intersection buttons to corresponding tab panel
     # get the marker list intersections
-    
+
     # step 1 c_intersection is a list of intersections in each cluster
     c_intersections <- list("")
     assign("clusters",length(names(markers)),envir = env)
-    
+
     for (i in 1:length(names(markers))) {
       intersection <- markers[[as.character(i - 1)]][["lvl1_intersec"]]
       #intersection <- strsplit(str_replace_all(
@@ -854,18 +873,18 @@ server <- shinyServer(function(input, output, session) {
       c_intersections <- append(c_intersections, intersection)
     }
     c_intersections[1] <- NULL
-    
+
     #step 2 total_intersection is the total gene in the intersection
     total_intersections = c()
     c_seen = c()
-    
+
     for (i in 1:length(c_intersections)) {
       for (j in 1:length(c_intersections[[i]])) {
         total_intersections <- c(
           total_intersections, c_intersections[[i]][j])
       }
     }
-    
+
     #step3 add a symbol to gene names that appear twice.
     #so we won't have duplicated button IDs later
     flag <- 0
@@ -894,12 +913,12 @@ server <- shinyServer(function(input, output, session) {
         }
       }
     }
-    
+
     ##Step4: Adding buttons into corresponding tabpanels
     for (i in 1:length(c_intersections)){
       for (j in 1:length(c_intersections[[i]])){
         textt<-c_intersections[[i]][j]
-        
+
         for (k in 1:length(total_intersections)){
           if (identical(
             total_intersections[k],
@@ -919,7 +938,7 @@ server <- shinyServer(function(input, output, session) {
         }
       }
     }
-    
+
     ## Final step: Maintaining those buttons:
     lapply(
       X = 1:length(total_intersections),
@@ -957,17 +976,17 @@ server <- shinyServer(function(input, output, session) {
         })
         assign("intersectbuttons",c(intersectbuttons,o),envir = env)
       })
-    
+
     #### cluster analysis
-    
-    
-    
-    
-    
+
+
+
+
+
     ###end of intersections
-    
-    
-    
+
+
+
     ########################################START OF CHANGING CLUSTERS NAMES
     # updateSelectInput(session = session,
     #                   inputId = "chgcluster",
@@ -1010,28 +1029,28 @@ server <- shinyServer(function(input, output, session) {
     #     }
     #   }
     # })
-    
+
     #########################################END OF CHANGING CLUSTERS NAMES
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
   })
-  
-  
-  
-  
+
+
+
+
   ####################################    END OF RUN CURRENT CONFIG
-  
-  
+
+
 })
 
 #   #showNotification(as.character(round(df$x1[[1]],5)),duration=NULL)
