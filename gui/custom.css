@@ -14,13 +14,13 @@ section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:ho
     background-color: var(--lightgreen) !important;
 }
 
-.selectize-control .selectize-dropdown {
-    position: static !important;
-}
-
 .shiny-split-layout {
     padding: 0 !important;
     margin: 0 !important;
+}
+
+.shiny-split-layout > div {
+    overflow: visible;
 }
 
 .scdbtn {
