@@ -31,8 +31,8 @@ server <- shinyServer(function(input, output, session) {
   setcount=0
   assign("setcount", 0, envir = env)
   #selected subsets
-  subsets <- vector(mode="list", length=10)
-  assign("subsets", vector(mode="list", length=10), envir = env)
+  subsets <- vector(mode="list", length=100)
+  assign("subsets", vector(mode="list", length=100), envir = env)
 
 
   degenenames=NULL
