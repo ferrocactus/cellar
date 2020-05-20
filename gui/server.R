@@ -607,23 +607,50 @@ server <- shinyServer(function(input, output, session) {
 
         if (cell_count2==0){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
-          selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
-          restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
+          mar=pipe$get_markers_subset(keys)
+          #['indices', 'pvals', 'diffs', 'inp_names', 'outp_names', 'lvl1_type', 
+          #'lvl1_sv', 'lvl1_intersec', 'lvl1_total', 'lvl1_all', 'lvl2_type',
+          #' 'lvl2_sv', 'lvl2_intersec', 'lvl2_total', 'lvl2_all']
+          pval=mar[['0']][['pvals']]
+          logFC=mar[['0']][['diffs']]
+          gene_names=mar[['0']][['outp_names']]
+          
+          
+          #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
+          #restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
           showNotification("DE genes of subset1 against the rest")
 
         }
         else if(cell_count==0){
           keys=s2
-          selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
-          restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
+          mar=pipe$get_markers_subset(keys)
+          pval=mar[['0']][['pvals']]
+          logFC=mar[['0']][['diffs']]
+          gene_names=mar[['0']][['outp_names']]
+          #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
+          #restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
           showNotification("DE genes of subset2 against the rest")
 
         }
         else{                 ## 2 subsets
           keys=s1
           keys2=s2
-          selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
-          restdat<-scdata_subset[as.numeric(keys2),1:ncol(scdata_subset)-1]
+          mar=pipe$get_markers_subset(keys,keys2)
+          
+          
+          ### calculating DE
+          pval=mar[['0']][['pvals']]
+          logFC=mar[['0']][['diffs']]
+          gene_names=mar[['0']][['outp_names']]
+          
+          pval2=mar[['1']][['pvals']]
+          logFC2=mar[['1']][['diffs']]
+          gene_names2=mar[['1']][['outp_names']]
+          
+          
+          
+          #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
+          #restdat<-scdata_subset[as.numeric(keys2),1:ncol(scdata_subset)-1]
           showNotification("DE genes of 2 subsets ")
         }
 
@@ -643,31 +670,34 @@ server <- shinyServer(function(input, output, session) {
         #### start calculating DE genes
         #### and realizing related functions
         output$genes <- renderPrint({
-
-          withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
-            #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-
-            incProgress(1/5, detail = paste("Step: Fetching 2 sets"))
-            labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
-            alldat<-rbind(selecteddat,restdat)
-            alldat<-data.frame(alldat,labelsdat)
-            modmat<-model.matrix(~labelsdat,data = alldat)
-            incProgress(2/5, detail = paste("Step: Processing data"))
-            t=t(alldat[,1:ncol(alldat)-1])
-            if (class(t[2,2])=="character"){
-              nr=dim(t)[[1]]
-              nc=dim(t)[[2]]
-              t=sapply(t, as.numeric)
-              t=matrix(t,nr,nc)
-            }
-            incProgress(3/5, detail = paste("Step: Calculating"))
-            newfit<-lmFit(t,design = modmat)
-
-            eb_newfit<-eBayes(newfit)
-            incProgress(4/5, detail = paste("Step: Rendering table"))
-            #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
-            toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
-          }) ## end of calculating DE progress
+          
+          
+          
+          #####old DE gene implementations
+          # withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
+          #   #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
+          # 
+          #   incProgress(1/5, detail = paste("Step: Fetching 2 sets"))
+          #   labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
+          #   alldat<-rbind(selecteddat,restdat)
+          #   alldat<-data.frame(alldat,labelsdat)
+          #   modmat<-model.matrix(~labelsdat,data = alldat)
+          #   incProgress(2/5, detail = paste("Step: Processing data"))
+          #   t=t(alldat[,1:ncol(alldat)-1])
+          #   if (class(t[2,2])=="character"){
+          #     nr=dim(t)[[1]]
+          #     nc=dim(t)[[2]]
+          #     t=sapply(t, as.numeric)
+          #     t=matrix(t,nr,nc)
+          #   }
+          #   incProgress(3/5, detail = paste("Step: Calculating"))
+          #   newfit<-lmFit(t,design = modmat)
+          # 
+          #   eb_newfit<-eBayes(newfit)
+          #   incProgress(4/5, detail = paste("Step: Rendering table"))
+          #   #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
+          #   toptable_sample<-topTable(eb_newfit,number = ncol(alldat)-1)
+          # }) ## end of calculating DE progress
 
           output$GeneOntology <- renderTable({
             withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
