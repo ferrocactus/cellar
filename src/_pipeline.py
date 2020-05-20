@@ -353,5 +353,31 @@ class Pipeline(Unit):
             pickle.dump(self, f)
         return path
 
+    def get_details(self):
+        details = {}
+        details['w'] = self.x.shape[0]
+        details['h'] = self.x.shape[1]
+        details['min'] = np.min(self.x)
+        details['max'] = np.max(self.x)
+        details['range'] = details['max'] - details['min']
+        details['means'] = np.mean(self.x, axis=0)
+        details['max_mean'] = np.max(details['means'])
+        details['min_mean'] = np.min(details['means'])
+        details['variances'] = np.var(self.x, axis=0)
+        details['max_var'] = np.max(details['variances'])
+        details['min_var'] = np.min(details['variances'])
+
+        details_txt =   f"Number of cells: {details['w']}\n" + \
+                        f"Number of genes: {details['h']}\n" + \
+                        f"Minimum value: {details['min']}\n" + \
+                        f"Maximum value: {details['max']}\n" + \
+                        f"Range: {details['range']}\n" + \
+                        f"Maximum gene mean: {details['max_mean']}\n" + \
+                        f"Minimum gene mean: {details['min_mean']}\n" + \
+                        f"Maximum gene variance: {details['max_var']}\n" + \
+                        f"Minimum gene variance: {details['min_var']}\n"
+        return details_txt
+
+
     def get(self):
         return self.x_emb_2d, self.labels, self.markers

@@ -3,7 +3,7 @@ library(shiny)
 source("gui/sidebar/options.R")
 
 configmenu <- menuItem(
-    "Configuration",
+    "Clustering",
     id = "configbtn",
     icon = icon("cog"),
     startExpanded = FALSE,

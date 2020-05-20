@@ -13,15 +13,15 @@ plots <- tabsetPanel(
         "Updated Plot",
         verbatimTextOutput("brush"),
         plotlyOutput("Plot2", height="550px")
-    ),
-
-    tabPanel(
-        "Details",
-        div(
-            id = "details_div",
-            textOutput(
-                "details"
-            )
-        )
     )
+
+    #tabPanel(
+    #    "Details",
+    #    div(
+    #        id = "details_div",
+    #        textOutput(
+    #            "details"
+    #        )
+    #    )
+    #)
 )
