@@ -671,7 +671,7 @@ server <- shinyServer(function(input, output, session) {
 
         #### start calculating DE genes
         #### and realizing related functions
-        output$genes <- renderPrint({
+        output$genes <- renderTable({
 
 
 
@@ -729,7 +729,7 @@ server <- shinyServer(function(input, output, session) {
           },bordered = T)
 
           ### DE gene buttons implementation:
-          DEgenes<-rownames(toptable_sample[1:input$nogenes,]) # a vector of characters
+          DEgenes<-degenes_table_ord[1:input$nogenes,1] # a vector of characters
           for (i in 1:length(DEgenes))
           {
             assign("degenenames",c(degenenames,paste(DEgenes[i]," ",seq="")),envir=env)
@@ -880,7 +880,7 @@ server <- shinyServer(function(input, output, session) {
 
             })
           },bordered = T)
-          toptable_sample[1:input$nogenes,]
+          degenes_table_ord[1:input$nogenes,]
         })
       })   ###end of get de gene button
 
