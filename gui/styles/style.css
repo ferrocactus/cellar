@@ -20,8 +20,12 @@ section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:ho
     padding: 5px !important;
 }
 
+.sidebar-menu .treeview-menu {
+    padding-bottom: 20px !important;
+}
+
 section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-input.action-link {
-    margin: 10px !important;
+    /*margin: 10px !important;*/
 }
 
 .shiny-input-container:not(.shiny-input-container-inline) {
@@ -31,8 +35,12 @@ section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-i
 .line {
     width: 80%;
     border-top: 2px dashed var(--gray) !important;
-    margin-top: 5px;
-    margin-bottom: 10px;
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.div_step {
+    margin-top: 15px !important;
 }
 
 .div_step .shiny-split-layout {
@@ -111,18 +119,13 @@ h3 {
     overflow: visible;
 }
 
-.scdbtn {
-    margin-right: 0 !important;
-    margin-left: 0 !important;
-}
-
-.highbtn {
+.secondcol {
+    width: calc(100% - 37px) !important;
     margin-top: 37px !important;
-    width: 80% !important;
 }
 
 .longbtn {
-    width: calc(100% - 25px) !important;
+    width: calc(100% - 35px) !important;
 }
 
 #ssclurun {
