@@ -313,7 +313,9 @@ server <- shinyServer(function(input, output, session) {
                 df, x = df$x1, y = df$x2,
                 text = ~paste("label: ", as.factor(df$y)),
                 color = plotcols,
-                key = row.names(df)
+                key = row.names(df),
+                type = 'scatter',
+                mode = 'markers'
               ) %>% layout(dragmode = "lasso",
                            title = paste("Value of ", input$color, sep=""))
             })
@@ -332,7 +334,9 @@ server <- shinyServer(function(input, output, session) {
                 plot_ly(
                   df, x = df[, 1], y = df[, 2],
                   text = ~paste("label: ", as.factor(newlabs)),
-                  color = as.factor(newlabs)
+                  color = as.factor(newlabs),
+                  type = 'scatter',
+                  mode = 'markers'
                 ) %>% layout(dragmode = "lasso",
                              title = paste("Value of ", input$labelupd, sep=""))
               })
@@ -524,7 +528,9 @@ server <- shinyServer(function(input, output, session) {
           #width=1040,height=780,
           text = ~paste("label: ", as.factor(df$y)),
           color = plotcols,
-          key = row.names(df)
+          key = row.names(df),
+          type = 'scatter',
+          mode = 'markers'
         ) %>% layout(dragmode = "lasso",
                      title = paste("Value of ", input$color, sep=""))
       })
@@ -556,7 +562,9 @@ server <- shinyServer(function(input, output, session) {
           plot_ly(
             df, x = df[, 1], y = df[, 2],
             text = ~paste("label: ", as.factor(newlabs)),
-            color = as.factor(newlabs)
+            color = as.factor(newlabs),
+            type = 'scatter',
+            mode = 'markers'
           ) %>% layout(dragmode = "lasso",
                        title = paste("Value of ", input$labelupd, sep=""))
         })
@@ -717,7 +725,9 @@ server <- shinyServer(function(input, output, session) {
                     x = df$x1, y = df$x2,
                     text = ~paste("label: ", as.factor(df$y)),
                     color = (scdata_subset[[DEgenes[i]]]),
-                    key = row.names(df)
+                    key = row.names(df),
+                    type = 'scatter',
+                    mode = 'markers'
                   )%>% layout(dragmode = "lasso",title=paste("Value of ",DEgenes[i],sep=""))
                 })
               }
@@ -1046,7 +1056,9 @@ server <- shinyServer(function(input, output, session) {
               df, x = df$x1, y = df$x2,
               text = ~paste("label: ", as.factor(df$y)),
               color = expr_data[[total_intersections[rr]]],
-              key = row.names(df)
+              key = row.names(df),
+              type = 'scatter',
+              mode = 'markers'
             ) %>% layout(dragmode = "lasso",
                          title = paste(
                            "Value of ", total_intersections[rr], sep=""))
