@@ -584,15 +584,15 @@ server <- shinyServer(function(input, output, session) {
       #
        scdata_subset=expr_data
 
-      if (length(intersect(rownames(scdata_subset),gene_ids_all[,1]))>0){
-        rownames(gene_ids_all)<-gene_ids_all[,1]
-      } else if (length(intersect(rownames(scdata_subset),gene_ids_all[,2]))>0){
-        rownames(gene_ids_all)<-gene_ids_all[,2]
-      } else if (length(intersect(rownames(scdata_subset),gene_ids_all[,3]))>0){
-        rownames(gene_ids_all)<-gene_ids_all[,3]
-      } else {
-        showNotification("Invalid gene ids, functional analysis cannot be performed")
-      }
+      #if (length(intersect(rownames(scdata_subset),gene_ids_all[,1]))>0){
+       rownames(gene_ids_all)<-gene_ids_all[,1]
+      #} else if (length(intersect(rownames(scdata_subset),gene_ids_all[,2]))>0){
+      #  rownames(gene_ids_all)<-gene_ids_all[,2]
+      #} else if (length(intersect(rownames(scdata_subset),gene_ids_all[,3]))>0){
+      #  rownames(gene_ids_all)<-gene_ids_all[,3]
+      #} else {
+      #  showNotification("Invalid gene ids, functional analysis cannot be performed")
+      #}
       observeEvent(input$getdegenes,{
         selecteddat=NULL
 
@@ -608,14 +608,14 @@ server <- shinyServer(function(input, output, session) {
         if (cell_count2==0){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
           mar=pipe$get_markers_subset(keys)
-          #['indices', 'pvals', 'diffs', 'inp_names', 'outp_names', 'lvl1_type', 
+          #['indices', 'pvals', 'diffs', 'inp_names', 'outp_names', 'lvl1_type',
           #'lvl1_sv', 'lvl1_intersec', 'lvl1_total', 'lvl1_all', 'lvl2_type',
           #' 'lvl2_sv', 'lvl2_intersec', 'lvl2_total', 'lvl2_all']
           pval=mar[['0']][['pvals']]
           logFC=mar[['0']][['diffs']]
           gene_names=mar[['0']][['outp_names']]
-          
-          
+
+
           #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
           #restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
           showNotification("DE genes of subset1 against the rest")
@@ -636,25 +636,27 @@ server <- shinyServer(function(input, output, session) {
           keys=s1
           keys2=s2
           mar=pipe$get_markers_subset(keys,keys2)
-          
-          
+
+
           ### calculating DE
           pval=mar[['0']][['pvals']]
           logFC=mar[['0']][['diffs']]
           gene_names=mar[['0']][['outp_names']]
-          
+
           pval2=mar[['1']][['pvals']]
           logFC2=mar[['1']][['diffs']]
           gene_names2=mar[['1']][['outp_names']]
-          
-          
-          
+
+
+
           #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
           #restdat<-scdata_subset[as.numeric(keys2),1:ncol(scdata_subset)-1]
           showNotification("DE genes of 2 subsets ")
         }
 
-
+        degenes_table<-data.frame(gene_names,logFC)
+        degenes_table<-data.frame(degenes_table,pval)
+        degenes_table_ord<-degenes_table[order(degenes_table[,2]),]
 
         ############# destroy previous DE gene buttons
         if (length(debuttons)>0){
@@ -670,13 +672,13 @@ server <- shinyServer(function(input, output, session) {
         #### start calculating DE genes
         #### and realizing related functions
         output$genes <- renderPrint({
-          
-          
-          
+
+
+
           #####old DE gene implementations
           # withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
           #   #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-          # 
+          #
           #   incProgress(1/5, detail = paste("Step: Fetching 2 sets"))
           #   labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
           #   alldat<-rbind(selecteddat,restdat)
@@ -692,7 +694,7 @@ server <- shinyServer(function(input, output, session) {
           #   }
           #   incProgress(3/5, detail = paste("Step: Calculating"))
           #   newfit<-lmFit(t,design = modmat)
-          # 
+          #
           #   eb_newfit<-eBayes(newfit)
           #   incProgress(4/5, detail = paste("Step: Rendering table"))
           #   #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
@@ -702,7 +704,7 @@ server <- shinyServer(function(input, output, session) {
           output$GeneOntology <- renderTable({
             withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_ids<-degenes_table_ord[1:input$nogenes,1]
               degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
               degenes<-gene_ids_all[degenes_int,3]
               incProgress(2/3, detail = paste("Step: Calculating "))
@@ -791,7 +793,7 @@ server <- shinyServer(function(input, output, session) {
           output$KEGG <- renderTable({
             withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_ids<-degenes_table_ord[1:input$nogenes,1]
               degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
               degenes<-gene_ids_all[degenes_int,3]
               incProgress(2/3, detail = paste("Step: Calculating "))
@@ -819,10 +821,10 @@ server <- shinyServer(function(input, output, session) {
           output$Markers <- renderTable({
             withProgress(message = 'calculating Markers Intersect',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes<-degenes_table_ord[1:input$nogenes,1]
               degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
-              degenes<-gene_ids_all[degenes_int,1]
-              incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
+              #degenes<-gene_ids_all[degenes_int,1]
+              #incProgress(2/3, detail = paste("Step: Calculating hypergeom"))
               for (i in 1:nrow(hypergeom)) {
                 hypergeom[i,1]<-names(markers_genelists_list)[i]
                 hypergeom[i,2]<-length(markers_genelists_list[[i]])
@@ -854,7 +856,7 @@ server <- shinyServer(function(input, output, session) {
           output$Msigdb <- renderTable({
             withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
-              degenes_ids<-rownames(toptable_sample[1:input$nogenes,])
+              degenes_ids<-degenes_table_ord[1:input$nogenes,1]
               degenes_int<-intersect(degenes_ids,rownames(gene_ids_all))
               degenes<-gene_ids_all[degenes_int,3]
               incProgress(2/3, detail = paste("Step: Calculating"))
