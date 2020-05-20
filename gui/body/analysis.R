@@ -8,7 +8,7 @@ analysis <- tabsetPanel(
     ),
     tabPanel(
         "DE",
-        verbatimTextOutput("genes"),
+        tableOutput("genes"),
         uiOutput("DEbuttons")
     ),
     tabPanel(
