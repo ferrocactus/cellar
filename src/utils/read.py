@@ -59,6 +59,33 @@ def load_data(dataset):
             return "error"
 
 
+
+#################### for UI:
+
+def load_path_data(path,dataset):
+    # dataset here is the filename 
+    # pipeline
+    if (path[-1]=='/'):
+        filename=os.listdir(path+dataset)[0]
+    else:
+        filename=os.listdir(path+'/'+dataset)[0]
+        
+    if filename[-4:] == 'h5ad':
+        filename=filename[0:-5]
+        ann = anndata.read_h5ad(str(path+dataset+'/'+filename+".h5ad"))
+        x,col_ids=ann.X, ann.var.index.to_numpy().astype('U')
+        return Pipeline(x,col_ids=col_ids)
+    elif filename[-3:] == 'csv':
+        filename=filename[0:-4]
+        df = pd.read_csv(str(path+filename+".csv"), index_col=0, header=None).T
+        x,col_ids=df.to_numpy(), df.columns.to_numpy()
+        return Pipeline(x,col_ids=col_ids)
+    else:
+        return "error"
+
+
+
+
 def upload(dataset,path):
     if path[-4:] == 'h5ad':
         filename=dataset[0:-5]
@@ -90,3 +117,7 @@ def write_data(dataset,path,filename,df):
         return "error"
 
     return
+
+
+
+    

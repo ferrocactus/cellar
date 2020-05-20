@@ -154,10 +154,19 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$runconfigbtn, {
 
     assign("ss", FALSE, envir = env)
-    dataset=as.character(input$dataset)
-    showNotification(paste("Dataset: ",dataset,sep=""))
-    print(dataset)
-    pipe <- Pipeline(x = dataset)
+    if (input$folder=="choose_temp"){
+      dataset=as.character(input$dataset)
+      showNotification(paste("Dataset: ",dataset,sep=""))
+      pipe <- Pipeline(x = dataset)  
+    }
+    else{
+      dataset=as.character(input$server_dataset)
+      pipe<-load_path_data("server_datasets/",dataset)
+      showNotification(paste("Dataset: ",dataset,sep=""))
+    }
+    
+  #  print(dataset)
+    
 
     tryCatch({
       df <- isolate(runPipe(pipe, input))
@@ -440,7 +449,7 @@ server <- shinyServer(function(input, output, session) {
         }
         plot_ly(
           df, x = df$x1, y = df$x2,
-          #width=520,height=390,
+          #width=1040,height=780,
           text = ~paste("label: ", as.factor(df$y)),
           color = plotcols,
           key = row.names(df)
