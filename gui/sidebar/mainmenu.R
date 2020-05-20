@@ -15,33 +15,24 @@ mainmenu <- menuItem(
                         min = 1, max = 500, value = 10),
 
 
-            h2("Selection Methods"),
-
-            h4("Cluster Selection"),
+            h2("Storing Subsets"),
+            splitLayout(
+                textInput("newsubset", "New Subset",
+                          placeholder = "Enter new subset name"),
+                actionButton("store_lasso", "Add Subset", class="sidebtn highbtn scdbtn")
+            ),
+            
+            
+            
+            h4("Subset Selection"),
             splitLayout(
                 #cellWidths = c("20%", "40%", "40%"),
-                selectInput("cluforanalysis", "Choose cluster", choices = c(""))
-
+                selectInput("subset1", "Choose Subset 1", choices = c("")),
+                selectInput("subset2", "Choose Subset 2", choices = c(""))
             ),
-
-            splitLayout(
-                cellWidths = c("40%", "40%", "20%"),
-                actionButton("cluster_store","Store to Subset 1",
-                             class="highbtn scdbtn"),
-                actionButton("cluster_store2","Store to Subset 2",
-                             class="highbtn scdbtn")
-            ),
-
-
-            h4("Lasso Selection"),
-
-            splitLayout(
-                cellWidths = c("40%", "40%", "20%"),
-                actionButton("subset1", "Store to Subset 1", class = "highbtn scdbtn"),
-                actionButton("subset2", "Store to Subset 2",
-                             class = "highbtn scdbtn")
-                #actionButton("DEsubsets", "DE", class = "sidebtn scdbtn")
-            ),
+            
+            
+            
 
             h2("Assigning Labels"),
             splitLayout(
@@ -52,7 +43,7 @@ mainmenu <- menuItem(
 
             splitLayout(
                 selectInput("newlabels", "Select labels", choices = 0),
-                actionButton("labelupd", "Update Subset 1 Labels",
+                actionButton("labelupd", "Update Subset Labels",
                              class="sidebtn highbtn scdbtn")
             ),
 

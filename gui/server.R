@@ -25,14 +25,15 @@ server <- shinyServer(function(input, output, session) {
 
   new_labels=NULL
   assign("new_labels",NULL,envir = env)
-  selected_cells=NULL
-  assign("selected_cells",NULL,envir = env)
-
-  cluster_selection_button=NULL
-  assign("cluster_selection_button",NULL,envir = env)
-
-  selected_cluster=0
-  assign("selected_cluster",0,envir = env)
+  
+  
+  # count of selected sets
+  setcount=0
+  assign("setcount", 0, envir = env)
+  #selected subsets
+  subsets <- vector(mode="list", length=10)
+  assign("subsets", vector(mode="list", length=10), envir = env)
+  
 
   degenenames=NULL
   assign("degenenames",NULL,envir = env)
@@ -124,12 +125,10 @@ server <- shinyServer(function(input, output, session) {
         if (files[i]==fname)
         {
           flag=1
-
         }
       }
       if (flag==1){# if the dataset already exists
         showNotification("Dataset already exists")
-
       }
       else{
         writeDataset(input$file1$datapath, input$file1$name)
@@ -154,6 +153,7 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$runconfigbtn, {
 
     assign("ss", FALSE, envir = env)
+    
     if (input$folder=="choose_temp"){
       dataset=as.character(input$dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
@@ -398,6 +398,76 @@ server <- shinyServer(function(input, output, session) {
       labeldats<-c(levels(as.factor(expr_data[,length(expr_data)])),cell_ontology_names)
 
       ############################################################ End of pipeline data processing
+      
+      
+      ############################## start observing UI events
+      
+      
+      
+      
+      
+      # initialize subsets, store clusters
+      
+      for (i in 1:length(markers)){
+        names(subsets)[setcount+1]<-paste("cluster_",as.character(i-1),sep="")
+        keys<-which(expr_data$cluster==(i-1))
+        subsets[[as.character(paste("cluster_",as.character(i-1),sep=""))]]<-keys
+        assign("setcount", setcount+1, envir = env)
+      }
+      
+      names(subsets)[setcount+1]<-"None"
+      list2env(subsets,env)
+      assign("setcount", setcount+1, envir = env)
+      # store selected subsets
+      observeEvent(input$store_lasso,{
+          d <- event_data("plotly_selected")
+          
+          keys=d$keys
+          cell_count=length(d$key)
+          #showNotification(as.character(input$newsubset),duration=NULL)
+          if (identical(input$newsubset,NULL)==FALSE){
+            names(subsets)[setcount+1]<-as.character(input$newsubset)
+            subsets[[as.character(input$newsubset)]]<-keys
+          }
+          else{
+            names(subsets)[setcount+1]<-paste("set",as.character(setcount+1),sep="")
+            subsets[[paste("set",as.character(setcount+1),sep="")]]<-keys
+          }
+          list2env(subsets,env)
+          showNotification(paste(as.character(cell_count)," cells stored",sep=""))
+          assign("setcount", setcount+1, envir = env)
+          
+          # select subset1
+          updateSelectInput(session = session,
+                            inputId = "subset1",
+                            label = "Choose Subset 1",
+                            choices = names(subsets),
+                            selected = NULL)
+          # select subset2
+          updateSelectInput(session = session,
+                            inputId = "subset2",
+                            label = "Choose Subset 2",
+                            choices = names(subsets),
+                            selected = NULL)
+          showNotification(as.character(setcount),duration=NULL)
+          showNotification(names(subsets)[setcount-1],duration=NULL)
+      })
+
+      # select subset1
+      updateSelectInput(session = session,
+                        inputId = "subset1",
+                        label = "Choose Subset 1",
+                        choices = names(subsets),
+                        selected = NULL)
+      # select subset2
+      updateSelectInput(session = session,
+                        inputId = "subset2",
+                        label = "Choose Subset 2",
+                        choices = names(subsets),
+                        selected = NULL)
+      
+      
+      
       # select color value
       updateSelectInput(session = session,
                         inputId = "color",
@@ -463,54 +533,8 @@ server <- shinyServer(function(input, output, session) {
       assign("s2", NULL, envir = env)  ##
       cell_count=0
       cell_count2=0
-      assign("cell_count", 0, envir = env)
-      assign("cell_cuont2", 0, envir = env)
-      sst1<-observeEvent(input$subset1,{
-        d <- event_data("plotly_selected")
-        assign("s1", d$key, envir = env)
-        cell_count=length(d$key)
-        showNotification(paste(as.character(cell_count)," cells stored in subset 1.",sep=""))
-      })
-      sst2<-observeEvent(input$subset2,{
-        d <- event_data("plotly_selected")
-        assign("s2", d$key, envir = env)
-        cell_count2=length(d$key)
-        showNotification(paste(as.character(cell_count2)," cells stored in subset 2.",sep=""))
-      })
-      observeEvent(input$cluster_store,{   ## cluster storing
-        keys<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
-        assign("s1", keys, envir = env)
-        cell_count=length(keys)
-
-        showNotification(paste(as.character(cell_count)," cells stored in subset 1.",sep=""))
-      })
-      observeEvent(input$cluster_store2,{   ## cluster storing 2
-        keys<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
-        assign("s2", keys, envir = env)
-        cell_count2=length(keys)
-        showNotification(paste(as.character(cell_count2)," cells stored in subset 2.",sep=""))
-      })
-
-
-
-      ### observe cluster selection
-      # observeEvent(input$cluster_label  ,{
-      #   showNotification(as.character(input$newlabels))
-      #   showNotification("Updated labels according to cluster selection.")
-      #   keys<-which(expr_data$cluster==as.numeric(input$cluforanalysis))
-      #   newlabs[keys]<<-as.character(input$newlabels)
-      #   assign("updated_new_labels", newlabs, envir = env)
-      #   output$Plot2 <- renderPlotly({
-      #     plot_ly(
-      #       df, x = df[, 1], y = df[, 2],
-      #       text = ~paste("label: ", as.factor(newlabs)),
-      #       color = as.factor(newlabs)
-      #     ) %>% layout(dragmode = "lasso",
-      #                  title = paste("Value of ", input$labelupd, sep=""))
-      #   })
-      #
-      # })
-
+       assign("cell_count", 0, envir = env)
+       assign("cell_cuont2", 0, envir = env)
 
 
 
@@ -520,15 +544,10 @@ server <- shinyServer(function(input, output, session) {
 
       observeEvent(input$labelupd, {
         #d <- event_data("plotly_selected")
-        keys<-s1
+        keys<-subsets[[as.character(input$subset1)]]
         showNotification(as.character(input$newlabels))
-
-
         newlabs[keys]<<-as.character(input$newlabels)
         showNotification("Updating labels")
-
-
-
 
         assign("updated_new_labels", newlabs, envir = env)
         output$Plot2 <- renderPlotly({
@@ -544,16 +563,16 @@ server <- shinyServer(function(input, output, session) {
 
       ########################################################################### DE GENE IMPLEMENTATION
       ### update select input for cluster selection
-      updateSelectInput(session = session,
-                        inputId = "cluforanalysis",
-                        label = "Select clusters",
-                        choices = levels(as.factor(expr_data$cluster)),
-                        selected = NULL)
-
-
-
-
-      scdata_subset=expr_data
+      # updateSelectInput(session = session,
+      #                   inputId = "cluforanalysis",
+      #                   label = "Select clusters",
+      #                   choices = levels(as.factor(expr_data$cluster)),
+      #                   selected = NULL)
+      # 
+      # 
+      # 
+      # 
+       scdata_subset=expr_data
 
       if (length(intersect(rownames(scdata_subset),gene_ids_all[,1]))>0){
         rownames(gene_ids_all)<-gene_ids_all[,1]
@@ -564,21 +583,14 @@ server <- shinyServer(function(input, output, session) {
       } else {
         showNotification("Invalid gene ids, functional analysis cannot be performed")
       }
-
-      assign("sst",c(sst,sst1,sst2),envir = env)
-      assign("sets", 0, envir = env)
-      assign("set", 0, envir = env)
-      assign("clu", 0, envir = env)
-      # toListen <- reactive({
-      #   list(input$getdegenes,input$DEsubsets,input$runanalysis)
-      # })
-
-
-
       observeEvent(input$getdegenes,{
         selecteddat=NULL
+        
+        assign("s1", subsets[[as.character(input$subset1)]], envir = env)
+        assign("s2", subsets[[as.character(input$subset2)]], envir = env)
 
 
+        
         cell_count=length(s1)
         cell_count2=length(s2)
         #### get selected data and rest data
@@ -624,7 +636,7 @@ server <- shinyServer(function(input, output, session) {
 
           withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
             #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
-            
+
             incProgress(1/5, detail = paste("Step: Fetching 2 sets"))
             labelsdat<-as.factor(c(rep("selected",nrow(selecteddat)),rep("notselected",nrow(restdat))))
             alldat<-rbind(selecteddat,restdat)
@@ -640,7 +652,7 @@ server <- shinyServer(function(input, output, session) {
             }
             incProgress(3/5, detail = paste("Step: Calculating"))
             newfit<-lmFit(t,design = modmat)
-            
+
             eb_newfit<-eBayes(newfit)
             incProgress(4/5, detail = paste("Step: Rendering table"))
             #names(sort(exp_genes_mean,decreasing = T)[1:input$nogenes])
@@ -843,7 +855,7 @@ server <- shinyServer(function(input, output, session) {
       #     #debuttons[[1]]<-NULL
       #   }
       # }
-      #assign("debuttons",NULL,envir=env)  # disable previous buttons
+      # assign("debuttons",NULL,envir=env)  # disable previous buttons
 
       #assign("set", set+1, envir = env)
 
@@ -1122,6 +1134,7 @@ server <- shinyServer(function(input, output, session) {
 
 
 })
+
 
 #   #showNotification(as.character(round(df$x1[[1]],5)),duration=NULL)
 # #UPDATE
