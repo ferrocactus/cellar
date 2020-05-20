@@ -160,3 +160,38 @@ def _validate_con_convention(con_convention):
         raise ValueError("Incorrect convention specified.")
 
     return con_convention
+
+def _validate_ensemble_methods(ensemble_methods):
+    methods = [
+        "All",
+        "KMeans",
+        "KMedoids",
+        "Spectral",
+        "Agglomerative",
+        #"DBSCAN",
+        #"Birch",
+        "GaussianMixture",
+        "Leiden",
+        "Scanpy"
+    ]
+
+    if isinstance(ensemble_methods, list):
+        for method in ensemble_methods:
+            if method not in methods:
+                raise ValueError("Incorrect method encountered in ensemble "
+                                "clustering.")
+            if method == 'All':
+                return methods[1:]
+    elif ensemble_methods is None:
+        return "default"
+    elif isinstance(ensemble_methods, str):
+        if ensemble_methods not in methods:
+            raise ValueError("Incorrect method encountered in ensemble"
+                            "clusering.")
+        if ensemble_methods == 'All':
+            return methods[1:]
+        else:
+            return [ensemble_methods]
+    else:
+        raise ValueError("Incorrect list provided for ensemble clustering.")
+    return ensemble_methods

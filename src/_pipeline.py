@@ -23,6 +23,7 @@ from .utils.validation import _validate_mark_alpha
 from .utils.validation import _validate_mark_markers_n
 from .utils.validation import _validate_mark_correction
 from .utils.validation import _validate_con_convention
+from .utils.validation import _validate_ensemble_methods
 
 
 class Pipeline(Unit):
@@ -69,7 +70,8 @@ class Pipeline(Unit):
             mark_correction='hs', mark_n_jobs=1, con_method="Converter",
             con_convention='id-to-name', con_path="markers/gene_id_name.csv",
             ide_method='HyperGeom', ide_path='markers/cell_type_marker.json',
-            ide_tissue='all', vis_method='UMAP', ssc_method=None):
+            ide_tissue='all', vis_method='UMAP', ssc_method=None,
+            ensemble_methods=None):
 
         try:
             _method_exists('dim_reduction', dim_method)
@@ -87,6 +89,8 @@ class Pipeline(Unit):
             _validate_con_convention(con_convention)
             _method_exists('identification', ide_method)
             _method_exists('visualization', vis_method)
+            if clu_method == 'Ensemble':
+                _validate_ensemble_methods(ensemble_methods)
             if ssc_method is not None:
                 _method_exists('ss_cluster', ssc_method)
         except NotImplementedError as nie:

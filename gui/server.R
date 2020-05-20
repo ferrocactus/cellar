@@ -25,15 +25,15 @@ server <- shinyServer(function(input, output, session) {
 
   new_labels=NULL
   assign("new_labels",NULL,envir = env)
-  
-  
+
+
   # count of selected sets
   setcount=0
   assign("setcount", 0, envir = env)
   #selected subsets
   subsets <- vector(mode="list", length=10)
   assign("subsets", vector(mode="list", length=10), envir = env)
-  
+
 
   degenenames=NULL
   assign("degenenames",NULL,envir = env)
@@ -100,10 +100,12 @@ server <- shinyServer(function(input, output, session) {
           }
       } else {
           for (x in options$clu_ensemble) {
-              shinyjs::enable(
-                  selector = paste("#ensemble_checkbox input[value='",x, "']",
-                                   sep="")
-              )
+              if (x != 'all') {
+                  shinyjs::enable(
+                      selector=paste("#ensemble_checkbox input[value='",x, "']",
+                                       sep="")
+                  )
+              }
           }
       }
   })
@@ -153,20 +155,20 @@ server <- shinyServer(function(input, output, session) {
   observeEvent(input$runconfigbtn, {
 
     assign("ss", FALSE, envir = env)
-    
+
     if (input$folder=="choose_temp"){
       dataset=as.character(input$dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
-      pipe <- Pipeline(x = dataset)  
+      pipe <- Pipeline(x = dataset)
     }
     else{
       dataset=as.character(input$server_dataset)
       pipe<-load_path_data("server_datasets/",dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
     }
-    
+
   #  print(dataset)
-    
+
 
     tryCatch({
       df <- isolate(runPipe(pipe, input))
@@ -398,30 +400,30 @@ server <- shinyServer(function(input, output, session) {
       labeldats<-c(levels(as.factor(expr_data[,length(expr_data)])),cell_ontology_names)
 
       ############################################################ End of pipeline data processing
-      
-      
+
+
       ############################## start observing UI events
-      
-      
-      
-      
-      
+
+
+
+
+
       # initialize subsets, store clusters
-      
+
       for (i in 1:length(markers)){
         names(subsets)[setcount+1]<-paste("cluster_",as.character(i-1),sep="")
         keys<-which(expr_data$cluster==(i-1))
         subsets[[as.character(paste("cluster_",as.character(i-1),sep=""))]]<-keys
         assign("setcount", setcount+1, envir = env)
       }
-      
+
       names(subsets)[setcount+1]<-"None"
       list2env(subsets,env)
       assign("setcount", setcount+1, envir = env)
       # store selected subsets
       observeEvent(input$store_lasso,{
           d <- event_data("plotly_selected")
-          
+
           keys=d$keys
           cell_count=length(d$key)
           #showNotification(as.character(input$newsubset),duration=NULL)
@@ -436,7 +438,7 @@ server <- shinyServer(function(input, output, session) {
           list2env(subsets,env)
           showNotification(paste(as.character(cell_count)," cells stored",sep=""))
           assign("setcount", setcount+1, envir = env)
-          
+
           # select subset1
           updateSelectInput(session = session,
                             inputId = "subset1",
@@ -465,9 +467,9 @@ server <- shinyServer(function(input, output, session) {
                         label = "Choose Subset 2",
                         choices = names(subsets),
                         selected = NULL)
-      
-      
-      
+
+
+
       # select color value
       updateSelectInput(session = session,
                         inputId = "color",
@@ -568,10 +570,10 @@ server <- shinyServer(function(input, output, session) {
       #                   label = "Select clusters",
       #                   choices = levels(as.factor(expr_data$cluster)),
       #                   selected = NULL)
-      # 
-      # 
-      # 
-      # 
+      #
+      #
+      #
+      #
        scdata_subset=expr_data
 
       if (length(intersect(rownames(scdata_subset),gene_ids_all[,1]))>0){
@@ -585,12 +587,12 @@ server <- shinyServer(function(input, output, session) {
       }
       observeEvent(input$getdegenes,{
         selecteddat=NULL
-        
+
         assign("s1", subsets[[as.character(input$subset1)]], envir = env)
         assign("s2", subsets[[as.character(input$subset2)]], envir = env)
 
 
-        
+
         cell_count=length(s1)
         cell_count2=length(s2)
         #### get selected data and rest data

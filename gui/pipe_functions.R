@@ -1,3 +1,5 @@
+source('gui/sidebar/options.R')
+
 runPipe <- function(pipe, input) {
 
     dim_method <- input$dim_method
@@ -6,9 +8,12 @@ runPipe <- function(pipe, input) {
     eval_method <- input$eval_method
     clu_n_clusters <- input$clu_n_clusters
     mark_method <- 'TTest'
-    mark_alpha <- input$mark_alpha
-    mark_markers_n <- input$mark_markers_n
-    mark_correction <- input$mark_correction
+    #mark_alpha <- input$mark_alpha
+    #mark_markers_n <- input$mark_markers_n
+    #mark_correction <- input$mark_correction
+    mark_alpha <- 0.05
+    mark_markers_n <- 200
+    mark_correction <- 'holm-sidak'
     con_method <- 'Converter'
     con_convention <- 'id-to-name'
     #con_path <- input$con_path
@@ -18,6 +23,7 @@ runPipe <- function(pipe, input) {
     ide_path <- 'markers/cell_type_marker.json'
     ide_tissue <- 'all'
     vis_method <- input$vis_method
+    ensemble_methods <- input$ensemble_checkbox
 
     msg = pipe$validate_params(dim_method=dim_method,
             dim_n_components=dim_n_components,
@@ -29,7 +35,8 @@ runPipe <- function(pipe, input) {
             con_method=con_method,
             con_convention=con_convention, con_path=con_path,
             ide_method=ide_method, ide_path=ide_path,
-            ide_tissue=ide_tissue, vis_method=vis_method)
+            ide_tissue=ide_tissue, vis_method=vis_method,
+            ensemble_methods=ensemble_methods)
 
     if (msg != 'good') {
         return(msg)
@@ -43,9 +50,16 @@ runPipe <- function(pipe, input) {
         x_emb = pipe$get_emb(method=dim_method, n_components=dim_n_components)
 
         incProgress(1/n, detail = paste("Step: Clustering"))
-        labels <- pipe$get_labels(method=clu_method,
-                                eval_method=eval_method,
-                                n_clusters=clu_n_clusters)
+        if (clu_method == 'Ensemble') {
+            labels <- pipe$get_labels(method=clu_method,
+                                    eval_method=eval_method,
+                                    n_clusters=clu_n_clusters,
+                                    methods=ensemble_methods)
+        } else {
+            labels <- pipe$get_labels(method=clu_method,
+                                    eval_method=eval_method,
+                                    n_clusters=clu_n_clusters)
+        }
 
         incProgress(1/n, detail = paste("Step: Finding markers"))
         markers <- pipe$get_markers(method='TTest', alpha=mark_alpha,

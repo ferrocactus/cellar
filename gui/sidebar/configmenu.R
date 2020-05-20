@@ -83,29 +83,29 @@ configmenu <- menuItem(
                 HTML('<hr class="line">')
             ),
 
-            div(
-                class = "div_step div_mark",
-                list(
-                    selectInput(
-                        "de_method",
-                        "DE",
-                        choices = options$de
-                    ),
-                    splitLayout(
-                        cellWidths = c("25%", "25%", "48%"),
-                        textInput(inputId = "mark_alpha",
-                                  label = "alpha",
-                                  value = defaults$mark_alpha),
-                        textInput(inputId = "mark_markers_n",
-                                  label = "markers",
-                                  value = defaults$mark_no),
-                        selectInput("mark_correction",
-                                    "Correction",
-                                    choices = options$correction)
-                    )
-                ),
-                HTML('<hr class="line">')
-            ),
+            #div(
+            #    class = "div_step div_mark",
+            #    list(
+            #        selectInput(
+            #            "de_method",
+            #            "DE",
+            #            choices = options$de
+            #        ),
+            #        splitLayout(
+            #            cellWidths = c("25%", "25%", "48%"),
+            #            textInput(inputId = "mark_alpha",
+            #                      label = "alpha",
+            #                      value = defaults$mark_alpha),
+            #            textInput(inputId = "mark_markers_n",
+            #                      label = "markers",
+            #                      value = defaults$mark_no),
+            #            selectInput("mark_correction",
+            #                        "Correction",
+            #                        choices = options$correction)
+            #        )
+            #    ),
+            #    HTML('<hr class="line">')
+            #),
 
             #splitLayout(
             #    cellWidths = c("50%", "50%"),

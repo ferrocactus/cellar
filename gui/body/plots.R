@@ -6,11 +6,22 @@ plots <- tabsetPanel(
     tabPanel(
         "Main Plot",
         h3(textOutput("caption")),
-        plotlyOutput("plot", height="750px"),
+        plotlyOutput("plot", height="550px"),
     ),
+
     tabPanel(
         "Updated Plot",
         verbatimTextOutput("brush"),
-        plotlyOutput("Plot2", height="750px")
+        plotlyOutput("Plot2", height="550px")
+    ),
+
+    tabPanel(
+        "Details",
+        div(
+            id = "details_div",
+            textOutput(
+                "details"
+            )
+        )
     )
 )

@@ -11,6 +11,7 @@ from ._cluster import Clu_Birch
 from ._cluster import Clu_GaussianMixture
 from ._cluster import Clu_Leiden
 from ._cluster import Clu_Scanpy
+from ..utils.validation import _validate_ensemble_methods
 
 
 cluster_dict = {
@@ -44,7 +45,7 @@ class Ens_HyperGraph(Unit):
     See https://github.com/GGiecold/Cluster_Ensembles
     """
 
-    def __init__(self, methods=["KMedoids", "KMeans", "Leiden", "Spectral"],
+    def __init__(self, methods=["KMedoids", "KMeans", "Spectral"],
                  n_clusters=np.array([2, 4, 8, 16]),
                  eval_obj=None, n_jobs=None, **kwargs):
         """
@@ -71,8 +72,12 @@ class Ens_HyperGraph(Unit):
             when instantiating it.
 
         """
+        methods = _validate_ensemble_methods(methods)
         self.logger = setup_logger('Ensemble')
-        self.methods = methods
+        if methods == "default":
+            self.methods = ["KMedoids", "KMeans", "Spectral"]
+        else:
+            self.methods = methods
         self.n_clusters = n_clusters
         self.eval_obj = eval_obj
         self.n_jobs = n_jobs
@@ -93,6 +98,8 @@ class Ens_HyperGraph(Unit):
 
         """
         self.logger.info("Initializing Ensemble Clustering.")
+        self.logger.info("Using the following methods:")
+        self.logger.info(", ".join(self.methods))
 
         # initialize empty partition matrix
         partitions = np.zeros((len(self.methods), x.shape[0]))
