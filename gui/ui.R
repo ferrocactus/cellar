@@ -33,37 +33,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
     useShinyjs(),
     tags$head(includeCSS("gui/styles/style.css")),
-    # Don't scroll to top after clicking anything
-    #tags$script(HTML(
-    #    "
-    #    $(document).on('click', function(e) {
-    #        return false;
-    #        e.preventDefault();
-    #    });
-    #    "
-    #)),
-    #tags$script(HTML(
-    #    "
-    #    addEventListener('click', function (ev) {
-    #        if (ev.target.classList.contains('form-control')) {
-    #            ev.preventDefault();
-    #        }
-    #    });
-    #    "
-    #)),
-    tags$script(HTML(
-        "
-        window.onload = function() {
-            var anchors = document.getElementsByTagName(\"a\");
-
-            for (var i = 0; i < anchors.length; i++) {
-                if (anchors[i].href.endsWith(\"#\")) {
-                    anchors[i].href = anchors[i].href + \"!\"
-                }
-            }
-        }
-        "
-    )),
+    tags$script(src = "gui/sidebar/anchor.js"),
     plots,
     analysis
 )
