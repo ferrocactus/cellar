@@ -101,6 +101,14 @@ class Ens_HyperGraph(Unit):
         self.logger.info("Using the following methods:")
         self.logger.info(", ".join(self.methods))
 
+        if len(self.methods) == 1:
+            # No need to do ensemble if only one method
+            return clu_wrap(self.methods[0])(eval_obj=self.eval_obj,
+                                    n_clusters=self.n_clusters,
+                                    n_jobs=self.n_jobs, **self.kwargs).get(x)
+        elif len(self.methods) < 1:
+            raise ValueError("No methods specified for ensemble clustering.")
+
         # initialize empty partition matrix
         partitions = np.zeros((len(self.methods), x.shape[0]))
 

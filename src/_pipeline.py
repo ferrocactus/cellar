@@ -28,14 +28,18 @@ from .utils.validation import _validate_ensemble_methods
 
 class Pipeline(Unit):
     def __init__(self, x='default', config='configs/config.ini', col_ids=None):
-        if x == 'default':
-            x, col_ids = load_data('default')
-            print("Loaded data.")
-        if type(x) == str:
-            x, col_ids = load_data(x)
-            print("Loaded data.")
-        if type(x) != np.ndarray:
-            x = np.array(x)
+        if isinstance(x, str):
+            if x == 'default':
+                x, col_ids = load_data('default')
+                print("Loaded data.")
+            else:
+                x, col_ids = load_data(x)
+                print("Loaded data.")
+        if not isinstance(x, np.ndarray):
+            try:
+                x = np.array(x)
+            except:
+                raise ValueError("Incorrect format for x.")
         if len(x.shape) != 2:
             raise ValueError(
                 "Data needs to be of shape (n_samples, n_features).")
