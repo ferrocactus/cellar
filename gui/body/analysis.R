@@ -2,10 +2,10 @@ library(shiny)
 
 analysis <- tabsetPanel(
     id = "switcher",
-    tabPanel(
-        "No selection",
-        "No selection"
-    ),
+    # tabPanel(
+    #     "No selection",
+    #     "No selection"
+    # ),
     tabPanel(
         "DE",
         tableOutput("genes"),

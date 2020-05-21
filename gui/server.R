@@ -944,179 +944,179 @@ server <- shinyServer(function(input, output, session) {
     ### start calculating DE genes
 
 
-
+    ############ No loNger used
     ###############################################################BOTTOM OF MAIN PANEL: (CLUSTERS & INTERSECTIONS)
     # Adding tabset panel corresponds to each Cluster
     # (at the bottom of the main panel)
 
-    for (i in 1:length(names(markers))) {
-      if (i == 1) {
-        insertTab(
-          inputId = "switcher",
-          position="after",
-          tabPanel(
-            as.character(i-1),
-            paste("Cluster", as.character(i-1), " intersections", seq=""),
-            tags$div(id = paste('placeholder', as.character(i-1), sep=""))
-          ),
-          target= "No selection"
-        )
-      } else {
-        insertTab(
-          inputId = "switcher",
-          position = "after",
-          tabPanel(
-            as.character(i-1),
-            paste("Cluster",as.character(i-1)," intersections",seq=""),
-            tags$div(id = paste('placeholder',as.character(i-1),sep=""))),
-          target = as.character(i-2)
-        )
-      }
-    }
-
-    ### update tabset panel according to the point selected
-    o<-observeEvent(event_data("plotly_click", priority = "event"), {
-      cldat <- event_data("plotly_click")
-      selectedi = "No selection"
-      selectedi <- filter(df, round(x1, 5) == round(cldat$x, 5))$y
-      updateTabsetPanel(session, "switcher", selected=as.character(selectedi))
-      i = df[, 3][cldat$pointNumber]
-
-      # if (previous_i!=-1){
-      #   for (j in 1:length(c_intersections[[i]])){
-      #     removeUI(
-      #       selector = paste("#",c_intersections[[i]][j],"")
-      #     )
-      #   }
-      # }
-    })
-
-
-
-    assign("switcher",c(switcher,o),envir = env)
-    ##############  Adding intersection buttons to corresponding tab panel
-    # get the marker list intersections
-
-    # step 1 c_intersection is a list of intersections in each cluster
-    c_intersections <- list("")
-    assign("clusters",length(names(markers)),envir = env)
-
-    for (i in 1:length(names(markers))) {
-      intersection <- markers[[as.character(i - 1)]][["lvl1_intersec"]]
-      #intersection <- strsplit(str_replace_all(
-      #           intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
-      if (isEmpty(intersection)){       ##intersection could be "numeric(0)" if there is no intersection in this cluster
-        intersection=" "
-      }
-      intersection <- list(intersection)
-      c_intersections <- append(c_intersections, intersection)
-    }
-    c_intersections[1] <- NULL
-
-    #step 2 total_intersection is the total gene in the intersection
-    total_intersections = c()
-    c_seen = c()
-
-    for (i in 1:length(c_intersections)) {
-      for (j in 1:length(c_intersections[[i]])) {
-        total_intersections <- c(
-          total_intersections, c_intersections[[i]][j])
-      }
-    }
-
-    #step3 add a symbol to gene names that appear twice.
-    #so we won't have duplicated button IDs later
-    flag <- 0
-    tmp = c()
-    c_updated <- c()
-    for (x in 1:length(c_intersections)) {
-      for (k in 1:length(c_intersections)) {
-        for (i in 1:length(c_intersections[[k]])) {
-          for (j in 1:length(total_intersections)) {
-            if ((c_intersections[[k]][i] %in% c_seen) == FALSE ){
-              c_seen <- c(c_seen, c_intersections[[k]][i])
-              c_updated <- c(c_updated, k * 1000 + i)
-            }
-            if (identical(
-              c_intersections[[k]][i], total_intersections[j])
-              && (c_intersections[[k]][i] %in% c_seen)
-              && (((k*1000+i) %in% c_updated)==FALSE)) {
-              c_intersections[[k]][i] <- paste(
-                c_intersections[[k]][i],"-",sep="")
-              total_intersections <- c(
-                total_intersections, c_intersections[[k]][i])
-              c_seen <- c(c_seen, c_intersections[[k]][i])
-              c_updated <- c(c_updated, k * 1000 + i)
-            }
-          }
-        }
-      }
-    }
-
-    ##Step4: Adding buttons into corresponding tabpanels
-    for (i in 1:length(c_intersections)){
-      for (j in 1:length(c_intersections[[i]])){
-        textt<-c_intersections[[i]][j]
-
-        for (k in 1:length(total_intersections)){
-          if (identical(
-            total_intersections[k],
-            as.character(strsplit(c_intersections[[i]][j], "-")))) {
-            #showNotification(textt,duration=NULL)
-            textt <- total_intersections[k]
-            #showNotification(textt,duration=NULL)
-            break
-          }
-        }
-        if (substr(c_intersections[[i]][j],1,1)!=" "){
-          insertUI(
-            selector = paste("#placeholder",as.character(i-1),sep=""),
-            #where = "afterEnd",
-            ui = actionButton(c_intersections[[i]][j],textt)
-          )
-        }
-      }
-    }
-
-    ## Final step: Maintaining those buttons:
-    lapply(
-      X = 1:length(total_intersections),
-      FUN = function(i) {
-        o<-observeEvent(input[[total_intersections[i]]], {
-          rr = i
-          for (j in 1:length(total_intersections)) {
-            if (identical(total_intersections[j],
-                          as.character(strsplit(total_intersections[i],"-")))) {
-              rr <- j
-              break
-            }
-          }
-          showNotification(
-            paste("showing ", total_intersections[rr],
-                  "'s expression",sep = ""),
-            duration = 5
-          )
-          output$plot <- renderPlotly({
-            plot_ly(
-              df, x = df$x1, y = df$x2,
-              text = ~paste("label: ", as.factor(df$y)),
-              color = expr_data[[total_intersections[rr]]],
-              key = row.names(df),
-              type = 'scatter',
-              mode = 'markers'
-            ) %>% layout(dragmode = "lasso",
-                         title = paste(
-                           "Value of ", total_intersections[rr], sep=""))
-          })
-          observeEvent(input$showcard, {
-            output$inc <- renderUI({
-              x <- input$test
-              getPage(total_intersections[rr])
-            })
-          })
-        })
-        assign("intersectbuttons",c(intersectbuttons,o),envir = env)
-      })
+    # for (i in 1:length(names(markers))) {
+    #   if (i == 1) {
+    #     insertTab(
+    #       inputId = "switcher",
+    #       position="after",
+    #       tabPanel(
+    #         as.character(i-1),
+    #         paste("Cluster", as.character(i-1), " intersections", seq=""),
+    #         tags$div(id = paste('placeholder', as.character(i-1), sep=""))
+    #       ),
+    #       target= "No selection"
+    #     )
+    #   } else {
+    #     insertTab(
+    #       inputId = "switcher",
+    #       position = "after",
+    #       tabPanel(
+    #         as.character(i-1),
+    #         paste("Cluster",as.character(i-1)," intersections",seq=""),
+    #         tags$div(id = paste('placeholder',as.character(i-1),sep=""))),
+    #       target = as.character(i-2)
+    #     )
+    #   }
+    # }
+    # 
+    # ### update tabset panel according to the point selected
+    # o<-observeEvent(event_data("plotly_click", priority = "event"), {
+    #   cldat <- event_data("plotly_click")
+    #   selectedi = "No selection"
+    #   selectedi <- filter(df, round(x1, 5) == round(cldat$x, 5))$y
+    #   updateTabsetPanel(session, "switcher", selected=as.character(selectedi))
+    #   i = df[, 3][cldat$pointNumber]
+    # 
+    #   # if (previous_i!=-1){
+    #   #   for (j in 1:length(c_intersections[[i]])){
+    #   #     removeUI(
+    #   #       selector = paste("#",c_intersections[[i]][j],"")
+    #   #     )
+    #   #   }
+    #   # }
+    # })
+    # 
+    # 
+    # 
+    # assign("switcher",c(switcher,o),envir = env)
+    # ##############  Adding intersection buttons to corresponding tab panel
+    # # get the marker list intersections
+    # 
+    # # step 1 c_intersection is a list of intersections in each cluster
+    # c_intersections <- list("")
+    # assign("clusters",length(names(markers)),envir = env)
+    # 
+    # for (i in 1:length(names(markers))) {
+    #   intersection <- markers[[as.character(i - 1)]][["lvl1_intersec"]]
+    #   #intersection <- strsplit(str_replace_all(
+    #   #           intersection,"([\\[])|([\\]])|([\n])|([\\'])", "")," ")
+    #   if (isEmpty(intersection)){       ##intersection could be "numeric(0)" if there is no intersection in this cluster
+    #     intersection=" "
+    #   }
+    #   intersection <- list(intersection)
+    #   c_intersections <- append(c_intersections, intersection)
+    # }
+    # c_intersections[1] <- NULL
+    # 
+    # #step 2 total_intersection is the total gene in the intersection
+    # total_intersections = c()
+    # c_seen = c()
+    # 
+    # for (i in 1:length(c_intersections)) {
+    #   for (j in 1:length(c_intersections[[i]])) {
+    #     total_intersections <- c(
+    #       total_intersections, c_intersections[[i]][j])
+    #   }
+    # }
+    # 
+    # #step3 add a symbol to gene names that appear twice.
+    # #so we won't have duplicated button IDs later
+    # flag <- 0
+    # tmp = c()
+    # c_updated <- c()
+    # for (x in 1:length(c_intersections)) {
+    #   for (k in 1:length(c_intersections)) {
+    #     for (i in 1:length(c_intersections[[k]])) {
+    #       for (j in 1:length(total_intersections)) {
+    #         if ((c_intersections[[k]][i] %in% c_seen) == FALSE ){
+    #           c_seen <- c(c_seen, c_intersections[[k]][i])
+    #           c_updated <- c(c_updated, k * 1000 + i)
+    #         }
+    #         if (identical(
+    #           c_intersections[[k]][i], total_intersections[j])
+    #           && (c_intersections[[k]][i] %in% c_seen)
+    #           && (((k*1000+i) %in% c_updated)==FALSE)) {
+    #           c_intersections[[k]][i] <- paste(
+    #             c_intersections[[k]][i],"-",sep="")
+    #           total_intersections <- c(
+    #             total_intersections, c_intersections[[k]][i])
+    #           c_seen <- c(c_seen, c_intersections[[k]][i])
+    #           c_updated <- c(c_updated, k * 1000 + i)
+    #         }
+    #       }
+    #     }
+    #   }
+    # }
+    # 
+    # ##Step4: Adding buttons into corresponding tabpanels
+    # for (i in 1:length(c_intersections)){
+    #   for (j in 1:length(c_intersections[[i]])){
+    #     textt<-c_intersections[[i]][j]
+    # 
+    #     for (k in 1:length(total_intersections)){
+    #       if (identical(
+    #         total_intersections[k],
+    #         as.character(strsplit(c_intersections[[i]][j], "-")))) {
+    #         #showNotification(textt,duration=NULL)
+    #         textt <- total_intersections[k]
+    #         #showNotification(textt,duration=NULL)
+    #         break
+    #       }
+    #     }
+    #     if (substr(c_intersections[[i]][j],1,1)!=" "){
+    #       insertUI(
+    #         selector = paste("#placeholder",as.character(i-1),sep=""),
+    #         #where = "afterEnd",
+    #         ui = actionButton(c_intersections[[i]][j],textt)
+    #       )
+    #     }
+    #   }
+    # }
+    # 
+    # ## Final step: Maintaining those buttons:
+    # lapply(
+    #   X = 1:length(total_intersections),
+    #   FUN = function(i) {
+    #     o<-observeEvent(input[[total_intersections[i]]], {
+    #       rr = i
+    #       for (j in 1:length(total_intersections)) {
+    #         if (identical(total_intersections[j],
+    #                       as.character(strsplit(total_intersections[i],"-")))) {
+    #           rr <- j
+    #           break
+    #         }
+    #       }
+    #       showNotification(
+    #         paste("showing ", total_intersections[rr],
+    #               "'s expression",sep = ""),
+    #         duration = 5
+    #       )
+    #       output$plot <- renderPlotly({
+    #         plot_ly(
+    #           df, x = df$x1, y = df$x2,
+    #           text = ~paste("label: ", as.factor(df$y)),
+    #           color = expr_data[[total_intersections[rr]]],
+    #           key = row.names(df),
+    #           type = 'scatter',
+    #           mode = 'markers'
+    #         ) %>% layout(dragmode = "lasso",
+    #                      title = paste(
+    #                        "Value of ", total_intersections[rr], sep=""))
+    #       })
+    #       observeEvent(input$showcard, {
+    #         output$inc <- renderUI({
+    #           x <- input$test
+    #           getPage(total_intersections[rr])
+    #         })
+    #       })
+    #     })
+    #     assign("intersectbuttons",c(intersectbuttons,o),envir = env)
+    #   })
 
     #### cluster analysis
 
