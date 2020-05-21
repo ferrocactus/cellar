@@ -263,9 +263,9 @@ class Pipeline(Unit):
         return self.vis.get(x, y)
 
     def get_markers_subset(self, indices1, indices2=None):
-        indices1 = np.array(indices1)
+        indices1 = np.array(indices1).astype(np.int)
         if indices2 is not None:
-            indices2 = np.array(indices2)
+            indices2 = np.array(indices2).astype(np.int)
 
         if indices2 is None:
             markers = self.mark.get_subset(self.x, indices1)

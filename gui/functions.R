@@ -27,7 +27,6 @@ writeDataset <- function(path, name) {
             filename<-l[[1]]
             df<-l[[2]]
             incProgress(2/4, detail = paste("Processing file"))
-            mkdir(filename)
             incProgress(3/4, detail = paste("Saving file"))
             write_data(name,path,filename,df)   # use python to write h5ad file
 

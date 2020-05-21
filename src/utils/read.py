@@ -1,9 +1,9 @@
 from ast import literal_eval
 from configparser import ConfigParser
-import os
 import anndata
 import gtfparse
 import pandas as pd
+
 
 def read_h5ad(filename):
     ann = anndata.read_h5ad(filename)
@@ -37,7 +37,6 @@ def read_config(dataset):
 
 def load_data(dataset):
     # return X, Y
-    
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
@@ -46,78 +45,52 @@ def load_data(dataset):
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return [ann.X, ann.var.index.to_numpy().astype('U')]
     else:
-        dataset=os.listdir("datasets/"+dataset)[0]
         if dataset[-4:] == 'h5ad':
-            filename=dataset[0:-5]
-            ann = anndata.read_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+            ann = anndata.read_h5ad(str("datasets/" + dataset))
             return [ann.X, ann.var.index.to_numpy().astype('U')]
         elif dataset[-3:] == 'csv':
-            filename=dataset[0:-4]
-            df = pd.read_csv(str("datasets/"+filename+"/"+filename+".csv"), index_col=0, header=None).T
+            df = pd.read_csv(str("datasets/" + dataset),
+                             index_col=0, header=None).T
             return df.to_numpy(), df.columns.to_numpy()
         else:
             return "error"
 
 
+# for UI:
 
-#################### for UI:
-
-def load_path_data(path,dataset):
-    # dataset here is the filename 
+def load_path_data(path, dataset):
+    # dataset here is the filename
     # pipeline
-    if (path[-1]=='/'):
-        filename=os.listdir(path+dataset)[0]
-    else:
-        filename=os.listdir(path+'/'+dataset)[0]
-        
-    if filename[-4:] == 'h5ad':
-        filename=filename[0:-5]
-        ann = anndata.read_h5ad(str(path+dataset+'/'+filename+".h5ad"))
-        x,col_ids=ann.X, ann.var.index.to_numpy().astype('U')
-        return Pipeline(x,col_ids=col_ids)
-    elif filename[-3:] == 'csv':
-        filename=filename[0:-4]
-        df = pd.read_csv(str(path+filename+".csv"), index_col=0, header=None).T
-        x,col_ids=df.to_numpy(), df.columns.to_numpy()
-        return Pipeline(x,col_ids=col_ids)
+    if dataset[-4:] == 'h5ad':
+        ann = anndata.read_h5ad(str(path + dataset))
+        x, col_ids = ann.X, ann.var.index.to_numpy().astype('U')
+        return Pipeline(x, col_ids=col_ids)
+    elif dataset[-3:] == 'csv':
+        df = pd.read_csv(str(path + dataset), index_col=0, header=None).T
+        x, col_ids = df.to_numpy(), df.columns.to_numpy()
+        return Pipeline(x, col_ids=col_ids)
     else:
         return "error"
 
 
-
-
-def upload(dataset,path):
+def upload(dataset, path):
     if path[-4:] == 'h5ad':
-        filename=dataset[0:-5]
+        filename = dataset[0:-5]
         df = anndata.read_h5ad(str(path))
-
     elif path[-3:] == 'csv':
-        filename=dataset[0:-4]
+        filename = dataset[0:-4]
         df = pd.read_csv(str(path))
- 
     else:
         return "error"
-
-    return filename,df
-
-def mkdir(filename):
-    os.mkdir("datasets/"+filename)
+    return filename, df
 
 
-def write_data(dataset,path,filename,df):
-
+def write_data(dataset, path, filename, df):
     if path[-4:] == 'h5ad':
-
-        df.write_h5ad(str("datasets/"+filename+"/"+filename+".h5ad"))
+        df.write_h5ad(str("datasets/" + filename + ".h5ad"))
     elif path[-3:] == 'csv':
-
         df = pd.read_csv(str(path))
-        df.to_csv(str("datasets/"+filename+"/"+filename+".csv"), index=False)
+        df.to_csv(str("datasets/" + filename + ".csv"), index=False)
     else:
         return "error"
-
     return
-
-
-
-    

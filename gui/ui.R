@@ -42,6 +42,28 @@ body <- dashboardBody(
     #    });
     #    "
     #)),
+    #tags$script(HTML(
+    #    "
+    #    addEventListener('click', function (ev) {
+    #        if (ev.target.classList.contains('form-control')) {
+    #            ev.preventDefault();
+    #        }
+    #    });
+    #    "
+    #)),
+    tags$script(HTML(
+        "
+        window.onload = function() {
+            var anchors = document.getElementsByTagName(\"a\");
+
+            for (var i = 0; i < anchors.length; i++) {
+                if (anchors[i].href.endsWith(\"#\")) {
+                    anchors[i].href = anchors[i].href + \"!\"
+                }
+            }
+        }
+        "
+    )),
     plots,
     analysis
 )
