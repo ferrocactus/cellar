@@ -8,12 +8,9 @@ runPipe <- function(pipe, input) {
     eval_method <- input$eval_method
     clu_n_clusters <- input$clu_n_clusters
     mark_method <- 'TTest'
-    #mark_alpha <- input$mark_alpha
-    #mark_markers_n <- input$mark_markers_n
-    #mark_correction <- input$mark_correction
-    mark_alpha <- 0.05
-    mark_markers_n <- 200
-    mark_correction <- 'holm-sidak'
+    mark_alpha <- input$mark_alpha
+    mark_markers_n <- input$nogenes
+    mark_correction <- input$mark_correction
     con_method <- 'Converter'
     con_convention <- 'id-to-name'
     #con_path <- input$con_path

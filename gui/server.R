@@ -633,7 +633,9 @@ server <- shinyServer(function(input, output, session) {
 
         if (as.character(input$subset2)=="None"){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
-          mar=pipe$get_markers_subset(keys-1)
+          mar=pipe$get_markers_subset(
+                keys-1, alpha=input$mark_alpha, correction=input$mark_correction,
+                markers_n=input$nogenes)
           #['indices', 'pvals', 'diffs', 'inp_names', 'outp_names', 'lvl1_type',
           #'lvl1_sv', 'lvl1_intersec', 'lvl1_total', 'lvl1_all', 'lvl2_type',
           #' 'lvl2_sv', 'lvl2_intersec', 'lvl2_total', 'lvl2_all']
@@ -649,7 +651,9 @@ server <- shinyServer(function(input, output, session) {
         }
         else if(as.character(input$subset1)=="None"){
           keys=s2
-          mar=pipe$get_markers_subset(keys-1)
+          mar=pipe$get_markers_subset(
+                keys-1, alpha=input$mark_alpha, correction=input$mark_correction,
+                markers_n=input$nogenes)
           pval=mar[['0']][['pvals']]
           logFC=mar[['0']][['diffs']]
           gene_names=mar[['0']][['outp_names']]
@@ -661,7 +665,10 @@ server <- shinyServer(function(input, output, session) {
         else{                 ## 2 subsets
           keys=s1
           keys2=s2
-          mar=pipe$get_markers_subset(keys-1,keys2-1)
+          mar=pipe$get_markers_subset(
+                keys-1, keys2-1, alpha=input$mark_alpha,
+                correction=input$mark_correction,
+                markers_n=input$nogenes)
 
 
           ### calculating DE

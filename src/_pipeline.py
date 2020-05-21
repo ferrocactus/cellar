@@ -46,27 +46,8 @@ class Pipeline(Unit):
                 "Data needs to be of shape (n_samples, n_features).")
         assert isinstance(config, str)
         self.x = x
-        self.params = False
         self.config = parse_config(config)
         self.col_ids = np.array(col_ids).astype('U').reshape(-1)
-        self.create_objects()
-        self.updated = False
-
-    def create_objects(self, methods=None):
-        try:
-            clu_method = self.config["methods"]["cluster"]
-            eval_method = self.config["methods"]["cluster_eval"]
-            vis_method = self.config["methods"]["visualization"]
-            mark_method = self.config["methods"]["markers"]
-            con_method = self.config["methods"]["conversion"]
-            ide_method = self.config["methods"]["identification"]
-            ssclu_method = self.config["methods"]["ss_cluster"]
-        except:
-            raise ValueError("Pipe: Config file malformed or method missing.")
-
-        self.ssclu = wrap("ss_cluster", ssclu_method)(
-            **self.config["ss_cluster"]
-        )
 
     def validate_params(self, dim_method='PCA', dim_n_components='knee',
             clu_method='KMeans', eval_method='Silhouette',
@@ -176,7 +157,7 @@ class Pipeline(Unit):
         return self.labels
 
     def get_markers(self, x=None, y=None, method="TTest", alpha=0.05,
-                    markers_n=200, correction='hs', n_jobs=1):
+                    markers_n=200, correction='holm-sidak', n_jobs=1):
         if x is None:
             x = self.x
         if y is None:
@@ -184,6 +165,7 @@ class Pipeline(Unit):
 
         alpha = _validate_mark_alpha(alpha)
         markers_n = _validate_mark_markers_n(markers_n, self.x.shape[1])
+        correction = _validate_mark_correction(correction)
         n_jobs = _validate_n_jobs(n_jobs)
 
         self.mark = wrap("markers", method)(
@@ -245,6 +227,9 @@ class Pipeline(Unit):
         return self.labels
 
     def get_emb_2d(self, x=None, y=None, method='UMAP'):
+        if hasattr(self, 'x_emb_2d'):
+            return self.x_emb_2d
+
         if x is None:
             x = self.x_emb
 
@@ -265,15 +250,29 @@ class Pipeline(Unit):
         else:
             self.vis = wrap("visualization", method)()
 
-        return self.vis.get(x, y)
+        self.x_emb_2d = self.vis.get(x)
+        return self.x_emb_2d
 
-    def get_markers_subset(self, indices1, indices2=None):
+    def get_markers_subset(self, indices1, indices2=None, alpha=0.05,
+                           correction='holm-sidak', markers_n=200, n_jobs=1,
+                           method='TTest'):
+
+        alpha = _validate_mark_alpha(alpha)
+        markers_n = _validate_mark_markers_n(markers_n, self.x.shape[1])
+        correction = _validate_mark_correction(correction)
+        n_jobs = _validate_n_jobs(n_jobs)
+
+        mark = wrap("markers", method)(
+            alpha=alpha, markers_n=markers_n,
+            correction=correction, n_jobs=n_jobs
+        )
+
         indices1 = np.array(indices1).astype(np.int)
         if indices2 is not None:
             indices2 = np.array(indices2).astype(np.int)
 
         if indices2 is None:
-            markers = self.mark.get_subset(self.x, indices1)
+            markers = mark.get_subset(self.x, indices1)
             # Convert
             for marker in markers:  # should be only 1
                 markers[marker]['inp_names'] = self.col_ids[
@@ -293,7 +292,7 @@ class Pipeline(Unit):
             x = np.concatenate([x1, x2])
             labels = np.concatenate([labels1, labels2])
 
-            markers = self.mark.get(x, labels)
+            markers = mark.get(x, labels)
             for marker in markers:
                 markers[marker]['inp_names'] = self.col_ids[
                     markers[marker]['indices']

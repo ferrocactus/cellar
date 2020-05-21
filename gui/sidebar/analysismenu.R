@@ -1,5 +1,7 @@
 library(shiny)
 
+source("gui/sidebar/options.R")
+
 analysismenu <- menuItem(
     "Analysis",
     id = "analysisbtn",
@@ -14,7 +16,20 @@ analysismenu <- menuItem(
                     sliderInput(
                         "nogenes",
                         "Select number of genes",
-                        min = 1, max = 500, value = 10
+                        min = 1, max = 500, value = 50
+                    ),
+                    splitLayout(
+                        cellWidths = c("50%", "50%"),
+                        textInput(
+                            inputId = "mark_alpha",
+                            label = "alpha",
+                            value = defaults$mark_alpha
+                        ),
+                        selectInput(
+                            "mark_correction",
+                            "Correction",
+                            choices = options$correction
+                        )
                     ),
                     splitLayout(
                         cellWidths = c("50%", "50%"),
