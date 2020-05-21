@@ -24,9 +24,9 @@ sidebar <- dashboardSidebar(
     width = 400,
     sidebarMenu(
         datasetmenu,
+        configmenu,
         selectionmenu,
-        analysismenu,
-        configmenu
+        analysismenu
     )
 )
 
