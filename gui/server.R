@@ -30,9 +30,6 @@ server <- shinyServer(function(input, output, session) {
   # count of selected sets
   setcount=0
   assign("setcount", 0, envir = env)
-  #selected subsets
-  subsets <- vector(mode="list", length=100)
-  assign("subsets", vector(mode="list", length=100), envir = env)
 
 
   degenenames=NULL
@@ -413,63 +410,80 @@ server <- shinyServer(function(input, output, session) {
 
 
       # initialize subsets, store clusters
-
+      assign("set_name",c("None"),envir = env)
+      assign("sets",c(NA),envir = env)
+      setcount=0
       for (i in 1:length(markers)){
-        names(subsets)[setcount+1]<-paste("cluster_",as.character(i-1),sep="")
+        #names(subsets)[setcount+1]<-paste("cluster_",as.character(i-1),sep="")
+        assign("set_name",c(set_name,(paste("cluster_",as.character(i-1),sep=""))),envir=env)
         keys<-which(expr_data$cluster==(i-1))
-        subsets[[as.character(paste("cluster_",as.character(i-1),sep=""))]]<-keys
+        assign("sets",c(sets,list(keys)),envir=env)
+        #subsets[[as.character(paste("cluster_",as.character(i-1),sep=""))]]<-keys
         assign("setcount", setcount+1, envir = env)
       }
-
-      names(subsets)[setcount+1]<-"None"
-      list2env(subsets,env)
-      assign("setcount", setcount+1, envir = env)
+      
+      
+      #list2env(subsets,env)
+      
       # store selected subsets
       observeEvent(input$store_lasso,{
-          d <- event_data("plotly_selected")
-
-          keys=d$keys
-          cell_count=length(d$key)
-          #showNotification(as.character(input$newsubset),duration=NULL)
-          if (identical(input$newsubset,NULL)==FALSE){
-            names(subsets)[setcount+1]<-as.character(input$newsubset)
-            subsets[[as.character(input$newsubset)]]<-keys
-          }
-          else{
-            names(subsets)[setcount+1]<-paste("set",as.character(setcount+1),sep="")
-            subsets[[paste("set",as.character(setcount+1),sep="")]]<-keys
-          }
-          list2env(subsets,env)
-          showNotification(paste(as.character(cell_count)," cells stored",sep=""))
-          assign("setcount", setcount+1, envir = env)
-
-          # select subset1
-          updateSelectInput(session = session,
-                            inputId = "subset1",
-                            label = "Choose Subset 1",
-                            choices = names(subsets),
-                            selected = NULL)
-          # select subset2
-          updateSelectInput(session = session,
-                            inputId = "subset2",
-                            label = "Choose Subset 2",
-                            choices = names(subsets),
-                            selected = NULL)
-          showNotification(as.character(setcount),duration=NULL)
-          showNotification(names(subsets)[setcount-1],duration=NULL)
+        d <- event_data("plotly_selected")
+        
+        keys=as.numeric(d$key)
+        cell_count=length(d$key)
+        #showNotification(as.character(input$newsubset),duration=NULL)
+        if (identical(d$key,NULL)==TRUE){
+          return()
+        }
+        if (identical(input$newsubset,NULL)==FALSE){
+          #names(subsets)[setcount+1]<-as.character(input$newsubset)
+          #subsets[[as.character(input$newsubset)]]<-keys
+          #subsets[setcount+1]<-keys
+          sets<<-c(sets,list(keys))
+          ###assign("set_name",c(set_name,as.character(input$newsubset)),envir=env)
+          
+          set_name<<-c(set_name,as.character(input$newsubset))
+          
+          #showNotification(as.character(subsets[setcount+1]),duration=NULL)
+          #showNotification(names(subsets)[setcount+1],duration=NULL)
+        }
+        else{
+          #names(subsets)[setcount+1]<-paste("set",as.character(setcount+1),sep="")
+          sets<<-c(sets,list(keys))
+          set_name<<-c(set_name,paste("set",as.character(setcount+1),sep=""))
+          #set_name=c(set_name,paste("set",as.character(setcount+1),sep=""))
+        }
+        #list2env(subsets,env)
+        showNotification(paste(as.character(cell_count)," cells stored",sep=""))
+        assign("setcount", setcount+1, envir = env)
+        
+        # select subset1
+        updateSelectInput(session = session,
+                          inputId = "subset1",
+                          label = "Choose Subset 1",
+                          choices = set_name,
+                          selected = NULL)
+        # select subset2
+        updateSelectInput(session = session,
+                          inputId = "subset2",
+                          label = "Choose Subset 2",
+                          choices = set_name,
+                          selected = NULL)
+        #showNotification(as.character(setcount),duration=NULL)
       })
+
 
       # select subset1
       updateSelectInput(session = session,
                         inputId = "subset1",
                         label = "Choose Subset 1",
-                        choices = names(subsets),
+                        choices = set_name,
                         selected = NULL)
       # select subset2
       updateSelectInput(session = session,
                         inputId = "subset2",
                         label = "Choose Subset 2",
-                        choices = names(subsets),
+                        choices = set_name,
                         selected = NULL)
 
 
@@ -595,19 +609,18 @@ server <- shinyServer(function(input, output, session) {
       #}
       observeEvent(input$getdegenes,{
         selecteddat=NULL
-
-        assign("s1", subsets[[as.character(input$subset1)]], envir = env)
-        assign("s2", subsets[[as.character(input$subset2)]], envir = env)
-
-
-
+        idx1=which(set_name==as.character(input$subset1))
+        idx2=which(set_name==as.character(input$subset2))
+        
+        assign("s1", sets[[idx1]], envir = env)
+        assign("s2", sets[[idx2]], envir = env)
+        
         cell_count=length(s1)
         cell_count2=length(s2)
-        #### get selected data and rest data
 
-        if (cell_count2==0){   ## one against the rest (can be selected by lasso or cluster selection)
+        if (as.character(input$subset2)=="None"){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
-          mar=pipe$get_markers_subset(keys)
+          mar=pipe$get_markers_subset(keys-1)
           #['indices', 'pvals', 'diffs', 'inp_names', 'outp_names', 'lvl1_type',
           #'lvl1_sv', 'lvl1_intersec', 'lvl1_total', 'lvl1_all', 'lvl2_type',
           #' 'lvl2_sv', 'lvl2_intersec', 'lvl2_total', 'lvl2_all']
@@ -621,9 +634,9 @@ server <- shinyServer(function(input, output, session) {
           showNotification("DE genes of subset1 against the rest")
 
         }
-        else if(cell_count==0){
+        else if(as.character(input$subset1)=="None"){
           keys=s2
-          mar=pipe$get_markers_subset(keys)
+          mar=pipe$get_markers_subset(keys-1)
           pval=mar[['0']][['pvals']]
           logFC=mar[['0']][['diffs']]
           gene_names=mar[['0']][['outp_names']]
@@ -635,7 +648,7 @@ server <- shinyServer(function(input, output, session) {
         else{                 ## 2 subsets
           keys=s1
           keys2=s2
-          mar=pipe$get_markers_subset(keys,keys2)
+          mar=pipe$get_markers_subset(keys-1,keys2-1)
 
 
           ### calculating DE
