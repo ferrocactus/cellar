@@ -12,18 +12,18 @@ datasetmenu <- menuItem(
                 "folder",
                 "Select dataset group:",
                 c(
-                    "Uploaded Datasets" = "choose_temp",
-                    "Server Datasets" = "choose_server"
+                    "Uploaded Datasets" = "user_uploaded",
+                    "Server Datasets" = "hubmap"
                 ),
                 inline = TRUE
             ),
 
             conditionalPanel(
-                condition = "input.folder == 'choose_temp'",
+                condition = "input.folder == 'user_uploaded'",
                 selectInput(
-                    "dataset",
-                    "Choose uploaded dataset:",
-                    choices = list.files("datasets")
+                    "uploaded_dataset",
+                    "Choose dataset:",
+                    choices = list.files("datasets/user_uploaded")
                 ),
                 fileInput(
                     "file1", "Choose CSV/h5ad File",
@@ -37,11 +37,11 @@ datasetmenu <- menuItem(
             ),
 
             conditionalPanel(
-                condition = "input.folder == 'choose_server'",
+                condition = "input.folder == 'hubmap'",
                 selectInput(
-                    "server_dataset",
-                    "Choose server dataset:",
-                    choices = list.files("server_datasets")
+                    "hubmap_dataset",
+                    "Choose dataset:",
+                    choices = list.files("datasets/hubmap")
                 )
             )
         )

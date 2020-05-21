@@ -3,6 +3,8 @@ from configparser import ConfigParser
 import anndata
 import gtfparse
 import pandas as pd
+import os
+import shutil
 
 
 def read_h5ad(filename):
@@ -35,7 +37,7 @@ def read_config(dataset):
     return config
 
 
-def load_data(dataset):
+def load_data(dataset, dataset_source=None):
     # return X, Y
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
@@ -45,52 +47,33 @@ def load_data(dataset):
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return [ann.X, ann.var.index.to_numpy().astype('U')]
     else:
-        if dataset[-4:] == 'h5ad':
-            ann = anndata.read_h5ad(str("datasets/" + dataset))
+        if dataset_source is None:
+            raise ValueError("Dataset source not specified.")
+
+        if dataset_source == 'hubmap':
+            if len(dataset) <= 5 or dataset[-4:] != 'h5ad':
+                dataset = dataset + ".h5ad"
+            ann = anndata.read_h5ad("datasets/" + dataset_source + "/" + dataset)
             return [ann.X, ann.var.index.to_numpy().astype('U')]
-        elif dataset[-3:] == 'csv':
-            df = pd.read_csv(str("datasets/" + dataset),
-                             index_col=0, header=None).T
-            return df.to_numpy(), df.columns.to_numpy()
+        elif dataset_source == 'user_uploaded':
+            if dataset[-4:] == 'h5ad':
+                ann = anndata.read_h5ad(
+                    "datasets/" + dataset_source + "/" + dataset)
+                return [ann.X, ann.var.index.to_numpy().astype('U')]
+            elif dataset[-3:] == 'csv':
+                df = pd.read_csv("datasets/" + dataset_source + "/" + dataset,
+                                 index_col=0, header=None).T
+                return df.to_numpy(), df.columns.to_numpy()
+            else:
+                raise ValueError("Dataset format not implemented.")
         else:
-            return "error"
+            raise ValueError("Dataset source not found.")
 
 
-# for UI:
-
-def load_path_data(path, dataset):
-    # dataset here is the filename
-    # pipeline
-    if dataset[-4:] == 'h5ad':
-        ann = anndata.read_h5ad(str(path + dataset))
-        x, col_ids = ann.X, ann.var.index.to_numpy().astype('U')
-        return Pipeline(x, col_ids=col_ids)
-    elif dataset[-3:] == 'csv':
-        df = pd.read_csv(str(path + dataset), index_col=0, header=None).T
-        x, col_ids = df.to_numpy(), df.columns.to_numpy()
-        return Pipeline(x, col_ids=col_ids)
-    else:
-        return "error"
-
-
-def upload(dataset, path):
-    if path[-4:] == 'h5ad':
-        filename = dataset[0:-5]
-        df = anndata.read_h5ad(str(path))
-    elif path[-3:] == 'csv':
-        filename = dataset[0:-4]
-        df = pd.read_csv(str(path))
-    else:
-        return "error"
-    return filename, df
-
-
-def write_data(dataset, path, filename, df):
-    if path[-4:] == 'h5ad':
-        df.write_h5ad(str("datasets/" + filename + ".h5ad"))
-    elif path[-3:] == 'csv':
-        df = pd.read_csv(str(path))
-        df.to_csv(str("datasets/" + filename + ".csv"), index=False)
-    else:
-        return "error"
-    return
+def upload_file(dataset, path):
+    try:
+        filename, file_extension = os.path.splitext(path)
+        shutil.move(path, "datasets/user_uploaded/" + dataset + file_extension)
+    except Exception as e:
+        print(str(e))
+        raise OSError("A problem occured when reading dataset.")

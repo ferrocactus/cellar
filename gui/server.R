@@ -16,6 +16,7 @@ load('gui/obj/gene_ids_all')
 
 # Load utility functions
 source("gui/functions.R") # getPage, intersect, writeDataset, getHypergeom
+                          # dataModal
 source("gui/pipe_functions.R") # runPipe
 
 ################################################################# server
@@ -108,7 +109,6 @@ server <- shinyServer(function(input, output, session) {
   })
   ###########################################################
 
-
   # Upload dataset
   # when a dataset is uploaded, write it into the "datasets" folder
   # users can choose it when run another configuration
@@ -117,33 +117,36 @@ server <- shinyServer(function(input, output, session) {
     req(input$file1)
 
     tryCatch({
-      fname <- strsplit(as.character(input$file1$name), ".", fixed = TRUE)[[1]][1]
-      files <- list.files("datasets")
-      flag=0## check if the dataset is already there
-      for (i in 1:length(files)){
-        if (files[i]==fname)
-        {
-          flag=1
-        }
-      }
-      if (flag==1){# if the dataset already exists
-        showNotification("Dataset already exists")
-      }
-      else{
-        writeDataset(input$file1$datapath, input$file1$name)
-        #dataset = "tmp"
-        updateSelectInput(session = session,
-                          inputId = "dataset",
-                          label = "Choose a dataset:",
-                          choices = list.files("datasets"),
-                          #selected = NULL)
-                          showNotification("Dataset uploaded")
-        )
-      }
-      #assign("dataset", input$file1$datapath, envir=env)
+        # Dialog window
+        showModal(dataModal(code = 0))
+
     }, error = function(e) {
-      stop(safeError(e))
+        stop(safeError(e))
     })
+  })
+
+  o <- observeEvent(input$okdataset, {
+      # Check if dataset exists
+      fname <- input$dataset_fname
+      print(fname)
+
+      if (fname == "") {
+          showModal(dataModal(code = 2))
+      } else if (datasetExists(fname, path="datasets/user_uploaded")) {
+          showModal(dataModal(code = 1))
+      } else {
+          removeModal()
+          writeDataset(input$file1$datapath, fname)
+          updateSelectInput(
+              session = session,
+              inputId = "uploaded_dataset",
+              label = "Choose a dataset:",
+              choices = list.files("datasets/user_uploaded"),
+              showNotification("Dataset uploaded")
+          )
+      }
+      #removeUI(selector = "#dataset_fname")
+      o$destroy
   })
 
 
@@ -153,15 +156,16 @@ server <- shinyServer(function(input, output, session) {
 
     assign("ss", FALSE, envir = env)
 
-    if (input$folder=="choose_temp"){
-      dataset=as.character(input$dataset)
+    if (input$folder=="user_uploaded"){
+      dataset=as.character(input$uploaded_dataset)
+      print(dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
-      pipe <- Pipeline(x = dataset)
+      pipe <- Pipeline(x = dataset, dataset_source=input$folder)
     }
     else{
-      dataset=as.character(input$server_dataset)
-      pipe<-load_path_data("server_datasets/",dataset)
+      dataset=as.character(input$hubmap_dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
+      pipe <- Pipeline(x = dataset, dataset_source=input$folder)
     }
 
   #  print(dataset)

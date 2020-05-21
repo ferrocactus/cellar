@@ -15,24 +15,47 @@ intersect <- function(x, y) {
     unique(y[match(as.vector(x), y, 0L)])
 }
 
-# File upload
-# File upload
+dataModal <- function(code = 0) {
+    # Show dialog box when user inputs dataset name
+    modalDialog(
+        textInput("dataset_fname", "Enter dataset name."),
+        if (code == 1) {
+            div(tags$b(
+                "Dataset exists.", style = "color: red;"
+            ))
+        } else if (code == 2) {
+            div(tags$b(
+                "Name should not be empty.", style = "color: red;"
+            ))
+        },
+        footer = tagList(actionButton("okdataset", "OK"))
+    )
+}
+
+datasetExists <- function(dataset, path) {
+    # Check if dataset exists in path
+    files <- list.files(path)
+
+    if (length(files) > 0) {
+        for (i in 1:length(files)) {
+            if (tools::file_path_sans_ext(files[i]) == dataset) {
+                return(TRUE)
+            }
+        }
+    }
+    return(FALSE)
+}
+
 writeDataset <- function(path, name) {
+    # File upload
     withProgress(
         message = 'Please wait...',
-        value = 0,
-        {
-            incProgress(1/4, detail = paste("Processing file"))
-            l<-upload(name,path)
-            filename<-l[[1]]
-            df<-l[[2]]
-            incProgress(2/4, detail = paste("Processing file"))
-            incProgress(3/4, detail = paste("Saving file"))
-            write_data(name,path,filename,df)   # use python to write h5ad file
-
+        value = 0, {
+            incProgress(1/2, detail = paste("Processing file"))
+            upload_file(name, path)
+            incProgress(2/2, detail = paste("Saving file"))
         }
     )
-    #p
 }
 
 # Get Hypergeom

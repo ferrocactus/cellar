@@ -27,13 +27,14 @@ from .utils.validation import _validate_ensemble_methods
 
 
 class Pipeline(Unit):
-    def __init__(self, x='default', config='configs/config.ini', col_ids=None):
+    def __init__(self, x='default', dataset_source=None,
+                    config='configs/config.ini', col_ids=None):
         if isinstance(x, str):
             if x == 'default':
                 x, col_ids = load_data('default')
                 print("Loaded data.")
             else:
-                x, col_ids = load_data(x)
+                x, col_ids = load_data(x, dataset_source=dataset_source)
                 print("Loaded data.")
         if not isinstance(x, np.ndarray):
             try:
