@@ -28,9 +28,6 @@ server <- shinyServer(function(input, output, session) {
   assign("new_labels",NULL,envir = env)
 
 
-  # count of selected sets
-  setcount=0
-  assign("setcount", 0, envir = env)
 
 
   degenenames=NULL
@@ -421,55 +418,49 @@ server <- shinyServer(function(input, output, session) {
 
 
 
-
+      
       # initialize subsets, store clusters
       assign("set_name",c("None"),envir = env)
       assign("sets",c(NA),envir = env)
-      setcount=0
+      
       for (i in 1:length(markers)){
-        #names(subsets)[setcount+1]<-paste("cluster_",as.character(i-1),sep="")
         assign("set_name",c(set_name,(paste("cluster_",as.character(i-1),sep=""))),envir=env)
         keys<-which(expr_data$cluster==(i-1))
         assign("sets",c(sets,list(keys)),envir=env)
-        #subsets[[as.character(paste("cluster_",as.character(i-1),sep=""))]]<-keys
-        assign("setcount", setcount+1, envir = env)
       }
-
-
+      
       #list2env(subsets,env)
 
       # store selected subsets
       observeEvent(input$store_lasso,{
+        if (as.character(input$newsubset) %in% set_name){
+          showNotification("Name already exists")
+          return()
+        }
+        if (substr(as.character(input$newsubset),1,7)=="cluster"){
+          showNotification("Reserved name, please choose another.")
+          return()
+        }
+        
         d <- event_data("plotly_selected")
-
         keys=as.numeric(d$key)
         cell_count=length(d$key)
         #showNotification(as.character(input$newsubset),duration=NULL)
         if (identical(d$key,NULL)==TRUE){
           return()
         }
-        if (identical(input$newsubset,NULL)==FALSE){
-          #names(subsets)[setcount+1]<-as.character(input$newsubset)
-          #subsets[[as.character(input$newsubset)]]<-keys
-          #subsets[setcount+1]<-keys
+        if (as.character(input$newsubset)!=""){
           sets<<-c(sets,list(keys))
-          ###assign("set_name",c(set_name,as.character(input$newsubset)),envir=env)
-
           set_name<<-c(set_name,as.character(input$newsubset))
-
-          #showNotification(as.character(subsets[setcount+1]),duration=NULL)
-          #showNotification(names(subsets)[setcount+1],duration=NULL)
+          
         }
         else{
-          #names(subsets)[setcount+1]<-paste("set",as.character(setcount+1),sep="")
           sets<<-c(sets,list(keys))
-          set_name<<-c(set_name,paste("set",as.character(setcount+1),sep=""))
-          #set_name=c(set_name,paste("set",as.character(setcount+1),sep=""))
+          set_name<<-c(set_name,paste("Newset",as.character(length(set_name)),sep=""))
         }
-        #list2env(subsets,env)
+        
         showNotification(paste(as.character(cell_count)," cells stored",sep=""))
-        assign("setcount", setcount+1, envir = env)
-
+        
         # select subset1
         updateSelectInput(session = session,
                           inputId = "subset1",
@@ -482,7 +473,7 @@ server <- shinyServer(function(input, output, session) {
                           label = "Choose Subset 2",
                           choices = set_name,
                           selected = NULL)
-        #showNotification(as.character(setcount),duration=NULL)
+        
       })
 
 
