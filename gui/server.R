@@ -284,8 +284,8 @@ server <- shinyServer(function(input, output, session) {
             showNotification(df)
           } else {
             markers <- pipe$markers
-            
-            
+
+
             #get the gene expression data
             expr_data = data.frame(
               matrix(pipe$x, ncol = length(pipe$col_ids),
@@ -355,8 +355,8 @@ server <- shinyServer(function(input, output, session) {
       for (i in 1:length(markers)){
         outp_names=c(outp_names,markers[[as.character(i-1)]][['outp_names']])
       }
-      
-      
+
+
       #get the gene expression data
       expr_data = data.frame(
         matrix(pipe$x, ncol = length(pipe$col_ids),
@@ -757,7 +757,8 @@ server <- shinyServer(function(input, output, session) {
                 }
               }
               incProgress(3/3, detail = paste("Step: Getting Geneontology"))
-              go_ord<-go_dispdat[order(go_dispdat[,4]),]
+              go_filt<-go_dispdat[which(go_dispdat[,4]<0.05),]
+              go_ord<-go_filt[order(go_filt[,4]),]
               showNotification("GeneOntology calculation finished")
               output$downloadGO <- downloadHandler(
                 filename = function() {
@@ -767,6 +768,7 @@ server <- shinyServer(function(input, output, session) {
                   write.csv(go_ord, file, row.names = FALSE)
                 }
               )
+              go_ord[,4]<-format(go_ord[,4],scientific=T)
               head(go_ord,n = 10)
             })
           },bordered = T)
@@ -861,7 +863,8 @@ server <- shinyServer(function(input, output, session) {
                 }
               }
               incProgress(3/3, detail = paste("Step: Formating"))
-              kegg_ord<-kegg_dispdat[order(kegg_dispdat[,4]),]
+              kegg_filt<-kegg_dispdat[which(kegg_dispdat[,4]<0.05),]
+              kegg_ord<-kegg_filt[order(kegg_filt[,4]),]
               showNotification("KEGG calculation finished")
               output$downloadKEGG <- downloadHandler(
                 filename = function() {
@@ -871,6 +874,7 @@ server <- shinyServer(function(input, output, session) {
                   write.csv(kegg_ord, file, row.names = FALSE)
                 }
               )
+              kegg_ord[,4]<-format(kegg_ord[,4],scientific=T)
               head(kegg_ord,n=10)
             })
           },bordered = T)
@@ -888,17 +892,22 @@ server <- shinyServer(function(input, output, session) {
                 hypergeom[i,1]<-names(markers_genelists_list)[i]
                 hypergeom[i,2]<-length(markers_genelists_list[[i]])
                 hypergeom[i,3]<-length(intersect(degenes,markers_genelists_list[[i]]))
-                hypergeom[i,4]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
-                int_genes<-intersect(degenes,markers_genelists_list[[i]])
-                #int_genes<-gene_ids_all[int_genes_ids,1]
-                if (length(int_genes)>0){
-                  hypergeom[i,5]<-(paste(int_genes,collapse=", "))
+                if (hypergeom[i,3]==0){
+                  hypergeom[i,4]<-1.0
                 } else {
-                  hypergeom[i,5]<-as.character("0")
+                  hypergeom[i,4]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
+                  int_genes<-intersect(degenes,markers_genelists_list[[i]])
+                  #int_genes<-gene_ids_all[int_genes_ids,1]
+                  if (length(int_genes)>0){
+                    hypergeom[i,5]<-(paste(int_genes,collapse=", "))
+                  } else {
+                    hypergeom[i,5]<-as.character("0")
+                  }
                 }
               }
               incProgress(3/3, detail = paste("Step: Presenting"))
-              hypergeom_ord<-hypergeom[order(hypergeom[,4]),]
+              hypergeom_filt<-hypergeom[which(hypergeom[,4]<0.05),]
+              hypergeom_ord<-hypergeom_filt[order(hypergeom_filt[,4]),]
               showNotification("Markers Intersect calculation finished")
               output$downloadMKS <- downloadHandler(
                 filename = function() {
@@ -908,6 +917,7 @@ server <- shinyServer(function(input, output, session) {
                   write.csv(hypergeom_ord, file, row.names = FALSE)
                 }
               )
+              hypergeom[,4]<-format(hypergeom[,4],scientific = T)
               hypergeom_ord[1:10,]
             })
           },bordered = T)
@@ -941,7 +951,8 @@ server <- shinyServer(function(input, output, session) {
                 }
               }
               incProgress(3/3, detail = paste("Step: Presenting"))
-              msig_ord<-msig_dispdat[order(msig_dispdat[,4]),]
+              msig_filt<-msig_dispdat[which(msig_dispdat[,4]<0.05),]
+              msig_ord<-msig_filt[order(msig_filt[,4]),]
               showNotification("Msigdb calculation finished")
               output$downloadMSIG <- downloadHandler(
                 filename = function() {
@@ -951,10 +962,12 @@ server <- shinyServer(function(input, output, session) {
                   write.csv(msig_ord, file, row.names = FALSE)
                 }
               )
+              msig_ord[,4]<-format(msig_ord[,4],scientific=T)
               msig_ord[1:10,]
 
             })
           },bordered = T)
+          degenes_table_ord[,3]<-format(degenes_table_ord[,3],scientific=T)
           degenes_table_ord[1:input$nogenes,]
         })
       })   ###end of get de gene button
