@@ -12,7 +12,8 @@ plots <- tabsetPanel(
     tabPanel(
         "Updated Plot",
         verbatimTextOutput("brush"),
-        plotlyOutput("Plot2", height="550px")
+        plotlyOutput("Plot2", height="550px"),
+        downloadButton("downlabels", "Download updated labels")
     )
 
     #tabPanel(

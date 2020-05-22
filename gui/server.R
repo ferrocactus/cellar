@@ -340,6 +340,14 @@ server <- shinyServer(function(input, output, session) {
                 ) %>% layout(dragmode = "lasso",
                              title = paste("Value of ", input$labelupd, sep=""))
               })
+              output$downlabels <- downloadHandler(
+                filename = function() {
+                  paste("Updated_labels", ".csv", sep = "")
+                },
+                content = function(file) {
+                  write.csv(newlabs, file, row.names = FALSE)
+                }
+              )
             })
           }
         }
