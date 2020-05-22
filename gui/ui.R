@@ -4,9 +4,10 @@ library(plotly)
 library(shinyjs)
 
 source("gui/sidebar/datasetmenu.R") #datasetmenu
+source("gui/sidebar/configmenu.R") #configmenu
 source("gui/sidebar/selectionmenu.R") #mainmenu
 source("gui/sidebar/analysismenu.R") #analysismenu
-source("gui/sidebar/configmenu.R") #configmenu
+source("gui/sidebar/downloadmenu.R") #downloadmenu
 source("gui/body/plots.R") #plots
 source("gui/body/analysis.R") #plots
 
@@ -26,7 +27,8 @@ sidebar <- dashboardSidebar(
         datasetmenu,
         configmenu,
         selectionmenu,
-        analysismenu
+        analysismenu,
+        downloadmenu
     )
 )
 

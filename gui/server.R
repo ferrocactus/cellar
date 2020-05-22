@@ -490,6 +490,12 @@ server <- shinyServer(function(input, output, session) {
                           choices = set_name,
                           selected = NULL)
 
+        updateSelectInput(session = session,
+                          inputId = "cell_subset_download",
+                          label = "Download labels",
+                          choices = c("All", set_name),
+                          selected = 'All')
+
       })
 
 
@@ -505,6 +511,12 @@ server <- shinyServer(function(input, output, session) {
                         label = "Choose Subset 2",
                         choices = set_name,
                         selected = NULL)
+
+      updateSelectInput(session = session,
+                        inputId = "cell_subset_download",
+                        label = "Download labels",
+                        choices = c("All", set_name),
+                        selected = 'All')
 
 
 
@@ -981,6 +993,47 @@ server <- shinyServer(function(input, output, session) {
         })
       })   ###end of get de gene button
 
+
+      ####################### Download panel
+
+      output$download_cells <- downloadHandler(
+        filename = function() {
+            paste(tools::file_path_sans_ext(dataset), "_all.csv", sep="")
+        },
+        content = function(filename) {
+            if (input$cell_subset_download == 'All') {
+                if (input$tabset == 'Main Plot') {
+                    write.csv(df, filename, row.names=TRUE)
+                } else {
+                    #TODO write csv with updated plot
+                    write.csv(df, filename, row.names=TRUE)
+                }
+            } else if (input$cell_subset_download != "") {
+                #TODO write csv with the subset input$cell_subset_download
+                idx <- which(
+                    set_name == as.character(input$cell_subset_download))
+                indices <- sets[[idx]]
+            }
+        }
+      )
+
+      output$download_plot <- downloadHandler(
+        filename = function() {
+            extension <- tolower(input$plot_download_format)
+            paste(tools::file_path_sans_ext(dataset),
+                  "_plot.", extension, sep="")
+        },
+        content = function(filename) {
+            if (input$tabset == 'Main Plot') {
+                #TODO save plot_ly from previous runs
+                fig <- plot_ly(z = ~volcano) %>% add_surface()
+                orca(fig, "plot.svg")
+            } else {
+                fig <- plot_ly(z = ~volcano) %>% add_surface()
+                orca(fig, "plot.svg")
+            }
+        }
+      )
 
 
       # selecteddat=NULL

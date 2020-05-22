@@ -47,6 +47,10 @@ section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-i
     margin-top: -20px !important;
 }
 
+.sidebar-menu .treeview-menu > .shiny-download-link {
+    margin-top: -100px !important;
+}
+
 .myp {
     margin-left: 5px;
     font-size: 15px;
@@ -99,12 +103,11 @@ input:disabled {
     background: var(--darkgray) !important;
 }
 
-h2 {
-    font-size:18px !important;
-}
-
-h3 {
-    font-size:16px !important;
+.downloadbtn {
+    background-color: var(--green) !important;
+    color: white !important;
+    border-color: var(--darkgreen) !important;
+    margin-left: 14px !important;
 }
 
 .wrapper {
