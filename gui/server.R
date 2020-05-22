@@ -917,7 +917,7 @@ server <- shinyServer(function(input, output, session) {
                   write.csv(hypergeom_ord, file, row.names = FALSE)
                 }
               )
-              hypergeom[,4]<-format(hypergeom[,4],scientific = T)
+              hypergeom_ord[,4]<-format(hypergeom_ord[,4],scientific = T)
               hypergeom_ord[1:10,]
             })
           },bordered = T)
