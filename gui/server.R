@@ -284,6 +284,8 @@ server <- shinyServer(function(input, output, session) {
             showNotification(df)
           } else {
             markers <- pipe$markers
+            
+            
             #get the gene expression data
             expr_data = data.frame(
               matrix(pipe$x, ncol = length(pipe$col_ids),
@@ -349,6 +351,12 @@ server <- shinyServer(function(input, output, session) {
       # the dictionary includes information of each cluster
       # (including DE genes and intersections)
       markers <- pipe$markers
+      outp_names=c("")
+      for (i in 1:length(markers)){
+        outp_names=c(outp_names,markers[[as.character(i-1)]][['outp_names']])
+      }
+      
+      
       #get the gene expression data
       expr_data = data.frame(
         matrix(pipe$x, ncol = length(pipe$col_ids),
@@ -525,7 +533,7 @@ server <- shinyServer(function(input, output, session) {
 
       ##### gene card
       observeEvent(input$search, {
-        if (input$searchgene %in% names(expr_data)) {
+        if (input$searchgene %in% outp_names) {
           getPage(input$searchgene) # function in functions.R
         }
         else {
