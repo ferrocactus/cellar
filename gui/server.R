@@ -578,7 +578,8 @@ server <- shinyServer(function(input, output, session) {
 
       observeEvent(input$labelupd, {
         #d <- event_data("plotly_selected")
-        keys<-subsets[[as.character(input$subset1)]]
+        idx=which(set_name==as.character(input$subset1))
+        keys<-sets[[idx]]
         showNotification(as.character(input$newlabels))
         newlabs[keys]<<-as.character(input$newlabels)
         showNotification("Updating labels")
