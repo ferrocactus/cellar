@@ -612,6 +612,12 @@ server <- shinyServer(function(input, output, session) {
       #  showNotification("Invalid gene ids, functional analysis cannot be performed")
       #}
       observeEvent(input$getdegenes,{
+      
+        if (as.character(input$subset2)=="None" && as.character(input$subset1)=="None"){
+          showNotification("At least one subset should be not empty")
+          return()
+        }
+        
         selecteddat=NULL
         idx1=which(set_name==as.character(input$subset1))
         idx2=which(set_name==as.character(input$subset2))
@@ -621,7 +627,10 @@ server <- shinyServer(function(input, output, session) {
 
         cell_count=length(s1)
         cell_count2=length(s2)
-
+        
+        
+        
+        
         if (as.character(input$subset2)=="None"){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
           mar=pipe$get_markers_subset(
@@ -640,7 +649,7 @@ server <- shinyServer(function(input, output, session) {
           showNotification("DE genes of subset1 against the rest")
 
         }
-        else if(as.character(input$subset1)=="None"){
+        else if(as.character(input$subset1)=="None"){          ### one subset DE
           keys=s2
           mar=pipe$get_markers_subset(
                 keys-1, alpha=input$mark_alpha, correction=input$mark_correction,
@@ -653,14 +662,14 @@ server <- shinyServer(function(input, output, session) {
           showNotification("DE genes of subset2 against the rest")
 
         }
-        else{                 ## 2 subsets
+        else{                 ## 2 subsets DE
           keys=s1
           keys2=s2
           mar=pipe$get_markers_subset(
                 keys-1, keys2-1, alpha=input$mark_alpha,
                 correction=input$mark_correction,
                 markers_n=input$nogenes)
-
+          ##DE information calculated
 
           ### calculating DE
           pval=mar[['0']][['pvals']]
@@ -671,10 +680,6 @@ server <- shinyServer(function(input, output, session) {
           logFC2=mar[['1']][['diffs']]
           gene_names2=mar[['1']][['outp_names']]
 
-
-
-          #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
-          #restdat<-scdata_subset[as.numeric(keys2),1:ncol(scdata_subset)-1]
           showNotification("DE genes of 2 subsets ")
         }
 
@@ -694,12 +699,8 @@ server <- shinyServer(function(input, output, session) {
         ###end of dealing with previous buttons
 
 
-        #### start calculating DE genes
-        #### and realizing related functions
+
         output$genes <- renderTable({
-
-
-
           #####old DE gene implementations
           # withProgress(message = 'calculating DE genes',detail=NULL, value = 0, {
           #   #exp_genes_mean<-colSums(exp_genes)/nrow(exp_genes)
@@ -761,7 +762,7 @@ server <- shinyServer(function(input, output, session) {
             })
           },bordered = T)
 
-          ### DE gene buttons implementation:
+          ############################### DE gene buttons implementation:
           DEgenes<-degenes_table_ord[1:input$nogenes,1] # a vector of characters
           for (i in 1:length(DEgenes))
           {
@@ -775,6 +776,8 @@ server <- shinyServer(function(input, output, session) {
               }
             )
           })
+          
+          
           ### maintain DE gene buttons
 
           lapply(
@@ -783,13 +786,15 @@ server <- shinyServer(function(input, output, session) {
 
               o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
                 showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
+                color=mar[['0']][['inp_names']][which(mar[['0']][['outp_names']]==DEgenes[i])]
+                
                 output$plot <- renderPlotly({
                   plot_ly(
                     df,
                     #width=3000,height=4000,
                     x = df$x1, y = df$x2,
                     text = ~paste("label: ", as.factor(df$y)),
-                    color = (scdata_subset[[DEgenes[i]]]),
+                    color = (scdata_subset[[color]]),
                     key = row.names(df),
                     type = 'scatter',
                     mode = 'markers'
@@ -801,7 +806,9 @@ server <- shinyServer(function(input, output, session) {
               assign("debuttons",c(debuttons,isolate(o)),envir =env)
             })
           ## end of maintaining buttons
-
+          ##################      end of DE buttons
+          
+          
           ##### constructing hgnc_filt using informations in the marker
           ENTREZID=array()
           SYMBOL=array()
