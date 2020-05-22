@@ -83,27 +83,6 @@ server <- shinyServer(function(input, output, session) {
       }
   })
 
-  observeEvent(input$ensemble_checkbox, {
-      if('all' %in% str_split(input$ensemble_checkbox, " ")){
-          for (x in options$clu_ensemble) {
-              if (x != 'all') {
-                  shinyjs::disable(
-                      selector = paste("#ensemble_checkbox input[value='",
-                                  x, "']", sep="")
-                  )
-              }
-          }
-      } else {
-          for (x in options$clu_ensemble) {
-              if (x != 'all') {
-                  shinyjs::enable(
-                      selector=paste("#ensemble_checkbox input[value='",x, "']",
-                                       sep="")
-                  )
-              }
-          }
-      }
-  })
   ###########################################################
 
   # Upload dataset
