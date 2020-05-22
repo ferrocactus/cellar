@@ -418,17 +418,17 @@ server <- shinyServer(function(input, output, session) {
 
 
 
-      
+
       # initialize subsets, store clusters
       assign("set_name",c("None"),envir = env)
       assign("sets",c(NA),envir = env)
-      
+
       for (i in 1:length(markers)){
         assign("set_name",c(set_name,(paste("cluster_",as.character(i-1),sep=""))),envir=env)
         keys<-which(expr_data$cluster==(i-1))
         assign("sets",c(sets,list(keys)),envir=env)
       }
-      
+
       #list2env(subsets,env)
 
       # store selected subsets
@@ -441,7 +441,7 @@ server <- shinyServer(function(input, output, session) {
           showNotification("Reserved name, please choose another.")
           return()
         }
-        
+
         d <- event_data("plotly_selected")
         keys=as.numeric(d$key)
         cell_count=length(d$key)
@@ -452,15 +452,15 @@ server <- shinyServer(function(input, output, session) {
         if (as.character(input$newsubset)!=""){
           sets<<-c(sets,list(keys))
           set_name<<-c(set_name,as.character(input$newsubset))
-          
+
         }
         else{
           sets<<-c(sets,list(keys))
           set_name<<-c(set_name,paste("Newset",as.character(length(set_name)),sep=""))
         }
-        
+
         showNotification(paste(as.character(cell_count)," cells stored",sep=""))
-        
+
         # select subset1
         updateSelectInput(session = session,
                           inputId = "subset1",
@@ -473,7 +473,7 @@ server <- shinyServer(function(input, output, session) {
                           label = "Choose Subset 2",
                           choices = set_name,
                           selected = NULL)
-        
+
       })
 
 
@@ -612,12 +612,12 @@ server <- shinyServer(function(input, output, session) {
       #  showNotification("Invalid gene ids, functional analysis cannot be performed")
       #}
       observeEvent(input$getdegenes,{
-      
+
         if (as.character(input$subset2)=="None" && as.character(input$subset1)=="None"){
           showNotification("At least one subset should be not empty")
           return()
         }
-        
+
         selecteddat=NULL
         idx1=which(set_name==as.character(input$subset1))
         idx2=which(set_name==as.character(input$subset2))
@@ -627,10 +627,10 @@ server <- shinyServer(function(input, output, session) {
 
         cell_count=length(s1)
         cell_count2=length(s2)
-        
-        
-        
-        
+
+
+
+
         if (as.character(input$subset2)=="None"){   ## one against the rest (can be selected by lasso or cluster selection)
           keys=s1
           mar=pipe$get_markers_subset(
@@ -728,7 +728,7 @@ server <- shinyServer(function(input, output, session) {
           # }) ## end of calculating DE progress
 
           output$GeneOntology <- renderTable({
-            rownames(gene_ids_all)<-gene_ids_all[,3]
+            rownames(gene_ids_all)<-gene_ids_all[,1]
             withProgress(message = 'calculating Gene Ontology',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
               degenes_ids<-degenes_table_ord[1:input$nogenes,1]
@@ -740,6 +740,7 @@ server <- shinyServer(function(input, output, session) {
                 go_dispdat[i,3]<-length(intersect(degenes,Hs.c5[[i]]))
                 go_dispdat[i,4]<-phyper(length(intersect(degenes,Hs.c5[[i]])),length(Hs.c5[[i]]),ncol(scdata_subset)-1-length(Hs.c5[[i]]),length(degenes),lower.tail = F)
                 int_genes_ids<-intersect(degenes,Hs.c5[[i]])
+                rownames(gene_ids_all)<-gene_ids_all[,3]
                 int_genes<-gene_ids_all[int_genes_ids,1]
                 if (length(int_genes)>0){
                   go_dispdat[i,5]<-(paste(int_genes,collapse=", "))
@@ -776,8 +777,8 @@ server <- shinyServer(function(input, output, session) {
               }
             )
           })
-          
-          
+
+
           ### maintain DE gene buttons
 
           lapply(
@@ -787,7 +788,7 @@ server <- shinyServer(function(input, output, session) {
               o<-observeEvent(input[[paste(DEgenes[i]," ",seq="")]], {
                 showNotification(paste("showing ", DEgenes[i],"'s expression",sep=""),duration=5)
                 color=mar[['0']][['inp_names']][which(mar[['0']][['outp_names']]==DEgenes[i])]
-                
+
                 output$plot <- renderPlotly({
                   plot_ly(
                     df,
@@ -807,8 +808,8 @@ server <- shinyServer(function(input, output, session) {
             })
           ## end of maintaining buttons
           ##################      end of DE buttons
-          
-          
+
+
           ##### constructing hgnc_filt using informations in the marker
           ENTREZID=array()
           SYMBOL=array()
@@ -831,7 +832,7 @@ server <- shinyServer(function(input, output, session) {
 
           ### KEGG panel
           output$KEGG <- renderTable({
-            rownames(gene_ids_all)<-gene_ids_all[,3]
+            rownames(gene_ids_all)<-gene_ids_all[,1]
             withProgress(message = 'calculating KEGG',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
               degenes_ids<-degenes_table_ord[1:input$nogenes,1]
@@ -843,6 +844,7 @@ server <- shinyServer(function(input, output, session) {
                 kegg_dispdat[i,3]<-length(intersect(degenes,kegg_genelists[[i]]))
                 kegg_dispdat[i,4]<-phyper(length(intersect(degenes,kegg_genelists[[i]])),length(kegg_genelists[[i]]),ncol(scdata_subset)-1-length(kegg_genelists[[i]]),length(degenes),lower.tail = F)
                 int_genes_ids<-intersect(degenes,kegg_genelists[[i]])
+                rownames(gene_ids_all)<-gene_ids_all[,3]
                 int_genes<-gene_ids_all[int_genes_ids,1]
                 if (length(int_genes)>0){
                   kegg_dispdat[i,5]<-(paste(int_genes,collapse=", "))
@@ -879,8 +881,8 @@ server <- shinyServer(function(input, output, session) {
                 hypergeom[i,2]<-length(markers_genelists_list[[i]])
                 hypergeom[i,3]<-length(intersect(degenes,markers_genelists_list[[i]]))
                 hypergeom[i,4]<-phyper(length(intersect(degenes,markers_genelists_list[[i]])),length(markers_genelists_list[[i]]),ncol(scdata_subset)-1-length(markers_genelists_list[[i]]),length(degenes),lower.tail = F)
-                int_genes_ids<-intersect(degenes,markers_genelists_list[[i]])
-                int_genes<-gene_ids_all[int_genes_ids,1]
+                int_genes<-intersect(degenes,markers_genelists_list[[i]])
+                #int_genes<-gene_ids_all[int_genes_ids,1]
                 if (length(int_genes)>0){
                   hypergeom[i,5]<-(paste(int_genes,collapse=", "))
                 } else {
@@ -910,7 +912,7 @@ server <- shinyServer(function(input, output, session) {
           #})
           ### Msigdb panel
           output$Msigdb <- renderTable({
-            rownames(gene_ids_all)<-gene_ids_all[,3]
+            rownames(gene_ids_all)<-gene_ids_all[,1]
             withProgress(message = 'calculating Msigdb',detail=NULL, value = 0, {
               incProgress(1/3, detail = paste("Step: Getting gene IDs"))
               degenes_ids<-degenes_table_ord[1:input$nogenes,1]
@@ -922,6 +924,7 @@ server <- shinyServer(function(input, output, session) {
                 msig_dispdat[i,3]<-length(intersect(degenes,Hs.c2[[i]]))
                 msig_dispdat[i,4]<-phyper(length(intersect(degenes,Hs.c2[[i]])),length(Hs.c2[[i]]),ncol(scdata_subset)-1-length(Hs.c2[[i]]),length(degenes),lower.tail = F)
                 int_genes_ids<-intersect(degenes,Hs.c2[[i]])
+                rownames(gene_ids_all)<-gene_ids_all[,3]
                 int_genes<-gene_ids_all[int_genes_ids,1]
                 if (length(int_genes)>0){
                   msig_dispdat[i,5]<-(paste(int_genes,collapse=", "))
