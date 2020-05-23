@@ -27,7 +27,18 @@ server <- shinyServer(function(input, output, session) {
   new_labels=NULL
   assign("new_labels",NULL,envir = env)
 
-
+  ##### gene card
+  observeEvent(input$search, {
+    
+    c=Con()
+    
+    if (c$check_name(input$searchgene)==1) {
+      getPage(input$searchgene) # function in functions.R
+    }
+    else {
+      showNotification("Gene name does not exist.")
+    }
+  })
 
 
   degenenames=NULL
@@ -530,15 +541,7 @@ server <- shinyServer(function(input, output, session) {
       })
 
 
-      ##### gene card
-      observeEvent(input$search, {
-        if (input$searchgene %in% outp_names) {
-          getPage(input$searchgene) # function in functions.R
-        }
-        else {
-          showNotification("Gene name does not exist.")
-        }
-      })
+      
 
       ########################################## PLOTTING
       output$plot <- renderPlotly({
