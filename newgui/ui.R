@@ -24,11 +24,11 @@ sidebar <- dashboardSidebar(
     useShinyjs(),
     width = 400,
     sidebarMenu(
-        datasetmenu(id='datasetmenu'),
-        configmenu(id='configmenu'),
-        selectionmenu(id='selectionmenu'),
-        analysismenu(id='analysismenu'),
-        downloadmenu(id='downloadmenu')
+        datasetmenu(id='ns'),
+        configmenu(id='ns'),
+        selectionmenu(id='ns'),
+        analysismenu(id='ns'),
+        downloadmenu(id='ns')
     )
 )
 
@@ -36,8 +36,8 @@ body <- dashboardBody(
     useShinyjs(),
     tags$head(includeCSS("newgui/ui_logic/styles/style.css")),
     tags$script(src = "newgui/ui_logic/sidebar/anchor.js"),
-    plots,
-    analysis
+    plots(id="ns"),
+    analysis(id="ns")
 )
 
 ui <- dashboardPage(header, sidebar, body, skin='green')

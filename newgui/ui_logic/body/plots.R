@@ -1,28 +1,20 @@
 library(shiny)
 
-plots <- tabsetPanel(
+plots <- function(id, label='plots') {
+ns = NS(id)
+tabsetPanel(
     type = "tabs",
     id = "tabset",
     tabPanel(
         "Main Plot",
         h3(textOutput("caption")),
-        plotlyOutput("plot", height="550px"),
+        plotlyOutput(ns("plot"), height="550px"),
     ),
 
     tabPanel(
         "Updated Plot",
         verbatimTextOutput("brush"),
-        plotlyOutput("Plot2", height="550px"),
-        downloadButton("downlabels", "Download updated labels")
+        plotlyOutput(ns("Plot2"), height="550px"),
+        downloadButton(ns("downlabels"), "Download updated labels")
     )
-
-    #tabPanel(
-    #    "Details",
-    #    div(
-    #        id = "details_div",
-    #        textOutput(
-    #            "details"
-    #        )
-    #    )
-    #)
-)
+)}
