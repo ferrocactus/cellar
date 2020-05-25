@@ -47,27 +47,16 @@ def load_data(dataset, dataset_source=None):
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
         return [ann.X, ann.var.index.to_numpy().astype('U')]
     else:
-        if dataset_source is None:
-            raise ValueError("Dataset source not specified.")
-
-        if dataset_source == 'hubmap':
-            if len(dataset) <= 5 or dataset[-4:] != 'h5ad':
-                dataset = dataset + ".h5ad"
-            ann = anndata.read_h5ad("datasets/" + dataset_source + "/" + dataset)
+        if dataset[-4:] == 'h5ad':
+            ann = anndata.read_h5ad(
+                "datasets/"  + dataset)
             return [ann.X, ann.var.index.to_numpy().astype('U')]
-        elif dataset_source == 'user_uploaded':
-            if dataset[-4:] == 'h5ad':
-                ann = anndata.read_h5ad(
-                    "datasets/" + dataset_source + "/" + dataset)
-                return [ann.X, ann.var.index.to_numpy().astype('U')]
-            elif dataset[-3:] == 'csv':
-                df = pd.read_csv("datasets/" + dataset_source + "/" + dataset,
-                                 index_col=0, header=None).T
-                return df.to_numpy(), df.columns.to_numpy()
-            else:
-                raise ValueError("Dataset format not implemented.")
+        elif dataset[-3:] == 'csv':
+            df = pd.read_csv("datasets/"  + dataset,
+                             index_col=0, header=None).T
+            return df.to_numpy(), df.columns.to_numpy()
         else:
-            raise ValueError("Dataset source not found.")
+            raise ValueError("Dataset format not implemented.")
 
 
 def upload_file(dataset, path):
