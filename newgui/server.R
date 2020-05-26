@@ -4,13 +4,27 @@ source("newgui/server_logic/selected_dataset.R")
 source("newgui/server_logic/pipe_cluster.R")
 source("newgui/server_logic/gene_card.R")
 source("newgui/server_logic/lasso_store.R")
+source("newgui/server_logic/de.R")
+source("newgui/server_logic/update_sets.R")
+source("newgui/server_logic/re_plot.R")
 
 server <- shinyServer(function(input, output, session) {
+    # Will be reset only when dataset changes
+    selDataset <- reactiveVal("")
+    setNames <- reactiveVal(c("None"))
+    setPts <- reactiveVal(c(NA))
+    pipe <- reactiveVal(0)
+    replot <- reactiveVal(0)
+
+    # Functionality
     callModule(upload_file, id = "ns")
     callModule(gray_widgets, id = "ns")
     callModule(gene_card, id = "ns")
-    #callModule(lasso_store, id = "selectionmmenu analysismenu plots")
+    callModule(lasso_store, id = "ns", setNames = setNames, setPts = setPts)
 
-    selDataset <- callModule(selected_dataset, id = "ns") # reactive
-    pipe <- callModule(cluster_run, id = "ns", selDataset = selDataset)
+    callModule(selected_dataset, id = "ns", selDataset = selDataset)
+    callModule(cluster_run, id = "ns", pipe = pipe, selDataset = selDataset,
+               setNames = setNames, setPts = setPts, replot = replot)
+    callModule(update_sets, id = "ns", setNames = setNames)
+    callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
 })

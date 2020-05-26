@@ -30,6 +30,7 @@ class Pipeline(Unit):
     def __init__(self, x='default', dataset_source=None,
                     config='configs/config.ini', col_ids=None):
         if isinstance(x, str):
+            self.dataset = x
             if x == 'default':
                 x, col_ids = load_data('default')
                 print("Loaded data.")
@@ -154,6 +155,7 @@ class Pipeline(Unit):
             eval_obj=self.eval, n_clusters=n_clusters, n_jobs=n_jobs, **kwargs
         )
         self.labels = self.clu.get(x)
+        self.n_clusters = np.unique(self.labels)
         return self.labels
 
     def get_markers(self, x=None, y=None, method="TTest", alpha=0.05,

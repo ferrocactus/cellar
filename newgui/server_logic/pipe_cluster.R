@@ -1,33 +1,31 @@
 library(reticulate)
 
 source_python("__init__.py")
-source("newgui/server_logic/selected_dataset.R")
 
 pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
                         eval_method, clu_n_clusters, vis_method) {
     withProgress(message = "Making plot", value = 0, {
         n <- 4
-        incProgress(1/n, detail = paste("Step: PCA"))
-        pipe$get_emb(method = dim_method, n_components = dim_n_components)
+        incProgress(1/n, detail = paste("Step: Reducing Dimensionality"))
+        pipe()$get_emb(method = dim_method, n_components = dim_n_components)
         incProgress(1/n, detail = paste("Step: Clustering"))
-        pipe$get_labels(method = clu_method, eval_method = eval_method,
+        pipe()$get_labels(method = clu_method, eval_method = eval_method,
                         n_clusters = clu_n_clusters)
         incProgress(1/n, detail = paste("Step: Visualizing"))
-        pipe$get_emb_2d(method = vis_method)
+        pipe()$get_emb_2d(method = vis_method)
     })
 }
 
-cluster_run <- function(input, output, session, selDataset, color) {
+cluster_run <- function(input, output, session, pipe, selDataset,
+                        setNames, setPts, replot) {
     observeEvent(input$runconfigbtn, {
         print(paste("Selected", selDataset()))
 
-        if (TRUE) {
+        if (pipe() == 0 || pipe()$dataset != selDataset()) {
             print("Changing dataset")
-            pipe <- Pipeline(x = selDataset())
+            pipe(Pipeline(x = selDataset()))
         } else {
-            # TODO
             print("Not changing dataset")
-            pipe <- Pipeline(x = selDataset())
         }
 
         # Run clustering
@@ -39,27 +37,16 @@ cluster_run <- function(input, output, session, selDataset, color) {
                     vis_method = input$vis_method)
 
         # Update plot
-        withProgress(message = "Making plot", value = 0, {
-            incProgress(1/4, detail = paste("Step: Rendering plot"))
-            if (input$color == "cluster") {
-                plotcols = as.factor(pipe$labels)
-            } else {
-                plotcols = pipe$labels
-            }
+        replot(replot() + 1)
 
-            output$plot <- renderPlotly({
-                plot_ly(
-                    x = pipe$x_emb_2d[,1], y = pipe$x_emb_2d[,2],
-                    text = ~paste("Label: ", as.factor(pipe$labels)),
-                    color = pipe$labels,
-                    key = plotcols,
-                    type = 'scatter',
-                    mode = 'markers'
-                ) %>% layout(dragmode = "lasso",
-                            title = paste("Value of ", input$color, sep=""))
-            })
-        })
-
-        return(pipe)
+        # Update sets
+        for (i in 1:length(pipe()$n_clusters)) {
+            #TODO replace cluster_i if rerun
+            setNames(c(
+                setNames(), (paste("Cluster_", as.character(i-1), sep = ""))))
+            setPts(c(setPts(), list(which(pipe()$labels == (i-1)))))
+        }
+        # TODO
+        # clear analysis tabs
     })
 }

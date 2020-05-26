@@ -1,7 +1,5 @@
 # Return the dataset that has been selected and store it in selDataset (reactive)
-selected_dataset <- function(input, output, session) {
-    selDataset <- reactiveVal(0)
-
+selected_dataset <- function(input, output, session, selDataset) {
     toListen <- reactive({
         list(input$folder, input$uploaded_dataset, input$hubmap_dataset)
     })
@@ -15,6 +13,4 @@ selected_dataset <- function(input, output, session) {
         # Include path as well
         selDataset(paste(input$folder, "/", selDataset(), sep=""))
     })
-
-    return(selDataset)
 }
