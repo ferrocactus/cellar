@@ -2,11 +2,12 @@ library(reticulate)
 
 source_python("__init__.py")
 
+# Needed by cluster_run
 pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
                         eval_method, clu_n_clusters, vis_method) {
     withProgress(message = "Making plot", value = 0, {
         n <- 4
-        incProgress(1/n, detail = paste("Step: Reducing Dimensionality"))
+        incProgress(1/n, detail = paste("Step: Reducing Data"))
         pipe()$get_emb(method = dim_method, n_components = dim_n_components)
         incProgress(1/n, detail = paste("Step: Clustering"))
         pipe()$get_labels(method = clu_method, eval_method = eval_method,
@@ -39,8 +40,7 @@ cluster_run <- function(input, output, session, pipe, selDataset,
                     clu_n_clusters = input$clu_n_clusters,
                     vis_method = input$vis_method)
 
-        # Update plot
-        replot(replot() + 1)
+        replot(replot() + 1) # Notify that labels have changed
 
         # Update sets
         for (i in 1:length(pipe()$n_clusters)) {

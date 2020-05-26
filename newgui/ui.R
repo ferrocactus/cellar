@@ -9,7 +9,7 @@ source("newgui/ui_logic/sidebar/selectionmenu.R") #mainmenu
 source("newgui/ui_logic/sidebar/analysismenu.R") #analysismenu
 source("newgui/ui_logic/sidebar/downloadmenu.R") #downloadmenu
 source("newgui/ui_logic/body/plots.R") #plots
-source("newgui/ui_logic/body/analysis.R") #plots
+source("newgui/ui_logic/body/analysis.R") #analysis
 
 #load('gui/obj/cell_ontology')
 

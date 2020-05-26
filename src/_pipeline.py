@@ -279,7 +279,9 @@ class Pipeline(Unit):
 
     def get_markers_subset(self, indices1, indices2=None, alpha=0.05,
                            correction='holm-sidak', markers_n=200, n_jobs=1,
-                           method='TTest'):
+                           method='TTest', con_method='Converter',
+                           con_path='markers/gene_id_name.csv',
+                           con_convention='id-to-name'):
 
         alpha = _validate_mark_alpha(alpha)
         markers_n = _validate_mark_markers_n(markers_n, self.x.shape[1])
@@ -290,10 +292,20 @@ class Pipeline(Unit):
             alpha=alpha, markers_n=markers_n,
             correction=correction, n_jobs=n_jobs
         )
+        con = wrap("conversion", con_method)(
+            convention=con_convention, path=con_path)
 
         indices1 = np.array(indices1).astype(np.int)
+        if len(indices1.shape) == 0:
+            indices1 = np.array([indices1])
         if indices2 is not None:
-            indices2 = np.array(indices2).astype(np.int)
+            if len(indices2) == 0:
+                indices2 = None
+            else:
+                indices2 = np.array(indices2).astype(np.int)
+                if len(indices2.shape) == 0:
+                    indices2 = np.array([indices2])
+
 
         if indices2 is None:
             markers = mark.get_subset(self.x, indices1)
@@ -302,11 +314,10 @@ class Pipeline(Unit):
                 markers[marker]['inp_names'] = self.col_ids[
                     markers[marker]['indices']
                 ]
-                markers[marker]['outp_names'] = self.con.get(
+                markers[marker]['outp_names'] = con.get(
                     markers[marker]['inp_names']
                 )
-            markers = self.ide.get(markers)
-            return markers
+            #markers = self.ide.get(markers)
         else:
             x1 = self.x[indices1]
             labels1 = np.zeros((x1.shape[0],), dtype=int)
@@ -321,11 +332,13 @@ class Pipeline(Unit):
                 markers[marker]['inp_names'] = self.col_ids[
                     markers[marker]['indices']
                 ]
-                markers[marker]['outp_names'] = self.con.get(
+                markers[marker]['outp_names'] = con.get(
                     markers[marker]['inp_names']
                 )
-            markers = self.ide.get(markers)
-            return markers
+            #markers = self.ide.get(markers)
+
+        self.markers = markers
+        return markers
 
     def enrich(self, indices1, indices2=None):
         if type(indices1) != np.ndarray:

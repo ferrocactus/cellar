@@ -4,10 +4,6 @@ analysis <- function(id, label="analysis") {
 ns = NS(id)
 tabsetPanel(
     id = "switcher",
-    # tabPanel(
-    #     "No selection",
-    #     "No selection"
-    # ),
     tabPanel(
         "DE",
         tableOutput(ns("genes")),

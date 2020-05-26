@@ -16,7 +16,7 @@ menuItem(
                 class = "div_step div_n_genes",
                 list(
                     sliderInput(
-                        ns("nogenes"),
+                        ns("mark_markers_n"),
                         "Select number of genes",
                         min = 1, max = 500, value = 50
                     ),
