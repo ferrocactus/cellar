@@ -21,9 +21,12 @@ cluster_run <- function(input, output, session, pipe, selDataset,
     observeEvent(input$runconfigbtn, {
         print(paste("Selected", selDataset()))
 
-        if (pipe() == 0 || pipe()$dataset != selDataset()) {
-            print("Changing dataset")
+        if (pipe() == 0) {
+            print("Initializing pipeline")
             pipe(Pipeline(x = selDataset()))
+        } else if (pipe()$dataset != selDataset()) {
+            print("Changing dataset")
+            pipe()$restate(x = selDataset())
         } else {
             print("Not changing dataset")
         }

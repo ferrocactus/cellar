@@ -23,8 +23,9 @@ server <- shinyServer(function(input, output, session) {
     callModule(lasso_store, id = "ns", setNames = setNames, setPts = setPts)
 
     callModule(selected_dataset, id = "ns", selDataset = selDataset)
-    callModule(cluster_run, id = "ns", pipe = pipe, selDataset = selDataset,
-               setNames = setNames, setPts = setPts, replot = replot)
+    callModule(cluster_run, id = "ns", pipe = pipe,
+               selDataset = selDataset, setNames = setNames,
+               setPts = setPts, replot = replot)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
 })

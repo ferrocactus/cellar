@@ -14,7 +14,7 @@ re_plot <- function(input, output, session, replot, pipe) {
                     plot_ly(
                         x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
                         text = ~paste("Label: ", as.factor(pipe()$labels)),
-                        color = pipe()$labels,
+                        color = as.factor(pipe()$labels),
                         key = plotcols,
                         type = 'scatter',
                         mode = 'markers'
@@ -22,6 +22,7 @@ re_plot <- function(input, output, session, replot, pipe) {
                                 title = paste("Value of ", input$color, sep=""))
                 })
             })
+            replot(0)
         }
     })
 }

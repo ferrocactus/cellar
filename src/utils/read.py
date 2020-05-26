@@ -37,7 +37,7 @@ def read_config(dataset):
     return config
 
 
-def load_data(dataset, dataset_source=None):
+def load_data(dataset):
     # return X, Y
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(

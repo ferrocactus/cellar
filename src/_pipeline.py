@@ -27,28 +27,50 @@ from .utils.validation import _validate_ensemble_methods
 
 
 class Pipeline(Unit):
-    def __init__(self, x='default', dataset_source=None,
-                    config='configs/config.ini', col_ids=None):
+    def __init__(self, x='default', config='configs/config.ini', col_ids=None):
         if isinstance(x, str):
             self.dataset = x
             if x == 'default':
-                x, col_ids = load_data('default')
+                self.x, self.col_ids = load_data('default')
                 print("Loaded data.")
             else:
-                x, col_ids = load_data(x, dataset_source=dataset_source)
+                self.x, self.col_ids = load_data(x)
+                print("Loaded data.")
+        if not isinstance(self.x, np.ndarray):
+            try:
+                self.x = np.array(self.x)
+            except:
+                raise ValueError("Incorrect format for x.")
+        if len(self.x.shape) != 2:
+            raise ValueError(
+                "Data needs to be of shape (n_samples, n_features).")
+        self.config = parse_config(config)
+        self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
+
+    def restate(self, x='default', col_ids=None):
+        keys = list(self.__dict__.keys())
+
+        for var in keys:
+            delattr(self, var)
+
+        if isinstance(x, str):
+            self.dataset = x
+            if x == 'default':
+                self.x, self.col_ids = load_data('default')
+                print("Loaded data.")
+            else:
+                self.x, self.col_ids = load_data(x)
                 print("Loaded data.")
         if not isinstance(x, np.ndarray):
             try:
-                x = np.array(x)
+                self.x = np.array(self.x)
             except:
                 raise ValueError("Incorrect format for x.")
-        if len(x.shape) != 2:
+        if len(self.x.shape) != 2:
             raise ValueError(
                 "Data needs to be of shape (n_samples, n_features).")
-        assert isinstance(config, str)
-        self.x = x
-        self.config = parse_config(config)
-        self.col_ids = np.array(col_ids).astype('U').reshape(-1)
+        self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
+
 
     def validate_params(self, dim_method='PCA', dim_n_components='knee',
             clu_method='KMeans', eval_method='Silhouette',
