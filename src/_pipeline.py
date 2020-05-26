@@ -295,17 +295,17 @@ class Pipeline(Unit):
         con = wrap("conversion", con_method)(
             convention=con_convention, path=con_path)
 
+        if isinstance(indices1, int) or isinstance(indices1, float):
+            indices1 = [indices1]
         indices1 = np.array(indices1).astype(np.int)
-        if len(indices1.shape) == 0:
-            indices1 = np.array([indices1])
+
         if indices2 is not None:
+            if isinstance(indices2, int) or isinstance(indices2, float):
+                indices2 = [indices2]
             if len(indices2) == 0:
                 indices2 = None
             else:
                 indices2 = np.array(indices2).astype(np.int)
-                if len(indices2.shape) == 0:
-                    indices2 = np.array([indices2])
-
 
         if indices2 is None:
             markers = mark.get_subset(self.x, indices1)

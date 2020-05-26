@@ -1,36 +1,40 @@
-re_mark <- function(input, output, session, remark, pipe) {
+re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
     observe({ if (remark() > 0) {
         output$genes <- renderTable({
+            # TODO change '0' to whatever the first element is
+            # not all clustering algorithms return cluster ids starting with 0
             table <- data.frame(
-                        pipe()$markers[['0']]['outp_names'], # gene_names
-                        pipe()$markers[['0']]['diffs'], # logFC
-                        pipe()$markers[['0']]['pvals'], # pvals
+                        pipe()$markers[['0']][['outp_names']], # gene_names
+                        pipe()$markers[['0']][['diffs']], # logFC
+                        pipe()$markers[['0']][['pvals']], # pvals
                         check.names = TRUE, # remove duplicates etc
                         stringsAsFactors = FALSE)
             table <- table[order(table[, 2], decreasing = TRUE),]
-            print('gor here')
             colnames(table) <- c("DE genes", "logFC", "adj.pval")
+            deGenes(table[1:length(pipe()$markers[['0']][['outp_names']]), 1])
             return(table)
         })
 
-        #DEgenes<-degenes_table_ord[1:input$mark_markers_n,1] # a vector of characters
+        if (length(deButtons()) > 0)
+            for (i in 1:length(deButtons()))
+                deButtons()[[i]]$destroy()
+        deButtons(c())
 
-        #for (i in 1:length(DEgenes)) {
-        #    assign("degenenames",c(degenenames,paste(DEgenes[i]," ",seq="")),envir=env)
-        #}
-        #  output$DEbuttons <- renderUI({
-        #    lapply(
-        #      X = 1:length(DEgenes),
-        #      FUN = function(i){
-        #        actionButton(paste(DEgenes[i]," ",seq=""),paste(DEgenes[i]," ",seq=""))
-        #      }
-        #    )
-        #  })
+        output$DEbuttons <- renderUI({
+            lapply(X = 1:length(deGenes()), FUN = function(i) {
+                    actionButton(paste(deGenes()[i], " ", seq = ""),
+                                 paste(deGenes()[i], " ", seq = ""))})
+        })
 
 
-
-          #selecteddat<-scdata_subset[as.numeric(keys),1:ncol(scdata_subset)-1]
-          #restdat<-scdata_subset[-as.numeric(keys),1:ncol(scdata_subset)-1]
-
+        lapply(X = 1:length(deGenes()), FUN = function(i) {
+            o <- observeEvent(input[[paste(deGenes()[i], " ", seq = "")]], {
+                showNotification(
+                    paste("Showing ", deGenes()[i], "'s expression", sep = ""),
+                    duration=5)
+            })
+            deButtons(c(deButtons(), isolate(o)))
+        })
+        remark(0)
     }})
 }

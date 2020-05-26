@@ -12,11 +12,13 @@ source("newgui/server_logic/re_mark.R")
 server <- shinyServer(function(input, output, session) {
     # Will be reset only when dataset changes
     selDataset <- reactiveVal("")
-    setNames <- reactiveVal(c("None"))
+    setNames <- reactiveVal(c("None")) # triggers update_sets on change
     setPts <- reactiveVal(c(NA))
     pipe <- reactiveVal(0)
-    replot <- reactiveVal(0)
-    remark <- reactiveVal(0)
+    replot <- reactiveVal(0) # triggers re_plot on change
+    remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
+    deButtons <- reactiveVal(c())
+    deGenes <- reactiveVal(c())
 
     # Functionality
     callModule(upload_file, id = "ns")
@@ -27,10 +29,12 @@ server <- shinyServer(function(input, output, session) {
     callModule(selected_dataset, id = "ns", selDataset = selDataset)
     callModule(cluster_run, id = "ns", pipe = pipe,
                selDataset = selDataset, setNames = setNames,
-               setPts = setPts, replot = replot)
+               setPts = setPts, replot = replot, remark = remark,
+               deButtons = deButtons)
     callModule(markers_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
-    callModule(re_mark, id = "ns", remark = remark, pipe = pipe)
+    callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
+               deGenes = deGenes, deButtons = deButtons)
 })
