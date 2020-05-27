@@ -25,6 +25,7 @@ shinyproxy
 Cluster_Ensembles.h5
 wgraph*
 uitest
-gui/tempserver.R
+gui/servertemp.R
 tempapp.R
 server_datasets
+gui/server_logic/*
