@@ -28,4 +28,3 @@ uitest
 gui/servertemp.R
 tempapp.R
 server_datasets
-gui/server_logic/*
