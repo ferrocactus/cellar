@@ -24,16 +24,14 @@ kegg_analysis <- function(input, output, session, deGenes, pipe) {
 
             withProgress(message = 'calculating KEGG', detail = NULL,
                          value = 0, {
-                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
 
+                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 deGenes_i <- intersect(deGenes(), rownames(gene_ids_all))
                 deGenes_i <- gene_ids_all[deGenes_i, 3]
                 lende_i <- length(deGenes_i)
 
-                print(kegg_dispdat)
+                incProgress(1/3, detail = paste("Step: Calculating "))
                 for (i in 1:nrow(kegg_dispdat)) {
-                    incProgress(1/3 + 1/nrow(kegg_dispdat),
-                                detail = paste("Step: Calculating "))
                     # cache
                     deGenes_i_ids <- intersect(deGenes_i, kegg_genelists[[i]])
                     leni <- length(deGenes_i_ids)
@@ -43,9 +41,8 @@ kegg_analysis <- function(input, output, session, deGenes, pipe) {
                     kegg_dispdat[i, 3] <- leni
                     kegg_dispdat[i, 4] <- phyper(leni, lenkegg, nc-1-lenkegg,
                                                  lende_i, lower.tail = F)
-
+                    rownames(gene_ids_all)<-gene_ids_all[,3]
                     int_genes <- gene_ids_all[deGenes_i_ids, 1]
-
                     if (length(int_genes) > 0) {
                         kegg_dispdat[i, 5] <- (paste(int_genes, collapse = ", "))
                     } else {
@@ -54,7 +51,6 @@ kegg_analysis <- function(input, output, session, deGenes, pipe) {
                 }
 
                 incProgress(1/3, detail = paste("Step: Formating"))
-
                 kegg_ord <- kegg_dispdat[which(kegg_dispdat[,4] < 0.05),]
                 kegg_ord <- kegg_ord[order(kegg_ord[, 4]),]
                 kegg_ord[, 4] <- format(kegg_ord[, 4], scientific = T)

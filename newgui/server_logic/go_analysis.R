@@ -23,14 +23,13 @@ go_analysis <- function(input, output, session, deGenes, pipe) {
 
             withProgress(message = 'Running GO Analysis', detail = NULL,
                          value = 0, {
-                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
 
+                incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 deGenes_i <- intersect(deGenes(), rownames(gene_ids_all))
                 deGenes_i <- gene_ids_all[deGenes_i, 3]
                 lende_i <- length(deGenes_i)
 
                 incProgress(1/3, detail = paste("Step: Calculating "))
-
                 for (i in 1:nrow(go_dispdat)) {
                     # cache
                     deGenes_i_ids <- intersect(deGenes_i, Hs.c5[[i]])
@@ -51,7 +50,6 @@ go_analysis <- function(input, output, session, deGenes, pipe) {
                 }
 
                 incProgress(1/3, detail = paste("Step: Getting Geneontology"))
-
                 go_ord <- go_dispdat[which(go_dispdat[, 4] < 0.05),]
                 go_ord <- go_ord[order(go_ord[, 4]),]
                 go_ord[, 4] <- format(go_ord[, 4], scientific = T)
