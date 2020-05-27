@@ -58,18 +58,23 @@ menuItem(
                         )
                     ),
 
-                    splitLayout(
+                   # splitLayout(
+                        selectInput(
+                            ns("tissue"),
+                            "Select tissue",
+                            choices = ''
+                        ),
                         selectInput(
                             ns("newlabels"),
-                            "Select labels",
-                            choices = 0
+                            "Select cell type",
+                            choices = ''
                         ),
                         actionButton(
                             ns("labelupd"),
                             "Update Subset Labels",
                             class="secondcol"
                         )
-                    )
+                    #)
                 )
             )
         )

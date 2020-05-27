@@ -10,6 +10,7 @@ source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/re_plot.R")
 source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis.R")
+source("gui/server_logic/update_label.R")
 source("gui/server_logic/analysis_markers.R")
 
 server <- shinyServer(function(input, output, session) {
@@ -41,6 +42,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
+    callModule(update_label, id = "ns")
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons)
