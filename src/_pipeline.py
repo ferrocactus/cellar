@@ -250,6 +250,16 @@ class Pipeline(Unit):
         self.labels = self.ssclu.get(x, new_labels, **kwargs)
         return self.labels
 
+    def has_emb(self):
+        if hasattr(self, 'x_emb'):
+            return True
+        return False
+
+    def has_emb_2d(self):
+        if hasattr(self, 'x_emb_2d'):
+            return True
+        return False
+
     def get_emb_2d(self, x=None, y=None, method='UMAP'):
         if hasattr(self, 'x_emb_2d'):
             return self.x_emb_2d

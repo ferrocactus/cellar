@@ -20,6 +20,7 @@ markers/gene_info
 src/methods/_mpck_means.py
 rsconnect
 */**/*.log
+*/**/*.pyd
 shinyproxy
 */**/*.ipynb
 Cluster_Ensembles.h5

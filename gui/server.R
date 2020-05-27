@@ -12,6 +12,7 @@ source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
 source("gui/server_logic/analysis_markers.R")
+source("gui/server_logic/save_session.R")
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -48,4 +49,6 @@ server <- shinyServer(function(input, output, session) {
                deGenes = deGenes, deButtons = deButtons)
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
+    callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
+               setPts = setPts, deGenes = deGenes)
 })

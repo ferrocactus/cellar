@@ -3,13 +3,21 @@ library(shiny)
 downloadmenu <- function(id, label="downloadmenu") {
 ns = NS(id)
 menuItem(
-    "Download",
+    "Export",
     id = "downloadbtn",
     icon = icon("download"),
     startExpanded = FALSE,
     menuSubItem(
         icon = NULL,
         list(
+            div(
+                class = "div_step div_download_session",
+                downloadButton(
+                    ns("download_sess"),
+                    "Export Session",
+                    class = "longbtn downloadbtn"
+                )
+            ),
             div(
                 class = "div_step div_download_cells",
                 list(
