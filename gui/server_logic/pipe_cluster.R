@@ -18,7 +18,7 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
 }
 
 cluster_run <- function(input, output, session, pipe, selDataset,
-                        setNames, setPts, replot, remark, deButtons) {
+                        setNames, setPts, replot, remark, deButtons, deGenes) {
     observeEvent(input$runconfigbtn, {
         print(paste("Selected", selDataset()))
 
@@ -45,6 +45,8 @@ cluster_run <- function(input, output, session, pipe, selDataset,
 
         replot(1) # Notify that labels have changed
 
+        setNames(c("None"))
+        setPts(c(NA))
         # Update sets
         for (i in 1:length(pipe()$n_clusters)) {
             #TODO replace cluster_i if rerun
@@ -53,12 +55,17 @@ cluster_run <- function(input, output, session, pipe, selDataset,
             setPts(c(setPts(), list(which(pipe()$labels == (i-1)))))
         }
 
-        #TODO clear all analysis tabs
+        # Clear all analysis tabs
         if (length(deButtons()) > 0)
             for (i in 1:length(deButtons()))
                 deButtons()[[i]]$destroy()
         deButtons(c())
+        deGenes(c())
         output$DEbuttons = NULL
         output$genes = NULL
+        output$GeneOntology = NULL
+        output$KEGG = NULL
+        output$Markers = NULL
+        output$Msigdb = NULL
     })
 }

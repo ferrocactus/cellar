@@ -37,7 +37,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(cluster_run, id = "ns", pipe = pipe,
                selDataset = selDataset, setNames = setNames,
                setPts = setPts, replot = replot, remark = remark,
-               deButtons = deButtons)
+               deButtons = deButtons, deGenes = deGenes)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
