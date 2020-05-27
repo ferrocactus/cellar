@@ -1,9 +1,10 @@
 # File upload logic
 library(reticulate)
 
-source_python("read_onto.py")
+source_python("gui/server_logic/read_onto.py")
 
 update_label <- function(input, output, session) {
+    dic=get_dic()
     observe({
         updateSelectInput(
             session,
@@ -11,7 +12,7 @@ update_label <- function(input, output, session) {
             "Select tissue",
             choices = sort(names(dic))
         )})
-    dic['']=''
+    
     observe({
         
         if (as.character(input$tissue)!=""){
