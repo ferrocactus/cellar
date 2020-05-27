@@ -47,5 +47,8 @@ markers_run <- function(input, output, session, pipe, remark, setNames, setPts) 
                     con_path = 'markers/gene_id_name.csv')
 
         remark(remark() + 1) # Notify that markers have changed
+        #TODO Update tabsetpanel to switch to DE
+        #ns <- session$ns
+        #updateTabsetPanel(session, ns("switcher"), selected = ns("DE"))
     })
 }
