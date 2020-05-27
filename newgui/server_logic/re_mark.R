@@ -16,6 +16,9 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
                         stringsAsFactors = FALSE)
             table <- table[order(table[, 2], decreasing = TRUE),]
             colnames(table) <- c("DE genes", "logFC", "adj.pval")
+            table[, 3] <- format(table[, 3], scientific = T)
+            degenes_table_ord[1:input$mark_markers_n,]
+
             deGenes(table[, 1])
             return(table)
         })

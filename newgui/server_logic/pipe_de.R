@@ -1,5 +1,5 @@
 # Needed by markers_run
-pipe_markers <- function(pipe, set1, set2, mark_method, mark_alpha,
+pipe_de <- function(pipe, set1, set2, mark_method, mark_alpha,
                          mark_markers_n, mark_correction, con_method,
                          con_convention, con_path) {
     withProgress(message = "DE", value = 0, {
@@ -15,7 +15,7 @@ pipe_markers <- function(pipe, set1, set2, mark_method, mark_alpha,
     })
 }
 
-markers_run <- function(input, output, session, pipe, remark, setNames, setPts) {
+de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
     observeEvent(input$getdegenes, {
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
@@ -37,7 +37,7 @@ markers_run <- function(input, output, session, pipe, remark, setNames, setPts) 
         }
 
         # Subtract by 1 due to R lists starting at 1
-        pipe_markers(pipe, set1 = (set1 - 1), set2 = (set2 - 1),
+        pipe_de(pipe, set1 = (set1 - 1), set2 = (set2 - 1),
                     mark_method = 'TTest',
                     mark_alpha = input$mark_alpha,
                     mark_markers_n = input$mark_markers_n,

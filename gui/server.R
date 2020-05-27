@@ -29,9 +29,9 @@ server <- shinyServer(function(input, output, session) {
 
   ##### gene card
   observeEvent(input$search, {
-    
+
     c=Con()
-    
+
     if (c$check_name(input$searchgene)==1) {
       getPage(input$searchgene) # function in functions.R
     }
@@ -147,12 +147,12 @@ server <- shinyServer(function(input, output, session) {
       dataset=as.character(input$uploaded_dataset)
       print(dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
-      pipe <- Pipeline(x = dataset, dataset_source=input$folder)
+      pipe <- Pipeline(x = paste0(input$folder, "/", dataset))
     }
     else{
       dataset=as.character(input$hubmap_dataset)
       showNotification(paste("Dataset: ",dataset,sep=""))
-      pipe <- Pipeline(x = dataset, dataset_source=input$folder)
+      pipe <- Pipeline(x = paste0(input$folder, "/", dataset))
     }
 
   #  print(dataset)
@@ -541,7 +541,7 @@ server <- shinyServer(function(input, output, session) {
       })
 
 
-      
+
 
       ########################################## PLOTTING
       output$plot <- renderPlotly({

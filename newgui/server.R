@@ -6,10 +6,9 @@ source("newgui/server_logic/lasso_store.R")
 source("newgui/server_logic/update_sets.R")
 
 source("newgui/server_logic/pipe_cluster.R")
-source("newgui/server_logic/pipe_markers.R")
+source("newgui/server_logic/pipe_de.R")
 source("newgui/server_logic/re_plot.R")
 source("newgui/server_logic/re_mark.R")
-
 source("newgui/server_logic/analysis.R")
 
 server <- shinyServer(function(input, output, session) {
@@ -38,7 +37,7 @@ server <- shinyServer(function(input, output, session) {
                selDataset = selDataset, setNames = setNames,
                setPts = setPts, replot = replot, remark = remark,
                deButtons = deButtons)
-    callModule(markers_run, id = "ns", pipe = pipe, remark = remark,
+    callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
