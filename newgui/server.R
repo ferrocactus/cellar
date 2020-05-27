@@ -10,8 +10,7 @@ source("newgui/server_logic/pipe_markers.R")
 source("newgui/server_logic/re_plot.R")
 source("newgui/server_logic/re_mark.R")
 
-source("newgui/server_logic/go_analysis.R")
-source("newgui/server_logic/kegg_analysis.R")
+source("newgui/server_logic/analysis.R")
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -45,6 +44,5 @@ server <- shinyServer(function(input, output, session) {
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons)
-    callModule(go_analysis, id = "ns", deGenes = deGenes, pipe = pipe)
-    callModule(kegg_analysis, id = "ns", deGenes = deGenes, pipe = pipe)
+    callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
 })
