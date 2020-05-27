@@ -8,9 +8,11 @@ source("newgui/server_logic/pipe_cluster.R")
 source("newgui/server_logic/pipe_markers.R")
 source("newgui/server_logic/re_plot.R")
 source("newgui/server_logic/re_mark.R")
+source("newgui/server_logic/go_analysis.R")
 
 server <- shinyServer(function(input, output, session) {
-    # Will be reset only when dataset changes
+    # All variables that need to be used across different modules
+    # should be defined here
     selDataset <- reactiveVal("")
     setNames <- reactiveVal(c("None")) # triggers update_sets on change
     setPts <- reactiveVal(c(NA))
@@ -21,6 +23,9 @@ server <- shinyServer(function(input, output, session) {
     deGenes <- reactiveVal(c())
 
     # Functionality
+    # We are using the same namespace for everything called "ns".
+    # This is not ideal, but a lot of our functions deal with widgets that
+    # belong to different ui components, so we are using one namespace for all.
     callModule(upload_file, id = "ns")
     callModule(gray_widgets, id = "ns")
     callModule(gene_card, id = "ns")
@@ -37,4 +42,5 @@ server <- shinyServer(function(input, output, session) {
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons)
+    callModule(go_analysis, id = "ns", deGenes = deGenes, pipe = pipe)
 })
