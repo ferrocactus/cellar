@@ -1,6 +1,6 @@
 library(shiny)
 
-source("newgui/ui_logic/sidebar/options.R")
+source("gui/ui_logic/sidebar/options.R")
 
 configmenu <- function(id, label="configmenu") {
 ns = NS(id)

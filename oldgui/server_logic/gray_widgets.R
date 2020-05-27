@@ -1,5 +1,7 @@
-# Logic for graying out buttons when not applicable
+library(shiny)
+
 gray_widgets <- function(input, output, session) {
+    # Gray out automatic if PCA not selected
     observeEvent(input$dim_method, {
         if(input$dim_method == "PCA"){
             shinyjs::enable(selector = "[type=radio][value=pca_auto]")
@@ -13,6 +15,7 @@ gray_widgets <- function(input, output, session) {
         }
     })
 
+    # Gray out n_components if manual not selected
     observeEvent(input$dim_options, {
         if(input$dim_options == "pca_manual"){
             shinyjs::enable('dim_n_components')
@@ -21,6 +24,7 @@ gray_widgets <- function(input, output, session) {
         }
     })
 
+    # Gray out eval method if clustering method does not require it
     observeEvent(input$clu_method, {
         if(input$clu_method %in% options$clu_no_n_clusters){
             shinyjs::disable('clu_n_clusters')
