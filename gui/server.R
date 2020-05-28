@@ -46,7 +46,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
-    callModule(update_label, id = "ns")
+    callModule(update_label, id = "ns",pipe=pipe, labelList = labelList)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons)
