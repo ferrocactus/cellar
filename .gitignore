@@ -29,3 +29,4 @@ uitest
 gui/servertemp.R
 tempapp.R
 server_datasets
+tmp/*

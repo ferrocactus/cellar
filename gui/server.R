@@ -27,6 +27,7 @@ server <- shinyServer(function(input, output, session) {
     deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
     labelList <- reactiveVal(c())
+    plotObj <- reactiveVal(0)
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -46,12 +47,13 @@ server <- shinyServer(function(input, output, session) {
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
-    callModule(update_label, id = "ns",pipe=pipe, labelList = labelList)
-    callModule(re_plot, id = "ns", replot = replot, pipe = pipe)
+    callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
+    callModule(re_plot, id = "ns", replot = replot, pipe = pipe,
+               plotObj = plotObj, selDataset = selDataset)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons)
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
-               setPts = setPts, deGenes = deGenes)
+               setPts = setPts, deGenes = deGenes, selDataset = selDataset)
 })

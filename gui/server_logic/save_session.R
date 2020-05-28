@@ -1,22 +1,17 @@
 library(rjson)
+library(tools)
 
 save_session <- function(input, output, session, pipe, setNames, setPts,
-                         deGenes) {
+                         deGenes, selDataset) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
-                if (input$folder == 'user_uploaded')
-                    dataset <- input$uploaded_dataset
-                else
-                    dataset <- input$hubmap_dataset
-                paste0(tools::file_path_sans_ext(dataset), "_session.json")
+                paste0(file_path_sans_ext(basename(selDataset())),
+                       "_session.json")
             },
             content = function(file) {
                 sess <- c()
-                if (input$folder == 'user_uploaded')
-                    sess$'dataset' <- input$uploaded_dataset
-                else
-                    sess$'dataset' <- input$hubmap_dataset
+                sess$'dataset' <- file_path_sans_ext(basename(selDataset()))
                 sess$'dim_reduction_method' <- input$dim_method
                 if (input$dim_options == 'pca_auto')
                     sess$'dim_n_components' <- 'Automatic'
