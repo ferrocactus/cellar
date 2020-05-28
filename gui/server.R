@@ -4,6 +4,7 @@ source("gui/server_logic/selected_dataset.R")
 source("gui/server_logic/gene_card.R")
 source("gui/server_logic/lasso_store.R")
 source("gui/server_logic/update_sets.R")
+source("gui/server_logic/add_label.R")
 
 source("gui/server_logic/pipe_cluster.R")
 source("gui/server_logic/pipe_de.R")
@@ -25,6 +26,7 @@ server <- shinyServer(function(input, output, session) {
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
     deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
+    labelList <- reactiveVal(c())
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -34,12 +36,13 @@ server <- shinyServer(function(input, output, session) {
     callModule(gray_widgets, id = "ns")
     callModule(gene_card, id = "ns")
     callModule(lasso_store, id = "ns", setNames = setNames, setPts = setPts)
+    callModule(add_label, id = "ns", labelList = labelList)
 
     callModule(selected_dataset, id = "ns", selDataset = selDataset)
     callModule(cluster_run, id = "ns", pipe = pipe,
                selDataset = selDataset, setNames = setNames,
                setPts = setPts, replot = replot, remark = remark,
-               deButtons = deButtons, deGenes = deGenes)
+               deButtons = deButtons, deGenes = deGenes, labelList = labelList)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
