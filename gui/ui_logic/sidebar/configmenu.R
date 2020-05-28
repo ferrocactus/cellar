@@ -38,11 +38,13 @@ menuItem(
                             inline = TRUE,
                             selected = 'pca_auto',
                         ),
-                        textInput(
-                            ns("dim_n_components"),
-                            label = NULL,
-                            value = defaults$dim
-                        )
+                        div(
+                            class = 'div_dim_n_components',
+                            textInput(
+                                ns("dim_n_components"),
+                                label = NULL,
+                                value = defaults$dim
+                        ))
                     )
                 ),
                 HTML('<hr class="line">')

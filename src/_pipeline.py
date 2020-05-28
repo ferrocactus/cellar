@@ -150,26 +150,38 @@ class Pipeline(Unit):
         if x is None:
             x = self.x
 
-        n_components = _validate_dim_n_components(n_components, *self.x.shape)
+        try:
+            _method_exists('dim_reduction', method)
+            n_components = _validate_dim_n_components(
+                    n_components, *self.x.shape)
+        except Exception as e:
+            print(str(e))
+            return str(e)
+
         if hasattr(self, 'x_emb') and self.n_components == n_components:
-            return self.x_emb
+            return 'good'
 
         self.n_components = n_components
-
         self.dim = wrap("dim_reduction", method)(
             n_components=n_components,
             **kwargs
         )
         self.x_emb = self.dim.get(x)
-        return self.x_emb
+        return 'good'
 
     def get_labels(self, x=None, method="KMeans", eval_method="Silhouette",
                    n_clusters='(3, 5, 1)', n_jobs=1, **kwargs):
         if x is None:
             x = self.x_emb
 
-        n_clusters = _validate_clu_n_clusters(n_clusters, self.x.shape[0])
-        n_jobs = _validate_n_jobs(n_jobs)
+        try:
+            _method_exists('cluster', method)
+            _method_exists('cluster_eval', eval_method)
+            n_clusters = _validate_clu_n_clusters(n_clusters, self.x.shape[0])
+            n_jobs = _validate_n_jobs(n_jobs)
+        except Exception as e:
+            print(str(e))
+            return str(e)
 
         self.clu_method = method
         self.eval = wrap("cluster_eval", eval_method)()
@@ -178,7 +190,7 @@ class Pipeline(Unit):
         )
         self.labels = self.clu.get(x)
         self.n_clusters = np.unique(self.labels)
-        return self.labels
+        return 'good'
 
     def get_markers(self, x=None, y=None, method="TTest", alpha=0.05,
                     markers_n=200, correction='holm-sidak', n_jobs=1):
@@ -261,8 +273,14 @@ class Pipeline(Unit):
         return False
 
     def get_emb_2d(self, x=None, y=None, method='UMAP'):
+        try:
+            _method_exists('visualization', method)
+        except Exception as e:
+            print(str(e))
+            return str(e)
+
         if hasattr(self, 'x_emb_2d'):
-            return self.x_emb_2d
+            return 'good'
 
         if x is None:
             x = self.x_emb
@@ -272,7 +290,7 @@ class Pipeline(Unit):
             scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
             scanpy.tl.umap(ann)
             self.x_emb_2d = ann.obsm['X_umap']
-            return self.x_emb_2d
+            return 'good'
 
         if method == 'UMAP':
             self.vis = wrap("visualization", method)(
@@ -285,7 +303,7 @@ class Pipeline(Unit):
             self.vis = wrap("visualization", method)()
 
         self.x_emb_2d = self.vis.get(x)
-        return self.x_emb_2d
+        return 'good'
 
     def get_markers_subset(self, indices1, indices2=None, alpha=0.05,
                            correction='holm-sidak', markers_n=200, n_jobs=1,
