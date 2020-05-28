@@ -18,6 +18,14 @@ update_sets <- function(input, output, session, setNames) {
     observe({
         updateSelectInput(
             session,
+            "subset1_upd",
+            "Choose Subset",
+            choices = setNames()
+    )})
+
+    observe({
+        updateSelectInput(
+            session,
             "cell_subset_download",
             "Download labels",
             choices = c("All", setNames())

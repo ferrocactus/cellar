@@ -1,3 +1,5 @@
+library(plotly)
+
 lasso_store <- function(input, output, session, setNames, setPts) {
     observeEvent(input$store_lasso, {
         if (as.character(input$newsubset) %in% setNames()) {
@@ -11,7 +13,9 @@ lasso_store <- function(input, output, session, setNames, setPts) {
         }
 
         d <- event_data("plotly_selected")
+        print(d$key)
         keys <- as.numeric(d$key)
+        print(keys)
         cell_count <- length(d$key)
 
         #showNotification(as.character(input$newsubset),duration=NULL)

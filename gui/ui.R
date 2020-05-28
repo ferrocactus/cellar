@@ -35,7 +35,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
     useShinyjs(),
     tags$head(includeCSS("gui/ui_logic/styles/style.css")),
-    tags$script(src = "gui/ui_logic/sidebar/anchor.js"),
+    #tags$script(src = "gui/ui_logic/sidebar/anchor.js"),
     plots(id="ns"),
     analysis(id="ns")
 )

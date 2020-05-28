@@ -12,6 +12,7 @@ source("gui/server_logic/re_plot.R")
 source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
+source("gui/server_logic/update_plot.R")
 source("gui/server_logic/analysis_markers.R")
 source("gui/server_logic/save_session.R")
 
@@ -28,6 +29,7 @@ server <- shinyServer(function(input, output, session) {
     deGenes <- reactiveVal(c())
     labelList <- reactiveVal(c())
     plotObj <- reactiveVal(0)
+    newLabels <- reactiveVal(-1)
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -48,6 +50,8 @@ server <- shinyServer(function(input, output, session) {
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
+    callModule(update_plot, id = "ns", pipe = pipe, setNames = setNames,
+               setPts = setPts, newLabels = newLabels)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe,
                plotObj = plotObj, selDataset = selDataset)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,

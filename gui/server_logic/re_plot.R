@@ -14,12 +14,11 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
                     x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
                     text = ~paste("Label: ", as.factor(pipe()$labels)),
                     color = as.factor(pipe()$labels),
-                    key = plotcols,
+                    key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     type = 'scatter',
                     mode = 'markers'
                 ) %>% layout(dragmode = "lasso",
                             title = paste("Value of ", input$color, sep="")))
-                print(plotObj())
                 return(plotObj())
             })
         })

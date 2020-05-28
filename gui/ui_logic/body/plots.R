@@ -14,7 +14,7 @@ tabsetPanel(
     tabPanel(
         "Updated Plot",
         verbatimTextOutput("brush"),
-        plotlyOutput(ns("Plot2"), height="600px"),
-        downloadButton(ns("downlabels"), "Download updated labels")
+        plotlyOutput(ns("Plot2"), height="600px")
+        #downloadButton(ns("downlabels"), "Download updated labels")
     )
 )}
