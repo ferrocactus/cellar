@@ -38,14 +38,22 @@ build_table <- function(mode, fl, deGenes, nc) {
 
             dispdat[i, 2] <- lenhs
             dispdat[i, 3] <- leni
-            dispdat[i, 4] <- phyper(leni, lenhs, nc - 1 - lenhs,
-                                       lende_i, lower.tail = F)
-            rownames(gene_ids_all) <- gene_ids_all[, 3]
-            int_genes <- gene_ids_all[deGenes_i_ids, 1]
-            if (length(int_genes) > 0) {
-                dispdat[i, 5] <- (paste(int_genes, collapse=", "))
+
+            if (dispdat[i, 3] == 0){
+                dispdat[i, 4] <- 1.0
             } else {
-                dispdat[i, 5] <- as.character("0")
+                dispdat[i,4]<-phyper(leni, lenhs, nc-1-lenhs,
+                                      lende_i, lower.tail = F)
+
+                rownames(gene_ids_all) <- gene_ids_all[, 3]
+                int_genes <- gene_ids_all[deGenes_i_ids, 1]
+
+                if (length(int_genes)>0){
+                    dispdat[i, 5] <- (paste(int_genes,
+                                              collapse = ", "))
+                } else {
+                    dispdat[i, 5] <- as.character("0")
+                }
             }
         }
 
