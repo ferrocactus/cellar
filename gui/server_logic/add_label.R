@@ -3,7 +3,7 @@ add_label <- function(input, output, session, labelList) {
         updateSelectInput(
             session,
             "newlabels",
-            label = paste("Select input label", length(x)),
+            label = paste("Select input label", length(input$newlabelbox)),
             choices = labelList())
     })
 
