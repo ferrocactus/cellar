@@ -3,7 +3,7 @@ library(shiny)
 analysis <- function(id, label="analysis") {
 ns = NS(id)
 tabsetPanel(
-    id = "switcher",
+    id = ns("switcher"),
     tabPanel(
         "DE",
         tableOutput(ns("genes")),

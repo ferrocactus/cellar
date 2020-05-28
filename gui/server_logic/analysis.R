@@ -5,7 +5,7 @@ load('gui/obj/kegg_genelists')
 load('gui/obj/keggidtoname')
 load('gui/obj/gene_ids_all')
 
-build_table <- function(mode, fl, deGenes, nc) {
+build_table <- function(mode, fl, deGenes, nc, alpha) {
     categories <- names(fl)
     if (mode == 'KEGG')
         categories <- kegg_id_toname[categories]
@@ -57,7 +57,7 @@ build_table <- function(mode, fl, deGenes, nc) {
             }
         }
 
-        ord <- dispdat[which(dispdat[, 4] < 0.05),]
+        ord <- dispdat[which(dispdat[, 4] < alpha),]
         ord <- ord[order(ord[, 4]),]
         ord[, 4] <- format(ord[, 4], scientific = T)
 
@@ -82,16 +82,18 @@ analysis <- function(input, output, session, deGenes, pipe) {
         nc = length(pipe()$col_ids)
 
         output$GeneOntology <- renderTable({
-            build_table(mode = 'GO', fl = Hs.c5, deGenes = deGenes, nc = nc)
+            build_table(mode = 'GO', fl = Hs.c5, deGenes = deGenes, nc = nc,
+                        alpha = as.numeric(input$mark_alpha))
         }, bordered = T)
 
         output$KEGG <- renderTable({
             build_table(mode = 'KEGG', fl = kegg_genelists, deGenes = deGenes,
-                        nc = nc)
+                        nc = nc, alpha = as.numeric(input$mark_alpha))
         }, bordered = T)
 
         output$Msigdb <- renderTable({
-            build_table(mode = 'MSIGDB', fl = Hs.c2, deGenes = deGenes, nc = nc)
+            build_table(mode = 'MSIGDB', fl = Hs.c2, deGenes = deGenes, nc = nc,
+                        alpha = as.numeric(input$mark_alpha))
         }, bordered = T)
     }})
 }

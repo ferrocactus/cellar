@@ -1,9 +1,17 @@
+library(shiny)
+
 re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
     observe({ if (remark() > 0) {
         if (length(deButtons()) > 0)
             for (i in 1:length(deButtons()))
                 deButtons()[[i]]$destroy()
         deButtons(c())
+        deGenes(c())
+
+        ns <- session$ns
+
+        reset_analysis_tabs(output)
+        updateTabsetPanel(session, "switcher", selected = "DE")
 
         output$genes <- renderTable({
             # TODO change '0' to whatever the first element is
@@ -22,8 +30,6 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
             return(table)
         })
 
-        ns <- session$ns
-
         output$DEbuttons <- renderUI({
             lapply(X = 1:length(deGenes()), FUN = function(i) {
                     actionButton(ns(paste(deGenes()[i], " ", seq = "")),
@@ -40,4 +46,26 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
         })
         remark(0)
     }})
+}
+
+reset_analysis_tabs <- function(output) {
+    # Reset analysis tabs and switch to DE
+    outputOptions(output, "genes", suspendWhenHidden = FALSE)
+    outputOptions(output, "DEbuttons", suspendWhenHidden = FALSE)
+    outputOptions(output, "KEGG", suspendWhenHidden = FALSE)
+    outputOptions(output, "GeneOntology", suspendWhenHidden = FALSE)
+    outputOptions(output, "Markers", suspendWhenHidden = FALSE)
+    outputOptions(output, "Msigdb", suspendWhenHidden = FALSE)
+    output$DEbuttons = NULL
+    output$genes = NULL
+    output$GeneOntology = NULL
+    output$KEGG = NULL
+    output$Markers = NULL
+    output$Msigdb = NULL
+    outputOptions(output, "genes", suspendWhenHidden = TRUE)
+    outputOptions(output, "DEbuttons", suspendWhenHidden = TRUE)
+    outputOptions(output, "KEGG", suspendWhenHidden = TRUE)
+    outputOptions(output, "GeneOntology", suspendWhenHidden = TRUE)
+    outputOptions(output, "Markers", suspendWhenHidden = TRUE)
+    outputOptions(output, "Msigdb", suspendWhenHidden = TRUE)
 }

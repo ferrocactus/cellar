@@ -25,6 +25,11 @@ de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
             return()
         }
 
+        if (s1 == s2) {
+            showNotification("The selected subsets should be different.")
+            return()
+        }
+
         if (s1 == 'None') {
             set1 = setPts()[[which(setNames() == s2)]]
             set2 = NULL
@@ -47,8 +52,5 @@ de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
                     con_path = 'markers/gene_id_name.csv')
 
         remark(remark() + 1) # Notify that markers have changed
-        #TODO Update tabsetpanel to switch to DE
-        #ns <- session$ns
-        #updateTabsetPanel(session, ns("switcher"), selected = ns("DE"))
     })
 }
