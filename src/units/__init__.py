@@ -9,16 +9,20 @@ from ._cluster import Clu_GaussianMixture
 from ._cluster import Clu_Leiden
 from ._cluster import Clu_Scanpy
 from ._cluster_ensemble import Ens_HyperGraph
-from ._dim_reduction import Dim_PCA, Dim_UMAP, Dim_TSNE
+from ._dim_reduction import Dim_PCA
+from ._dim_reduction import Dim_UMAP
+from ._dim_reduction import Dim_TSNE
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
-from ._markers import Mark_TTest
+from ._de import DE_TTest
 from ._converter import Con
 from ._identificator import Ide_HyperGeom
 from ._ss_cluster import SSClu_SeededKMeans
 from ._ss_cluster import SSClu_ConstrainedKMeans
 from ._ss_cluster import SSClu_ConstrainedSeededKMeans
+
+from ..utils.exceptions import MethodNotImplementedError
 
 translation_dict = {
     "cluster": {
@@ -26,8 +30,8 @@ translation_dict = {
         "KMedoids": Clu_KMedoids,
         "Spectral": Clu_SpectralClustering,
         "Agglomerative": Clu_Agglomerative,
-        #"DBSCAN": Clu_DBSCAN,
-        #"Birch": Clu_Birch,
+        # "DBSCAN": Clu_DBSCAN,
+        # "Birch": Clu_Birch,
         "GaussianMixture": Clu_GaussianMixture,
         "Leiden": Clu_Leiden,
         "Scanpy": Clu_Scanpy,
@@ -44,8 +48,8 @@ translation_dict = {
         "DaviesBouldin": Eval_DaviesBouldin,
         "CalinskiHarabasz": Eval_CalinskiHarabasz
     },
-    "markers": {
-        "TTest": Mark_TTest
+    "de": {
+        "TTest": DE_TTest
     },
     "conversion": {
         "Converter": Con
@@ -70,9 +74,11 @@ def _method_exists(step, method):
     Check if method in step has been implemented.
     """
     if step not in translation_dict:
-        raise NotImplementedError("{0} step not implemented.".format(step))
+        raise MethodNotImplementedError(
+            "{0} step not implemented.".format(step))
     if method not in translation_dict[step]:
-        raise NotImplementedError("{0} method not implemented.".format(method))
+        raise MethodNotImplementedError(
+            "{0} method not implemented.".format(method))
 
 
 def wrap(step, method):
@@ -88,9 +94,8 @@ def wrap(step, method):
     """
     try:
         _method_exists(step, method)
-    except NotImplementedError:
-        print(f"{method} in {step} is not implemented.")
-        return 404
+    except MethodNotImplementedError as e:
+        return str(e)
     return translation_dict[step][method]
 
 
@@ -102,8 +107,8 @@ __all__ = [
     'Clu_KMedoids',
     'Clu_SpectralClustering',
     'Clu_Agglomerative',
-    #'Clu_DBSCAN',
-    #'Clu_Birch',
+    # 'Clu_DBSCAN',
+    # 'Clu_Birch',
     'Clu_GaussianMixture',
     'Clu_Leiden',
     'Clu_Scanpy',
@@ -114,7 +119,7 @@ __all__ = [
     'Eval_Silhouette',
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',
-    'Mark_TTest',
+    'DE_TTest',
     'Con',
     'Ide_HyperGeom',
     'SSClu_SeededKMeans',

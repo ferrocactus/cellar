@@ -1,17 +1,20 @@
 # Needed by markers_run
 pipe_de <- function(pipe, set1, set2, mark_method, mark_alpha,
-                         mark_markers_n, mark_correction, con_method,
-                         con_convention, con_path) {
+                    mark_markers_n, mark_correction, con_method,
+                    con_convention, con_path) {
     withProgress(message = "DE", value = 0, {
-       n <- 1
-       incProgress(1/n, detail = paste("Step: Finding DE genes"))
-       pipe()$get_markers_subset(indices1 = set1, indices2 = set2,
-                                 method = mark_method, alpha = mark_alpha,
-                                 markers_n = mark_markers_n,
-                                 correction = mark_correction,
-                                 con_method = con_method,
-                                 con_convention = con_convention,
-                                 con_path = con_path)
+        n <- 2
+        incProgress(1 / n, detail = paste("Step: Finding DE genes"))
+        msg <- pipe()$run_step(step = 'de_subset', subset1 = set1, subset2 = set2,
+                               de_method = mark_method, de_alpha = mark_alpha,
+                               de_n_genes = mark_markers_n,
+                               de_correction = mark_correction)
+        if (msg != 'good') return(msg)
+        incProgress(1 / n, detail = paste("Step: Converting names"))
+        msg <- pipe()$run_step(step = 'con', con_method = con_method,
+                               con_convention = con_convention,
+                               con_path = con_path)
+        return(msg)
     })
 }
 
@@ -42,7 +45,7 @@ de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
         }
 
         # Subtract by 1 due to R lists starting at 1
-        pipe_de(pipe, set1 = (set1 - 1), set2 = (set2 - 1),
+        msg <- pipe_de(pipe, set1 = (set1 - 1), set2 = (set2 - 1),
                     mark_method = 'TTest',
                     mark_alpha = input$mark_alpha,
                     mark_markers_n = input$mark_markers_n,
@@ -51,6 +54,10 @@ de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
                     con_convention = 'id-to-name',
                     con_path = 'markers/gene_id_name.csv')
 
-        remark(remark() + 1) # Notify that markers have changed
+        if (msg != 'good') {
+            showNotification(msg)
+        } else {
+            remark(remark() + 1) # Notify that markers have changed
+        }
     })
 }

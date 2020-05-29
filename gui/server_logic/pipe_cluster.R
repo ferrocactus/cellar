@@ -7,17 +7,17 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
                         eval_method, clu_n_clusters, vis_method) {
     withProgress(message = "Making plot", value = 0, {
         n <- 4
-        incProgress(1/n, detail = paste("Step: Reducing Data"))
-        msg <- pipe()$get_emb(method = dim_method,
-                              n_components = dim_n_components)
+        incProgress(1 / n, detail = paste("Step: Reducing Data"))
+        msg <- pipe()$run_step(step = 'dim', dim_method = dim_method,
+                              dim_n_components = dim_n_components)
         if (msg != 'good') return(msg)
-        incProgress(1/n, detail = paste("Step: Clustering"))
-        msg <- pipe()$get_labels(method = clu_method, eval_method = eval_method,
-                                n_clusters = clu_n_clusters)
+        incProgress(1 / n, detail = paste("Step: Clustering"))
+        msg <- pipe()$run_step(step = 'clu', clu_method = clu_method,
+                                eval_method = eval_method,
+                                clu_n_clusters = clu_n_clusters)
         if (msg != 'good') return(msg)
-        incProgress(1/n, detail = paste("Step: Visualizing"))
-        msg <- pipe()$get_emb_2d(method = vis_method)
-        if (msg != 'good') return(msg)
+        incProgress(1 / n, detail = paste("Step: Visualizing"))
+        msg <- pipe()$run_step(step = 'vis', vis_method = vis_method)
 
         return(msg)
     })
@@ -58,9 +58,9 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
             for (i in 1:length(pipe()$n_clusters)) {
                 #TODO replace cluster_i if rerun
                 setNames(c(
-                    setNames(), (paste("Cluster_", as.character(i-1), sep = ""))))
-                setPts(c(setPts(), list(which(pipe()$labels == (i-1)))))
-                labelList(c(labelList(), i-1))
+                    setNames(), (paste("Cluster_", as.character(i - 1), sep = ""))))
+                setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
+                labelList(c(labelList(), i - 1))
             }
 
             # Clear all analysis tabs

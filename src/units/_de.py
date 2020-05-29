@@ -7,7 +7,7 @@ from ._ttest_de import _ttest_differential_expression
 from ._unit import Unit
 
 
-class Mark_TTest(Unit):
+class DE_TTest(Unit):
     """
     One-vs-all T-Test.
 
@@ -85,7 +85,7 @@ class Mark_TTest(Unit):
 
         m = int(self.markers_n*x.shape[1]
                 ) if self.markers_n < 1 else self.markers_n
-        self.logger.info("Using {0} markers.".format(m))
+        self.logger.info("Using {0} genes.".format(m))
 
         test_results = {}
 
@@ -101,9 +101,9 @@ class Mark_TTest(Unit):
                     correction=self.correction
                 )
                 self.logger.info(
-                    "Finished finding markers for cluster={0}.".format(i))
+                    "Finished finding DE genes for cluster={0}.".format(i))
         else:
-            self.logger.info("Running marker discovery in parallel.")
+            self.logger.info("Running DE gene discovery in parallel.")
             test_results = Parallel(n_jobs=self.n_jobs)(
                 delayed(_ttest_differential_expression)(
                     x[np.where(labels == i)],
@@ -113,7 +113,7 @@ class Mark_TTest(Unit):
                     correction=self.correction
                 ) for i in unq_labels
             )
-            self.logger.info("Finished finding markers.")
+            self.logger.info("Finished finding DE genes.")
             test_results = dict(zip(unq_labels, test_results))
 
         return test_results

@@ -83,7 +83,8 @@ class Dim_PCA(Unit):
 
         if self.n_components == 'knee':
             n_components = min(self.n_components_max, np.min(x.shape))
-            obj = PCA(n_components=n_components, svd_solver='randomized', **self.kwargs).fit(x)
+            obj = PCA(n_components=n_components,
+                      svd_solver='randomized', **self.kwargs).fit(x)
 
             # Construct axis for KneeLocator
             x_axis = list(range(1, obj.n_components_ + 1))
@@ -109,7 +110,7 @@ class Dim_PCA(Unit):
 
 
 class Dim_UMAP(Unit):
-    def __init__(self, use_y=True, **kwargs):
+    def __init__(self, use_y=False, **kwargs):
         """
         Parameters
         __________
@@ -156,7 +157,8 @@ class Dim_UMAP(Unit):
 
         """
         self.logger.info("Initializing UMAP.")
-        return UMAP(**self.kwargs).fit_transform(x, y=y)
+        return UMAP(n_components=2, n_neighbors=15, min_dist=0,
+                    metric="euclidean", **self.kwargs).fit_transform(x)
 
 
 class Dim_TSNE(Unit):
