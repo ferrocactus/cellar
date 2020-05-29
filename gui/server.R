@@ -13,6 +13,7 @@ source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
 source("gui/server_logic/update_plot.R")
+source("gui/server_logic/update_color.R")
 source("gui/server_logic/analysis_markers.R")
 source("gui/server_logic/save_session.R")
 
@@ -49,6 +50,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
+    callModule(update_color, id = "ns", pipe=pipe, plotObj=plotObj,replot=replot) #udpated color selection 
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
     callModule(update_plot, id = "ns", pipe = pipe, setNames = setNames,
                setPts = setPts, newLabels = newLabels)
