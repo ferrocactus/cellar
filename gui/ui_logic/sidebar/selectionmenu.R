@@ -11,18 +11,6 @@ menuItem(
         icon = NULL,
         list(
             div(
-                class = "div_step div_color",
-                list(
-                    selectInput(
-                        ns("color"),
-                        "Select colour value:",
-                        "cluster"
-                    )
-                ),
-                HTML('<hr class="line">')
-            ),
-
-            div(
                 class = "div_step div_subsets",
                 list(
                     splitLayout(

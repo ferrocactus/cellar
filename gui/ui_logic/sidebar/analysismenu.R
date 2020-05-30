@@ -13,6 +13,17 @@ menuItem(
         icon = NULL,
         list(
             div(
+                class = "div_step div_color",
+                list(
+                    selectInput(
+                        ns("color"),
+                        "View gene expression:",
+                        "Clusters"
+                    )
+                ),
+            ),
+
+            div(
                 class = "div_step div_n_genes",
                 list(
                     sliderInput(
