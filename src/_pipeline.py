@@ -3,6 +3,7 @@ import sys
 
 import numpy as np
 import scanpy
+import anndata
 
 from .units import wrap
 from .units import _method_exists
