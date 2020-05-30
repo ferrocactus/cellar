@@ -17,6 +17,7 @@ load_dataset <- function(input, output, session, pipe, selDataset,
                 pipe()$restate(x = selDataset())
                 setNames(c("None"))
                 setPts(c(NA))
+                output$Plot2 = NULL
             }
         })
     })

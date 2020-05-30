@@ -66,5 +66,6 @@ server <- shinyServer(function(input, output, session) {
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
                setPts = setPts, deGenes = deGenes, selDataset = selDataset,
-               plotObj = plotObj, replot = replot, remark = remark)
+               plotObj = plotObj, replot = replot, remark = remark,
+               newLabels = newLabels, labelList = labelList)
 })

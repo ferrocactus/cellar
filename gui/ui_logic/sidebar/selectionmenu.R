@@ -1,5 +1,7 @@
 library(shiny)
 
+source("gui/ui_logic/sidebar/options.R")
+
 selectionmenu <- function(id, label="selectionmenu") {
 ns = NS(id)
 menuItem(
@@ -42,14 +44,14 @@ menuItem(
                         actionButton(
                             ns("labeladd"),
                             "Add Label",
-                            class="secondcol"
+                            class = "secondcol"
                         )
                     ),
 
                     selectInput(
                         ns("tissue"),
                         "Select tissue",
-                        choices = ''
+                        choices = options$tissues
                     ),
 
                     selectInput(
@@ -67,7 +69,7 @@ menuItem(
                         actionButton(
                             ns("labelupd"),
                             "Update Subset Labels",
-                            class="secondcol"
+                            class = "secondcol"
                         )
                     )
                 )

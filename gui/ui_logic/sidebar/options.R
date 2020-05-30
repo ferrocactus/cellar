@@ -1,3 +1,7 @@
+library(reticulate)
+source_python("gui/server_logic/read_onto.py")
+dic = get_dic()
+
 defaults <- list(
     "dim" = '10',
     "clu" = '(3, 5, 1)',
@@ -7,8 +11,8 @@ defaults <- list(
 
 options <- list(
     "dim" = c("PCA", "UMAP", "TSNE"),
-    "clu" = c("KMeans", "KMedoids", "Spectral", "Agglomerative",
-              "GaussianMixture", "Leiden", "Scanpy", "Ensemble"),
+    "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
+              "GaussianMixture", "Scanpy", "Ensemble"),
     "clu_ensemble" = c("All"="All", "KMeans"="KMeans", "KMedoids"="KMedoids",
                        "GaussianMixture"="GaussianMixture",
                        "Spectral"="Spectral", "Agglomerative"="Agglomerative",
@@ -19,10 +23,12 @@ options <- list(
                      "simes-hochberg", "hommel", "fdr_bh", "fdr_by",
                      "fdr_tsbh", "fdr_tsbky"),
     "converter" = c("id-to-name", "name-to-id"),
-    "tissues" = c("all", "Spleen", "Thyroid", "Kidney", "Liver", "Blood",
-                  "Placenta", "Eye", "Heart", "Embryo", "Skeletal muscle",
-                  "Brain"),
+    "tissues" = c("all", "blood", "brain", "embryo", "eye", "heart", "kidney",
+                  "large intestine", "liver", "lymph", "muscle", "other",
+                  "placenta", "small intestine", "spleen", "stomach", "thymus",
+                  "thyroid", "clusters", "user defined"),
     "vis" = c("UMAP", "TSNE"),
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans", "ConstrainedSeededKMeans"),
-    "de" = c("TTest")
+    "de" = c("TTest"),
+    "tissues" = c(sort(names(dic)), 'Clusters', 'User defined')
 )

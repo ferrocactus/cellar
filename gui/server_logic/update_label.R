@@ -1,61 +1,54 @@
-# File upload logic
 library(reticulate)
-
 source_python("gui/server_logic/read_onto.py")
 
-update_label <- function(input, output, session,pipe,labelList) {
-    dic=get_dic()
+update_label <- function(input, output, session, pipe, labelList) {
+    dic = get_dic()
     observe({
-        updateSelectInput(
-            session,
-            "tissue",
-            "Select tissue",
-            choices = c(sort(names(dic)),'Clusters','User defined'),
-            selected = "Clusters"
-        )})
-
-    observe({ if (pipe() != 0) { if (pipe()$has('labels')) {
-        #print(input$tissue)
-        if (as.character(input$tissue)!=""){
-            if (as.character(input$tissue)=='Clusters')
-            {
-                n_clusters=pipe()$n_clusters
-                updateSelectInput(
-                    session,
-                    "newlabels",
-                    "Select cell type",
-                    choices = n_clusters
-                )
-            }
-            else if (as.character(input$tissue)=='User defined')
-            {
-                if (identical(labelList(),NULL)==TRUE){
+        tissue = as.character(input$tissue)
+        if (tissue != "") {
+            if (tissue == 'clusters') {
+                if (pipe() != 0) {
+                    if (pipe()$has('labels')) {
+                        n_clusters = pipe()$n_clusters
+                        updateSelectInput(
+                            session,
+                            "newlabels",
+                            choices = n_clusters
+                        )
+                    }
+                }
+            } else if (tissue == 'user defined') {
+                if (identical(labelList(), NULL) == TRUE) {
                     updateSelectInput(
                         session,
                         "newlabels",
-                        "Select cell type",
                         choices = ""
                     )
-                }
-                else{
+                } else {
                     updateSelectInput(
                         session,
                         "newlabels",
-                        "Select cell type",
                         choices = labelList()
                     )
                 }
-            }
-            else{
+            } else if (tissue == 'all') {
+                choices = c()
+                for (tissue in names(dic)) {
+                    choices = c(choices, dic[tissue])
+                }
                 updateSelectInput(
                     session,
                     "newlabels",
-                    "Select cell type",
-                    choices = dic[as.character(input$tissue)]
+                    choices = choices
+                )
+            } else {
+                updateSelectInput(
+                    session,
+                    "newlabels",
+                    choices = dic[tissue]
                 )
             }
-
         }
-    }}})
+    })
 }
 

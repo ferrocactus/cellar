@@ -19,7 +19,8 @@ def get_dic():
          'small intestine', 'large intestine','blood',"brain","thyroid",
          'placenta','eye','other', "embryo", "muscle"]
 
-    identifiers=[['kidney'], ['thymocyte'], ['splenic'], ["hepat","liver"],['T','B'], ['stomach','gastric'], ['heart','cardiac'],
+    identifiers=[['kidney'], ['thymocyte'], ['splenic'], ["hepat","liver"],
+            ['T','B'], ['stomach','gastric'], ['heart','cardiac'],
          ['small intestine'], ['large intestine'],['blood'],["brain"],["thyroid"],
          ['placenta'],['eye','retina'], ['other'],["embryo"], ["muscle",'myo']]
 
