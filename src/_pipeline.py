@@ -39,7 +39,7 @@ class Pipeline():
     def load(self, x, col_ids):
         if isinstance(x, str):
             self.dataset = x
-            self.x, self.col_ids = load_data('default')
+            self.x, self.col_ids = load_data(x)
             self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
         else:
             try:

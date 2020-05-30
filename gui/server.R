@@ -13,7 +13,6 @@ source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
 source("gui/server_logic/update_plot.R")
-source("gui/server_logic/update_color.R")
 source("gui/server_logic/analysis_markers.R")
 source("gui/server_logic/save_session.R")
 
@@ -26,6 +25,7 @@ server <- shinyServer(function(input, output, session) {
     pipe <- reactiveVal(0)
     replot <- reactiveVal(0) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
+    rebutton <- reactiveVal(0)
     deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
     labelList <- reactiveVal(c())
@@ -50,14 +50,14 @@ server <- shinyServer(function(input, output, session) {
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
-    callModule(update_color, id = "ns", pipe=pipe, plotObj=plotObj,replot=replot) #udpated color selection 
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
     callModule(update_plot, id = "ns", pipe = pipe, setNames = setNames,
                setPts = setPts, newLabels = newLabels)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe,
                plotObj = plotObj, selDataset = selDataset)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
-               deGenes = deGenes, deButtons = deButtons)
+               deGenes = deGenes, deButtons = deButtons, plotObj = plotObj,
+               rebutton = rebutton)
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,

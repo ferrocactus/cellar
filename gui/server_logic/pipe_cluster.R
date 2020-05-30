@@ -75,7 +75,18 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
             output$KEGG = NULL
             output$Markers = NULL
             output$Msigdb = NULL
+
+            updateSelectInput(
+                session = session,
+                inputId = "color",
+                label = "Select colour value:",
+                choices = c("cluster", as.character(pipe()$col_ids)),
+                selected = NULL)
         }
 
+    })
+
+    observeEvent(input$color, {
+        replot(1)
     })
 }

@@ -1,6 +1,7 @@
 library(shiny)
 
-re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
+re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
+                    plotObj, rebutton) {
     observe({ if (remark() > 0) {
         if (length(deButtons()) > 0)
             for (i in 1:length(deButtons()))
@@ -36,20 +37,40 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons) {
                                  paste(deGenes()[i], " ", seq = ""))})
         })
 
+        rebutton(1)
+        remark(0)
+    }})
+
+    observe({
+    if (rebutton() > 0) {
         lapply(X = 1:length(deGenes()), FUN = function(i) {
             o <- observeEvent(input[[paste(deGenes()[i], " ", seq = "")]], {
-                #showNotification(
-                #    paste("Showing ", deGenes()[i], "'s expression", sep = ""),
-                #    duration=5)
+                output$plot <- renderPlotly({
+                    # add 1 since lists in R start at 1
+                    colors = pipe()$x[, pipe()$markers[['0']][['indices']][i]+1]
+                    plotObj(plot_ly(
+                        x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
+                        text = ~paste("Label: ", as.factor(pipe()$labels)),
+                        color = colors,
+                        key = as.character(1:length(pipe()$x_emb_2d[,1])),
+                        type = 'scatter',
+                        mode = 'markers'
+                    ) %>% layout(dragmode = "lasso",
+                                title = paste("Value of ", deGenes()[i], sep="")))
+                    return(plotObj())
+                })
             })
             deButtons(c(deButtons(), isolate(o)))
         })
-        remark(0)
+        rebutton(0)
     }})
 }
 
 reset_analysis_tabs <- function(output) {
     # Reset analysis tabs and switch to DE
+    # By default the tabs will be erased only when we switch to them
+    # so we first disable suspendWhenHidden, set them to null, and enable
+    # it again
     outputOptions(output, "genes", suspendWhenHidden = FALSE)
     outputOptions(output, "DEbuttons", suspendWhenHidden = FALSE)
     outputOptions(output, "KEGG", suspendWhenHidden = FALSE)

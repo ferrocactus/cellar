@@ -12,15 +12,14 @@ import json
 def get_dic():
     f=open("markers/cl-simple.json","rb")
     onto_data=json.load(f)
-    print(onto_data['graphs'][0].keys())
     cells=onto_data['graphs'][0]['nodes']    # dictionary of length 2632
     tissue=[]
     cell_type=[]
-    tissues=['kidney', 'thymus', 'spleen', "liver",'lymph', 'stomach', 'heart', 
+    tissues=['kidney', 'thymus', 'spleen', "liver",'lymph', 'stomach', 'heart',
          'small intestine', 'large intestine','blood',"brain","thyroid",
          'placenta','eye','other', "embryo", "muscle"]
 
-    identifiers=[['kidney'], ['thymocyte'], ['splenic'], ["hepat","liver"],['T','B'], ['stomach','gastric'], ['heart','cardiac'], 
+    identifiers=[['kidney'], ['thymocyte'], ['splenic'], ["hepat","liver"],['T','B'], ['stomach','gastric'], ['heart','cardiac'],
          ['small intestine'], ['large intestine'],['blood'],["brain"],["thyroid"],
          ['placenta'],['eye','retina'], ['other'],["embryo"], ["muscle",'myo']]
 
