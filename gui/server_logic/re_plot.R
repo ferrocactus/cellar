@@ -5,9 +5,11 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
             output$plot <- renderPlotly({
                 if (input$color == 'cluster') {
                     color = as.factor(pipe()$labels)
+                    title="Clusters"
                 } else {
                     i = which(pipe()$col_ids == input$color)[1]
                     color = pipe()$x[, i]
+                    title=input$color
                 }
 
                 plotObj(plot_ly(
@@ -18,7 +20,7 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
                     type = 'scatter',
                     mode = 'markers'
                 ) %>% layout(dragmode = "lasso",
-                            title = paste("Value of ", input$color, sep="")))
+                            title = title))
                 return(plotObj())
             })
         })
