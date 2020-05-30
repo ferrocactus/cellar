@@ -25,6 +25,9 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
         replot(0)
     }})
 
+    observeEvent(input$color, suspended=TRUE, {
+        replot(1)
+    })
 
     # Download plot
     output$download_plot <- downloadHandler(
