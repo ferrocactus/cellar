@@ -15,7 +15,7 @@ update_label <- function(input, output, session,pipe,labelList) {
         )})
     
     observe({
-        print(input$tissue)
+        #print(input$tissue)
         if (as.character(input$tissue)!=""){
             if (as.character(input$tissue)=='Clusters')
             {
