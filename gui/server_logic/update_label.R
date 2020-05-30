@@ -10,7 +10,8 @@ update_label <- function(input, output, session,pipe,labelList) {
             session,
             "tissue",
             "Select tissue",
-            choices = c(sort(names(dic)),'Clusters','User defined')
+            choices = c(sort(names(dic)),'Clusters','User defined'),
+            selected = "Clusters"
         )})
     
     observe({
@@ -28,13 +29,22 @@ update_label <- function(input, output, session,pipe,labelList) {
             }
             else if (as.character(input$tissue)=='User defined')
             {
-                n_clusters=pipe()['n_clusters']
-                updateSelectInput(
-                    session,
-                    "newlabels",
-                    "Select cell type",
-                    choices = n_clusters
-                )
+                if (identical(labelList(),NULL)==TRUE){
+                    updateSelectInput(
+                        session,
+                        "newlabels",
+                        "Select cell type",
+                        choices = ""
+                    )
+                }
+                else{
+                    updateSelectInput(
+                        session,
+                        "newlabels",
+                        "Select cell type",
+                        choices = labelList()
+                    )
+                }
             }
             else{
                 updateSelectInput(

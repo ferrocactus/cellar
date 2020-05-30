@@ -67,7 +67,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
                 setNames(c(
                     setNames(), (paste("Cluster_", as.character(i - 1), sep = ""))))
                 setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
-                labelList(c(labelList(), i - 1))
+                #labelList(c(labelList(), i - 1))
             }
 
             # Clear all analysis tabs
