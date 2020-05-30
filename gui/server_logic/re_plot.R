@@ -3,13 +3,17 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
             output$plot <- renderPlotly({
-                if (input$color == 'cluster') {
+                if (input$color == 'Clusters') {
                     color = as.factor(pipe()$labels)
-                    title="Clusters"
+                    title = "Clusters"
                 } else {
                     i = which(pipe()$col_ids == input$color)[1]
-                    color = pipe()$x[, i]
-                    title=input$color
+                    if (i == NULL) {
+                        color = as.factor(pipe()$labels)
+                    } else {
+                        color = pipe()$x[, i]
+                        title = input$color
+                    }
                 }
 
                 plotObj(plot_ly(

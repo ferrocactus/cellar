@@ -6,6 +6,7 @@ source("gui/server_logic/lasso_store.R")
 source("gui/server_logic/update_sets.R")
 source("gui/server_logic/add_label.R")
 
+source("gui/server_logic/load_dataset.R")
 source("gui/server_logic/pipe_cluster.R")
 source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/re_plot.R")
@@ -37,12 +38,15 @@ server <- shinyServer(function(input, output, session) {
     # This is not ideal, but a lot of our functions deal with widgets that
     # belong to different ui components, so we are using one namespace for all.
     callModule(upload_file, id = "ns")
+    callModule(selected_dataset, id = "ns", selDataset = selDataset)
+    callModule(load_dataset, id = "ns", pipe = pipe, selDataset = selDataset,
+               setNames = setNames, setPts = setPts)
+
     callModule(gray_widgets, id = "ns")
     callModule(gene_card, id = "ns")
     callModule(lasso_store, id = "ns", setNames = setNames, setPts = setPts)
     callModule(add_label, id = "ns", labelList = labelList)
 
-    callModule(selected_dataset, id = "ns", selDataset = selDataset)
     callModule(cluster_run, id = "ns", pipe = pipe,
                selDataset = selDataset, setNames = setNames,
                setPts = setPts, replot = replot, remark = remark,
@@ -61,5 +65,6 @@ server <- shinyServer(function(input, output, session) {
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
-               setPts = setPts, deGenes = deGenes, selDataset = selDataset)
+               setPts = setPts, deGenes = deGenes, selDataset = selDataset,
+               plotObj = plotObj, replot = replot, remark = remark)
 })

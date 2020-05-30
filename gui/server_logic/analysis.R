@@ -78,7 +78,7 @@ build_table <- function(mode, fl, deGenes, nc, alpha) {
 analysis <- function(input, output, session, deGenes, pipe) {
     observe({
     # only run if deGenes have been stored
-    if (length(deGenes()) > 0) {
+    if (length(deGenes()) > 0 && pipe() != 0) {
         nc = length(pipe()$col_ids)
 
         output$GeneOntology <- renderTable({

@@ -1,7 +1,5 @@
 library(reticulate)
 
-source_python("__init__.py")
-
 # Needed by cluster_run
 pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
                         eval_method, clu_n_clusters, vis_method) {
@@ -25,20 +23,10 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
 
 cluster_run <- function(input, output, session, pipe, selDataset, setNames,
                         setPts, replot, remark, deButtons, deGenes, labelList) {
-    observeEvent(input$runconfigbtn, {
-        print(paste("Selected", selDataset()))
-
-        if (pipe() == 0) {
-            print("Initializing pipeline")
-            pipe(Pipeline(x = selDataset()))
-        } else if (pipe()$dataset != selDataset()) {
-            print("Changing dataset")
-            pipe()$restate(x = selDataset())
-            setNames(c("None"))
-            setPts(c(NA))
-        }
-
-        # Run clustering
+    observeEvent(input$runconfigbtn, { if (pipe() == 0) {
+            showNotification("Please load data first.")
+        } else {
+        # Clustering
         msg <- pipe_cluster(pipe, dim_method = input$dim_method,
                         dim_n_components = input$dim_n_components,
                         clu_method = input$clu_method,
@@ -53,7 +41,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
                 session = session,
                 inputId = "color",
                 label = "Select colour value:",
-                choices = c("cluster", as.character(pipe()$col_ids)),
+                choices = c("Clusters", as.character(pipe()$col_ids)),
                 selected = NULL)
 
             replot(1) # Notify that labels have changed
@@ -64,8 +52,8 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
             # Update sets
             for (i in 1:length(pipe()$n_clusters)) {
                 #TODO replace cluster_i if rerun
-                setNames(c(
-                    setNames(), (paste("Cluster_", as.character(i - 1), sep = ""))))
+                setNames(c(setNames(),
+                           (paste("Cluster_", as.character(i - 1), sep = ""))))
                 setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
                 #labelList(c(labelList(), i - 1))
             }
@@ -83,6 +71,5 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
             output$Markers = NULL
             output$Msigdb = NULL
         }
-    })
-
+    }})
 }

@@ -286,3 +286,57 @@ class Pipeline():
 
         self.vis_method = vis_method
         self.x_emb_2d = wrap("visualization", vis_method)().get(self.x_emb)
+
+    def has(self, attr):
+        # Needed to make calls from R easier
+        if hasattr(self, attr):
+            return True
+        return False
+
+    def save_session(self):
+        sess = {}
+        to_save = [
+            'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
+            'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
+            'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
+            'markers', 'vis_method'
+        ]
+
+        for attr in to_save:
+            if hasattr(self, attr):
+                sess[attr] = getattr(self, attr)
+        if hasattr(self, 'x_emb'):
+            for comp in range(self.x_emb.shape[1]):
+                sess['comp' + str(comp)] = self.x_emb[:, comp]
+        if hasattr(self, 'x_emb_2d'):
+            sess['x1'] = self.x_emb_2d[:, 0]
+            sess['x2'] = self.x_emb_2d[:, 1]
+
+        return sess
+
+    def load_session(self, sess):
+        to_load = [
+            'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
+            'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
+            'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
+            'markers', 'vis_method'
+        ]
+
+        for attr in to_load:
+            if attr in sess:
+                try:
+                    setattr(self, attr, sess[attr])
+                except:
+                    raise KeyError("Error loading session.")
+
+        if 'x1' in sess:
+            self.x_emb_2d = np.vstack([sess['x1'], sess['x2']]).T
+
+        if 'comp0' in sess:
+            comps = []
+            for comp in range(1000):
+                if 'comp' + str(comp) in sess:
+                    comps.append(sess['comp' + str(comp)])
+                else:
+                    break
+            self.x_emb = np.vstack(comps).T

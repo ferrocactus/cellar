@@ -11,7 +11,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
 
         ns <- session$ns
 
-        reset_analysis_tabs(output)
+        #reset_analysis_tabs(output)
         updateTabsetPanel(session, "switcher", selected = "DE")
 
         output$genes <- renderTable({

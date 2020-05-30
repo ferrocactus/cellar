@@ -3,7 +3,7 @@ library(shiny)
 downloadmenu <- function(id, label="downloadmenu") {
 ns = NS(id)
 menuItem(
-    "Export",
+    "Export/Import",
     id = "downloadbtn",
     icon = icon("download"),
     startExpanded = FALSE,
@@ -12,10 +12,18 @@ menuItem(
         list(
             div(
                 class = "div_step div_download_session",
-                downloadButton(
-                    ns("download_sess"),
-                    "Export Session",
-                    class = "longbtn downloadbtn"
+                list(
+                    downloadButton(
+                        ns("download_sess"),
+                        "Export Session",
+                        class = "longbtn downloadbtn"
+                    ),
+                    fileInput(
+                        ns("upload_sess"),
+                        "Import Session",
+                        multiple = FALSE,
+                        accept = c(".json")
+                    )
                 )
             ),
             #div(
@@ -36,15 +44,17 @@ menuItem(
             div(
                 class = "div_step div_download_plot",
                 list(
-                    selectInput(
-                        ns("plot_download_format"),
-                        "Select format",
-                        choices=c("SVG", "HTML", "JPEG", "PNG", "WEBP", "PDF")
-                    ),
-                    downloadButton(
-                        ns("download_plot"),
-                        "Download Plot",
-                        class = "longbtn downloadbtn"
+                    splitLayout(
+                        selectInput(
+                            ns("plot_download_format"),
+                            "Select format",
+                            choices=c("SVG", "HTML", "JPEG", "PNG", "WEBP", "PDF")
+                        ),
+                        downloadButton(
+                            ns("download_plot"),
+                            "Download Plot",
+                            class = "secondcol downloadbtn"
+                        )
                     )
                 )
             )

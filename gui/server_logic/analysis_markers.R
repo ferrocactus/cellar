@@ -37,7 +37,7 @@ analysis_markers <- function(input, output, session, deGenes, pipe) {
     rownames(gene_ids_all) <- gene_ids_all[,1]
 
     observe({
-    if (length(deGenes()) > 0) {
+    if (length(deGenes()) > 0 && pipe() != 0) {
         ns <- length(pipe()$col_ids)
 
         output$Markers <- renderTable({

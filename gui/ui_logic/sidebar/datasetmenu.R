@@ -48,6 +48,12 @@ menuItem(
                     "Choose dataset:",
                     choices = list.files("datasets/hubmap")
                 )
+            ),
+
+            actionButton(
+                ns("load_dataset"),
+                "Load Dataset",
+                class = "sidebtn longbtn"
             )
         )
     )
