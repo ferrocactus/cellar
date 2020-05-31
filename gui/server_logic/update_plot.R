@@ -12,16 +12,21 @@ update_plot <- function(input, output, session, pipe, setNames,
         showNotification("Updating labels")
 
         #assign("updated_new_labels", newlabs, envir = env)
-
+        if (input$color == 'Clusters') {
+          title = "Clusters"
+        } else {
+          title = input$labelupd
+        }
         output$Plot2 <- renderPlotly({
           plot_ly(
+            
             x = pipe()$x_emb_2d[, 1], y = pipe()$x_emb_2d[, 2],
             text = ~paste("label: ", as.factor(newLabels())),
             color = as.factor(newLabels()),
             type = 'scatter',
             mode = 'markers'
           ) %>% layout(dragmode = "lasso",
-                       title = paste("Value of ", input$labelupd, sep=""))
+                       title = title)
         })
       })
 }
