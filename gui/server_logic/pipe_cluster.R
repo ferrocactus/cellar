@@ -33,7 +33,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
         if (input$dim_options == "pca_auto")
             dim_n_components = 'knee'
         else
-            dim_n_components = input$dim_options
+            dim_n_components = input$dim_n_components
 
         msg <- pipe_cluster(pipe, dim_method = input$dim_method,
                         dim_n_components = dim_n_components,
