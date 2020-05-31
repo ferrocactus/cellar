@@ -23,12 +23,20 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
 
 cluster_run <- function(input, output, session, pipe, selDataset, setNames,
                         setPts, replot, remark, deButtons, deGenes, labelList) {
-    observeEvent(input$runconfigbtn, { if (pipe() == 0) {
+    observeEvent(input$runconfigbtn, {
+        if (pipe() == 0) {
             showNotification("Please load data first.")
-        } else {
+            return()
+        }
+
         # Clustering
+        if (input$dim_options == "pca_auto")
+            dim_n_components = 'knee'
+        else
+            dim_n_components = input$dim_options
+
         msg <- pipe_cluster(pipe, dim_method = input$dim_method,
-                        dim_n_components = input$dim_n_components,
+                        dim_n_components = dim_n_components,
                         clu_method = input$clu_method,
                         eval_method = input$eval_method,
                         clu_n_clusters = input$clu_n_clusters,
@@ -36,40 +44,41 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
 
         if (msg != 'good') {
             showNotification(msg)
-        } else {
-            updateSelectInput(
-                session = session,
-                inputId = "color",
-                label = "Select colour value:",
-                choices = c("Clusters", as.character(pipe()$col_ids)),
-                selected = NULL)
-
-            replot(1) # Notify that labels have changed
-
-            setNames(c("None"))
-            setPts(c(NA))
-            labelList(c())
-            # Update sets
-            for (i in 1:length(pipe()$n_clusters)) {
-                #TODO replace cluster_i if rerun
-                setNames(c(setNames(),
-                           (paste("Cluster_", as.character(i - 1), sep = ""))))
-                setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
-                #labelList(c(labelList(), i - 1))
-            }
-
-            # Clear all analysis tabs
-            if (length(deButtons()) > 0)
-                for (i in 1:length(deButtons()))
-                    deButtons()[[i]]$destroy()
-            deButtons(c())
-            deGenes(c())
-            output$DEbuttons = NULL
-            output$genes = NULL
-            output$GeneOntology = NULL
-            output$KEGG = NULL
-            output$Markers = NULL
-            output$Msigdb = NULL
+            return()
         }
-    }})
+
+        updateSelectInput(
+            session = session,
+            inputId = "color",
+            label = "Select colour value:",
+            choices = c("Clusters", as.character(pipe()$col_ids)),
+            selected = NULL)
+
+        replot(1) # Notify that labels have changed
+
+        setNames(c("None"))
+        setPts(c(NA))
+        labelList(c())
+        # Update sets
+        for (i in 1:length(pipe()$n_clusters)) {
+            #TODO replace cluster_i if rerun
+            setNames(c(setNames(),
+                       (paste("Cluster_", as.character(i - 1), sep = ""))))
+            setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
+            #labelList(c(labelList(), i - 1))
+        }
+
+        # Clear all analysis tabs
+        if (length(deButtons()) > 0)
+            for (i in 1:length(deButtons()))
+                deButtons()[[i]]$destroy()
+        deButtons(c())
+        deGenes(c())
+        output$DEbuttons = NULL
+        output$genes = NULL
+        output$GeneOntology = NULL
+        output$KEGG = NULL
+        output$Markers = NULL
+        output$Msigdb = NULL
+    })
 }
