@@ -8,7 +8,7 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
                     title = "Clusters"
                 } else {
                     i = which(pipe()$col_ids == input$color)[1]
-                    if (i == NULL) {
+                    if (is.null(i)) {
                         color = as.factor(pipe()$labels)
                     } else {
                         color = pipe()$x[, i]
