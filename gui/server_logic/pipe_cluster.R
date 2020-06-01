@@ -46,11 +46,11 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
             showNotification(msg)
             return()
         }
-
+        converter=Con()
         updateSelectInput(
             session = session,
             inputId = "color",
-            choices = c("Clusters", as.character(pipe()$col_ids)),
+            choices = c("Clusters", as.character(converter$id_to_name_R(as.character(pipe()$col_ids)))),
             selected = "Clusters")
 
         replot(1) # Notify that labels have changed

@@ -8,7 +8,12 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
                     color = as.factor(pipe()$labels)
                     title = "Clusters"
                 } else {
-                    i = which(pipe()$col_ids == input$color)[1]
+                    converter=Con()
+                    color_name=input$color
+                    showNotification("Rendering...")
+                    color_id=converter$name_to_id_R(c(color_name,"soldier"))[1]
+                    i = which(pipe()$col_ids == color_id)[1]
+                    #i = which(pipe()$col_ids == input$color)[1]
                     if (is.null(i)) {
                         color = as.factor(pipe()$labels)
                     } else {

@@ -74,12 +74,49 @@ class Con(Unit):
         # Leave unchanged if not found
         return np.char.upper([gene_dict.get(i, i) for i in parsed_ids])
     
-    
+    def id_to_name_R(self,ids):
+        
+        # used in R because R cannot make string ndarray
+        
+        if (type(ids)!="numpy.ndarray"):
+            ids=np.array(ids)
+        
+        gene_dict = pd.read_csv(self.path, index_col=0, squeeze=True).to_dict()
+        parsed_ids = parse(ids)
+
+        if parsed_ids.size == 0:
+            return np.array([])
+
+        # Leave unchanged if not found
+        return np.char.upper([gene_dict.get(i, i) for i in parsed_ids])
 
     def name_to_id(self, names):
         """
         Does the opposite of id_to_name.
         """
+        gene_dict = pd.read_csv(self.path, squeeze=True)
+        col1, col2 = gene_dict.columns
+
+        # Revert the order of columns
+        gene_dict = gene_dict[gene_dict.columns[::-1]
+                              ].set_index(col2)[col1].to_dict()
+        parsed_names = parse(names)
+
+        if parsed_names.size == 0:
+            return np.array([])
+
+        # Leave unchanged if not found
+        return np.char.upper([gene_dict.get(i, i) for i in parsed_names])
+    
+    def name_to_id_R(self, names):
+        """
+        Used in R, which cannot make string ndarray
+        """
+        
+        if (type(names)!="numpy.ndarray"):
+            names=np.array(names)
+            
+        
         gene_dict = pd.read_csv(self.path, squeeze=True)
         col1, col2 = gene_dict.columns
 
