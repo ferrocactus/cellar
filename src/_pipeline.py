@@ -20,6 +20,8 @@ from .utils.validation import _validate_mark_markers_n
 from .utils.validation import _validate_n_clusters
 from .utils.validation import _validate_n_jobs
 from .utils.validation import _validate_subset
+from .utils.validation import _validate_new_labels
+from .utils.validation import _validate_saved_clusters
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
 from .utils.exceptions import MethodNotImplementedError
@@ -42,11 +44,17 @@ class Pipeline():
             self.dataset = x
             self.x, self.col_ids = load_data(x)
             self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
+            self.col_ids = np.char.split(self.col_ids.flatten(),
+                                        sep='.', maxsplit=1)
+            self.col_ids = np.array([i[0] for i in self.col_ids])
         else:
             try:
                 self.dataset = "Noname"
                 self.x = np.array(x)
                 self.col_ids = np.array(col_ids).astype('U').reshape(-1)
+                self.col_ids = np.char.split(self.col_ids.flatten(),
+                                            sep='.', maxsplit=1)
+                self.col_ids = np.array([i[0] for i in self.col_ids])
             except:
                 raise ValueError("Incorrect format for x.")
 
@@ -185,7 +193,8 @@ class Pipeline():
         self.clu_n_clusters_inp = clu_n_clusters
         self.labels = wrap("cluster", clu_method)(
             eval_obj=wrap("cluster_eval", eval_method)(),
-            n_clusters=clu_n_clusters, n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
+            n_clusters=clu_n_clusters,
+            n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
         self.n_clusters = np.unique(self.labels)
 
     def run_de(self, de_method="TTest", de_alpha=0.05, de_n_genes=200,
@@ -225,12 +234,13 @@ class Pipeline():
                 alpha=de_alpha, markers_n=de_n_genes,
                 correction=de_correction).get_subset(self.x, subset1)
         else:
+            # Artificially create dataset and labels
             x1 = self.x[subset1]
             x2 = self.x[subset2]
+            x = np.concatenate([x1, x2])
+
             labels1 = np.zeros((x1.shape[0],), dtype=int)
             labels2 = np.ones((x2.shape[0],), dtype=int)
-
-            x = np.concatenate([x1, x2])
             labels = np.concatenate([labels1, labels2])
 
             self.markers = wrap("de", de_method)(
@@ -263,12 +273,18 @@ class Pipeline():
             path=ide_path, tissue=ide_tissue,
         ).get(self.markers.copy())
 
-    def run_sslu(self, new_labels=None, method='SeededKMeans', **kwargs):
-        if type(new_labels) != np.ndarray:
-            new_labels = np.asarray(new_labels)
-        self.ssclu = wrap("ss_cluster", method)()
-        self.labels = self.ssclu.get(x, new_labels, **kwargs)
-        return self.labels
+    def run_ssclu(self, ssclu_method='SeededKMeans',
+                  ssclu_new_labels=None, **kwargs):
+        _method_exists('ss_cluster', ssclu_method)
+        ssclu_new_labels, key_maps = _validate_new_labels(ssclu_new_labels)
+        if 'saved_clusters' in kwargs:
+            saved_clusters = _validate_saved_clusters(kwargs['saved_clusters'],
+                                                      key_maps)
+
+        self.ssclu_method = ssclu_method
+        self.labels = wrap(
+            "ss_cluster",
+            ssclu_method)().get(self.x_emb, ssclu_new_labels, **kwargs)
 
     def run_vis(self, vis_method='UMAP', **kwargs):
         _method_exists('visualization', vis_method)
