@@ -14,10 +14,11 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
         #reset_analysis_tabs(output)
         s1=as.character(input$subset1)
         s2=as.character(input$subset2)
+        tabletitle=paste(s1," (vs. ",s2,")",sep="")
         
         updateTabsetPanel(session, "switcher", selected = "DE")
-        tabletitle=paste(s1,"vs",s2)
-        #output$detitle <- renderText(tabletitle)
+    
+  
                                    
         output$genes <- renderTable({
             # TODO change '0' to whatever the first element is
