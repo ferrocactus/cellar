@@ -25,7 +25,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
                         setPts, replot, remark, deButtons, deGenes, labelList) {
     observeEvent(input$runconfigbtn, {
         if (pipe() == 0) {
-            showNotification("Please load data first.")
+            showNotification("Please load the data first.")
             return()
         }
 

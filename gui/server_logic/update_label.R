@@ -50,5 +50,10 @@ update_label <- function(input, output, session, pipe, labelList) {
             }
         }
     })
+
+    # Observe adding new labels
+    observeEvent(input$labeladd, {
+        labelList(union(labelList(), input$newlabelbox))
+    })
 }
 

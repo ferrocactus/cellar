@@ -65,7 +65,7 @@ def _validate_clu_n_clusters(clu_n_clusters, h):
             raise InappropriateArgument(
                 "Empty tuple encountered for the number of "
                 "clusters.")
-    elif isinstance(clu_n_clusters, list):
+    elif isinstance(clu_n_clusters, (list, np.ndarray)):
         if len(clu_n_clusters) < 1:
             raise InappropriateArgument(
                 "Empty list encountered for the number of "
@@ -188,7 +188,7 @@ def _validate_ensemble_methods(ensemble_methods):
         "Scanpy"
     ]
 
-    if isinstance(ensemble_methods, list):
+    if isinstance(ensemble_methods, (list, np.ndarray)):
         for method in ensemble_methods:
             if method not in methods:
                 raise MethodNotImplementedError(
@@ -217,9 +217,52 @@ def _validate_subset(subset):
 
     if isinstance(subset, (int, float)):
         return np.array([subset]).astype(np.int)
-    elif isinstance(subset, list):
+    elif isinstance(subset, (list, np.ndarray)):
         if len(subset) == 0:
             return None
         return np.array(subset).astype(np.int)
     else:
         raise InvalidArgument("Invalid subset encountered.")
+
+
+def _validate_new_labels(new_labels):
+    if isinstance(new_labels, (int, float)):
+        return np.array([new_labels]).astype(np.int), 0
+    elif isinstance(new_labels, (list, np.ndarray)):
+        new_labels = np.array(new_labels)
+        key_maps = {}
+        unq = np.unique(new_labels)
+        used = []
+        for label in unq:
+            if isinstance(label, (int, float)) or label.isnumeric():
+                used.append(int(label))
+                key_maps[label] = int(label)
+            else:
+                for x in range(1000):
+                    if x not in used:
+                        new_labels[new_labels == label] = x
+                        used.append(x)
+                        key_maps[label] = x
+                        break
+        return new_labels.astype(np.int), key_maps
+    else:
+        raise InvalidArgument("Invalid list of new labels encountered")
+
+def _validate_saved_clusters(saved_clusters, key_maps):
+    if isinstance(saved_clusters, str):
+        saved_clusters = saved_clusters.split(',')
+        saved_clusters = [i.strip() for i in saved_clusters]
+    if isinstance(saved_clusters, (int, float)):
+        if saved_clusters not in key_maps:
+            raise InvalidArgument(f"Cluster name {saved_clusters} not found.")
+        return np.array([key_maps[saved_clusters]])
+    elif isinstance(saved_clusters, (list, np.ndarray)):
+        saved_clusters = np.array(saved_clusters)
+        for i, cluster in enumerate(saved_clusters):
+            if cluster not in key_maps:
+                raise InvalidArgument(f"Cluster name {cluster} not found.")
+            else:
+                saved_clusters[i] = key_maps[saved_clusters[i]]
+        return saved_clusters
+    else:
+        raise InvalidArgument("Invalid list of clusters encountered.")

@@ -47,7 +47,7 @@ save_session <- function(input, output, session, pipe, setNames, setPts,
                     sess$'de_genes' <- deGenes()
                 if (length(labelList()) > 0)
                     sess$'label_list' <- labelList()
-                if (newLabels() != -1)
+                if (!is.null(newLabels()))
                     sess$'new_labels' <- newLabels()
                 sess$'checksum' <- get_checksum(paste0("datasets/", selDataset()))
                 json_obj <- toJSON(sess, indent = 2)

@@ -1,4 +1,5 @@
-re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
+re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
+                    setNames, setPts) {
     observe({ if (replot() > 0) {
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
@@ -16,13 +17,15 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
                     }
                 }
 
+                ns <- session$ns
                 plotObj(plot_ly(
                     x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
                     text = ~paste("Label: ", as.factor(pipe()$labels)),
                     color = color,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     type = 'scatter',
-                    mode = 'markers'
+                    mode = 'markers',
+                    source = ns('M')
                 ) %>% layout(dragmode = "lasso",
                             title = title))
                 return(plotObj())
@@ -55,6 +58,40 @@ re_plot <- function(input, output, session, replot, pipe, plotObj, selDataset) {
                 })
             }
         }
-      )
+    )
 
+    observeEvent(input$store_lasso, {
+        if (as.character(input$newsubset) %in% setNames()) {
+          showNotification("Name already exists")
+          return()
+        }
+
+        if (substr(as.character(input$newsubset),1,7) == "cluster") {
+          showNotification("Reserved name, please choose another.")
+          return()
+        }
+
+        ns <- session$ns
+        d <- event_data("plotly_selected", source='M')
+        keys <- as.numeric(d$key)
+        cell_count <- length(d$key)
+        print(input$newsubset)
+        print(d$key)
+
+        #showNotification(as.character(input$newsubset),duration=NULL)
+        if (identical(d$key, NULL) == TRUE) {
+          return()
+        }
+
+        if (as.character(input$newsubset) != "") {
+          setPts(c(setPts(), list(keys)))
+          setNames(c(setNames(), as.character(input$newsubset)))
+        } else {
+          setPts(c(setPts(), list(keys)))
+          setNames(c(setNames(),
+                    paste("Newset", as.character(length(setNames())), sep="")))
+        }
+
+        showNotification(paste(as.character(cell_count), "cells stored"))
+    })
 }

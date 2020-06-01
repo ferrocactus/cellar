@@ -46,8 +46,7 @@ menuItem(
                                 value = defaults$dim
                         ))
                     )
-                ),
-                HTML('<hr class="line">')
+                )
             ),
 
             div(
@@ -85,8 +84,7 @@ menuItem(
                             )
                         )
                     )
-                ),
-                HTML('<hr class="line">')
+                )
             ),
 
             #div(
@@ -141,31 +139,33 @@ menuItem(
                         "Visualization method:",
                         choices = options$vis
                     )
-                ),
-                HTML('<hr class="line">')
+                )
             ),
 
             div(
                 class = "div_step div_ssclu",
                 list(
+                    selectInput(
+                        ns("ssc_method"),
+                        "Constrained clustering",
+                        choices = options$ssclu
+                    ),
+                    conditionalPanel(
+                        condition = "input.clu_method != 'SeededKMeans'",
+                        ns = ns,
+                        div(
+                            #class = "multicol",
+                            checkboxGroupInput(
+                                ns("saved_clusters"),
+                                label = NULL,
+                                choices = c()
+                            )
+                        )
+                    ),
                     actionButton(
                         ns("ssclurun"),
                         "Run constrained clustering",
                         class="sidebtn longbtn"
-                    ),
-
-                    splitLayout(
-                        cellWidths = c("60%", "40%"),
-                        selectInput(
-                            ns("ssc_method"),
-                            "Constrained clustering",
-                            choices = options$ssclu
-                        ),
-                        textInput(
-                            ns("savedClusters"),
-                            label = "Preserve",
-                            value = "1,2"
-                        )
                     )
                 )
             )

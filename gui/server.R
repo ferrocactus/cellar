@@ -2,12 +2,11 @@ source("gui/server_logic/gray_widgets.R")
 source("gui/server_logic/upload_file.R")
 source("gui/server_logic/selected_dataset.R")
 source("gui/server_logic/gene_card.R")
-source("gui/server_logic/lasso_store.R")
 source("gui/server_logic/update_sets.R")
-source("gui/server_logic/add_label.R")
 
 source("gui/server_logic/load_dataset.R")
 source("gui/server_logic/pipe_cluster.R")
+source("gui/server_logic/pipe_sscluster.R")
 source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/re_plot.R")
 source("gui/server_logic/re_mark.R")
@@ -31,7 +30,7 @@ server <- shinyServer(function(input, output, session) {
     deGenes <- reactiveVal(c())
     labelList <- reactiveVal(c())
     plotObj <- reactiveVal(0)
-    newLabels <- reactiveVal(-1)
+    newLabels <- reactiveVal(NULL)
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -44,21 +43,22 @@ server <- shinyServer(function(input, output, session) {
 
     callModule(gray_widgets, id = "ns")
     callModule(gene_card, id = "ns")
-    callModule(lasso_store, id = "ns", setNames = setNames, setPts = setPts)
-    callModule(add_label, id = "ns", labelList = labelList)
 
     callModule(cluster_run, id = "ns", pipe = pipe,
                selDataset = selDataset, setNames = setNames,
                setPts = setPts, replot = replot, remark = remark,
                deButtons = deButtons, deGenes = deGenes, labelList = labelList)
+    callModule(sscluster_run, id = "ns", pipe = pipe, newLabels = newLabels,
+               replot = replot)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
     callModule(update_plot, id = "ns", pipe = pipe, setNames = setNames,
-               setPts = setPts, newLabels = newLabels)
+               setPts = setPts, newLabels = newLabels, plotObj = plotObj)
     callModule(re_plot, id = "ns", replot = replot, pipe = pipe,
-               plotObj = plotObj, selDataset = selDataset)
+               plotObj = plotObj, selDataset = selDataset, setNames = setNames,
+               setPts = setPts)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons, plotObj = plotObj,
                rebutton = rebutton)
