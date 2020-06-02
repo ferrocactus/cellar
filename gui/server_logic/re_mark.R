@@ -1,7 +1,7 @@
 library(shiny)
 
 re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
-                    plotObj, rebutton) {
+                    plotObj, rebutton, replot) {
     observe({ if (remark() > 0) {
         if (length(deButtons()) > 0)
             for (i in 1:length(deButtons()))
@@ -15,11 +15,9 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
         s1=as.character(input$subset1)
         s2=as.character(input$subset2)
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
-        
+
         updateTabsetPanel(session, "switcher", selected = "DE")
-    
-  
-                                   
+
         output$genes <- renderTable({
             # TODO change '0' to whatever the first element is
             # not all clustering algorithms return cluster ids starting with 0
@@ -36,13 +34,13 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
             deGenes(table[, 1])
             return(table)
         },caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"), 
+        caption.placement = getOption("xtable.caption.placement", "top"),
         caption.width = getOption("xtable.caption.width", NULL))
 
         output$DEbuttons <- renderUI({
             lapply(X = 1:length(deGenes()), FUN = function(i) {
-                    actionButton(ns(paste(deGenes()[i], " ", seq = "")),
-                                 paste(deGenes()[i], " ", seq = ""))})
+                    actionButton(ns(paste(deGenes()[i], "_", seq = "")),
+                                 deGenes()[i])})
         })
 
         rebutton(1)
@@ -52,21 +50,13 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
     observe({
     if (rebutton() > 0) {
         lapply(X = 1:length(deGenes()), FUN = function(i) {
-            o <- observeEvent(input[[paste(deGenes()[i], " ", seq = "")]], {
-                output$plot <- renderPlotly({
-                    # add 1 since lists in R start at 1
-                    colors = pipe()$x[, pipe()$markers[['0']][['indices']][i]+1]
-                    plotObj(plot_ly(
-                        x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
-                        text = ~paste("Label: ", as.factor(pipe()$labels)),
-                        color = colors,
-                        key = as.character(1:length(pipe()$x_emb_2d[,1])),
-                        type = 'scatter',
-                        mode = 'markers'
-                    ) %>% layout(dragmode = "lasso",
-                                title = paste("Value of ", deGenes()[i], sep="")))
-                    return(plotObj())
-                })
+            o <- observeEvent(input[[paste(deGenes()[i], "_", seq = "")]], {
+                updateSelectInput(
+                    session,
+                    'color',
+                    selected = deGenes()[i]
+                )
+                replot(1)
             })
             deButtons(c(deButtons(), isolate(o)))
         })

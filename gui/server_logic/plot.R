@@ -26,8 +26,7 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     type = 'scatter',
                     mode = 'markers'
-                ) %>% layout(dragmode = "lasso",
-                            title = title))
+                ) %>% layout(dragmode = "lasso", title = title))
                 return(plotObj())
             })
         })
@@ -36,6 +35,7 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
 
     # triggered when view gene expression is clicked
     observeEvent(input$color, suspended=TRUE, {
+        print('triggered')
         replot(1)
     })
 
