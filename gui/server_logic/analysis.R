@@ -62,8 +62,8 @@ build_table <- function(mode, fl, deGenes, nc, alpha) {
         ord[, 4] <- format(ord[, 4], scientific = T)
 
         showNotification(paste(mode, "analysis finished"))
-  
-        
+
+
         #output$downloadGO <- downloadHandler(
         #    filename = function() {
         #        paste("GO_data", ".csv", sep = "")
@@ -72,7 +72,7 @@ build_table <- function(mode, fl, deGenes, nc, alpha) {
         #        write.csv(ord, file, row.names = FALSE)
         #    }
         #)
-        return(head(ord, n = 10))
+        return(ord)
     })
 }
 
@@ -81,17 +81,17 @@ analysis <- function(input, output, session, deGenes, pipe) {
     # only run if deGenes have been stored
     if (length(deGenes()) > 0 && pipe() != 0) {
         nc = length(pipe()$col_ids)
-        
+
         s1=as.character(input$subset1)
         s2=as.character(input$subset2)
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
-        
+
         output$GeneOntology <- renderTable({
             build_table(mode = 'GO', fl = Hs.c5, deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha))
         },caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"), 
-        caption.width = getOption("xtable.caption.width", NULL), 
+        caption.placement = getOption("xtable.caption.placement", "top"),
+        caption.width = getOption("xtable.caption.width", NULL),
         bordered = T)
 
         output$KEGG <- renderTable({
@@ -99,7 +99,7 @@ analysis <- function(input, output, session, deGenes, pipe) {
                         nc = nc, alpha = as.numeric(input$mark_alpha))
         },
         caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"), 
+        caption.placement = getOption("xtable.caption.placement", "top"),
         caption.width = getOption("xtable.caption.width", NULL)
         ,bordered = T)
 
@@ -107,8 +107,8 @@ analysis <- function(input, output, session, deGenes, pipe) {
             build_table(mode = 'MSIGDB', fl = Hs.c2, deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha))
         },caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"), 
-        caption.width = getOption("xtable.caption.width", NULL), 
+        caption.placement = getOption("xtable.caption.placement", "top"),
+        caption.width = getOption("xtable.caption.width", NULL),
         bordered = T)
     }})
 }

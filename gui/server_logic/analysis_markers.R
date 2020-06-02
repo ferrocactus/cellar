@@ -85,7 +85,7 @@ analysis_markers <- function(input, output, session, deGenes, pipe) {
                 #        write.csv(hypergeom_ord, file, row.names = FALSE)
                 #    }
                 #)
-                return(head(ord, n = 10))
+                return(ord)
             })
         }, bordered = T)
     }})

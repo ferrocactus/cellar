@@ -31,7 +31,7 @@ tabsetPanel(
     ),
     tabPanel(
         "User Markers",
-         fileInput("markjson", "Choose markers JSON",multiple = FALSE,accept = c(".json")),
+         fileInput(ns("markjson"), "Choose markers JSON",multiple = FALSE,accept = c(".json")),
          tableOutput(ns("upmarkers")),
          downloadButton(ns("downloadusermks"), "Download user markers table")
     )

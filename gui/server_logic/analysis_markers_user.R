@@ -87,7 +87,7 @@ analysis_markers_user <- function(input, output, session, deGenes, pipe) {
                 #        write.csv(ord_user, file, row.names = FALSE)
                 #    }
                 #)
-                return(head(ord_user, n = 10))
+                return(ord_user)
             })
         }, bordered = T)
     }})
