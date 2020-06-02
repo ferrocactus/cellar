@@ -24,6 +24,7 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
                     text = ~paste("Label: ", as.factor(pipe()$labels)),
                     color = color,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
+                    marker=list(size=input$dot_size),
                     type = 'scatter',
                     mode = 'markers'
                 ) %>% layout(dragmode = "lasso", title = title))
