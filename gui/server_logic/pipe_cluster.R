@@ -21,15 +21,25 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
     })
 }
 
-cluster_run <- function(input, output, session, pipe, selDataset, setNames,
-                        setPts, replot, remark, deButtons, deGenes, labelList) {
+pipe_sscluster <- function(pipe, new_labels, ssc_method, saved_clusters) {
+    withProgress(message = "Running", value = 0, {
+        incProgress(1 / 2, detail = paste("Constrained Clustering"))
+        msg <- pipe()$run_step(step = "ssclu", ssclu_method = ssc_method,
+                               ssclu_new_labels = new_labels,
+                               saved_clusters = saved_clusters)
+        return(msg)
+    })
+}
+
+cluster_run <- function(input, output, session, pipe, selDataset, replot,
+                        reset, newLabels) {
+    # Clustering
     observeEvent(input$runconfigbtn, {
         if (pipe() == 0) {
             showNotification("Please load the data first.")
             return()
         }
 
-        # Clustering
         if (input$dim_options == "pca_auto")
             dim_n_components = 'knee'
         else
@@ -46,47 +56,28 @@ cluster_run <- function(input, output, session, pipe, selDataset, setNames,
             showNotification(msg)
             return()
         }
-        converter=Con()
-        if (substring(pipe()$col_ids[1],1,4)=="ENSG"){
-            updateSelectInput(
-                session = session,
-                inputId = "color",
-                choices = c("Clusters", as.character(converter$id_to_name_R(as.character(pipe()$col_ids)))),
-                selected = "Clusters")
-        }
-        else{
-            updateSelectInput(
-                session = session,
-                inputId = "color",
-                choices = c("Clusters", as.character(as.character(pipe()$col_ids))),
-                selected = "Clusters")
-        }
 
         replot(1) # Notify that labels have changed
+        reset(1) # notify changes
+    })
 
-        setNames(c("None"))
-        setPts(c(NA))
-        labelList(c())
-        # Update sets
-        for (i in 1:length(pipe()$n_clusters)) {
-            #TODO replace cluster_i if rerun
-            setNames(c(setNames(),
-                       (paste("Cluster_", as.character(i - 1), sep = ""))))
-            setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
-            #labelList(c(labelList(), i - 1))
+    # Semi-supervised clustering
+    observeEvent(input$ssclurun, {
+        if (is.null(newLabels())) {
+            showNotification("No labels have been updated")
+            return()
         }
 
-        # Clear all analysis tabs
-        if (length(deButtons()) > 0)
-            for (i in 1:length(deButtons()))
-                deButtons()[[i]]$destroy()
-        deButtons(c())
-        deGenes(c())
-        output$DEbuttons = NULL
-        output$genes = NULL
-        output$GeneOntology = NULL
-        output$KEGG = NULL
-        output$Markers = NULL
-        output$Msigdb = NULL
+        msg <- pipe_sscluster(pipe, new_labels = newLabels(),
+                              ssc_method = input$ssc_method,
+                              saved_clusters = input$saved_clusters)
+
+        if (msg != 'good') {
+            showNotification(msg)
+            return()
+        }
+
+        replot(1)
+        reset(1)
     })
 }

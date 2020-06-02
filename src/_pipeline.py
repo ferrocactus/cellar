@@ -44,19 +44,18 @@ class Pipeline():
             self.dataset = x
             self.x, self.col_ids = load_data(x)
             self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
-            self.col_ids = np.char.split(self.col_ids.flatten(),
-                                        sep='.', maxsplit=1)
-            self.col_ids = np.array([i[0] for i in self.col_ids])
         else:
             try:
                 self.dataset = "Noname"
                 self.x = np.array(x)
                 self.col_ids = np.array(col_ids).astype('U').reshape(-1)
-                self.col_ids = np.char.split(self.col_ids.flatten(),
-                                            sep='.', maxsplit=1)
-                self.col_ids = np.array([i[0] for i in self.col_ids])
             except:
                 raise ValueError("Incorrect format for x.")
+
+        self.col_ids = np.char.split(self.col_ids.flatten(),
+                                    sep='.', maxsplit=1)
+        self.col_ids = np.array([i[0] for i in self.col_ids])
+        self.col_names = wrap("conversion", "Converter")().get(self.col_ids)
 
         if len(self.x.shape) != 2:
             raise ValueError(
@@ -285,6 +284,7 @@ class Pipeline():
         self.labels = wrap(
             "ss_cluster",
             ssclu_method)().get(self.x_emb, ssclu_new_labels, **kwargs)
+        self.n_clusters = np.unique(self.labels)
 
     def run_vis(self, vis_method='UMAP', **kwargs):
         _method_exists('visualization', vis_method)

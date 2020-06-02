@@ -6,15 +6,15 @@ source("gui/server_logic/update_sets.R")
 
 source("gui/server_logic/load_dataset.R")
 source("gui/server_logic/pipe_cluster.R")
-source("gui/server_logic/pipe_sscluster.R")
 source("gui/server_logic/pipe_de.R")
-source("gui/server_logic/re_plot.R")
+source("gui/server_logic/plot.R")
 source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
-source("gui/server_logic/update_plot.R")
 source("gui/server_logic/analysis_markers.R")
 source("gui/server_logic/save_session.R")
+
+source("gui/server_logic/dataset_reset.R")
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -31,6 +31,7 @@ server <- shinyServer(function(input, output, session) {
     labelList <- reactiveVal(c())
     plotObj <- reactiveVal(0)
     newLabels <- reactiveVal(NULL)
+    reset <- reactiveVal(0)
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -44,26 +45,23 @@ server <- shinyServer(function(input, output, session) {
     callModule(gray_widgets, id = "ns")
     callModule(gene_card, id = "ns")
 
-    callModule(cluster_run, id = "ns", pipe = pipe,
-               selDataset = selDataset, setNames = setNames,
-               setPts = setPts, replot = replot, remark = remark,
-               deButtons = deButtons, deGenes = deGenes, labelList = labelList)
-    callModule(sscluster_run, id = "ns", pipe = pipe, newLabels = newLabels,
-               replot = replot)
+    callModule(cluster_run, id = "ns", pipe = pipe, selDataset = selDataset,
+               replot = replot, reset = reset, newLabels = newLabels)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
-    callModule(update_plot, id = "ns", pipe = pipe, setNames = setNames,
-               setPts = setPts, newLabels = newLabels, plotObj = plotObj)
-    callModule(re_plot, id = "ns", replot = replot, pipe = pipe,
+    callModule(plot, id = "ns", replot = replot, pipe = pipe,
                plotObj = plotObj, selDataset = selDataset, setNames = setNames,
-               setPts = setPts)
+               setPts = setPts, newLabels = newLabels)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons, plotObj = plotObj,
                rebutton = rebutton)
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
+    callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
+               setPts = setPts, labelList = labelList, deButtons = deButtons,
+               deGenes = deGenes, pipe = pipe, newLabels = newLabels)
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
                setPts = setPts, deGenes = deGenes, selDataset = selDataset,
                plotObj = plotObj, replot = replot, remark = remark,

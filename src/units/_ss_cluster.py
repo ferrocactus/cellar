@@ -26,13 +26,13 @@ class SSClu_SeededKMeans(Unit):
         self.logger = setup_logger('SeededKMeans')
         self.kwargs = kwargs
 
-    def get(self, x, labels, mask=None):
+    def get(self, x, labels, saved_clusters=None):
         """
         Find the non-negative values and let them define the n_clusters.
         Args:
             x (np.ndarray): Data points (n_points x n_features)
             labels (np.ndarray): Labels (n_points x 1)
-            mask: ignored, used for consistencyd
+            saved_clusters: ignored, used for consistency
         Returns:
             (np.ndarray): New labels after clustering (n_points x 1)
         """

@@ -87,50 +87,6 @@ menuItem(
                 )
             ),
 
-            #div(
-            #    class = "div_step div_mark",
-            #    list(
-            #        selectInput(
-            #            "de_method",
-            #            "DE",
-            #            choices = options$de
-            #        ),
-            #        splitLayout(
-            #            cellWidths = c("25%", "25%", "48%"),
-            #            textInput(inputId = "mark_alpha",
-            #                      label = "alpha",
-            #                      value = defaults$mark_alpha),
-            #            textInput(inputId = "mark_markers_n",
-            #                      label = "markers",
-            #                      value = defaults$mark_no),
-            #            selectInput("mark_correction",
-            #                        "Correction",
-            #                        choices = options$correction)
-            #        )
-            #    ),
-            #    HTML('<hr class="line">')
-            #),
-
-            #splitLayout(
-            #    cellWidths = c("50%", "50%"),
-            #    selectInput("con_convention",
-            #                "Converter convention",
-            #                choices = options$converter),
-            #    textInput(inputId = "con_path",
-            #              label = "Path (dont use)",
-            #              value = '')
-            #),
-
-            #splitLayout(
-            #    cellWidths = c("50%", "50%"),
-            #    selectInput("ide_tissue",
-            #                "Converter convention",
-            #                choices = options$tissue),
-            #    textInput(inputId = "ide_path",
-            #              label = "Path (dont use)",
-            #              value = "")
-            #),
-
             div(
                 class = "div_step div_vis",
                 list(
@@ -154,11 +110,10 @@ menuItem(
                         condition = "input.clu_method != 'SeededKMeans'",
                         ns = ns,
                         div(
-                            #class = "multicol",
-                            checkboxGroupInput(
+                            textInput(
                                 ns("saved_clusters"),
-                                label = NULL,
-                                choices = c()
+                                "Clusters to preserve",
+                                placeholder = "1-5, 8"
                             )
                         )
                     ),
