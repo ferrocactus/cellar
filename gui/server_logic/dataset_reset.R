@@ -2,21 +2,13 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
                           labelList, deButtons, deGenes, pipe, newLabels) {
     observe({ if (reset() > 0) {
         print("Resetting")
-        converter = Con()
-
-        if (substring(pipe()$col_ids[1],1,4) == "ENSG") {
-            updateSelectInput(
-                session = session,
-                inputId = "color",
-                choices = c("Clusters", as.character(converter$id_to_name_R(as.character(pipe()$col_ids)))),
-                selected = "Clusters")
-        } else {
-            updateSelectInput(
-                session = session,
-                inputId = "color",
-                choices = c("Clusters", as.character(as.character(pipe()$col_ids))),
-                selected = "Clusters")
-        }
+        #converter = Con()
+        updateSelectInput(
+            session = session,
+            inputId = "color",
+            choices = c("Clusters", as.character(as.character(pipe()$col_names))),
+            selected = "Clusters")
+      
 
         setNames(c("None"))
         setPts(c(NA))
