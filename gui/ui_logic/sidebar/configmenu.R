@@ -107,14 +107,12 @@ menuItem(
                         choices = options$ssclu
                     ),
                     conditionalPanel(
-                        condition = "input.clu_method != 'SeededKMeans'",
+                        condition = "input.ssc_method != 'SeededKMeans'",
                         ns = ns,
-                        div(
-                            textInput(
-                                ns("saved_clusters"),
-                                "Clusters to preserve",
-                                placeholder = "1-5, 8"
-                            )
+                        textInput(
+                            ns("saved_clusters"),
+                            "Clusters to preserve",
+                            placeholder = "1-5, 8"
                         )
                     ),
                     actionButton(
