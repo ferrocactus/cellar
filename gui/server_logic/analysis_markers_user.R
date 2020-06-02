@@ -24,6 +24,7 @@ analysis_markers_user <- function(input, output, session, deGenes, pipe) {
 
     req(input$markjson)
     user_genelists <- getMarkerGeneList(input$markjson$datapath)
+    showNotification("File Read")
     user_gene_names <- names(user_genelists)
 
     len_user <- length(user_gene_names)
