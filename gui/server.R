@@ -3,6 +3,7 @@ source("gui/server_logic/upload_file.R")
 source("gui/server_logic/selected_dataset.R")
 source("gui/server_logic/gene_card.R")
 source("gui/server_logic/update_sets.R")
+source("gui/server_logic/theme.R")
 
 source("gui/server_logic/load_dataset.R")
 source("gui/server_logic/pipe_cluster.R")
@@ -68,4 +69,5 @@ server <- shinyServer(function(input, output, session) {
                setPts = setPts, deGenes = deGenes, selDataset = selDataset,
                plotHistory = plotHistory, curPlot = curPlot, replot = replot,
                remark = remark, newLabels = newLabels, labelList = labelList)
+    callModule(theme, id = "ns")
 })

@@ -4,6 +4,8 @@
   --lightgreen: rgb(0, 180, 110);
   --gray: rgb(80, 80, 112);
   --darkgray: rgb(150, 150, 150);
+  --bluegray: rgb(44, 59, 65);
+  --darkbluegray: rgb(34, 45, 50);
 }
 
 section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-input.action-link {
@@ -150,10 +152,14 @@ input:disabled {
     margin-top: 30px !important;
 }
 
+#ns-switcher {
+    margin-top: 40px !important;
+}
+
 .hist {
     float:right !important;
     margin-right: 40px !important;
-    margin-bottom: -20px !important;
+    margin-bottom: -30px !important;
 }
 
 .histbtn {
@@ -175,8 +181,49 @@ input:disabled {
 .nextbtn {
   background-color: var(--green);
   color: white;
+  border-color: transparent;
 }
 
 .round {
   border-radius: 50%;
+}
+
+.body_dark_mode {
+    background-color: var(--bluegray) !important;
+    color: white !important;
+}
+
+.tab_dark_mode {
+    color : white !important;
+    background-color: var(--bluegray) !important;
+    border-color: var(--bluegray) !important;
+}
+
+.tab_dark_mode:hover {
+    background-color: var(--darkbluegray) !important;
+    border-color: var(--darkbluegray) !important;
+}
+
+.nav-tabs > li.active > a.tab_dark_mode,
+.nav-tabs > li.active > a.tab_dark_mode:focus,
+.nav-tabs > li.active > a.tab_dark_mode:hover {
+    color : white !important;
+    background-color: var(--darkbluegray) !important;
+    border-color: var(--darkbluegray) !important;
+}
+
+.nav_tabs_dark_mode {
+    border-bottom-color: var(--darkbluegray) !important;
+}
+
+.btn_dark {
+    background-color: var(--darkbluegray) !important;
+    color: white !important;
+    border-color: transparent !important;
+}
+
+.btn_dark:hover {
+    background-color: white !important;
+    color: black !important;
+    border-color: transparent !important;
 }

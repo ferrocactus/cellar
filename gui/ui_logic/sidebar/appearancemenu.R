@@ -8,6 +8,15 @@ appearancemenu <- function(id, label='appearancemenu') {
     menuSubItem(
       icon = NULL,
       list(
+        radioButtons(
+            ns("theme_mode"),
+            "Select theme:",
+            c(
+                "Light Mode" = "light_mode",
+                "Dark Mode" = "dark_mode"
+            ),
+            inline = TRUE
+        ),
 
         sliderInput(
           ns("dot_size"),
