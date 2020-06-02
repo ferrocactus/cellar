@@ -75,22 +75,25 @@ reset_analysis_tabs <- function(output) {
     # By default the tabs will be erased only when we switch to them
     # so we first disable suspendWhenHidden, set them to null, and enable
     # it again
-    outputOptions(output, "genes", suspendWhenHidden = FALSE)
+    outputOptions(output, "DEtable", suspendWhenHidden = FALSE)
     outputOptions(output, "DEbuttons", suspendWhenHidden = FALSE)
-    outputOptions(output, "KEGG", suspendWhenHidden = FALSE)
-    outputOptions(output, "GeneOntology", suspendWhenHidden = FALSE)
-    outputOptions(output, "Markers", suspendWhenHidden = FALSE)
-    outputOptions(output, "Msigdb", suspendWhenHidden = FALSE)
+    outputOptions(output, "KEGGtable", suspendWhenHidden = FALSE)
+    outputOptions(output, "GOtable", suspendWhenHidden = FALSE)
+    outputOptions(output, "Markerstable", suspendWhenHidden = FALSE)
+    outputOptions(output, "MSIGDBtable", suspendWhenHidden = FALSE)
+    outputOptions(output, "Markerstableuser", suspendWhenHidden = FALSE)
     output$DEbuttons = NULL
-    output$genes = NULL
-    output$GeneOntology = NULL
-    output$KEGG = NULL
-    output$Markers = NULL
-    output$Msigdb = NULL
-    outputOptions(output, "genes", suspendWhenHidden = TRUE)
+    output$DEtable = NULL
+    output$GOtable = NULL
+    output$KEGGtable = NULL
+    output$Markerstable = NULL
+    output$Markerstableuser = NULL
+    output$MSIGDBtable = NULL
+    outputOptions(output, "DEtable", suspendWhenHidden = TRUE)
     outputOptions(output, "DEbuttons", suspendWhenHidden = TRUE)
-    outputOptions(output, "KEGG", suspendWhenHidden = TRUE)
-    outputOptions(output, "GeneOntology", suspendWhenHidden = TRUE)
-    outputOptions(output, "Markers", suspendWhenHidden = TRUE)
-    outputOptions(output, "Msigdb", suspendWhenHidden = TRUE)
+    outputOptions(output, "KEGGtable", suspendWhenHidden = TRUE)
+    outputOptions(output, "GOtable", suspendWhenHidden = TRUE)
+    outputOptions(output, "Markerstable", suspendWhenHidden = TRUE)
+    outputOptions(output, "MSIGDBtable", suspendWhenHidden = TRUE)
+    outputOptions(output, "Markerstableuser", suspendWhenHidden = TRUE)
 }

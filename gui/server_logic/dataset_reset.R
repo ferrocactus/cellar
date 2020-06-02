@@ -32,13 +32,15 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
                 deButtons()[[i]]$destroy()
         deButtons(c())
         deGenes(c())
-        output$DEbuttons = NULL
-        output$genes = NULL
-        output$GeneOntology = NULL
-        output$KEGG = NULL
-        output$Markers = NULL
-        output$Msigdb = NULL
 
-        reset(0)
+        output$DEbuttons = NULL
+        output$DEtable = NULL
+        output$GOtable = NULL
+        output$KEGGtable = NULL
+        output$Markerstable = NULL
+        output$Markerstableuser = NULL
+        output$MSIGDBtable = NULL
+
+        isolate(reset(0))
     }})
 }
