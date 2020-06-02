@@ -1,3 +1,12 @@
+library(shinydashboard)
+library(ggplot2)
+library(shiny)
+library(reticulate)
+library(shinyjs)
+library(plotly)
+library(rjson)
+library(tools)
+
 source("gui/ui.R")
 source("gui/server.R")
 

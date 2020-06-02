@@ -1,5 +1,3 @@
-library(shiny)
-
 source("gui/ui_logic/sidebar/options.R")
 
 configmenu <- function(id, label="configmenu") {
@@ -15,7 +13,7 @@ menuItem(
             actionButton(
                 ns("runconfigbtn"),
                 "Run with current configuration",
-                class="sidebtn longbtn"
+                class="sidebtn longbtn runconfig"
             ),
 
             div(

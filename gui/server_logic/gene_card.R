@@ -1,5 +1,3 @@
-library(reticulate)
-
 source_python("__init__.py")
 
 gene_card <- function(input, output, session) {

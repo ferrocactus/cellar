@@ -1,4 +1,3 @@
-library(reticulate)
 source_python("gui/server_logic/read_onto.py")
 dic = get_dic()
 

@@ -1,5 +1,3 @@
-library(shiny)
-
 source("gui/ui_logic/sidebar/options.R")
 
 analysismenu <- function(id, label="analysismenu") {

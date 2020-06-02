@@ -1,5 +1,3 @@
-library(shiny)
-
 plots <- function(id, label='plots') {
 ns = NS(id)
 tabsetPanel(

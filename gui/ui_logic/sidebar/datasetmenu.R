@@ -1,6 +1,4 @@
-library(shiny)
-
-datasetmenu <- function(id, label='datasetmeu') {
+datasetmenu <- function(id, label='datasetmenu') {
 ns = NS(id)
 menuItem(
     "Dataset",

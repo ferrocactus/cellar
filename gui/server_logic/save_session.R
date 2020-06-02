@@ -1,6 +1,3 @@
-library(rjson)
-library(tools)
-
 get_checksum <- function(filepath) {
     return(tools::md5sum(filepath))
 }

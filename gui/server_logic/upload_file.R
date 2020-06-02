@@ -1,6 +1,4 @@
 # File upload logic
-library(reticulate)
-
 source_python("gui/server_logic/write_file.py")
 
 datasetExists <- function(dataset, path) {

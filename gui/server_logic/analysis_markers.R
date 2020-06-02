@@ -1,5 +1,3 @@
-library(rjson)
-
 load('gui/obj/gene_ids_all')
 
 getMarkerGeneList <- function(path) {

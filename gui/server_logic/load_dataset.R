@@ -1,5 +1,3 @@
-library(reticulate)
-
 source_python("__init__.py")
 
 load_dataset <- function(input, output, session, pipe, selDataset,

@@ -1,5 +1,3 @@
-library(shiny)
-
 re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                     plotObj, rebutton, replot) {
     observe({ if (remark() > 0) {

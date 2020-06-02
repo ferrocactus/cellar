@@ -1,5 +1,3 @@
-library(shiny)
-
 downloadmenu <- function(id, label="downloadmenu") {
 ns = NS(id)
 menuItem(

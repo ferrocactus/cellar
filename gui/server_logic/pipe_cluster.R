@@ -1,5 +1,3 @@
-library(reticulate)
-
 # Needed by cluster_run
 pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
                         eval_method, clu_n_clusters, vis_method) {

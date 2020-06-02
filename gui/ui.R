@@ -1,8 +1,3 @@
-library(shiny)
-library(shinydashboard)
-library(plotly)
-library(shinyjs)
-
 source("gui/ui_logic/sidebar/datasetmenu.R") #datasetmenu
 source("gui/ui_logic/sidebar/appearancemenu.R") #appearancemenu
 source("gui/ui_logic/sidebar/configmenu.R") #configmenu

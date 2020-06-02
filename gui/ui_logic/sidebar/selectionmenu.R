@@ -1,5 +1,3 @@
-library(shiny)
-
 source("gui/ui_logic/sidebar/options.R")
 
 selectionmenu <- function(id, label="selectionmenu") {

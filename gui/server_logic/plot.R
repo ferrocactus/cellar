@@ -1,3 +1,5 @@
+library(RColorBrewer)
+# Define the number of colors you want
 plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
                     setNames, setPts, newLabels) {
     # triggers when replot is set to 1
@@ -19,12 +21,16 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
                     }
                 }
 
+                nb.cols <- 30
+                colors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
+
                 plotObj(plot_ly(
                     x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
                     text = ~paste("Label: ", as.factor(pipe()$labels)),
                     color = color,
+                    colors = colors,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
-                    marker=list(size=input$dot_size),
+                    marker = list(size = input$dot_size),
                     type = 'scatter',
                     mode = 'markers'
                 ) %>% layout(dragmode = "lasso", title = title))

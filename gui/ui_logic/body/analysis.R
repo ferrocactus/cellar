@@ -1,5 +1,3 @@
-library(shiny)
-
 analysis <- function(id, label="analysis") {
 ns = NS(id)
 tabsetPanel(

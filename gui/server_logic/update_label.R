@@ -1,4 +1,3 @@
-library(reticulate)
 source_python("gui/server_logic/read_onto.py")
 
 update_label <- function(input, output, session, pipe, labelList) {
