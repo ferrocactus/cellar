@@ -28,6 +28,12 @@ tabsetPanel(
         "MSigDB C2",
         tableOutput(ns("Msigdb")),
         downloadButton(ns("downloadMSIG"), "Download MsigDB enrichment table")
+    ),
+    tabPanel(
+        "User Markers",
+         fileInput("markjson", "Choose markers JSON",multiple = FALSE,accept = c(".json")),
+         tableOutput(ns("upmarkers")),
+         downloadButton(ns("downloadusermks"), "Download user markers table")
     )
     #tabPanel(
      #   "Top Expressed Genes",
