@@ -137,3 +137,7 @@ input:disabled {
 #details_div {
     min-height: 300px !important;
 }
+
+.div_subsets {
+    margin-top: 30px !important;
+}

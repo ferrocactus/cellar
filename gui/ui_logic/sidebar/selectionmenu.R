@@ -28,8 +28,7 @@ menuItem(
                             class="secondcol"
                         )
                     )
-                ),
-                HTML('<hr class="line">')
+                )
             ),
 
             div(
