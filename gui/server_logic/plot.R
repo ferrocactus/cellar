@@ -1,9 +1,12 @@
 library(RColorBrewer)
 # Define the number of colors you want
-plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
-                    setNames, setPts, newLabels) {
+plot <- function(input, output, session, replot, pipe, selDataset,
+                 setNames, setPts, newLabels, plotHistory, curPlot) {
     # triggers when replot is set to 1
-    observe({ if (replot() > 0) {
+    observe({
+        req(replot())
+        if (!pipe()$has('labels')) return()
+
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
             output$plot <- renderPlotly({
@@ -21,28 +24,41 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
                     }
                 }
 
-                nb.cols <- 30
-                colors <- colorRampPalette(brewer.pal(8, "Set2"))(nb.cols)
-
-                plotObj(plot_ly(
+                p <- plotly_build(plot_ly(
                     x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
                     text = ~paste("Label: ", as.factor(pipe()$labels)),
                     color = color,
-                    colors = colors,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     marker = list(size = input$dot_size),
                     type = 'scatter',
                     mode = 'markers'
                 ) %>% layout(dragmode = "lasso", title = title))
-                return(plotObj())
+                isolate(plotHistory(c(plotHistory(), list(p))))
+                isolate(curPlot(length(plotHistory())))
+                return(p)
             })
         })
-        replot(0)
-    }})
+        isolate(replot(NULL))
+    })
+
+    observeEvent(input$prevplot, {
+        if (curPlot() == 1) return()
+        curPlot(curPlot() - 1)
+        output$plot <- renderPlotly({
+            return(plotHistory()[[curPlot()]])
+        })
+    })
+
+    observeEvent(input$nextplot, {
+        if (curPlot() == length(plotHistory())) return()
+        curPlot(curPlot() + 1)
+        output$plot <- renderPlotly({
+            return(plotHistory()[[curPlot()]])
+        })
+    })
 
     # triggered when view gene expression is clicked
     observeEvent(input$color, suspended=TRUE, {
-        print('triggered')
         replot(1)
     })
 
@@ -79,12 +95,12 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
     })
 
     observeEvent(input$labelupd, {
-        if (is.null(newLabels())) newLabels(pipe()$labels)
+        if (is.null(newLabels())) isolate(newLabels(pipe()$labels))
         idx <- which(setNames() == as.character(input$subset1_upd))
         keys <- setPts()[[idx]]
         lbs <- newLabels()
         lbs[keys] <- as.character(input$newlabels)
-        newLabels(lbs)
+        isolate(newLabels(lbs))
         showNotification("Updating labels")
 
         if (input$color == 'Clusters')
@@ -93,15 +109,17 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
             title = input$labelupd
 
         output$plot <- renderPlotly({
-            plotObj(plot_ly(
+            p <- plotly_build(plot_ly(
                 x = pipe()$x_emb_2d[, 1], y = pipe()$x_emb_2d[, 2],
                 text = ~paste("label: ", as.factor(newLabels())),
                 color = as.factor(newLabels()),
                 key = as.character(1:length(pipe()$x_emb_2d[,1])),
                 type = 'scatter',
                 mode = 'markers',
-          ) %>% layout(dragmode = "lasso", title = title))
-          return(plotObj())
+            ) %>% layout(dragmode = "lasso", title = title))
+            isolate(plotHistory(c(plotHistory(), list(p))))
+            isolate(curPlot(length(plotHistory())))
+            return(p)
         })
       })
 
@@ -115,12 +133,14 @@ plot <- function(input, output, session, replot, pipe, plotObj, selDataset,
         content = function(fname) {
             extension <- tolower(input$plot_download_format)
             if (extension == 'html') {
-                htmlwidgets::saveWidget(as_widget(plotObj()), fname,
-                                    selfcontained = TRUE)
+                htmlwidgets::saveWidget(
+                        as_widget(plotHistory()[[curPlot()]]), fname,
+                        selfcontained = TRUE)
             } else {
                 withProgress(message = "Saving plot", value = 0, {
                     incProgress(1/2, detail = paste("Step: Rendering"))
-                    withr::with_dir(dirname(fname), orca(plotObj(),
+                    withr::with_dir(dirname(fname),
+                            orca(plotHistory()[[curPlot()]],
                             basename(fname), format = extension))
                 })
             }

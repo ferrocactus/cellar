@@ -1,5 +1,5 @@
 re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
-                    plotObj, rebutton, replot) {
+                    rebutton, replot) {
     observe({ if (remark() > 0) {
         if (length(deButtons()) > 0)
             for (i in 1:length(deButtons()))
@@ -54,7 +54,6 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                     'color',
                     selected = deGenes()[i]
                 )
-                replot(1)
             })
             deButtons(c(deButtons(), isolate(o)))
         })

@@ -23,13 +23,14 @@ server <- shinyServer(function(input, output, session) {
     setNames <- reactiveVal(c("None")) # triggers update_sets on change
     setPts <- reactiveVal(c(NA))
     pipe <- reactiveVal(0)
-    replot <- reactiveVal(0) # triggers re_plot on change
+    replot <- reactiveVal(NULL) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
     rebutton <- reactiveVal(0)
     deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
     labelList <- reactiveVal(c())
-    plotObj <- reactiveVal(0)
+    plotHistory <- reactiveVal(c())
+    curPlot <- reactiveVal(0)
     newLabels <- reactiveVal(NULL)
     reset <- reactiveVal(0)
 
@@ -52,10 +53,11 @@ server <- shinyServer(function(input, output, session) {
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
     callModule(plot, id = "ns", replot = replot, pipe = pipe,
-               plotObj = plotObj, selDataset = selDataset, setNames = setNames,
-               setPts = setPts, newLabels = newLabels)
+               selDataset = selDataset, setNames = setNames, setPts = setPts,
+               newLabels = newLabels, plotHistory = plotHistory,
+               curPlot = curPlot)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
-               deGenes = deGenes, deButtons = deButtons, plotObj = plotObj,
+               deGenes = deGenes, deButtons = deButtons,
                rebutton = rebutton, replot = replot)
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
@@ -64,6 +66,6 @@ server <- shinyServer(function(input, output, session) {
                deGenes = deGenes, pipe = pipe, newLabels = newLabels)
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
                setPts = setPts, deGenes = deGenes, selDataset = selDataset,
-               plotObj = plotObj, replot = replot, remark = remark,
-               newLabels = newLabels, labelList = labelList)
+               plotHistory = plotHistory, curPlot = curPlot, replot = replot,
+               remark = remark, newLabels = newLabels, labelList = labelList)
 })

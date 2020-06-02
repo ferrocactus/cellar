@@ -149,3 +149,34 @@ input:disabled {
 .div_download_session {
     margin-top: 30px !important;
 }
+
+.hist {
+    float:right !important;
+    margin-right: 40px !important;
+    margin-bottom: -20px !important;
+}
+
+.histbtn {
+  text-decoration: none;
+  display: inline-block;
+  padding: 8px 16px;
+}
+
+.histbtn:hover {
+  background-color: #ddd;
+  color: black;
+}
+
+.prevbtn {
+  background-color: #f1f1f1;
+  color: black;
+}
+
+.nextbtn {
+  background-color: var(--green);
+  color: white;
+}
+
+.round {
+  border-radius: 50%;
+}

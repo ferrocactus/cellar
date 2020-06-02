@@ -3,8 +3,8 @@ get_checksum <- function(filepath) {
 }
 
 save_session <- function(input, output, session, pipe, setNames, setPts,
-                         deGenes, selDataset, plotObj, replot, remark,
-                         newLabels, labelList) {
+                         deGenes, selDataset, plotHistory, curPlot, replot,
+                         remark, newLabels, labelList) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
