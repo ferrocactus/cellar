@@ -4,34 +4,36 @@ tabsetPanel(
     id = ns("switcher"),
     tabPanel(
         "DE",
-        tableOutput(ns("genes")),
+        downloadButton(ns("downloadDE"), "Download DE genes"),
+        tableOutput(ns("DEtable")),
         uiOutput(ns("DEbuttons"))
     ),
     tabPanel(
         "Gene Ontology",
-        tableOutput(ns("GeneOntology")),
-        downloadButton(ns("downloadGO"), "Download GO table")
+        downloadButton(ns("downloadGO"), "Download GO table"),
+        tableOutput(ns("GOtable"))
     ),
     tabPanel(
         "KEGG",
-        tableOutput(ns("KEGG")),
-        downloadButton(("downloadKEGG"), "Download KEGG table")
-    ),
-    tabPanel(
-        "Markers Intersect",
-        tableOutput(ns("Markers")),
-        downloadButton(("downloadMKS"), "Download Markers intersect table")
+        downloadButton(ns("downloadKEGG"), "Download KEGG table"),
+        tableOutput(ns("KEGGtable"))
     ),
     tabPanel(
         "MSigDB C2",
-        tableOutput(ns("Msigdb")),
-        downloadButton(ns("downloadMSIG"), "Download MsigDB enrichment table")
+        downloadButton(ns("downloadMSIGDB"), "Download MSIGDB table"),
+        tableOutput(ns("MSIGDBtable"))
+    ),
+    tabPanel(
+        "Markers",
+        downloadButton(ns("downloadMKS"), "Download Markers table"),
+        tableOutput(ns("Markerstable"))
     ),
     tabPanel(
         "User Markers",
-         fileInput(ns("markjson"), "Choose markers JSON",multiple = FALSE,accept = c(".json")),
-         tableOutput(ns("upmarkers")),
-         downloadButton(ns("downloadusermks"), "Download user markers table")
+        downloadButton(ns("downloadMKSuser"), "Download Markers table"),
+        fileInput(ns("markjson"), "Choose markers JSON",
+                  multiple = FALSE, accept = c(".json")),
+        tableOutput(ns("Markerstableuser"))
     )
     #tabPanel(
      #   "Top Expressed Genes",

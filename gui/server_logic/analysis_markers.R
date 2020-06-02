@@ -38,7 +38,7 @@ analysis_markers <- function(input, output, session, deGenes, pipe) {
     if (length(deGenes()) > 0 && pipe() != 0) {
         ns <- length(pipe()$col_ids)
 
-        output$Markers <- renderTable({
+        output$Markerstable <- renderTable({
             withProgress(message = 'Finding Markers', value = 0, {
                 incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 deGenes_i <- intersect(deGenes(), rownames(gene_ids_all))
@@ -75,14 +75,14 @@ analysis_markers <- function(input, output, session, deGenes, pipe) {
 
                 showNotification("Markers analysis finished")
 
-                #output$downloadMKS <- downloadHandler(
-                #    filename = function() {
-                #        paste("Markers_data", ".csv", sep = "")
-                #    },
-                #    content = function(file) {
-                #        write.csv(hypergeom_ord, file, row.names = FALSE)
-                #    }
-                #)
+                output$downloadMKS <- downloadHandler(
+                    filename = function() {
+                        paste0(pipe()$dataset, "_Markers", "_analysis", ".csv")
+                    },
+                    content = function(file) {
+                        write.csv(ord, file, row.names = FALSE)
+                    }
+                )
                 return(ord)
             })
         }, bordered = T)

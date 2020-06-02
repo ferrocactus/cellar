@@ -5,7 +5,7 @@ load('gui/obj/kegg_genelists')
 load('gui/obj/keggidtoname')
 load('gui/obj/gene_ids_all')
 
-build_table <- function(mode, fl, deGenes, nc, alpha) {
+build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     categories <- names(fl)
     if (mode == 'KEGG')
         categories <- kegg_id_toname[categories]
@@ -63,15 +63,16 @@ build_table <- function(mode, fl, deGenes, nc, alpha) {
 
         showNotification(paste(mode, "analysis finished"))
 
+        downloadid = paste0("download", mode)
 
-        #output$downloadGO <- downloadHandler(
-        #    filename = function() {
-        #        paste("GO_data", ".csv", sep = "")
-        #    },
-        #    content = function(file) {
-        #        write.csv(ord, file, row.names = FALSE)
-        #    }
-        #)
+        output[[downloadid]] <- downloadHandler(
+            filename = function() {
+                paste0(dataset, "_", mode, "_analysis", ".csv")
+            },
+            content = function(file) {
+                write.csv(ord, file, row.names = FALSE)
+            }
+        )
         return(ord)
     })
 }
@@ -86,26 +87,32 @@ analysis <- function(input, output, session, deGenes, pipe) {
         s2=as.character(input$subset2)
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
 
-        output$GeneOntology <- renderTable({
-            build_table(mode = 'GO', fl = Hs.c5, deGenes = deGenes, nc = nc,
-                        alpha = as.numeric(input$mark_alpha))
+        output$GOtable <- renderTable({
+            build_table(output = output, mode = 'GO', fl = Hs.c5,
+                        deGenes = deGenes, nc = nc,
+                        alpha = as.numeric(input$mark_alpha),
+                        dataset = pipe()$dataset, ns = session$ns)
         },caption = tabletitle,
         caption.placement = getOption("xtable.caption.placement", "top"),
         caption.width = getOption("xtable.caption.width", NULL),
         bordered = T)
 
-        output$KEGG <- renderTable({
-            build_table(mode = 'KEGG', fl = kegg_genelists, deGenes = deGenes,
-                        nc = nc, alpha = as.numeric(input$mark_alpha))
+        output$KEGGtable <- renderTable({
+            build_table(output = output, mode = 'KEGG', fl = kegg_genelists,
+                        deGenes = deGenes,
+                        nc = nc, alpha = as.numeric(input$mark_alpha),
+                        dataset = pipe()$dataset, ns = session$ns)
         },
         caption = tabletitle,
         caption.placement = getOption("xtable.caption.placement", "top"),
         caption.width = getOption("xtable.caption.width", NULL)
         ,bordered = T)
 
-        output$Msigdb <- renderTable({
-            build_table(mode = 'MSIGDB', fl = Hs.c2, deGenes = deGenes, nc = nc,
-                        alpha = as.numeric(input$mark_alpha))
+        output$MSIGDBtable <- renderTable({
+            build_table(output = output, mode = 'MSIGDB', fl = Hs.c2,
+                        deGenes = deGenes, nc = nc,
+                        alpha = as.numeric(input$mark_alpha),
+                        dataset = pipe()$dataset, ns = session$ns)
         },caption = tabletitle,
         caption.placement = getOption("xtable.caption.placement", "top"),
         caption.width = getOption("xtable.caption.width", NULL),

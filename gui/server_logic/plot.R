@@ -31,8 +31,9 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     marker = list(size = input$dot_size),
                     type = 'scatter',
-                    mode = 'markers'
-                ) %>% layout(dragmode = "lasso", title = title))
+                    mode = 'markers',
+                ) %>% layout(dragmode = "lasso", title = title,
+                            margin = list(t = 50)))
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))
                 return(p)
@@ -116,7 +117,8 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                 key = as.character(1:length(pipe()$x_emb_2d[,1])),
                 type = 'scatter',
                 mode = 'markers',
-            ) %>% layout(dragmode = "lasso", title = title))
+            ) %>% layout(dragmode = "lasso", title = title,
+                        margin = list(t = 50)))
             isolate(plotHistory(c(plotHistory(), list(p))))
             isolate(curPlot(length(plotHistory())))
             return(p)

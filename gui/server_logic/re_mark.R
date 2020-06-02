@@ -16,7 +16,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
 
         updateTabsetPanel(session, "switcher", selected = "DE")
 
-        output$genes <- renderTable({
+        output$DEtable <- renderTable({
             # TODO change '0' to whatever the first element is
             # not all clustering algorithms return cluster ids starting with 0
             table <- data.frame(
@@ -30,6 +30,15 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
             table[, 3] <- format(table[, 3], scientific = T)
 
             deGenes(table[, 1])
+            output$downloadDE <- downloadHandler(
+                filename = function() {
+                    paste0(pipe()$dataset, "_DE_genes", ".csv")
+                },
+                content = function(file) {
+                    write.csv(table, file, row.names = FALSE)
+                }
+            )
+
             return(table)
         },caption = tabletitle,
         caption.placement = getOption("xtable.caption.placement", "top"),

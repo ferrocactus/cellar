@@ -20,10 +20,10 @@ sidebar <- dashboardSidebar(
     width = 400,
     sidebarMenu(
         datasetmenu(id='ns'),
-        appearancemenu(id='ns'),
         configmenu(id='ns'),
         selectionmenu(id='ns'),
         analysismenu(id='ns'),
+        appearancemenu(id='ns'),
         downloadmenu(id='ns')
     )
 )
