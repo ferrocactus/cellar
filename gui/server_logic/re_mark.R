@@ -13,20 +13,35 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
         s1=as.character(input$subset1)
         s2=as.character(input$subset2)
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
-
+        output$titleDE <- renderText(tabletitle)
         updateTabsetPanel(session, "switcher", selected = "DE")
-
-        output$DEtable <- renderTable({
+        
+        shinyInput <- function(FUN, len, id, ns, ...) {  ## for inputting buttons
+            inputs <- character(len)
+            for (i in seq_len(len)) {
+                inputs[i] <- as.character(FUN(paste0(id, i), ...))
+            }
+            inputs
+        }
+        
+        output$DEtable <- DT::renderDataTable({
             # TODO change '0' to whatever the first element is
             # not all clustering algorithms return cluster ids starting with 0
             table <- data.frame(
                         pipe()$markers[['0']][['outp_names']], # gene_names
                         pipe()$markers[['0']][['diffs']], # logFC
                         pipe()$markers[['0']][['pvals']], # pvals
+                        Actions = shinyInput(actionButton, length(pipe()$markers[['0']][['outp_names']]),
+                                             'button_',
+                                             label = "Show Expression",
+                                             #onclick = paste0('Shiny.onInputChange(\"' , ns("select_button"), '\", this.id)')
+                                             onclick = sprintf("Shiny.onInputChange('%s', this.id)", ns("select_button")
+                                             ),
+                        ),
                         check.names = TRUE, # remove duplicates etc
                         stringsAsFactors = FALSE)
             table <- table[order(table[, 2], decreasing = TRUE),]
-            colnames(table) <- c("DE genes", "logFC", "adj.pval")
+            colnames(table) <- c("DE genes", "logFC", "adj.pval","Show Expression Level")
             table[, 3] <- format(table[, 3], scientific = T)
 
             deGenes(table[, 1])
@@ -40,34 +55,52 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
             )
 
             return(table)
-        },caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"),
-        caption.width = getOption("xtable.caption.width", NULL))
+        },
+        #caption = tabletitle,
+        #caption.placement = getOption("xtable.caption.placement", "top"),
+        #caption.width = getOption("xtable.caption.width", NULL)
+        server = FALSE
+        , escape = FALSE
+        ,selection = 'none'
+        )
 
-        output$DEbuttons <- renderUI({
-            lapply(X = 1:length(deGenes()), FUN = function(i) {
-                    actionButton(ns(paste(deGenes()[i], "_", seq = "")),
-                                 deGenes()[i])})
+        observeEvent(input$select_button, {
+            selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
+            #showNotification(as.character(selectedRow))
+            selected_gene=pipe()$markers[['0']][['outp_names']][[selectedRow]]
+            updateSelectInput(
+                session,
+                'color',
+                selected = selected_gene
+            )
+            
+            #myValue$employee <<- paste('click on ',df$data[selectedRow,1])
         })
+        
+        # output$DEbuttons <- renderUI({
+        #     lapply(X = 1:length(deGenes()), FUN = function(i) {
+        #             actionButton(ns(paste(deGenes()[i], "_", seq = "")),
+        #                          deGenes()[i])})
+        # })
 
         rebutton(1)
         remark(0)
     }})
 
-    observe({
-    if (rebutton() > 0) {
-        lapply(X = 1:length(deGenes()), FUN = function(i) {
-            o <- observeEvent(input[[paste(deGenes()[i], "_", seq = "")]], {
-                updateSelectInput(
-                    session,
-                    'color',
-                    selected = deGenes()[i]
-                )
-            })
-            deButtons(c(deButtons(), isolate(o)))
-        })
-        rebutton(0)
-    }})
+    # observe({
+    # if (rebutton() > 0) {
+    #     lapply(X = 1:length(deGenes()), FUN = function(i) {
+    #         o <- observeEvent(input[[paste(deGenes()[i], "_", seq = "")]], {
+    #             updateSelectInput(
+    #                 session,
+    #                 'color',
+    #                 selected = deGenes()[i]
+    #             )
+    #         })
+    #         deButtons(c(deButtons(), isolate(o)))
+    #     })
+    #     rebutton(0)
+    # }})
 }
 
 reset_analysis_tabs <- function(output) {

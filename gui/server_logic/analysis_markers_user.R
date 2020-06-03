@@ -51,8 +51,11 @@ analysis_markers_user <- function(input, output, session, deGenes, pipe) {
 
     if (length(deGenes()) > 0 && pipe() != 0) {
         ns <- length(pipe()$col_ids)
-
-        output$Markerstableuser <- renderTable({
+        s1=as.character(input$subset1)
+        s2=as.character(input$subset2)
+        tabletitle=paste(s1," (vs. ",s2,")",sep="")
+        output$titleUM <- renderText(tabletitle)
+        output$Markerstableuser <- DT::renderDataTable({
             withProgress(message = 'Finding Markers', value = 0, {
                 incProgress(1/3, detail = paste("Step: Getting gene IDs"))
                 deGenes_i_user <- intersect(deGenes(), rownames(gene_ids_all))
@@ -105,6 +108,7 @@ analysis_markers_user <- function(input, output, session, deGenes, pipe) {
                 )
                 return(ord_user)
             })
-        }, bordered = T)
+        }#, bordered = T
+        )
     }})
 }

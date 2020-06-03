@@ -86,36 +86,41 @@ analysis <- function(input, output, session, deGenes, pipe) {
         s1=as.character(input$subset1)
         s2=as.character(input$subset2)
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
-
-        output$GOtable <- renderTable({
+        output$titleONTO <- renderText(tabletitle)
+        output$GOtable <- DT::renderDataTable({
             build_table(output = output, mode = 'GO', fl = Hs.c5,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
                         dataset = pipe()$dataset, ns = session$ns)
-        },caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"),
-        caption.width = getOption("xtable.caption.width", NULL),
-        bordered = T)
-
-        output$KEGGtable <- renderTable({
+        },
+        #caption = tabletitle,
+        #caption.placement = getOption("xtable.caption.placement", "top"),
+        #caption.width = getOption("xtable.caption.width", NULL),
+        #bordered = T
+        )
+        output$titleKEGG <- renderText(tabletitle)
+        output$KEGGtable <- DT::renderDataTable({
             build_table(output = output, mode = 'KEGG', fl = kegg_genelists,
                         deGenes = deGenes,
                         nc = nc, alpha = as.numeric(input$mark_alpha),
                         dataset = pipe()$dataset, ns = session$ns)
-        },
-        caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"),
-        caption.width = getOption("xtable.caption.width", NULL)
-        ,bordered = T)
-
-        output$MSIGDBtable <- renderTable({
+        }
+        #caption = tabletitle,
+        #caption.placement = getOption("xtable.caption.placement", "top"),
+        #caption.width = getOption("xtable.caption.width", NULL)
+        #,bordered = T
+        )
+        output$titleMSIG <- renderText(tabletitle)
+        output$MSIGDBtable <- DT::renderDataTable({
             build_table(output = output, mode = 'MSIGDB', fl = Hs.c2,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
                         dataset = pipe()$dataset, ns = session$ns)
-        },caption = tabletitle,
-        caption.placement = getOption("xtable.caption.placement", "top"),
-        caption.width = getOption("xtable.caption.width", NULL),
-        bordered = T)
+        },
+        #caption = tabletitle,
+        #caption.placement = getOption("xtable.caption.placement", "top"),
+        #caption.width = getOption("xtable.caption.width", NULL),
+        #bordered = T
+        )
     }})
 }

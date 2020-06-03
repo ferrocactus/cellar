@@ -5,35 +5,41 @@ tabsetPanel(
     tabPanel(
         "DE",
         downloadButton(ns("downloadDE"), "Download DE genes"),
-        tableOutput(ns("DEtable")),
-        uiOutput(ns("DEbuttons"))
+        uiOutput(ns("titleDE")),
+        DT::dataTableOutput(ns("DEtable")),
+        #uiOutput(ns("DEbuttons"))
     ),
     tabPanel(
         "Gene Ontology",
         downloadButton(ns("downloadGO"), "Download GO table"),
-        tableOutput(ns("GOtable"))
+        uiOutput(ns("titleONTO")),
+        DT::dataTableOutput(ns("GOtable"))
     ),
     tabPanel(
         "KEGG",
         downloadButton(ns("downloadKEGG"), "Download KEGG table"),
-        tableOutput(ns("KEGGtable"))
+        uiOutput(ns("titleKEGG")),
+        DT::dataTableOutput(ns("KEGGtable"))
     ),
     tabPanel(
         "MSigDB C2",
         downloadButton(ns("downloadMSIGDB"), "Download MSIGDB table"),
-        tableOutput(ns("MSIGDBtable"))
+        uiOutput(ns("titleMSIG")),
+        DT::dataTableOutput(ns("MSIGDBtable"))
     ),
     tabPanel(
         "Markers",
+        uiOutput(ns("titleM")),
         downloadButton(ns("downloadMKS"), "Download Markers table"),
-        tableOutput(ns("Markerstable"))
+        DT::dataTableOutput(ns("Markerstable"))
     ),
     tabPanel(
         "User Markers",
         downloadButton(ns("downloadMKSuser"), "Download Markers table"),
+        uiOutput(ns("titleUM")),
         fileInput(ns("markjson"), "Choose markers JSON",
                   multiple = FALSE, accept = c(".json")),
-        tableOutput(ns("Markerstableuser"))
+        DT::dataTableOutput(ns("Markerstableuser"))
     )
     #tabPanel(
      #   "Top Expressed Genes",
