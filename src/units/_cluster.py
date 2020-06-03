@@ -557,4 +557,4 @@ class Clu_Scanpy(Unit):
         scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
         #sc.tl.umap(adata)
         scanpy.tl.leiden(ann)
-        return np.squeeze(np.array(ann.obs))
+        return np.squeeze(np.array(ann.obs)).astype(np.int)
