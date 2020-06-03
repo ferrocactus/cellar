@@ -1,5 +1,10 @@
-theme <- function(input, output, session) {
+theme <- function(input, output, session, retheme) {
     observeEvent(input$theme_mode, {
+        retheme(1)
+    })
+
+    observe({
+        if (retheme() < 1) return()
         if (input$theme_mode == 'dark_mode') {
             addCssClass(
                 class = "tab_dark_mode",
@@ -25,6 +30,22 @@ theme <- function(input, output, session) {
                 class = "cell_names_dark",
                 selector = '#ns-collapse_cell_names'
             )
+            addCssClass(
+                class = "odd_dark",
+                selector = '.odd'
+            )
+            addCssClass(
+                class = "datatables_dark",
+                selector = '.datatables'
+            )
+            addCssClass(
+                class = "dataTables_white",
+                selector = '.dataTables_length'
+            )
+            addCssClass(
+                class = "dataTables_white",
+                selector = '.dataTables_filter'
+            )
         } else if (input$theme_mode == 'light_mode') {
             removeCssClass(
                 class = "tab_dark_mode",
@@ -49,6 +70,18 @@ theme <- function(input, output, session) {
             removeCssClass(
                 class = "cell_names_dark",
                 selector = '#ns-collapse_cell_names'
+            )
+            removeCssClass(
+                class = "datatables_dark",
+                selector = '.datatables'
+            )
+            removeCssClass(
+                class = "dataTables_white",
+                selector = '.dataTables_length'
+            )
+            removeCssClass(
+                class = "dataTables_white",
+                selector = '.dataTables_filter'
             )
         }
     })

@@ -248,3 +248,56 @@ input:disabled {
 .cell_names_dark:focus {
     color: white;
 }
+
+.odd_dark {
+    background-color: var(--darkbluegray) !important;
+    color: white !important;
+}
+
+.odd_dark:hover {
+    background-color: var(--darkbluegray) !important;
+    color: white !important;
+}
+
+.even_dark {
+    background-color: var(--bluegray) !important;
+    color: white !important;
+}
+
+.even_dark:hover {
+    background-color: var(--darkbluegray) !important;
+    color: white !important;
+}
+
+.datatables_dark {
+    color: white !important;
+}
+
+.dataTables_white {
+    color: white !important;
+}
+
+.title1 {
+    float:left;
+    font-size: 10px;
+    margin-left: 10px;
+    margin-top: -10px;
+}
+
+.title2 {
+    float:left;
+    font-size: 10px;
+    margin-left: 46px;
+    margin-top: -50px;
+}
+
+.title3 {
+    float:left;
+    font-size: 10px;
+    margin-left: 46px;
+    margin-top: -90px;
+}
+
+.maintitle {
+    margin-top: -100px;
+}

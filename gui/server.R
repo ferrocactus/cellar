@@ -37,6 +37,7 @@ server <- shinyServer(function(input, output, session) {
     curPlot <- reactiveVal(0)
     reset <- reactiveVal(0)
     fullreset <- reactiveVal(0)
+    retheme <- reactiveVal(0)
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -74,5 +75,5 @@ server <- shinyServer(function(input, output, session) {
                setPts = setPts, deGenes = deGenes, selDataset = selDataset,
                plotHistory = plotHistory, curPlot = curPlot, replot = replot,
                remark = remark, labelList = labelList)
-    callModule(theme, id = "ns")
+    callModule(theme, id = "ns", retheme = retheme)
 })
