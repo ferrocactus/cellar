@@ -186,6 +186,11 @@ class Pipeline():
         clu_n_clusters = _validate_clu_n_clusters(
             clu_n_clusters, self.x.shape[0])
         clu_n_jobs = _validate_n_jobs(clu_n_jobs)
+        if clu_method != 'Ensemble':
+            kwargs.pop('ensemble_methods', None)
+        if "ensemble_methods" in kwargs:
+            kwargs['ensemble_methods'] = _validate_ensemble_methods(
+                    kwargs['ensemble_methods'])
 
         self.clu_method = clu_method
         self.eval_method = eval_method

@@ -45,14 +45,15 @@ class Ens_HyperGraph(Unit):
     See https://github.com/GGiecold/Cluster_Ensembles
     """
 
-    def __init__(self, methods=["KMedoids", "KMeans", "Spectral"],
+    def __init__(self, ensemble_methods=["KMedoids", "KMeans", "Spectral"],
                  n_clusters=np.array([2, 4, 8, 16]),
                  eval_obj=None, n_jobs=None, **kwargs):
         """
         Parameters
         __________
 
-        methods: list of clustering methods to use. Should be a list of strings.
+        ensemble_methods: list of clustering methods to use.
+                            Should be a list of strings.
 
         n_clusters: array or int or tuple, dtype int, default [2, 4, 8, 16]
             Array containing the different values of clusters to try,
@@ -72,7 +73,7 @@ class Ens_HyperGraph(Unit):
             when instantiating it.
 
         """
-        methods = _validate_ensemble_methods(methods)
+        methods = _validate_ensemble_methods(ensemble_methods)
         self.logger = setup_logger('Ensemble')
         if methods == "default":
             self.methods = ["KMedoids", "KMeans", "Spectral"]

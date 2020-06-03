@@ -1,6 +1,7 @@
 # Needed by cluster_run
 pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
-                        eval_method, clu_n_clusters, vis_method) {
+                        ensemble_methods, eval_method, clu_n_clusters,
+                        vis_method) {
     withProgress(message = "Making plot", value = 0, {
         n <- 4
         incProgress(1 / n, detail = paste("Step: Reducing Data"))
@@ -10,7 +11,8 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
         incProgress(1 / n, detail = paste("Step: Clustering"))
         msg <- pipe()$run_step(step = 'clu', clu_method = clu_method,
                                 eval_method = eval_method,
-                                clu_n_clusters = clu_n_clusters)
+                                clu_n_clusters = clu_n_clusters,
+                                ensemble_methods = ensemble_methods)
         if (msg != 'good') return(msg)
         incProgress(1 / n, detail = paste("Step: Visualizing"))
         msg <- pipe()$run_step(step = 'vis', vis_method = vis_method)
@@ -45,6 +47,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
         msg <- pipe_cluster(pipe, dim_method = input$dim_method,
                         dim_n_components = dim_n_components,
                         clu_method = input$clu_method,
+                        ensemble_methods = input$ensemble_checkbox,
                         eval_method = input$eval_method,
                         clu_n_clusters = input$clu_n_clusters,
                         vis_method = input$vis_method)
