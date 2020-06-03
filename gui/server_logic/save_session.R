@@ -4,7 +4,7 @@ get_checksum <- function(filepath) {
 
 save_session <- function(input, output, session, pipe, setNames, setPts,
                          deGenes, selDataset, plotHistory, curPlot, replot,
-                         remark, newLabels, labelList) {
+                         remark, labelList) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
@@ -44,8 +44,6 @@ save_session <- function(input, output, session, pipe, setNames, setPts,
                     sess$'de_genes' <- deGenes()
                 if (length(labelList()) > 0)
                     sess$'label_list' <- labelList()
-                if (!is.null(newLabels()))
-                    sess$'new_labels' <- newLabels()
                 sess$'checksum' <- get_checksum(paste0("datasets/", selDataset()))
                 json_obj <- toJSON(sess, indent = 2)
                 write(json_obj, file)
@@ -72,9 +70,10 @@ save_session <- function(input, output, session, pipe, setNames, setPts,
             updateSelectInput(session, 'dim_method',
                               selected = sess$'dim_reduction_method')
             pipe()$load_session(sess$'pipe_sess')
-            replot(1)
             if (pipe()$has('markers'))
                 remark(1)
+            if (pipe()$has('labels'))
+                replot(1)
             if (sess$'dim_n_components' == 'Automatic') {
                 updateRadioButtons(session, 'dim_options',
                                    selected = 'pca_auto')
@@ -105,22 +104,8 @@ save_session <- function(input, output, session, pipe, setNames, setPts,
                 setPts(sess$'set_points')
             if (!is.null(sess$'de_genes'))
                 deGenes(sess$'de_genes')
-            if (!is.null(sess$'new_labels')) {
-                newLabels(sess$'new_labels')
-                output$Plot2 <- renderPlotly({
-                  plot_ly(
-                    x = pipe()$x_emb_2d[, 1], y = pipe()$x_emb_2d[, 2],
-                    text = ~paste("label: ", as.factor(newLabels())),
-                    color = as.factor(newLabels()),
-                    type = 'scatter',
-                    mode = 'markers'
-                  ) %>% layout(dragmode = "lasso",
-                        title = paste("Clusters", sep=""))
-                })
-
-            }
             if (!is.null(sess$'label_list'))
-                newLabels(sess$'label_list')
+                labelList(sess$'label_list')
 
             showNotification("Session loaded successfully.")
         }, error = function(e) {

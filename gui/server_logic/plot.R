@@ -1,7 +1,7 @@
 library(RColorBrewer)
 # Define the number of colors you want
 plot <- function(input, output, session, replot, pipe, selDataset,
-                 setNames, setPts, newLabels, plotHistory, curPlot) {
+                 setNames, setPts, plotHistory, curPlot, reset) {
     # triggers when replot is set to 1
     observe({
         req(replot())
@@ -70,7 +70,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
           return()
         }
 
-        if (substr(as.character(input$newsubset),1,7) == "cluster") {
+        if (substr(as.character(input$newsubset),1,7) == "Cluster") {
           showNotification("Reserved name, please choose another.")
           return()
         }
@@ -96,34 +96,12 @@ plot <- function(input, output, session, replot, pipe, selDataset,
     })
 
     observeEvent(input$labelupd, {
-        if (is.null(newLabels())) isolate(newLabels(pipe()$labels))
         idx <- which(setNames() == as.character(input$subset1_upd))
         keys <- setPts()[[idx]]
-        lbs <- newLabels()
-        lbs[keys] <- as.character(input$newlabels)
-        isolate(newLabels(lbs))
-        showNotification("Updating labels")
-
-        if (input$color == 'Clusters')
-            title = "Clusters"
-        else
-            title = input$labelupd
-
-        output$plot <- renderPlotly({
-            p <- plotly_build(plot_ly(
-                x = pipe()$x_emb_2d[, 1], y = pipe()$x_emb_2d[, 2],
-                text = ~paste("label: ", as.factor(newLabels())),
-                color = as.factor(newLabels()),
-                marker = list(size = input$dot_size),
-                key = as.character(1:length(pipe()$x_emb_2d[,1])),
-                type = 'scatter',
-                mode = 'markers',
-            ) %>% layout(dragmode = "lasso", title = title,
-                        margin = list(t = 50)))
-            isolate(plotHistory(c(plotHistory(), list(p))))
-            isolate(curPlot(length(plotHistory())))
-            return(p)
-        })
+        # pass name and indices
+        pipe()$update_labels(as.character(input$newlabels), keys - 1)
+        reset(1)
+        replot(1)
       })
 
     # Download plot

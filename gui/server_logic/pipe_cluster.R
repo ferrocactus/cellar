@@ -19,18 +19,17 @@ pipe_cluster <- function(pipe, dim_method, dim_n_components, clu_method,
     })
 }
 
-pipe_sscluster <- function(pipe, new_labels, ssc_method, saved_clusters) {
+pipe_sscluster <- function(pipe, ssc_method, saved_clusters) {
     withProgress(message = "Running", value = 0, {
         incProgress(1 / 2, detail = paste("Constrained Clustering"))
         msg <- pipe()$run_step(step = "ssclu", ssclu_method = ssc_method,
-                               ssclu_new_labels = new_labels,
                                saved_clusters = saved_clusters)
         return(msg)
     })
 }
 
 cluster_run <- function(input, output, session, pipe, selDataset, replot,
-                        reset, newLabels) {
+                        reset) {
     # Clustering
     observeEvent(input$runconfigbtn, {
         if (pipe() == 0) {
@@ -61,13 +60,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
 
     # Semi-supervised clustering
     observeEvent(input$ssclurun, {
-        if (is.null(newLabels())) {
-            showNotification("No labels have been updated")
-            return()
-        }
-
-        msg <- pipe_sscluster(pipe, new_labels = newLabels(),
-                              ssc_method = input$ssc_method,
+        msg <- pipe_sscluster(pipe, ssc_method = input$ssc_method,
                               saved_clusters = input$saved_clusters)
 
         if (msg != 'good') {

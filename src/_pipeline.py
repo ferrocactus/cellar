@@ -195,6 +195,25 @@ class Pipeline():
             n_clusters=clu_n_clusters,
             n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
         self.n_clusters = np.unique(self.labels)
+        self.label_names = self.labels.astype('U')
+
+    def update_labels(self, name, indices):
+        indices = np.array(indices).astype(np.int)
+        name = str(name)
+
+        unq_names = np.unique(self.label_names)
+        if name in unq_names:
+            lbl = self.labels[np.where(self.label_names == name)][0]
+            self.labels[indices] = lbl
+            self.label_names[indices] = name
+        else:
+            unq_lbls = np.unique(self.labels).astype(np.int)
+            for x in range(1000):
+                if x not in unq_lbls:
+                    self.labels[indices] = x
+                    break
+            self.label_names[indices] = name
+        self.n_clusters = np.unique(self.labels)
 
     def run_de(self, de_method="TTest", de_alpha=0.05, de_n_genes=200,
                de_correction='holm-sidak', de_n_jobs=1):
@@ -272,19 +291,18 @@ class Pipeline():
             path=ide_path, tissue=ide_tissue,
         ).get(self.markers.copy())
 
-    def run_ssclu(self, ssclu_method='SeededKMeans',
-                  ssclu_new_labels=None, **kwargs):
+    def run_ssclu(self, ssclu_method='SeededKMeans', **kwargs):
         _method_exists('ss_cluster', ssclu_method)
-        ssclu_new_labels, key_maps = _validate_new_labels(ssclu_new_labels)
         if 'saved_clusters' in kwargs:
-            saved_clusters = _validate_saved_clusters(kwargs['saved_clusters'],
-                                                      key_maps)
+            kwargs['saved_clusters'] = _validate_saved_clusters(self.labels,
+                                            kwargs['saved_clusters'])
 
         self.ssclu_method = ssclu_method
         self.labels = wrap(
             "ss_cluster",
-            ssclu_method)().get(self.x_emb, ssclu_new_labels, **kwargs)
+            ssclu_method)().get(self.x_emb, self.labels, **kwargs)
         self.n_clusters = np.unique(self.labels)
+        self.label_names = self.labels.astype('U')
 
     def run_vis(self, vis_method='UMAP', **kwargs):
         _method_exists('visualization', vis_method)
@@ -315,7 +333,7 @@ class Pipeline():
             'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
             'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
             'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
-            'markers', 'vis_method'
+            'markers', 'vis_method', 'label_names'
         ]
 
         for attr in to_save:
@@ -335,7 +353,7 @@ class Pipeline():
             'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
             'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
             'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
-            'markers', 'vis_method'
+            'markers', 'vis_method', 'label_names'
         ]
 
         for attr in to_load:

@@ -1,7 +1,7 @@
 source_python("__init__.py")
 
 load_dataset <- function(input, output, session, pipe, selDataset,
-                         setNames, setPts) {
+                         setNames, setPts, fullreset) {
     observeEvent(input$load_dataset, {
         print(paste("Selected", selDataset()))
 
@@ -16,6 +16,7 @@ load_dataset <- function(input, output, session, pipe, selDataset,
                 setNames(c("None"))
                 setPts(c(NA))
                 output$Plot2 = NULL
+                fullreset(1)
             }
         })
     })

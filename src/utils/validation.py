@@ -225,7 +225,7 @@ def _validate_subset(subset):
         raise InvalidArgument("Invalid subset encountered.")
 
 
-def _validate_new_labels(new_labels):
+def _validate_new_labels(new_labels, old_key_maps):
     if isinstance(new_labels, (int, float)):
         return np.array([new_labels]).astype(np.int), 0
     elif isinstance(new_labels, (list, np.ndarray)):
@@ -234,35 +234,41 @@ def _validate_new_labels(new_labels):
         unq = np.unique(new_labels)
         used = []
         for label in unq:
-            if isinstance(label, (int, float)) or label.isnumeric():
-                used.append(int(label))
-                key_maps[label] = int(label)
+            try:
+                label = int(label)
+            except:
+                pass
+
+            if str(label) in old_key_maps:
+                new_labels[new_labels == label] = old_key_maps[str(label)]
+                key_maps[str(label)] = label
+            elif isinstance(label, int):
+                used.append(label)
+                key_maps[str(label)] = label
             else:
                 for x in range(1000):
-                    if x not in used:
+                    if str(x) not in used:
                         new_labels[new_labels == label] = x
-                        used.append(x)
-                        key_maps[label] = x
+                        used.append(str(x))
+                        key_maps[str(label)] = x
                         break
         return new_labels.astype(np.int), key_maps
     else:
         raise InvalidArgument("Invalid list of new labels encountered")
 
-def _validate_saved_clusters(saved_clusters, key_maps):
+def _validate_saved_clusters(labels, saved_clusters):
     if isinstance(saved_clusters, str):
         saved_clusters = saved_clusters.split(',')
-        saved_clusters = [i.strip() for i in saved_clusters]
+        saved_clusters = [int(i.strip()) for i in saved_clusters]
     if isinstance(saved_clusters, (int, float)):
-        if saved_clusters not in key_maps:
+        if saved_clusters not in labels:
             raise InvalidArgument(f"Cluster name {saved_clusters} not found.")
-        return np.array([key_maps[saved_clusters]])
+        return np.array([saved_clusters])
     elif isinstance(saved_clusters, (list, np.ndarray)):
         saved_clusters = np.array(saved_clusters)
         for i, cluster in enumerate(saved_clusters):
-            if cluster not in key_maps:
+            if cluster not in labels:
                 raise InvalidArgument(f"Cluster name {cluster} not found.")
-            else:
-                saved_clusters[i] = key_maps[saved_clusters[i]]
         return saved_clusters
     else:
         raise InvalidArgument("Invalid list of clusters encountered.")

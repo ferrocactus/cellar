@@ -1,16 +1,20 @@
 dataset_reset <- function(input, output, session, reset, setNames, setPts,
-                          labelList, deButtons, deGenes, pipe, newLabels) {
-    observe({ if (reset() > 0) {
+                          labelList, deButtons, deGenes, pipe, fullreset) {
+    observe({ if (reset() > 0 || fullreset() > 0) {
         updateSelectInput(
             session = session,
             inputId = "color",
             choices = c("Clusters", as.character(as.character(pipe()$col_names))),
             selected = "Clusters")
 
-        setNames(c("None"))
-        setPts(c(NA))
-        labelList(c())
-        newLabels(NULL)
+        if (fullreset() > 0) {
+            setNames(c("None"))
+            setPts(c(NA))
+            labelList(c())
+        } else {
+            setPts(setPts()[which(substr(setNames(), 1, 7) != 'Cluster')])
+            setNames(setNames()[which(substr(setNames(), 1, 7) != 'Cluster')])
+        }
 
         # Update sets
         for (i in 1:length(pipe()$n_clusters)) {
@@ -20,11 +24,13 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
         }
 
         n_clusters = pipe()$n_clusters
-        updateSelectInput(
-            session,
-            "newlabels",
-            choices = n_clusters
-        )
+        if (input$tissue == 'clusters') {
+            updateSelectInput(
+                session,
+                "newlabels",
+                choices = n_clusters
+            )
+        }
 
         # Clear all analysis tabs
         if (length(deButtons()) > 0)
@@ -42,5 +48,6 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
         output$MSIGDBtable = NULL
 
         isolate(reset(0))
+        isolate(fullreset(0))
     }})
 }
