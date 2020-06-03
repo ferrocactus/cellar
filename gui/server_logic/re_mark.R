@@ -67,13 +67,15 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
         observeEvent(input$select_button, {
             selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
             #showNotification(as.character(selectedRow))
-            selected_gene=pipe()$markers[['0']][['outp_names']][[selectedRow]]
-            updateSelectInput(
-                session,
-                'color',
-                selected = selected_gene
-            )
-            
+            if (length(pipe()$markers[['0']][['outp_names']])>=selectedRow)
+            {
+                selected_gene=pipe()$markers[['0']][['outp_names']][[selectedRow]]
+                updateSelectInput(
+                    session,
+                    'color',
+                    selected = selected_gene
+                )    
+            }
             #myValue$employee <<- paste('click on ',df$data[selectedRow,1])
         })
         

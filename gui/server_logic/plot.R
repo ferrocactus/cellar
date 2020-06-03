@@ -34,11 +34,13 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                 }
 
                 text = ~paste("Label: ", as.factor(pipe()$label_names))
-
+                vals <- schema(F)$traces$scatter$attributes$marker$symbol$values
+                vals <- grep("-", vals, value = T)
                 p <- plotly_build(plot_ly(
                     x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
                     text = text,
                     color = color,
+                    symbol = ~as.factor(pipe()$labels), symbols = vals,#c('circle','x','o'),
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     marker = list(size = input$dot_size),
                     type = 'scatter',
