@@ -3,19 +3,29 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                  setNames, setPts, plotHistory, curPlot, reset, relabel) {
     # triggers when replot is set to 1
     observe({
-        req(replot())
+        if (is.null(replot())) return()
         if (!pipe()$has('labels')) return()
 
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
             output$plot <- renderPlotly({
                 if (input$color == 'Clusters') {
-                    color = as.factor(pipe()$labels)
+                    if (input$show_names == 'show_names')
+                        color = paste0(
+                                    as.factor(pipe()$labels), ": ",
+                                    as.factor(pipe()$label_names))
+                    else
+                        color = as.factor(pipe()$labels)
                     title = "Clusters"
                 } else {
                     i = which(pipe()$col_names == input$color)[1]
                     if (is.null(i)) {
-                        color = as.factor(pipe()$labels)
+                        if (input$show_names == 'show_names')
+                            color = paste0(
+                                        as.factor(pipe()$labels), ": ",
+                                        as.factor(pipe()$label_names))
+                        else
+                            color = as.factor(pipe()$labels)
                         title = "Clusters"
                     } else {
                         color = pipe()$x[, i]
@@ -23,9 +33,11 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                     }
                 }
 
+                text = ~paste("Label: ", as.factor(pipe()$label_names))
+
                 p <- plotly_build(plot_ly(
                     x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
-                    text = ~paste("Label: ", as.factor(pipe()$labels)),
+                    text = text,
                     color = color,
                     key = as.character(1:length(pipe()$x_emb_2d[,1])),
                     marker = list(size = input$dot_size),
@@ -102,7 +114,11 @@ plot <- function(input, output, session, replot, pipe, selDataset,
         reset(1)
         replot(1)
         relabel(1)
-      })
+    })
+
+    observeEvent(input$show_names, suspended=TRUE, {
+        replot(1)
+    })
 
     # Download plot
     output$download_plot <- downloadHandler(

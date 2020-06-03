@@ -22,6 +22,16 @@ appearancemenu <- function(id, label='appearancemenu') {
           ns("dot_size"),
           "Select dot size",
           min = 1, max = 30, value = 5
+        ),
+
+        radioButtons(
+            ns("show_names"),
+            "Show names in plot:",
+            c(
+                "Don't show names" = "dont_show_names",
+                "Show names" = "show_names"
+            ),
+            inline = TRUE
         )
 
       )

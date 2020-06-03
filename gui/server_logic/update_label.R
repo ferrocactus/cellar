@@ -53,6 +53,7 @@ update_label <- function(input, output, session, pipe, labelList) {
                 choices = labelList()
             )
         }
+        showNotification("Label added")
     })
 }
 
