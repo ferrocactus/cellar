@@ -195,7 +195,7 @@ class Pipeline():
             n_clusters=clu_n_clusters,
             n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
         self.n_clusters = np.unique(self.labels)
-        self.label_names = self.labels.astype('U')
+        self.label_names = self.labels.astype('U200')
 
     def update_labels(self, name, indices):
         indices = np.array(indices).astype(np.int)
@@ -302,7 +302,7 @@ class Pipeline():
             "ss_cluster",
             ssclu_method)().get(self.x_emb, self.labels, **kwargs)
         self.n_clusters = np.unique(self.labels)
-        self.label_names = self.labels.astype('U')
+        self.label_names = self.labels.astype('U200')
 
     def run_vis(self, vis_method='UMAP', **kwargs):
         _method_exists('visualization', vis_method)
@@ -326,6 +326,12 @@ class Pipeline():
         if hasattr(self, attr):
             return True
         return False
+
+    def get_cluster_names(self):
+        pairs = np.unique(np.vstack([self.labels, self.label_names]), axis=1).T
+        unq_labels = [i[0] for i in pairs]
+        unq_names = [i[1] for i in pairs]
+        return {'labels': unq_labels, 'names': unq_names}
 
     def save_session(self):
         sess = {}

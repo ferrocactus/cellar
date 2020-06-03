@@ -8,6 +8,7 @@ source("gui/ui_logic/sidebar/analysismenu.R") #analysismenu
 source("gui/ui_logic/sidebar/downloadmenu.R") #downloadmenu
 
 source("gui/ui_logic/body/plots.R") #plots
+source("gui/ui_logic/body/cell_names.R") #cell_names
 source("gui/ui_logic/body/analysis.R") #analysis
 
 header <- dashboardHeader(
@@ -34,6 +35,7 @@ body <- dashboardBody(
     #tags$script(src = "gui/ui_logic/sidebar/anchor.js"),
     history(id='ns'),
     plots(id="ns"),
+    cell_names(id="ns"),
     analysis(id="ns")
 )
 

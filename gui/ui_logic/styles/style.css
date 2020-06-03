@@ -227,3 +227,24 @@ input:disabled {
     color: black !important;
     border-color: transparent !important;
 }
+
+#ns-collapse_cell_names {
+    float: right;
+    margin-right: 50px;
+    margin-bottom: -20px;
+    margin-top: 20px;
+    border: none;
+    background: none;
+    box-shadow: none;
+}
+
+#ns-collapse_cell_names:hover {
+    text-decoration: underline;
+}
+
+.cell_names_dark,
+.cell_names_dark:hover,
+.cell_names_dark:active,
+.cell_names_dark:focus {
+    color: white;
+}

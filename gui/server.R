@@ -10,6 +10,7 @@ source("gui/server_logic/pipe_cluster.R")
 source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/plot.R")
 source("gui/server_logic/re_mark.R")
+source("gui/server_logic/re_label.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
 source("gui/server_logic/analysis_markers.R")
@@ -29,6 +30,7 @@ server <- shinyServer(function(input, output, session) {
     deGenes <- reactiveVal(c())
     replot <- reactiveVal(NULL) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
+    relabel <- reactiveVal(0)
     rebutton <- reactiveVal(0)
     labelList <- reactiveVal(c())
     plotHistory <- reactiveVal(c())
@@ -49,14 +51,16 @@ server <- shinyServer(function(input, output, session) {
     callModule(gene_card, id = "ns")
 
     callModule(cluster_run, id = "ns", pipe = pipe, selDataset = selDataset,
-               replot = replot, reset = reset)
+               replot = replot, reset = reset, relabel = relabel)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
     callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
+    callModule(re_label, id = "ns", relabel = relabel, pipe = pipe)
     callModule(plot, id = "ns", replot = replot, pipe = pipe,
                selDataset = selDataset, setNames = setNames, setPts = setPts,
-               plotHistory = plotHistory, curPlot = curPlot, reset = reset)
+               plotHistory = plotHistory, curPlot = curPlot, reset = reset,
+               relabel = relabel)
     callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
                deGenes = deGenes, deButtons = deButtons,
                rebutton = rebutton, replot = replot)

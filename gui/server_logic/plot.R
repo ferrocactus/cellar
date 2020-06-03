@@ -1,7 +1,6 @@
-library(RColorBrewer)
 # Define the number of colors you want
 plot <- function(input, output, session, replot, pipe, selDataset,
-                 setNames, setPts, plotHistory, curPlot, reset) {
+                 setNames, setPts, plotHistory, curPlot, reset, relabel) {
     # triggers when replot is set to 1
     observe({
         req(replot())
@@ -102,6 +101,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
         pipe()$update_labels(as.character(input$newlabels), keys - 1)
         reset(1)
         replot(1)
+        relabel(1)
       })
 
     # Download plot

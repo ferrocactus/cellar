@@ -29,7 +29,7 @@ pipe_sscluster <- function(pipe, ssc_method, saved_clusters) {
 }
 
 cluster_run <- function(input, output, session, pipe, selDataset, replot,
-                        reset) {
+                        reset, relabel) {
     # Clustering
     observeEvent(input$runconfigbtn, {
         if (pipe() == 0) {
@@ -56,6 +56,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
 
         replot(1) # Notify that labels have changed
         reset(1) # notify changes
+        relabel(1)
     })
 
     # Semi-supervised clustering
@@ -70,5 +71,6 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
 
         replot(1)
         reset(1)
+        relabel(1)
     })
 }

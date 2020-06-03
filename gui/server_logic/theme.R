@@ -21,6 +21,10 @@ theme <- function(input, output, session) {
                 class = "btn_dark",
                 selector = '#ns-DEbuttons .btn.btn-default'
             )
+            addCssClass(
+                class = "cell_names_dark",
+                selector = '#ns-collapse_cell_names'
+            )
         } else if (input$theme_mode == 'light_mode') {
             removeCssClass(
                 class = "tab_dark_mode",
@@ -41,6 +45,10 @@ theme <- function(input, output, session) {
             removeCssClass(
                 class = "btn_dark",
                 selector = '#ns-DEbuttons .btn.btn-default'
+            )
+            removeCssClass(
+                class = "cell_names_dark",
+                selector = '#ns-collapse_cell_names'
             )
         }
     })

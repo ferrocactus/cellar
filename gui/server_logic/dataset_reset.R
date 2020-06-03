@@ -17,10 +17,10 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
         }
 
         # Update sets
-        for (i in 1:length(pipe()$n_clusters)) {
+        for (i in pipe()$n_clusters) {
             setNames(c(setNames(),
-                       (paste("Cluster_", as.character(i - 1), sep = ""))))
-            setPts(c(setPts(), list(which(pipe()$labels == (i - 1)))))
+                       (paste("Cluster_", as.character(i), sep = ""))))
+            setPts(c(setPts(), list(which(pipe()$labels == (i)))))
         }
 
         n_clusters = pipe()$n_clusters
