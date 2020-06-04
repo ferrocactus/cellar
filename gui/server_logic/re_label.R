@@ -7,7 +7,7 @@ re_label <- function(input, output, session, relabel, pipe) {
         if (relabel() < 1) return()
         output$cell_names_outp <- renderTable(width = "100%", {
             d <- pipe()$get_cluster_names()
-            df <- data.frame(d$'labels', d$'names')
+            df <- data.frame(as.character(d$'labels'), as.character(d$'names'))
             colnames(df) <- c("Cluster ID", "Name")
             isolate(relabel(0))
             return(df)

@@ -286,3 +286,21 @@ def _validate_saved_clusters(labels, saved_clusters):
         return saved_clusters
     else:
         raise InvalidArgument("Invalid list of clusters encountered.")
+
+
+def _categorify(labels, saved_clusters):
+    labels_new = labels.copy()
+    saved_clusters_new = saved_clusters.copy()
+    unq = np.sort(np.unique(labels))
+    repl = {}
+    last = -1
+    for i in range(len(unq)):
+        if i not in unq:
+            labels_new[labels == unq[last]] = i
+            if unq[last] in saved_clusters:
+                saved_clusters_new[saved_clusters == unq[last]] = i
+            last -= 1
+            repl[unq[last]] = i
+        else:
+            repl[i] = i
+    return labels_new, saved_clusters_new, repl

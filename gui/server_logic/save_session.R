@@ -4,7 +4,7 @@ get_checksum <- function(filepath) {
 
 save_session <- function(input, output, session, pipe, setNames, setPts,
                          deGenes, selDataset, plotHistory, curPlot, replot,
-                         remark, labelList) {
+                         remark, labelList, relabel) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
@@ -72,8 +72,10 @@ save_session <- function(input, output, session, pipe, setNames, setPts,
             pipe()$load_session(sess$'pipe_sess')
             if (pipe()$has('markers'))
                 remark(remark() + 1)
-            if (pipe()$has('labels'))
+            if (pipe()$has('labels')) {
                 replot(replot() + 1)
+                relabel(relabel() + 1)
+            }
             if (sess$'dim_n_components' == 'Automatic') {
                 updateRadioButtons(session, 'dim_options',
                                    selected = 'pca_auto')

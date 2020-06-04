@@ -22,6 +22,7 @@ from .utils.validation import _validate_n_jobs
 from .utils.validation import _validate_subset
 from .utils.validation import _validate_new_labels
 from .utils.validation import _validate_saved_clusters
+from .utils.validation import _categorify
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
 from .utils.exceptions import MethodNotImplementedError
@@ -200,24 +201,38 @@ class Pipeline():
             n_clusters=clu_n_clusters,
             n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
         self.n_clusters = np.unique(self.labels)
-        self.label_names = self.labels.astype('U200')
+        self.key_maps = {str(i): i for i in np.unique(self.labels)}
+
+    def get_cluster_id(self, name):
+        return self.key_maps[name]
+
+    def get_cluster_name(self, id):
+        all_values = list(self.key_maps.values())
+        all_keys = list(self.key_maps.keys())
+        name = all_keys[all_values.index(id)]
+        return name
 
     def update_labels(self, name, indices):
         indices = np.array(indices).astype(np.int)
         name = str(name)
 
-        unq_names = np.unique(self.label_names)
-        if name in unq_names:
-            lbl = self.labels[np.where(self.label_names == name)][0]
-            self.labels[indices] = lbl
-            self.label_names[indices] = name
+        if name in self.key_maps:
+            cid = self.get_cluster_id(name)
+            self.labels[indices] = cid
         else:
-            unq_lbls = np.unique(self.labels).astype(np.int)
+            unq = np.unique(self.labels)
             for x in range(1000):
-                if x not in unq_lbls:
+                if x not in unq:
+                    self.key_maps[name] = x
                     self.labels[indices] = x
+                    newunq = np.unique(self.labels)
+                    oldlabels = list(self.key_maps.values())
+                    for oldlabel in oldlabels:
+                        if oldlabel not in newunq:
+                            oldname = self.get_cluster_name(oldlabel)
+                            self.key_maps.pop(oldname, None)
                     break
-            self.label_names[indices] = name
+
         self.n_clusters = np.unique(self.labels)
 
     def run_de(self, de_method="TTest", de_alpha=0.05, de_n_genes=200,
@@ -301,13 +316,32 @@ class Pipeline():
         if 'saved_clusters' in kwargs:
             kwargs['saved_clusters'] = _validate_saved_clusters(self.labels,
                                             kwargs['saved_clusters'])
+            saved = {}
+            for saved_cluster in kwargs['saved_clusters']:
+                name = self.get_cluster_name(saved_cluster)
+                if not name.isnumeric():
+                    saved[saved_cluster] = (name, np.where(self.labels == saved_cluster))
+
+            self.labels, kwargs['saved_clusters'], repl = _categorify(
+                    self.labels, kwargs['saved_clusters']
+            )
 
         self.ssclu_method = ssclu_method
         self.labels = wrap(
             "ss_cluster",
             ssclu_method)().get(self.x_emb, self.labels, **kwargs)
         self.n_clusters = np.unique(self.labels)
-        self.label_names = self.labels.astype('U200')
+
+        self.key_maps = {str(i): i for i in np.unique(self.labels)}
+
+        if 'saved_clusters' in kwargs:
+            for i in saved:
+                new_lbl = self.labels[saved[i][1]][0]
+                print('new', new_lbl)
+                old_name = self.get_cluster_name(new_lbl)
+                if old_name in self.key_maps:
+                    self.key_maps.pop(old_name, None)
+                self.key_maps[saved[i][0]] = new_lbl
 
     def run_vis(self, vis_method='UMAP', **kwargs):
         _method_exists('visualization', vis_method)
@@ -333,10 +367,14 @@ class Pipeline():
         return False
 
     def get_cluster_names(self):
-        pairs = np.unique(np.vstack([self.labels, self.label_names]), axis=1).T
-        unq_labels = [i[0] for i in pairs]
-        unq_names = [i[1] for i in pairs]
-        return {'labels': unq_labels, 'names': unq_names}
+        sd = {k: v for k, v in sorted(self.key_maps.items(), key=lambda item: item[1])}
+        return {'labels': list(sd.values()), 'names': list(sd.keys())}
+
+    def get_label_names(self):
+        names = np.zeros_like(self.labels).astype('U200')
+        for i in self.key_maps:
+            names[np.where(self.labels == self.key_maps[i])] = i
+        return names
 
     def save_session(self):
         sess = {}
@@ -344,7 +382,7 @@ class Pipeline():
             'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
             'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
             'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
-            'markers', 'vis_method', 'label_names'
+            'markers', 'vis_method', 'key_maps'
         ]
 
         for attr in to_save:
@@ -364,7 +402,7 @@ class Pipeline():
             'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
             'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
             'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
-            'markers', 'vis_method', 'label_names'
+            'markers', 'vis_method', 'key_maps'
         ]
 
         for attr in to_load:

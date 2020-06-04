@@ -76,6 +76,6 @@ server <- shinyServer(function(input, output, session) {
     callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
                setPts = setPts, deGenes = deGenes, selDataset = selDataset,
                plotHistory = plotHistory, curPlot = curPlot, replot = replot,
-               remark = remark, labelList = labelList)
+               remark = remark, labelList = labelList, relabel = relabel)
     callModule(theme, id = "ns", retheme = retheme)
 })
