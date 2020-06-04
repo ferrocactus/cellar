@@ -28,13 +28,13 @@ tabsetPanel(
         DT::dataTableOutput(ns("MSIGDBtable"))
     ),
     tabPanel(
-        "Markers",
+        "Cell Type",
         uiOutput(ns("titleM")),
         downloadButton(ns("downloadMKS"), "Download Markers table"),
         DT::dataTableOutput(ns("Markerstable"))
     ),
     tabPanel(
-        "Disease Markers",
+        "Disease",
         uiOutput(ns("titleD")),
         downloadButton(ns("downloadDis"), "Download Markers table"),
         DT::dataTableOutput(ns("disease"))
