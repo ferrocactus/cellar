@@ -30,22 +30,27 @@ theme <- function(input, output, session, retheme) {
                 class = "cell_names_dark",
                 selector = '#ns-collapse_cell_names'
             )
-            addCssClass(
-                class = "odd_dark",
-                selector = '.odd'
-            )
-            addCssClass(
-                class = "datatables_dark",
-                selector = '.datatables'
-            )
-            addCssClass(
-                class = "dataTables_white",
-                selector = '.dataTables_length'
-            )
-            addCssClass(
-                class = "dataTables_white",
-                selector = '.dataTables_filter'
-            )
+            runjs('
+                $("<style>").text(".even { color:white !important; background-color: var(--bluegray) !important;}").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text(".odd { color:white !important; background-color: var(--darkbluegray) !important;}").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text("table.dataTable thead .sorting, .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button { color:white !important;}").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text("td > .btn-default { color:white !important; background-color: var(--darkbluegray) !important; } ").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text("td > .btn-default:hover { color:black !important; background-color: white !important; }").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text(".datatables button, .datatables input, .datatables select, .datatables textarea { background-color: var(--darkbluegray) !important; }").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text(".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate { color:white !important;}").appendTo("head");
+            ')
         } else if (input$theme_mode == 'light_mode') {
             removeCssClass(
                 class = "tab_dark_mode",
@@ -71,18 +76,28 @@ theme <- function(input, output, session, retheme) {
                 class = "cell_names_dark",
                 selector = '#ns-collapse_cell_names'
             )
-            removeCssClass(
-                class = "datatables_dark",
-                selector = '.datatables'
-            )
-            removeCssClass(
-                class = "dataTables_white",
-                selector = '.dataTables_length'
-            )
-            removeCssClass(
-                class = "dataTables_white",
-                selector = '.dataTables_filter'
-            )
+            runjs('
+                $("<style>").text(".even { color:rgb(51, 51, 51) !important; background-color: white !important;}").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text(".odd { color:rgb(51, 51, 51) !important; background-color: rgb(249, 249, 249) !important;}").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text("table.dataTable thead .sorting, .paginate_button, .dataTables_wrapper .dataTables_paginate .paginate_button { color:rgb(51, 51, 51) !important;}").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text("td > .btn-default { color:rgb(51, 51, 51) !important; background-color: #f4f4f4  !important;} ").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text("td > .btn-default:hover { color:rgb(51, 51, 51) !important; background-color: white !important; }").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text(".datatables button, .datatables input, .datatables select, .datatables textarea { background-color: white !important; } ").appendTo("head");
+            ')
+            runjs('
+                $("<style>").text(".dataTables_wrapper .dataTables_length, .dataTables_wrapper .dataTables_filter, .dataTables_wrapper .dataTables_info, .dataTables_wrapper .dataTables_processing, .dataTables_wrapper .dataTables_paginate { color:rgb(51, 51, 51) !important;}").appendTo("head");
+            ')
         }
+        retheme(0)
     })
 }

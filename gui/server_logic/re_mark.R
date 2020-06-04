@@ -15,7 +15,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
         output$titleDE <- renderText(tabletitle)
         updateTabsetPanel(session, "switcher", selected = "DE")
-        
+
         shinyInput <- function(FUN, len, id, ns, ...) {  ## for inputting buttons
             inputs <- character(len)
             for (i in seq_len(len)) {
@@ -23,7 +23,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
             }
             inputs
         }
-        
+
         output$DEtable <- DT::renderDataTable({
             # TODO change '0' to whatever the first element is
             # not all clustering algorithms return cluster ids starting with 0
@@ -74,11 +74,11 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                     session,
                     'color',
                     selected = selected_gene
-                )    
+                )
             }
             #myValue$employee <<- paste('click on ',df$data[selectedRow,1])
         })
-        
+
         # output$DEbuttons <- renderUI({
         #     lapply(X = 1:length(deGenes()), FUN = function(i) {
         #             actionButton(ns(paste(deGenes()[i], "_", seq = "")),

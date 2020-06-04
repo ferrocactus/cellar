@@ -190,7 +190,7 @@ input:disabled {
 
 .body_dark_mode {
     background-color: var(--bluegray) !important;
-    color: white !important;
+    color: white;
 }
 
 .tab_dark_mode {
