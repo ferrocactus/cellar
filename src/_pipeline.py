@@ -32,26 +32,29 @@ OK = 'good'
 
 class Pipeline():
     def __init__(self, x='default', col_ids=None):
-        self.load(x, col_ids)
+        self.loadmsg = self.load(x, col_ids)
 
     def restate(self, x='default', col_ids=None):
         keys = list(self.__dict__.keys())
         for var in keys:
             delattr(self, var)
-        self.load(x, col_ids)
+        self.loadmsg = self.load(x, col_ids)
 
     def load(self, x, col_ids):
         if isinstance(x, str):
-            self.dataset = x
-            self.x, self.col_ids = load_data(x)
-            self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
+            try:
+                self.dataset = x
+                self.x, self.col_ids = load_data(x)
+                self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
+            except:
+                return "Incorrect data format."
         else:
             try:
                 self.dataset = "Noname"
                 self.x = np.array(x)
                 self.col_ids = np.array(col_ids).astype('U').reshape(-1)
             except:
-                raise ValueError("Incorrect format for x.")
+                return "Incorrect data format."
 
         self.col_ids = np.char.split(self.col_ids.flatten(),
                                     sep='.', maxsplit=1)
@@ -59,9 +62,9 @@ class Pipeline():
         self.col_names = wrap("conversion", "Converter")().get(self.col_ids)
 
         if len(self.x.shape) != 2:
-            raise ValueError(
-                "Data needs to be of shape (n_samples, n_features).")
+            return "Data needs to be of shape (n_samples, n_features)."
         print("Loaded data.")
+        return OK
 
     def validate_all(self, dim_method='PCA', dim_n_components='knee',
                      clu_method='KMeans', eval_method='Silhouette',

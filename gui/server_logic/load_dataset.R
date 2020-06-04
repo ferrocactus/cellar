@@ -19,6 +19,12 @@ load_dataset <- function(input, output, session, pipe, selDataset,
                 fullreset(fullreset() + 1)
             }
         })
-        showNotification("Dataset loaded")
+
+        if (pipe()$loadmsg == 'good')
+            showNotification("Dataset loaded")
+        else {
+            showNotification(pipe()$loadmsg)
+            pipe(0)
+        }
     })
 }
