@@ -71,9 +71,9 @@ save_session <- function(input, output, session, pipe, setNames, setPts,
                               selected = sess$'dim_reduction_method')
             pipe()$load_session(sess$'pipe_sess')
             if (pipe()$has('markers'))
-                remark(1)
+                remark(remark() + 1)
             if (pipe()$has('labels'))
-                replot(1)
+                replot(replot() + 1)
             if (sess$'dim_n_components' == 'Automatic') {
                 updateRadioButtons(session, 'dim_options',
                                    selected = 'pca_auto')

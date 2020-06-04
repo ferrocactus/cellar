@@ -57,7 +57,7 @@ de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
         if (msg != 'good') {
             showNotification(msg)
         } else {
-            remark(1) # Notify that markers have changed
+            remark(remark() + 1) # Notify that markers have changed
         }
     })
 }

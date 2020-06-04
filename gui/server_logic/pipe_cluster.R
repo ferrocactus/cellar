@@ -57,9 +57,9 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
             return()
         }
 
-        replot(1) # Notify that labels have changed
-        reset(1) # notify changes
-        relabel(1)
+        replot(replot() + 1) # Notify that labels have changed
+        reset(reset() + 1) # notify changes
+        relabel(relabel() + 1)
     })
 
     # Semi-supervised clustering
@@ -72,8 +72,8 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
             return()
         }
 
-        replot(1)
-        reset(1)
-        relabel(1)
+        replot(replot() + 1)
+        reset(reset() + 1)
+        relabel(relabel() + 1)
     })
 }

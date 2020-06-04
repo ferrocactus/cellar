@@ -16,6 +16,9 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
             setNames(setNames()[which(substr(setNames(), 1, 7) != 'Cluster')])
         }
 
+        isolate(reset(0))
+        isolate(fullreset(0))
+
         # Update sets
         for (i in pipe()$n_clusters) {
             setNames(c(setNames(),
@@ -47,7 +50,5 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
         output$Markerstableuser = NULL
         output$MSIGDBtable = NULL
 
-        isolate(reset(0))
-        isolate(fullreset(0))
     }})
 }

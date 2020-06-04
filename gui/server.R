@@ -28,7 +28,7 @@ server <- shinyServer(function(input, output, session) {
     setPts <- reactiveVal(c(NA))
     deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
-    replot <- reactiveVal(NULL) # triggers re_plot on change
+    replot <- reactiveVal(0) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
     relabel <- reactiveVal(0)
     rebutton <- reactiveVal(0)
