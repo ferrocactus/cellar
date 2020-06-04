@@ -46,7 +46,10 @@ body <- dashboardBody(
     history(id='ns'),
     plots(id="ns"),
     cell_names(id="ns"),
-    analysis(id="ns")
+    analysis(id="ns"),
+    div(class = "footer",
+        includeHTML("gui/ui_logic/body/copyright.html")
+    )
 )
 
 ui <- dashboardPage(header, sidebar, body, skin = 'green', title = 'Cellar')
