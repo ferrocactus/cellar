@@ -20,6 +20,8 @@ pipe_de <- function(pipe, set1, set2, mark_method, mark_alpha,
 
 de_run <- function(input, output, session, pipe, remark, setNames, setPts) {
     observeEvent(input$getdegenes, {
+        if (pipe() == 0) return()
+
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
 

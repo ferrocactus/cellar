@@ -111,6 +111,13 @@ plot <- function(input, output, session, replot, pipe, selDataset,
 
     # Store selected cells
     observeEvent(input$store_lasso, {
+        if (curPlot() != length(plotHistory())) {
+            showNotification("You can only select in the last plot.")
+            return()
+        }
+        if (curPlot() == 0) return()
+        if (!pipe()$has('labels')) return()
+
         if (as.character(input$newsubset) %in% setNames()) {
             showNotification("Name already exists")
             return()
@@ -142,7 +149,12 @@ plot <- function(input, output, session, replot, pipe, selDataset,
     })
 
     observeEvent(input$labelupd, {
+        if (pipe() == 0) return()
+        if (!pipe()$has('labels')) return()
+
         idx <- which(setNames() == as.character(input$subset1_upd))
+        if (idx == "None") return()
+
         keys <- setPts()[[idx]]
         # pass name and indices
         pipe()$update_labels(as.character(input$newlabels), keys - 1)
@@ -163,6 +175,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                    "_plot.", extension)
         },
         content = function(fname) {
+            if (curPlot() == 0) return(NULL)
             extension <- tolower(input$plot_download_format)
             if (extension == 'html') {
                 htmlwidgets::saveWidget(

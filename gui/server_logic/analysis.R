@@ -81,6 +81,7 @@ analysis <- function(input, output, session, deGenes, pipe) {
     observe({
     # only run if deGenes have been stored
     if (length(deGenes()) > 0 && pipe() != 0) {
+
         nc = length(pipe()$col_ids)
 
         s1=as.character(isolate(input$subset1))

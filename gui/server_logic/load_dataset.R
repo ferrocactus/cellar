@@ -19,5 +19,6 @@ load_dataset <- function(input, output, session, pipe, selDataset,
                 fullreset(fullreset() + 1)
             }
         })
+        showNotification("Dataset loaded")
     })
 }

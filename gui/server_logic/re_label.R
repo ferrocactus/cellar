@@ -5,6 +5,7 @@ re_label <- function(input, output, session, relabel, pipe) {
     })
     observe({
         if (relabel() < 1) return()
+        if (!pipe()$has('labels')) return()
         output$cell_names_outp <- renderTable(width = "100%", {
             d <- pipe()$get_cluster_names()
             df <- data.frame(as.character(d$'labels'), as.character(d$'names'))

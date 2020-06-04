@@ -1,5 +1,6 @@
 dataset_reset <- function(input, output, session, reset, setNames, setPts,
-                          labelList, deButtons, deGenes, pipe, fullreset) {
+                          labelList, deButtons, deGenes, pipe, fullreset,
+                          curPlot, plotHistory) {
     observe({ if (reset() > 0 || fullreset() > 0) {
         updateSelectInput(
             session = session,
@@ -11,6 +12,9 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
             setNames(c("None"))
             setPts(c(NA))
             labelList(c())
+            curPlot(0)
+            plotHistory(c())
+            output$plot <- NULL
         } else {
             setPts(setPts()[which(substr(setNames(), 1, 7) != 'Cluster')])
             setNames(setNames()[which(substr(setNames(), 1, 7) != 'Cluster')])
@@ -20,19 +24,29 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
         isolate(fullreset(0))
 
         # Update sets
-        for (i in pipe()$n_clusters) {
-            setNames(c(setNames(),
-                       (paste("Cluster_", as.character(i), sep = ""))))
-            setPts(c(setPts(), list(which(pipe()$labels == (i)))))
-        }
+        if (pipe()$has('n_clusters')) {
+            n_clusters = pipe()$n_clusters
+            for (i in n_clusters) {
+                setNames(c(setNames(),
+                           (paste("Cluster_", as.character(i), sep = ""))))
+                setPts(c(setPts(), list(which(pipe()$labels == (i)))))
+            }
 
-        n_clusters = pipe()$n_clusters
-        if (input$tissue == 'clusters') {
-            updateSelectInput(
-                session,
-                "newlabels",
-                choices = n_clusters
-            )
+            if (input$tissue == 'clusters') {
+                updateSelectInput(
+                    session,
+                    "newlabels",
+                    choices = n_clusters
+                )
+            }
+        } else {
+            if (input$tissue == 'clusters') {
+                updateSelectInput(
+                    session,
+                    "newlabels",
+                    choices = c()
+                )
+            }
         }
 
         # Clear all analysis tabs

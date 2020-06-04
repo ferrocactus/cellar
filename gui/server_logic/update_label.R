@@ -9,6 +9,7 @@ update_label <- function(input, output, session, pipe, labelList) {
 
         if (tissue == 'clusters') {
             if (pipe() == 0) return()
+            if (!pipe()$has('labels')) return()
 
             n_clusters = pipe()$n_clusters
             updateSelectInput(

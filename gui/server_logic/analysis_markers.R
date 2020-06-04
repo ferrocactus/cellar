@@ -36,6 +36,7 @@ analysis_markers <- function(input, output, session, deGenes, pipe) {
 
     observe({
     if (length(deGenes()) > 0 && pipe() != 0) {
+        if (!pipe()$has('col_ids')) return()
         ns <- length(pipe()$col_ids)
         s1=as.character(input$subset1)
         s2=as.character(input$subset2)
