@@ -83,8 +83,8 @@ analysis <- function(input, output, session, deGenes, pipe) {
     if (length(deGenes()) > 0 && pipe() != 0) {
         nc = length(pipe()$col_ids)
 
-        s1=as.character(input$subset1)
-        s2=as.character(input$subset2)
+        s1=as.character(isolate(input$subset1))
+        s2=as.character(isolate(input$subset2))
         tabletitle=paste(s1," (vs. ",s2,")",sep="")
         output$titleONTO <- renderText(tabletitle)
         output$GOtable <- DT::renderDataTable({
