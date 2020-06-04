@@ -33,6 +33,7 @@ sidebar <- dashboardSidebar(
 body <- dashboardBody(
     useShinyjs(),
     tags$head(includeCSS("gui/ui_logic/styles/style.css")),
+    tags$head(includeHTML(("gui/ui_logic/header/google-analytics.html"))),
     tags$script(HTML('
     $(document).ready(function() {
     $("header").find("nav").append(\'<span class="maintitle"> Cellar </span>\');
