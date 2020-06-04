@@ -257,17 +257,31 @@ def _validate_new_labels(new_labels, old_key_maps):
         raise InvalidArgument("Invalid list of new labels encountered")
 
 def _validate_saved_clusters(labels, saved_clusters):
+    unq = np.unique(labels)
+    if saved_clusters is None:
+        return np.array([])
     if isinstance(saved_clusters, str):
+        if saved_clusters == "":
+            return np.array([])
         saved_clusters = saved_clusters.split(',')
-        saved_clusters = [int(i.strip()) for i in saved_clusters]
+        saved_clusters = [i.strip() for i in saved_clusters]
+        ret_val = []
+        for saved_cluster in saved_clusters:
+            if '-' in saved_cluster:
+                b, e = saved_cluster.split('-')
+                b, e = b.strip(), e.strip()
+                ret_val += list(range(int(b), int(e)+1))
+            else:
+                ret_val.append(int(saved_cluster))
+        saved_clusters = np.unique(ret_val).astype(np.int)
     if isinstance(saved_clusters, (int, float)):
-        if saved_clusters not in labels:
+        if saved_clusters not in unq:
             raise InvalidArgument(f"Cluster name {saved_clusters} not found.")
         return np.array([saved_clusters])
     elif isinstance(saved_clusters, (list, np.ndarray)):
         saved_clusters = np.array(saved_clusters)
-        for i, cluster in enumerate(saved_clusters):
-            if cluster not in labels:
+        for cluster in saved_clusters:
+            if cluster not in unq:
                 raise InvalidArgument(f"Cluster name {cluster} not found.")
         return saved_clusters
     else:
