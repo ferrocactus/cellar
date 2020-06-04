@@ -298,13 +298,20 @@ input:disabled {
     margin-top: -90px;
 }
 
-.maintitle {
-    margin-top: -100px;
-}
-
 .footer {
     color: gray;
     text-align: center;
     margin-top: 80px;
     margin-bottom: -10px;
 }
+
+.maintitle {
+    font-size: 20px;
+    line-height: 50px;
+    text-align: left;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+    padding: 0 15px;
+    overflow: hidden;
+    color: white;
+}
+
