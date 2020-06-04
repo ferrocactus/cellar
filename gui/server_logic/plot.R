@@ -7,56 +7,79 @@ plot <- function(input, output, session, replot, pipe, selDataset,
         isolate(replot(0))
         if (pipe() == 0) return()
         if (!pipe()$has('labels')) return()
-
-        if (input$color == 'Clusters') {
-            if (input$show_names == 'show_names')
-                color = paste0(
-                            as.factor(pipe()$labels), ": ",
-                            as.factor(pipe()$label_names))
-            else
-                color = as.factor(pipe()$labels)
-            title = "Clusters"
-        } else {
-            i = which(pipe()$col_names == input$color)[1]
-            if (is.null(i)) {
-                if (input$show_names == 'show_names')
-                    color = paste0(
-                                as.factor(pipe()$labels), ": ",
-                                as.factor(pipe()$label_names))
-                else
-                    color = as.factor(pipe()$labels)
-                title = "Clusters"
-            } else {
-                color = pipe()$x[, i]
-                title = input$color
-            }
-        }
-
-        text = ~paste("Label: ", as.factor(pipe()$label_names))
-        vals <- schema(F)$traces$scatter$attributes$marker$symbol$values
-        vals <- grep("-", vals, value = T)
-
+        
+        
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
             output$plot <- renderPlotly({
-                p <- plotly_build(plot_ly(
-                    x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
-                    text = text,
-                    color = color,
-                    symbol = ~as.factor(pipe()$labels), symbols = vals,#c('circle','x','o'),
-                    key = as.character(1:length(pipe()$x_emb_2d[,1])),
-                    marker = list(size = input$dot_size),
-                    type = 'scatter',
-                    mode = 'markers',
-                ) %>% layout(dragmode = "lasso", title = title,
-                            margin = list(t = 50)))
+                if (input$color == 'Clusters') {
+                    if (input$show_names == 'show_names')
+                        color = paste0(
+                            as.factor(pipe()$labels), ": ",
+                            as.factor(pipe()$label_names))
+                    else
+                        color = as.factor(pipe()$labels)
+                    text = ~paste("Label: ", as.factor(pipe()$label_names))
+                    title = "Clusters"
+                    p <- plotly_build(plot_ly(
+                        x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
+                        text = text,
+                        color = color,
+                        key = as.character(1:length(pipe()$x_emb_2d[,1])),
+                        marker = list(size = input$dot_size),
+                        type = 'scatter',
+                        mode = 'markers',
+                    ) %>% layout(dragmode = "lasso", title = title,
+                                 margin = list(t = 50)))
+                    
+                    
+                    
+                } else {
+                    i = which(pipe()$col_names == input$color)[1]
+                    if (is.null(i)) {
+                        if (input$show_names == 'show_names')
+                            color = paste0(
+                                as.factor(pipe()$labels), ": ",
+                                as.factor(pipe()$label_names))
+                        else
+                            color = as.factor(pipe()$labels)
+                        title = "Clusters"
+                    } else {
+                        color = pipe()$x[, i]
+                        title = input$color
+                    }
+                    
+                    text = ~paste("Label: ", as.factor(pipe()$label_names))
+                    
+                    p <- plotly_build(plot_ly(
+                        x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
+                        text = text,
+                        color = color,
+                        symbol = ~as.factor(pipe()$labels), 
+                        symbols = c('star-triangle-down','circle','square',"diamond",
+                                    "x",'triangle-up','triangle-down','hexagon','asterisk','diamond-cross',
+                                    "square-cross","circle-cross","circle-x","star-square","star","star-triangle-up",
+                                    "star-square","star-diamond","diamond-tall","diamond-wide","hourglass",'bowtie',
+                                    'pentagon','hexagram-dot','triangle-se','y-right','hexagon2','octagon','triangle-nw','triangle-sw'
+                        ),  ## 30 shapes
+                        key = as.character(1:length(pipe()$x_emb_2d[,1])),
+                        marker = list(size = input$dot_size),
+                        type = 'scatter',
+                        mode = 'markers',
+                    ) %>% layout(dragmode = "lasso", showlegend=FALSE,title = title,
+                                 margin = list(t = 50)))
+                    
+                }
+                
+                
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))
                 return(p)
             })
         })
+        
     })
-
+    
     observeEvent(input$prevplot, {
         if (curPlot() == 1) {
             showNotification("No more plots to show")
@@ -67,7 +90,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
             return(plotHistory()[[curPlot()]])
         })
     })
-
+    
     observeEvent(input$nextplot, {
         if (curPlot() == length(plotHistory())) {
             showNotification("This is the last plot")
@@ -78,44 +101,44 @@ plot <- function(input, output, session, replot, pipe, selDataset,
             return(plotHistory()[[curPlot()]])
         })
     })
-
+    
     # triggered when view gene expression is clicked
     observeEvent(input$color, {
         replot(replot() + 1)
     })
-
+    
     # Store selected cells
     observeEvent(input$store_lasso, {
         if (as.character(input$newsubset) %in% setNames()) {
-          showNotification("Name already exists")
-          return()
+            showNotification("Name already exists")
+            return()
         }
-
+        
         if (substr(as.character(input$newsubset),1,7) == "Cluster") {
-          showNotification("Reserved name, please choose another.")
-          return()
+            showNotification("Reserved name, please choose another.")
+            return()
         }
-
+        
         d <- event_data("plotly_selected")
         keys <- as.numeric(d$key)
         cell_count <- length(keys)
         keys <- list(keys)
-
+        
         if (is.null(d$key))
             return()
-
+        
         if (as.character(input$newsubset) != "") {
             setPts(c(setPts(), keys))
             setNames(c(setNames(), as.character(input$newsubset)))
         } else {
             setPts(c(setPts(), keys))
             setNames(c(setNames(),
-                paste("Newset", as.character(length(setNames())), sep="")))
+                       paste("Newset", as.character(length(setNames())), sep="")))
         }
-
+        
         showNotification(paste(as.character(cell_count), "cells stored"))
     })
-
+    
     observeEvent(input$labelupd, {
         idx <- which(setNames() == as.character(input$subset1_upd))
         keys <- setPts()[[idx]]
@@ -125,11 +148,11 @@ plot <- function(input, output, session, replot, pipe, selDataset,
         replot(replot() + 1)
         relabel(relabel() + 1)
     })
-
+    
     observeEvent(input$show_names, {
         replot(replot() + 1)
     })
-
+    
     # Download plot
     output$download_plot <- downloadHandler(
         filename = function() {
@@ -141,14 +164,14 @@ plot <- function(input, output, session, replot, pipe, selDataset,
             extension <- tolower(input$plot_download_format)
             if (extension == 'html') {
                 htmlwidgets::saveWidget(
-                        as_widget(plotHistory()[[curPlot()]]), fname,
-                        selfcontained = TRUE)
+                    as_widget(plotHistory()[[curPlot()]]), fname,
+                    selfcontained = TRUE)
             } else {
                 withProgress(message = "Saving plot", value = 0, {
                     incProgress(1/2, detail = paste("Step: Rendering"))
                     withr::with_dir(dirname(fname),
-                            orca(plotHistory()[[curPlot()]],
-                            basename(fname), format = extension))
+                                    orca(plotHistory()[[curPlot()]],
+                                         basename(fname), format = extension))
                 })
             }
         }
