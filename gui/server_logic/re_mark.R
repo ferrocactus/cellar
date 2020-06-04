@@ -3,7 +3,6 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
     observe({ if (remark() > 0) {
         rebutton(rebutton() + 1)
         remark(0)
-
         updateTabsetPanel(session, "switcher", selected = "DE")
         reset_analysis_tabs(output)
         if (length(deButtons()) > 0)
@@ -69,7 +68,11 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
         ,selection = 'none'
         )
 
-        observeEvent(input$select_button, {
+        o<-observeEvent(input$select_button, {
+            if (identical(input$select_button,'reset'))
+            {
+                return()
+            }
             selectedRow <- as.numeric(strsplit(input$select_button, "_")[[1]][2])
             #showNotification(as.character(selectedRow))
             if (length(pipe()$markers[['0']][['outp_names']])>=selectedRow)
@@ -83,7 +86,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
             }
             #myValue$employee <<- paste('click on ',df$data[selectedRow,1])
         })
-
+        deButtons(c(deButtons(),o))
         # output$DEbuttons <- renderUI({
         #     lapply(X = 1:length(deGenes()), FUN = function(i) {
         #             actionButton(ns(paste(deGenes()[i], "_", seq = "")),

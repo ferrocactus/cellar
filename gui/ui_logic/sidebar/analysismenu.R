@@ -58,7 +58,8 @@ menuItem(
                     actionButton(
                         ns("getdegenes"),
                         "Run DE analysis",
-                        class="longbtn"
+                        class="longbtn",
+                        onclick=sprintf("Shiny.onInputChange('%s', 'reset')", ns("select_button")),
                     )
                 )
             ),
