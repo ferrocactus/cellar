@@ -1,6 +1,8 @@
 re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                     rebutton, replot) {
     observe({ if (remark() > 0) {
+        updateTabsetPanel(session, "switcher", selected = "DE")
+        reset_analysis_tabs(output)
         if (length(deButtons()) > 0)
             for (i in 1:length(deButtons()))
                 deButtons()[[i]]$destroy()
