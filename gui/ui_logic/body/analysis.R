@@ -34,6 +34,12 @@ tabsetPanel(
         DT::dataTableOutput(ns("Markerstable"))
     ),
     tabPanel(
+        "Disease Markers",
+        uiOutput(ns("titleD")),
+        downloadButton(ns("downloadDis"), "Download Markers table"),
+        DT::dataTableOutput(ns("disease"))
+    ),
+    tabPanel(
         "User Markers",
         downloadButton(ns("downloadMKSuser"), "Download Markers table"),
         uiOutput(ns("titleUM")),
