@@ -307,6 +307,12 @@ input:disabled {
     right:0;
     margin-left:auto;
     margin-right:auto;
+    margin-top: 20px;
+    bottom: 5px;
+}
+
+#ns-heatmap {
+    margin-bottom: 20px;
 }
 
 .maintitle {
