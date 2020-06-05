@@ -10,6 +10,11 @@ tabsetPanel(
         #uiOutput(ns("DEbuttons"))
     ),
     tabPanel(
+      "Heat Map",
+      uiOutput(ns("titleheatmap")),
+      plotOutput(ns("heatmap"), height="600px")
+    ),
+    tabPanel(
         "Gene Ontology",
         downloadButton(ns("downloadGO"), "Download GO table"),
         uiOutput(ns("titleONTO")),

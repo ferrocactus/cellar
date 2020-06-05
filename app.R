@@ -7,6 +7,7 @@ library(plotly)
 library(rjson)
 library(tools)
 library(DT)
+library(gplots)
 source("gui/ui.R")
 source("gui/server.R")
 
