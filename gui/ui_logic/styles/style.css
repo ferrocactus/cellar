@@ -301,8 +301,12 @@ input:disabled {
 .footer {
     color: gray;
     text-align: center;
-    margin-top: 80px;
-    margin-bottom: -10px;
+    position: absolute;
+    position:absolute;
+    left:0;
+    right:0;
+    margin-left:auto;
+    margin-right:auto;
 }
 
 .maintitle {

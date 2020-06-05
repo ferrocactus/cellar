@@ -17,7 +17,7 @@ source("gui/server_logic/analysis_markers.R")
 source("gui/server_logic/analysis_disease.R")
 source("gui/server_logic/analysis_markers_user.R")
 source("gui/server_logic/save_session.R")
-
+source("gui/server_logic/notifications.R")
 source("gui/server_logic/dataset_reset.R")
 
 server <- shinyServer(function(input, output, session) {
@@ -44,6 +44,7 @@ server <- shinyServer(function(input, output, session) {
     # We are using the same namespace for everything called "ns".
     # This is not ideal, but a lot of our functions deal with widgets that
     # belong to different ui components, so we are using one namespace for all.
+    notificationModule = callModule(notifications, id = 'ns')
     callModule(upload_file, id = "ns")
     callModule(selected_dataset, id = "ns", selDataset = selDataset)
     callModule(load_dataset, id = "ns", pipe = pipe, selDataset = selDataset,

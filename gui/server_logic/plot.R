@@ -153,7 +153,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
         if (!pipe()$has('labels')) return()
 
         idx <- which(setNames() == as.character(input$subset1_upd))
-        if (idx == "None") return()
+        if (idx == 1) return()
 
         keys <- setPts()[[idx]]
         # pass name and indices

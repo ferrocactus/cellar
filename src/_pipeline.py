@@ -219,6 +219,7 @@ class Pipeline():
         indices = np.array(indices).astype(np.int)
         name = str(name)
 
+        print(indices)
         if name in self.key_maps:
             cid = self.get_cluster_id(name)
             self.labels[indices] = cid

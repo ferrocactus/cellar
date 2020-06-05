@@ -1,5 +1,6 @@
 source("gui/ui_logic/header/history.R") # history
 source("gui/ui_logic/header/title.R") # title
+source("gui/ui_logic/header/info.R") # title
 
 source("gui/ui_logic/sidebar/datasetmenu.R") #datasetmenu
 source("gui/ui_logic/sidebar/appearancemenu.R") #appearancemenu
@@ -15,6 +16,7 @@ source("gui/ui_logic/body/analysis.R") #analysis
 header <- dashboardHeader(
     titleWidth = 400,
     title = title
+    #info(id="ns")
 )
 
 sidebar <- dashboardSidebar(

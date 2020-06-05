@@ -65,7 +65,7 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
     # Semi-supervised clustering
     observeEvent(input$ssclurun, {
         if (pipe() == 0) return()
-        if (!pipe()$has('labels'))
+        if (!pipe()$has('labels')) return()
         msg <- pipe_sscluster(pipe, ssc_method = input$ssc_method,
                               saved_clusters = input$saved_clusters)
 
