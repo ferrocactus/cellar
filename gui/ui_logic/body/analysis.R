@@ -12,7 +12,12 @@ tabsetPanel(
     tabPanel(
       "Heat Map",
       uiOutput(ns("titleheatmap")),
-      plotOutput(ns("heatmap"), height="600px")
+      sliderInput(
+        ns("heat_height"),
+        "Select heat map height",
+        min = 400, max = 800, value = 600
+      ),
+      plotOutput(ns("heatmap"), height="100%")
     ),
     tabPanel(
         "Gene Ontology",
