@@ -118,7 +118,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                 scaleRYG <- colorRampPalette(c("blue","white","red"), space = "rgb")(30)
                 #plot the heatmap
                 heatmap.2(heatmap_dat,density.info = "none",trace = "none",col = scaleRYG,
-                          xlab = "DE Genes",
+                          xlab = "DE Genes",margins = c(9,7),
                           ylab = "Cluster")
             })
         }
