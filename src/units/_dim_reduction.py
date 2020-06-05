@@ -27,7 +27,7 @@ class Dim_PCA(Unit):
     See https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
     """
 
-    def __init__(self, n_components='knee', n_components_max=200, **kwargs):
+    def __init__(self, n_components='knee', n_components_max=60, **kwargs):
         """
         Parameters
         __________
@@ -94,13 +94,15 @@ class Dim_PCA(Unit):
                                        curve='convex',  # Approximately
                                        direction='decreasing'
                                        ).knee
-            n_components = max(n_components, 2)
+            n_components = max(n_components, 10)
 
             self.logger.info("Knee found at {0}.".format(n_components))
             x_emb = PCA(n_components=n_components,
+                        svd_solver='randomized',
                         **self.kwargs).fit_transform(x)
         else:
             x_emb = PCA(n_components=self.n_components,
+                        svd_solver='randomized',
                         **self.kwargs).fit_transform(x)
 
         if return_evr == True:
