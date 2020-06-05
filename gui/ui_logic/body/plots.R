@@ -6,6 +6,6 @@ tabsetPanel(
     tabPanel(
         "Main Plot",
         h3(textOutput("caption")),
-        plotlyOutput(ns("plot"), height="600px"),
+        plotlyOutput(ns("plot"), height="100%"),
     )
 )}

@@ -35,8 +35,6 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                     ) %>% layout(dragmode = "lasso", title = title,
                                  margin = list(t = 50)))
 
-
-
                 } else {
                     i = which(pipe()$col_names == input$color)[1]
                     if (is.null(i)) {
