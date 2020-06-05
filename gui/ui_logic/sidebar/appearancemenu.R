@@ -32,8 +32,13 @@ appearancemenu <- function(id, label='appearancemenu') {
                 "Show names" = "show_names"
             ),
             inline = TRUE
-        )
+        ),
 
+        sliderInput(
+          ns("plot_height"),
+          "Select plot height",
+          min = 400, max = 800, value = 600
+        )
       )
     )
   )}

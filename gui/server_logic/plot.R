@@ -31,6 +31,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                         marker = list(size = input$dot_size),
                         type = 'scatter',
                         mode = 'markers',
+                        height = input$plot_height
                     ) %>% layout(dragmode = "lasso", title = title,
                                  margin = list(t = 50)))
 
