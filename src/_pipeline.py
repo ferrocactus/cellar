@@ -44,7 +44,8 @@ class Pipeline():
         if isinstance(x, str):
             try:
                 self.dataset = x
-                self.x, self.col_ids = load_data(x)
+                self.x, self.col_ids, self.x_emb_precomp = load_data(x,
+                                            check_precomputed_PCA=True)
                 self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
             except:
                 return "Incorrect data format."
@@ -167,9 +168,20 @@ class Pipeline():
             raise MethodNotImplementedError("Step not found.")
 
     def run_dim(self, dim_method="PCA", dim_n_components='knee', **kwargs):
-        _method_exists('dim_reduction', dim_method)
         dim_n_components = _validate_dim_n_components(
             dim_n_components, dim_method, *self.x.shape)
+
+        if dim_method == 'Precomputed PCA':
+            if self.x_emb_precomp is not None:
+                if dim_n_components > 60:
+                    raise InappropriateArgument(
+                        "A max of 60 components is precomputed.")
+                self.x_emb = self.x_emb_precomp[:, :dim_n_components]
+                return
+            else:
+                raise InappropriateArgument("No precomputed PCA found.")
+
+        _method_exists('dim_reduction', dim_method)
 
         if hasattr(self, 'dim_method') and hasattr(self, 'dim_n_components_inp')\
                 and hasattr(self, 'x_emb'):

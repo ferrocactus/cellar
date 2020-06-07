@@ -37,23 +37,31 @@ def read_config(dataset):
     return config
 
 
-def load_data(dataset):
+def load_data(dataset, check_precomputed_PCA=False):
     # return X, Y
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
+        if check_precomputed_PCA:
+            return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy(), None
         return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy()
     elif dataset == 'spleen':
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
+        if check_precomputed_PCA:
+            return [ann.X, ann.var.index.to_numpy().astype('U'), None]
         return [ann.X, ann.var.index.to_numpy().astype('U')]
     else:
         if dataset[-4:] == 'h5ad':
             ann = anndata.read_h5ad(
                 "datasets/"  + dataset)
+            if check_precomputed_PCA:
+                return [ann.X, ann.var.index.to_numpy().astype('U'), ann.obsm['X_pca']]
             return [ann.X, ann.var.index.to_numpy().astype('U')]
         elif dataset[-3:] == 'csv':
             df = pd.read_csv("datasets/"  + dataset,
                              index_col=0, header=None).T
+            if check_precomputed_PCA:
+                return df.to_numpy(), df.columns.to_numpy(), None
             return df.to_numpy(), df.columns.to_numpy()
         else:
             raise ValueError("Dataset format not implemented.")

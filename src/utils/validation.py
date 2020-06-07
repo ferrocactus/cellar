@@ -6,6 +6,8 @@ from .exceptions import InvalidArgument
 from .exceptions import InappropriateArgument
 from .exceptions import MethodNotImplementedError
 
+from kneed import KneeLocator
+
 
 def _validate_dim_n_components(dim_n_components, method, h, w):
     if isinstance(dim_n_components, str):
@@ -15,10 +17,12 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
             except:
                 raise InvalidArgument(
                     "Incorrect number of components specified.")
-        elif method != 'PCA':
+        elif method != 'PCA' and method != 'Precomputed PCA':
             raise InvalidArgument(
                 "Incorrect number of components specified.")
         else:
+            if method == 'Precomputed PCA':
+                return 10 # default 10 components
             return dim_n_components
 
     if isinstance(dim_n_components, int):

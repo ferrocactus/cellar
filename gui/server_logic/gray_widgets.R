@@ -1,7 +1,7 @@
 # Logic for graying out buttons when not applicable
 gray_widgets <- function(input, output, session) {
     observeEvent(input$dim_method, {
-        if(input$dim_method == "PCA"){
+        if(input$dim_method == "PCA" || input$dim_method == "Precomputed PCA"){
             shinyjs::enable(selector = "[type=radio][value=pca_auto]")
         } else {
             shinyjs::disable(selector = "[type=radio][value=pca_auto]")
