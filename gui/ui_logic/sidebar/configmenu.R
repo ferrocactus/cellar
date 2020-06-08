@@ -119,6 +119,24 @@ menuItem(
                         class="sidebtn longbtn"
                     )
                 )
+            ),
+
+            div(
+                class = "div_step div_merge",
+                list(
+                    splitLayout(
+                        textInput(
+                            ns("clusters_to_merge"),
+                            "Clusters to merge",
+                            placeholder = "1, 2-5"
+                        ),
+                        actionButton(
+                            ns("merge_clusters"),
+                            "Merge clusters",
+                            class="sidebtn secondcol"
+                        )
+                    )
+                )
             )
         )
     )

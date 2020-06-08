@@ -136,20 +136,28 @@ input:disabled {
     margin-bottom: 20px !important;
 }
 
+#ns-saved_clusters {
+    margin-top: -30px;
+}
+
 #details_div {
-    min-height: 300px !important;
+    min-height: 300px;
 }
 
 .div_subsets {
-    margin-top: 30px !important;
+    margin-top: 30px;
+}
+
+.div_merge {
+    margin-top: 30px;
 }
 
 .runconfig {
-    margin-top: 30px !important;
+    margin-top: 30px;
 }
 
 .div_download_session {
-    margin-top: 30px !important;
+    margin-top: 30px;
 }
 
 #ns-switcher {

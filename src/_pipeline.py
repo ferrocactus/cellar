@@ -21,7 +21,7 @@ from .utils.validation import _validate_n_clusters
 from .utils.validation import _validate_n_jobs
 from .utils.validation import _validate_subset
 from .utils.validation import _validate_new_labels
-from .utils.validation import _validate_saved_clusters
+from .utils.validation import _validate_cluster_list
 from .utils.validation import _categorify
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
@@ -45,7 +45,7 @@ class Pipeline():
             try:
                 self.dataset = x
                 self.x, self.col_ids, self.x_emb_precomp = load_data(x,
-                                            check_precomputed_PCA=True)
+                                                                     check_precomputed_PCA=True)
                 self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
             except:
                 return "Incorrect data format."
@@ -58,7 +58,7 @@ class Pipeline():
                 return "Incorrect data format."
 
         self.col_ids = np.char.split(self.col_ids.flatten(),
-                                    sep='.', maxsplit=1)
+                                     sep='.', maxsplit=1)
         self.col_ids = np.array([i[0] for i in self.col_ids])
         self.col_names = wrap("conversion", "Converter")().get(self.col_ids)
 
@@ -206,7 +206,7 @@ class Pipeline():
             kwargs.pop('ensemble_methods', None)
         if "ensemble_methods" in kwargs:
             kwargs['ensemble_methods'] = _validate_ensemble_methods(
-                    kwargs['ensemble_methods'])
+                kwargs['ensemble_methods'])
 
         self.clu_method = clu_method
         self.eval_method = eval_method
@@ -227,11 +227,20 @@ class Pipeline():
         name = all_keys[all_values.index(id)]
         return name
 
+    def run_merge_clusters(self, clusters):
+        clusters = _validate_cluster_list(self.labels, clusters)
+        if len(clusters) < 2:
+            raise InvalidArgument("Not enough clusters found to merge")
+
+        for cluster in clusters[1:]:
+            name = self.get_cluster_name(cluster)
+            self.key_maps.pop(name, None)
+            self.labels[self.labels == cluster] = clusters[0]
+
     def update_labels(self, name, indices):
         indices = np.array(indices).astype(np.int)
         name = str(name)
 
-        print(indices)
         if name in self.key_maps:
             cid = self.get_cluster_id(name)
             self.labels[indices] = cid
@@ -330,16 +339,17 @@ class Pipeline():
     def run_ssclu(self, ssclu_method='SeededKMeans', **kwargs):
         _method_exists('ss_cluster', ssclu_method)
         if 'saved_clusters' in kwargs:
-            kwargs['saved_clusters'] = _validate_saved_clusters(self.labels,
-                                            kwargs['saved_clusters'])
+            kwargs['saved_clusters'] = _validate_cluster_list(self.labels,
+                                                              kwargs['saved_clusters'])
             saved = {}
             for saved_cluster in kwargs['saved_clusters']:
                 name = self.get_cluster_name(saved_cluster)
                 if not name.isnumeric():
-                    saved[saved_cluster] = (name, np.where(self.labels == saved_cluster))
+                    saved[saved_cluster] = (
+                        name, np.where(self.labels == saved_cluster))
 
             self.labels, kwargs['saved_clusters'], repl = _categorify(
-                    self.labels, kwargs['saved_clusters']
+                self.labels, kwargs['saved_clusters']
             )
 
         self.ssclu_method = ssclu_method
@@ -353,7 +363,6 @@ class Pipeline():
         if 'saved_clusters' in kwargs:
             for i in saved:
                 new_lbl = self.labels[saved[i][1]][0]
-                print('new', new_lbl)
                 old_name = self.get_cluster_name(new_lbl)
                 if old_name in self.key_maps:
                     self.key_maps.pop(old_name, None)
@@ -383,7 +392,8 @@ class Pipeline():
         return False
 
     def get_cluster_names(self):
-        sd = {k: v for k, v in sorted(self.key_maps.items(), key=lambda item: item[1])}
+        sd = {k: v for k, v in sorted(
+            self.key_maps.items(), key=lambda item: item[1])}
         return {'labels': list(sd.values()), 'names': list(sd.keys())}
 
     def get_label_names(self):

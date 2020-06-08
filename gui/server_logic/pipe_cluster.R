@@ -78,4 +78,23 @@ cluster_run <- function(input, output, session, pipe, selDataset, replot,
         reset(reset() + 1)
         relabel(relabel() + 1)
     })
+
+    # Merge clusters
+    observeEvent(input$merge_clusters, {
+        if (pipe() == 0) return()
+        if (!pipe()$has('labels')) return()
+        if (is.null(input$clusters_to_merge)) return()
+
+        msg <- pipe()$run_step(step = 'merge_clusters',
+                            clusters = input$clusters_to_merge)
+
+        if (msg != 'good') {
+            showNotification(msg)
+            return()
+        }
+
+        replot(replot() + 1)
+        reset(reset() + 1)
+        relabel(relabel() + 1)
+    })
 }

@@ -111,7 +111,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
     # Store selected cells
     observeEvent(input$store_lasso, {
         if (curPlot() != length(plotHistory())) {
-            showNotification("You can only select in the last plot.")
+            showNotification("You can only select in the active plot.")
             return()
         }
         if (curPlot() == 0) return()
