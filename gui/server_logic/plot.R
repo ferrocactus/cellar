@@ -67,6 +67,7 @@ plot <- function(input, output, session, replot, pipe, selDataset,
                         marker = list(size = input$dot_size),
                         type = 'scatter',
                         mode = 'markers',
+                        height = input$plot_height
                     ) %>% layout(dragmode = "lasso", showlegend=FALSE,title = title,
                                  margin = list(t = 50)))
 
@@ -81,26 +82,42 @@ plot <- function(input, output, session, replot, pipe, selDataset,
 
     })
 
-    observeEvent(input$prevplot, {
-        if (curPlot() == 1) {
-            showNotification("No more plots to show")
-            return()
-        }
-        curPlot(curPlot() - 1)
+    observe({
+        if (curPlot() < 1) return()
+
         output$plot <- renderPlotly({
             return(plotHistory()[[curPlot()]])
         })
     })
 
+    observeEvent(input$prevplot, {
+        if (curPlot() < 1) return()
+
+        if (curPlot() == 1) {
+            showNotification("No more plots to show")
+            return()
+        }
+        curPlot(curPlot() - 1)
+    })
+
     observeEvent(input$nextplot, {
+        if (curPlot() < 1) return()
+
         if (curPlot() == length(plotHistory())) {
             showNotification("This is the last plot")
             return()
         }
         curPlot(curPlot() + 1)
-        output$plot <- renderPlotly({
-            return(plotHistory()[[curPlot()]])
-        })
+    })
+
+    observeEvent(input$firstplot, {
+        if (curPlot() < 1) return()
+        curPlot(1)
+    })
+
+    observeEvent(input$lastplot, {
+        if (curPlot() < 1) return()
+        curPlot(length(plotHistory()))
     })
 
     # triggered when view gene expression is clicked
