@@ -19,6 +19,7 @@ source("gui/server_logic/analysis_markers_user.R")
 source("gui/server_logic/save_session.R")
 source("gui/server_logic/notifications.R")
 source("gui/server_logic/dataset_reset.R")
+source("gui/server_logic/download_cells.R")
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -80,4 +81,5 @@ server <- shinyServer(function(input, output, session) {
                plotHistory = plotHistory, curPlot = curPlot, replot = replot,
                remark = remark, labelList = labelList, relabel = relabel)
     callModule(theme, id = "ns", retheme = retheme)
+    callModule(download_cells, id = "ns", setNames, setPts,labelList, pipe)
 })
