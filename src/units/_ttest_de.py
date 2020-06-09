@@ -81,20 +81,22 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
 
     pvals = welch_ttest(x_i, x_not_i)
 
-    # Apply correction and update p-values to the corrected ones
-    decision, pvals, _, _ = multipletests(
-        pvals,
-        alpha=alpha,
-        method=correction,
-        is_sorted=False,
-        returnsorted=False
-    )
-
-    # Return the rejected null hypothesis which have the highest
     # difference of means of x_ij and x_not_ij
     diffs = np.mean(x_i, axis=0) - np.mean(x_not_i, axis=0)
     diffs[diffs <= 0] = -np.Inf
-    diffs[np.where(decision == False)] = -np.Inf
+
+    if correction != 'None':
+        # Apply correction and update p-values to the corrected ones
+        decision, pvals, _, _ = multipletests(
+            pvals,
+            alpha=alpha,
+            method=correction,
+            is_sorted=False,
+            returnsorted=False
+        )
+        # Return the rejected null hypothesis which have the highest
+        diffs[np.where(decision == False)] = -np.Inf
+
     sorted_diff_indices = np.flip(np.argsort(diffs))
     last_positive = np.argmin(diffs[sorted_diff_indices] > 0)
 

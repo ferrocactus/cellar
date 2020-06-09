@@ -119,9 +119,9 @@ def _validate_mark_alpha(mark_alpha):
         mark_alpha = float(mark_alpha)
 
     if isinstance(mark_alpha, float):
-        if mark_alpha > 0.15 or mark_alpha < 0.001:
+        if mark_alpha > 0.5 or mark_alpha < 0.001:
             raise InappropriateArgument(
-                "Significance alpha needs to be in the interval (0.001, 0.15)")
+                "Significance alpha needs to be in the interval (0.001, 0.5)")
     else:
         raise InvalidArgument("Incorrect significance alpha set.")
 
@@ -155,7 +155,7 @@ def _validate_mark_markers_n(mark_markers_n, h):
 def _validate_mark_correction(mark_correction):
     corrections_methods = ["bonferroni", "sidak", "holm-sidak", "holm",
                            "simes-hochberg", "hommel", "fdr_bh", "fdr_by",
-                           "fdr_tsbh", "fdr_tsbky"]
+                           "fdr_tsbh", "fdr_tsbky", "None"]
 
     if isinstance(mark_correction, str):
         if mark_correction not in corrections_methods:

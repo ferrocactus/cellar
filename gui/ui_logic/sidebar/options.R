@@ -20,7 +20,7 @@ options <- list(
     "eval" = c("Silhouette", "DaviesBouldin", "CalinskiHarabasz"),
     "correction" = c("holm-sidak", "bonferroni", "sidak", "holm",
                      "simes-hochberg", "hommel", "fdr_bh", "fdr_by",
-                     "fdr_tsbh", "fdr_tsbky"),
+                     "fdr_tsbh", "fdr_tsbky", "None"),
     "converter" = c("id-to-name", "name-to-id"),
     "tissues" = c("all", "blood", "brain", "embryo", "eye", "heart", "kidney",
                   "large intestine", "liver", "lymph", "muscle", "other",
