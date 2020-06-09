@@ -90,6 +90,14 @@ plot <- function(input, output, session, replot, pipe, selDataset,
         })
     })
 
+    observeEvent(input$plot_height, {
+        replot(replot() + 1)
+    })
+
+    observeEvent(input$dot_size, {
+        replot(replot() + 1)
+    })
+
     observeEvent(input$prevplot, {
         if (curPlot() < 1) return()
 
