@@ -10,60 +10,76 @@ download_cells <- function(input, output, session,setNames, setPts,
     if (!pipe()$has('x')) return()
     
     
-    if (input$cell_subset_download =="All"){
-        ouput_labeldat<-data.frame(pipe()$x,pipe()$labels)
-        colnames(ouput_labeldat)<-c(pipe()$col_ids,"Updates Labels")
-        filename="All.csv"
-        comp=NULL
-        compname="None.csv"
+    if (identical(input$cell_subset_download,NULL)){
+        return()
     }
-    else if (input$cell_subset_download == "None"){
-        ouput_labeldat<-NULL
-        filename="None.csv"
-        compname="All.csv"
-        comp<-data.frame(pipe()$x,pipe()$labels)
-        colnames(comp)<-c(pipe()$col_ids,"Updates Labels")
-    }
-    else if (identical(input$cell_subset_download,NULL)){
-      return()
+    else if (input$cell_subset_download==""){
+        return()
     }
     else{
-        id<-strsplit(input$cell_subset_download,"_")[[1]][[2]]
-        id=as.numeric(id)
-        setname=pipe()$get_cluster_name(as.numeric(id))
-        #id <- pipe()$get_cluster_id(input$cell_subset_download)
-        idx <- which(setNames() == input$cell_subset_download)
-
-        #print(setNames())
-        #print(idx)
-        #print(setname)
-
-        #idx <- which(setNames() == input$cell_subset_download)
-        keys <- setPts()[[idx]]
-        compkey=setdiff((1:length(pipe()$col_ids)),keys)
-        alldata=data.frame(pipe()$x,pipe()$labels)
-        colnames(alldata)<-c(pipe()$col_ids,"Updates Labels")
-        ouput_labeldat<-alldata[keys,]
+        ids=c()
         
-        setname=gsub(':', '', setname)
-        filename=paste0(setname,".csv")
-        compname=paste0(setname,"_complement.csv")
-        comp=alldata[,compkey]
+        subsets=input$cell_subset_download
+        if (substr(subsets,2,2)=="-"){
+            
+            a=strsplit(subsets,"-")[[1]][[1]]
+            a=as.numeric(a)
+            if (substr(subsets,3,3==""))
+            {
+                b=length(setNames())-1
+                
+            }
+            else{
+               b=strsplit(subsets,"-")[[1]][[2]]
+               b=as.numeric(b)
+            }
+            
+            for (i in a:b){
+                ids=c(ids,setPts()[[i]])
+            }
+            
+            
+        }
+        else{
+            subsets=strsplit(subsets,",")[[1]]
+            print(subsets)
+            print("subsets")
+            for (i in 1:length(subsets)){
+                
+                id=(subsets[[i]])
+                #print(id)
+                #print(setNames())
+                #if (id < length((pipe()$get_cluster_names())[[2]])){
+                ids=c(ids,setPts()[[which(setNames() == paste("Cluster_",id,sep=""))]])  
+                #}
+                
+            }
+            
+        }
+        #print(ids)
+        #print(length(ids))
+        
+
+        #setname=pipe()$get_cluster_name(as.numeric(id))
+        #id <- pipe()$get_cluster_id(input$cell_subset_download)
+        #idx <- which(setNames() == input$cell_subset_download)
+        #idx <- which(setNames() == input$cell_subset_download)
+        #print("here")
+        allkeys=c(1:length(pipe()$labels))
+        alldata=data.frame(allkeys,as.character(pipe()$get_label_names()))#pipe()$labels)
+        colnames(alldata)<-c("Keys","Updates Labels")
+        ouput_labeldat<-alldata[ids,]
+        
+        #setname=gsub(':', '', setname)
+        
     }
     
     output$download_cells <- downloadHandler(
-      filename = filename,
+      filename = "subsets.csv",
       content = function(file) {
         write.csv(ouput_labeldat, file, row.names = FALSE)
       }
     )
-    
-     output$download_comp <- downloadHandler(
-       filename = compname,
-       content = function(file) {
-         write.csv(comp, file, row.names = FALSE)
-       }
-     )
     
     
   })

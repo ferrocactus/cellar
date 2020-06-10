@@ -44,25 +44,26 @@ downloadmenu <- function(id, label="downloadmenu") {
                 div(
                     class = "div_step div_download_cells",
                     list(
-                        selectInput(
+                        textInput(
                             ns("cell_subset_download"),
-                            "Select subset",
-                            choices=c("")
+                            "Input Subset IDs"
+                            #value = defaults$clu
                         ),
-                        splitLayout(
+                        
+                        # selectInput(
+                        #     ns("cell_subset_download"),
+                        #     "Select subset",
+                        #     choices=c("")
+                        # ),
+                        #splitLayout(
                             downloadButton(
                                 ns("download_cells"),
-                                "Download Subset",
+                                "Download Selected Subset",
                                 class = "secondcol downloadbtn",
-                                style="width:50%"
-                            ),
-                            downloadButton(
-                                ns("download_comp"),
-                                "Download Complement",
-                                class = "secondcol downloadbtn",
-                                style="width:50%"
+                                value=0
+                                #style="width:50%"
                             )
-                        )
+                        #)
                     )
                 )
             )

@@ -23,11 +23,12 @@ update_sets <- function(input, output, session, setNames) {
             choices = setNames()
     )})
 
-    observe({
-        updateSelectInput(
-            session,
-            "cell_subset_download",
-            "Download labels",
-            choices = c("All", setNames())
-    )})
+    # observe({
+    #     updateTextInput(
+    #         session,
+    #         "cell_subset_download",
+    #         "Input Subset IDs",
+    #         value='0'
+    #         #value=strsplit(setNames()[2],'_')[[1]][[2]]
+    # )})
 }
