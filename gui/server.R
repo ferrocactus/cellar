@@ -8,6 +8,7 @@ source("gui/server_logic/theme.R")
 source("gui/server_logic/load_dataset.R")
 source("gui/server_logic/pipe_cluster.R")
 source("gui/server_logic/pipe_de.R")
+source("gui/server_logic/pipe_align.R")
 source("gui/server_logic/plot.R")
 source("gui/server_logic/re_mark.R")
 source("gui/server_logic/re_label.R")
@@ -56,6 +57,8 @@ server <- shinyServer(function(input, output, session) {
 
     callModule(cluster_run, id = "ns", pipe = pipe, selDataset = selDataset,
                replot = replot, reset = reset, relabel = relabel)
+    callModule(align_run, id = "ns", pipe = pipe, replot = replot,
+               reset = reset, relabel = relabel)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)

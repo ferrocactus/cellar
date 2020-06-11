@@ -375,15 +375,40 @@ class Pipeline():
             if self.vis_method == vis_method:
                 return
 
-        if self.clu_method == "Scanpy":
-            ann = anndata.AnnData(X=self.x_emb)
-            scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
-            scanpy.tl.umap(ann)
-            self.x_emb_2d = ann.obsm['X_umap']
-            return
+        if not hasattr(self, 'x_emb'):
+            self.run_step('dim')
+
+        if hasattr(self, 'clu_method'):
+            if self.clu_method == "Scanpy":
+                ann = anndata.AnnData(X=self.x_emb)
+                scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
+                scanpy.tl.umap(ann)
+                self.x_emb_2d = ann.obsm['X_umap']
+                return
+        if hasattr(self, 'align_method'):
+            if self.align_method == "Scanpy":
+                ann = anndata.AnnData(X=self.x_emb)
+                scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
+                scanpy.tl.umap(ann)
+                self.x_emb_2d = ann.obsm['X_umap']
+                return
 
         self.vis_method = vis_method
         self.x_emb_2d = wrap("visualization", vis_method)().get(self.x_emb)
+
+    def run_align(self, align_method, x_ref, col_ids_ref, labels_ref,
+                  key_maps, **kwargs):
+        _method_exists('align', align_method)
+        self.align_method = align_method
+
+        self.labels = wrap("align", align_method)().get(
+            self.x, self.col_ids, x_ref, col_ids_ref, labels_ref
+        ).astype(np.int)
+        self.n_clusters = np.unique(self.labels)
+        self.key_maps = key_maps.copy()
+        for name in key_maps:
+            if self.get_cluster_id(name) not in self.n_clusters:
+                self.key_maps.pop(name, None)
 
     def has(self, attr):
         # Needed to make calls from R easier

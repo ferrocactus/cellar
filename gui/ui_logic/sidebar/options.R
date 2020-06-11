@@ -29,5 +29,6 @@ options <- list(
     "vis" = c("UMAP", "TSNE"),
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans", "ConstrainedSeededKMeans"),
     "de" = c("TTest"),
+    "ali" = c("Scanpy Ingest"),
     "tissues" = c(sort(names(dic)), 'Clusters', 'User defined')
 )

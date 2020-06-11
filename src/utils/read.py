@@ -37,7 +37,7 @@ def read_config(dataset):
     return config
 
 
-def load_data(dataset, check_precomputed_PCA=False):
+def load_data(dataset, check_precomputed_PCA=False, return_row_names=False):
     # return X, Y
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
@@ -54,8 +54,13 @@ def load_data(dataset, check_precomputed_PCA=False):
         if dataset[-4:] == 'h5ad':
             ann = anndata.read_h5ad(
                 "datasets/"  + dataset)
-            if check_precomputed_PCA:
-                return [ann.X, ann.var.index.to_numpy().astype('U'), ann.obsm['X_pca']]
+            if check_precomputed_PCA and not return_row_names:
+                return [ann.X, ann.var.index.to_numpy().astype('U'),
+                        ann.obsm['X_pca']]
+            elif check_precomputed_PCA and return_row_names:
+                return [ann.X, ann.var.index.to_numpy().astype('U'),
+                        ann.obsm['X_pca'],
+                        ann.obs.index.to_numpy().astype('U')]
             return [ann.X, ann.var.index.to_numpy().astype('U')]
         elif dataset[-3:] == 'csv':
             df = pd.read_csv("datasets/"  + dataset,

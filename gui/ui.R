@@ -5,6 +5,7 @@ source("gui/ui_logic/header/info.R") # title
 source("gui/ui_logic/sidebar/datasetmenu.R") #datasetmenu
 source("gui/ui_logic/sidebar/appearancemenu.R") #appearancemenu
 source("gui/ui_logic/sidebar/configmenu.R") #configmenu
+source("gui/ui_logic/sidebar/alignmenu.R") #downloadmenu
 source("gui/ui_logic/sidebar/selectionmenu.R") #mainmenu
 source("gui/ui_logic/sidebar/analysismenu.R") #analysismenu
 source("gui/ui_logic/sidebar/downloadmenu.R") #downloadmenu
@@ -25,6 +26,7 @@ sidebar <- dashboardSidebar(
     sidebarMenu(
         datasetmenu(id='ns'),
         configmenu(id='ns'),
+        alignmenu(id='ns'),
         selectionmenu(id='ns'),
         analysismenu(id='ns'),
         appearancemenu(id='ns'),
