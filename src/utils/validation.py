@@ -260,6 +260,10 @@ def _validate_new_labels(new_labels, old_key_maps):
     else:
         raise InvalidArgument("Invalid list of new labels encountered")
 
+def validate_cluster_list(labels, saved_clusters):
+    return _validate_cluster_list(labels, saved_clusters)
+    # wrapper of _validate_cluster_list
+
 def _validate_cluster_list(labels, saved_clusters):
     unq = np.unique(labels)
     if saved_clusters is None:
