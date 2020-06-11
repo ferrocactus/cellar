@@ -13,7 +13,7 @@ menuItem(
                 list(
                     selectInput(
                         ns("align_method"),
-                        "Select alignment method",
+                        "Select label transfer method",
                         options$ali
                     ),
                     radioButtons(
@@ -51,7 +51,7 @@ menuItem(
                     ),
                     actionButton(
                         ns("align_btn"),
-                        "Run Alignment",
+                        "Run Label Transfer",
                         class = "longbtn sidebtn"
                     )
                 )
