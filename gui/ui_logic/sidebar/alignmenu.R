@@ -1,7 +1,7 @@
 alignmenu <- function(id, label="alignmenu") {
 ns = NS(id)
 menuItem(
-    "Alignment",
+    "Label Transfer",
     id = "alignbtn",
     icon = icon("arrows-alt"),
     startExpanded = FALSE,
