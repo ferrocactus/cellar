@@ -1,3 +1,4 @@
+library(shinyBS)
 downloadmenu <- function(id, label="downloadmenu") {
     ns = NS(id)
     menuItem(
@@ -49,7 +50,7 @@ downloadmenu <- function(id, label="downloadmenu") {
                             "Input Subset IDs"
                             #value = defaults$clu
                         ),
-                        
+                        bsTooltip(ns("cell_subset_download"),"Eg: 1 ; 1-7 ; 1,6,10"),
                         # selectInput(
                         #     ns("cell_subset_download"),
                         #     "Select subset",
