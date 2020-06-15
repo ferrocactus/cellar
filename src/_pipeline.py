@@ -65,7 +65,7 @@ class Pipeline():
                 print(str(e))
                 return "Incorrect data format."
 
-        self.col_ids = np.char.split(self.col_ids.flatten(),
+        self.col_ids = np.char.split(self.col_ids.astype('U').flatten(),
                                      sep='.', maxsplit=1)
         self.col_ids = np.array([i[0] for i in self.col_ids])
         self.col_names = wrap("conversion", "Converter")().get(self.col_ids)
