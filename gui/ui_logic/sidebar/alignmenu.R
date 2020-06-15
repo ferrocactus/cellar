@@ -26,7 +26,7 @@ menuItem(
                         inline = TRUE
                     ),
                     conditionalPanel(
-                        condition = "input.folder == 'user_uploaded'",
+                        condition = "input.folder_align == 'user_uploaded'",
                         ns = ns,
                         selectInput(
                             ns("uploaded_dataset_align"),
@@ -35,7 +35,7 @@ menuItem(
                         )
                     ),
                     conditionalPanel(
-                        condition = "input.folder == 'hubmap'",
+                        condition = "input.folder_align == 'hubmap'",
                         ns = ns,
                         selectInput(
                             ns("hubmap_dataset_align"),
