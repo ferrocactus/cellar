@@ -4,7 +4,7 @@ Documentation for the single cell analysis app hosted by the Bar-Joseph [Systems
 
 ---
 
-#### Choose dataset
+### Choose dataset
 
 ![Load dataset](datasetMenu.png)
 
@@ -16,7 +16,7 @@ Clicking the **Load Dataset** button loads the dataset into the app for use.
 
 ---
 
-#### Clustering
+### Clustering
 
 ---
 
