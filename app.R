@@ -8,6 +8,7 @@ library(rjson)
 library(tools)
 library(DT)
 library(gplots)
+library(SingleR)
 source("gui/ui.R")
 source("gui/server.R")
 

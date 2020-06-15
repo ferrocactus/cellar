@@ -2,9 +2,9 @@ source_python("__init__.py")
 
 pipe_align <- function(pipe, method, x_ref, col_ids_ref, labels_ref, vis_method,
                         key_maps) {
-    withProgress(message = "Running Alignment", value = 0, {
+    withProgress(message = "Running Ingest", value = 0, {
         n <- 2
-        incProgress(1 / n, detail = "Please wait")
+        incProgress(1 / n, detail = "Step: Annotating")
         msg <- pipe()$run_step('align', align_method = method, x_ref = x_ref,
                         col_ids_ref = col_ids_ref, labels_ref = labels_ref,
                         key_maps = key_maps)
@@ -16,12 +16,11 @@ pipe_align <- function(pipe, method, x_ref, col_ids_ref, labels_ref, vis_method,
     })
 }
 
-align_run <- function(input, output, session, pipe, replot, relabel, reset) {
-    selDatasetAlign <- reactiveVal("")
-    pipeAlign <- reactiveVal(0)
-
+align_run <- function(input, output, session, pipe, replot, relabel, reset,
+                      selDatasetAlign, pipeAlign) {
     observeEvent(input$align_btn, {
         if (pipe() == 0) return()
+        if (input$align_method == 'SingleR') return()
 
         req(input$upload_sess_align)
 
@@ -51,20 +50,5 @@ align_run <- function(input, output, session, pipe, replot, relabel, reset) {
         replot(replot() + 1)
         reset(reset() + 1)
         relabel(relabel() + 1)
-    })
-
-    toListenAlign <- reactive({
-        list(input$folder_align, input$uploaded_dataset_align,
-             input$hubmap_dataset_align)
-    })
-
-    observeEvent(toListenAlign(), {
-        if (input$folder_align == 'user_uploaded')
-            selDatasetAlign(as.character(input$uploaded_dataset_align))
-        else
-            selDatasetAlign(as.character(input$hubmap_dataset_align))
-
-        # Include path as well
-        selDatasetAlign(paste(input$folder_align, "/", selDatasetAlign(), sep=""))
     })
 }

@@ -1,9 +1,11 @@
 source("gui/server_logic/gray_widgets.R")
 source("gui/server_logic/upload_file.R")
 source("gui/server_logic/selected_dataset.R")
+source("gui/server_logic/selected_dataset_align.R")
 source("gui/server_logic/gene_card.R")
 source("gui/server_logic/update_sets.R")
 source("gui/server_logic/theme.R")
+source("gui/server_logic/singler.R")
 
 source("gui/server_logic/load_dataset.R")
 source("gui/server_logic/pipe_cluster.R")
@@ -26,7 +28,9 @@ server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
     # should be defined here
     selDataset <- reactiveVal("")
+    selDatasetAlign <- reactiveVal("")
     pipe <- reactiveVal(0)
+    pipeAlign <- reactiveVal(0)
     setNames <- reactiveVal(c("None")) # triggers update_sets on change
     setPts <- reactiveVal(c(NA))
     deButtons <- reactiveVal(c())
@@ -49,6 +53,8 @@ server <- shinyServer(function(input, output, session) {
     notificationModule = callModule(notifications, id = 'ns')
     callModule(upload_file, id = "ns")
     callModule(selected_dataset, id = "ns", selDataset = selDataset)
+    callModule(selected_dataset_align, id = "ns",
+               selDatasetAlign = selDatasetAlign)
     callModule(load_dataset, id = "ns", pipe = pipe, selDataset = selDataset,
                setNames = setNames, setPts = setPts, fullreset = fullreset)
 
@@ -58,7 +64,11 @@ server <- shinyServer(function(input, output, session) {
     callModule(cluster_run, id = "ns", pipe = pipe, selDataset = selDataset,
                replot = replot, reset = reset, relabel = relabel)
     callModule(align_run, id = "ns", pipe = pipe, replot = replot,
-               reset = reset, relabel = relabel)
+               reset = reset, relabel = relabel,
+               selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
+    callModule(singler, id = "ns", pipe = pipe, replot = replot,
+               reset = reset, relabel = relabel,
+               selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
     callModule(de_run, id = "ns", pipe = pipe, remark = remark,
                setNames = setNames, setPts = setPts)
     callModule(update_sets, id = "ns", setNames = setNames)
