@@ -37,39 +37,39 @@ def read_config(dataset):
     return config
 
 
-def load_data(dataset, check_precomputed_PCA=False, return_row_names=False):
-    # return X, Y
+def load_data(dataset, check_precomputed_PCA=False):
+    # return dict with keys x, y, precomputed_pca, col_ids, row_ids
+    df = {}
     if (dataset == 'default' or dataset == "brain"):
         rnaseqtpm = pd.read_csv(
             'datasets/brain/RNAseqTPM.csv', index_col=0, header=None).T
-        if check_precomputed_PCA:
-            return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy(), None
-        return rnaseqtpm.to_numpy(), rnaseqtpm.columns.to_numpy()
+        df['x'] = rnaseqtpm.to_numpy()
+        df['col_ids'] = rnaseqtpm.columns.to_numpy()
+        df['row_ids'] = None
+        df['precomputed_pca'] = None
     elif dataset == 'spleen':
         ann = anndata.read_h5ad('datasets/spleen/dim_reduced_clustered.h5ad')
-        if check_precomputed_PCA:
-            return [ann.X, ann.var.index.to_numpy().astype('U'), None]
-        return [ann.X, ann.var.index.to_numpy().astype('U')]
+        df['x'] = ann.X
+        df['col_ids'] = ann.var.index.to_numpy().astype('U')
+        df['row_ids'] = ann.obs.index.to_numpy().astype('U')
+        df['precomputed_pca'] = ann.obsm['X_pca']
     else:
         if dataset[-4:] == 'h5ad':
-            ann = anndata.read_h5ad(
-                "datasets/"  + dataset)
-            if check_precomputed_PCA and not return_row_names:
-                return [ann.X, ann.var.index.to_numpy().astype('U'),
-                        ann.obsm['X_pca']]
-            elif check_precomputed_PCA and return_row_names:
-                return [ann.X, ann.var.index.to_numpy().astype('U'),
-                        ann.obsm['X_pca'],
-                        ann.obs.index.to_numpy().astype('U')]
-            return [ann.X, ann.var.index.to_numpy().astype('U')]
+            ann = anndata.read_h5ad("datasets/"  + dataset)
+            df['x'] = ann.X
+            df['col_ids'] = ann.var.index.to_numpy().astype('U')
+            df['row_ids'] = ann.obs.index.to_numpy().astype('U')
+            df['precomputed_pca'] = ann.obsm['X_pca']
         elif dataset[-3:] == 'csv':
-            df = pd.read_csv("datasets/"  + dataset,
+            csvdf = pd.read_csv("datasets/"  + dataset,
                              index_col=0, header=None).T
-            if check_precomputed_PCA:
-                return df.to_numpy(), df.columns.to_numpy(), None
-            return df.to_numpy(), df.columns.to_numpy()
+            df['x'] = csvdf.to_numpy()
+            df['col_ids'] = csvdf.columns.to_numpy()
+            df['row_ids'] = None
+            df['precomputed_pca'] = None
         else:
             raise ValueError("Dataset format not implemented.")
+    return df
 
 
 def upload_file(dataset, path):

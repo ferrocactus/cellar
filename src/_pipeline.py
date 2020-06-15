@@ -31,30 +31,38 @@ OK = 'good'
 
 
 class Pipeline():
-    def __init__(self, x='default', col_ids=None):
-        self.loadmsg = self.load(x, col_ids)
+    def __init__(self, x='default', col_ids=None, row_ids=None):
+        self.loadmsg = self.load(x, col_ids, row_ids)
 
-    def restate(self, x='default', col_ids=None):
+    def restate(self, x='default', col_ids=None, row_ids=None):
         keys = list(self.__dict__.keys())
         for var in keys:
             delattr(self, var)
-        self.loadmsg = self.load(x, col_ids)
+        self.loadmsg = self.load(x, col_ids, row_ids)
 
-    def load(self, x, col_ids):
+    def load(self, x, col_ids, row_ids):
         if isinstance(x, str):
             try:
                 self.dataset = x
-                self.x, self.col_ids, self.x_emb_precomp = load_data(x,
-                                                                     check_precomputed_PCA=True)
-                self.col_ids = np.array(self.col_ids).astype('U').reshape(-1)
-            except:
+                df = load_data(x)
+                self.x = df['x']
+                self.col_ids = df['col_ids']
+                self.row_ids = df['row_ids']
+                self.x_emb_precomp = df['precomputed_pca']
+                self.col_ids = np.array(self.col_ids).reshape(-1)
+                if self.row_ids is not None:
+                    self.row_ids = np.array(self.row_ids).reshape(-1)
+            except Exception as e:
+                print(str(e))
                 return "Incorrect data format."
         else:
             try:
                 self.dataset = "Noname"
                 self.x = np.array(x)
                 self.col_ids = np.array(col_ids).astype('U').reshape(-1)
-            except:
+                self.row_ids = np.array(row_ids).astype('U').reshape(-1)
+            except Exception as e:
+                print(str(e))
                 return "Incorrect data format."
 
         self.col_ids = np.char.split(self.col_ids.flatten(),
