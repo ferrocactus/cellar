@@ -27,9 +27,14 @@ download_cells <- function(input, output, session,setNames, setPts,
         id=(subsets[[i]])
         ids=c(ids,setPts()[[which(setNames() == paste("Cluster_",id,sep=""))]])
       }
-      allkeys=c(1:length(pipe()$labels))
+      if (identical(pipe()$row_ids,NULL)==FALSE){
+        allkeys=pipe()$row_ids
+      }
+      else{
+        allkeys=c(1:length(pipe()$labels))
+      }
       alldata=data.frame(allkeys,as.character(pipe()$get_label_names()))#pipe()$labels)
-      colnames(alldata)<-c("Keys","Updates Labels")
+      colnames(alldata)<-c("Cell IDs","Updates Labels")
       ouput_labeldat<-alldata[ids,]
       output$download_cells <- downloadHandler(
         filename = "subsets.csv",
