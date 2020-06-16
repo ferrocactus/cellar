@@ -64,6 +64,7 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
 
     if n_jobs == 1:
         top_y, top_score, top_k = None, -np.Inf, -1
+        score_list = []
 
         for i, k in enumerate(k_list):
             kwargs[attribute_name] = k
@@ -71,6 +72,7 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
             y = getattr(obj_def(**kwargs), method_name)(x)
             # Evaluate
             score = eval_obj.get(x, y)
+            score_list.append(score)
             # Update if better (higher) score (saves memory)
             if score > top_score:
                 top_y, top_score, top_k = y, score, k
@@ -107,4 +109,4 @@ def cluster_multiple(x, obj_def, k_list=np.array([2, 4, 8, 16]),
     logger.info(
         "Finished clustering. Best score achieved for k={0}.".format(top_k))
 
-    return top_y
+    return top_y, score_list

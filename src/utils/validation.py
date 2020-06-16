@@ -32,7 +32,7 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
                 "Incorrect number of components specified.")
         else:
             if method == 'Precomputed PCA':
-                return 10 # default 10 components
+                return 10  # default 10 components
             return dim_n_components
 
     if isinstance(dim_n_components, int):
@@ -270,9 +270,11 @@ def _validate_new_labels(new_labels, old_key_maps):
     else:
         raise InvalidArgument("Invalid list of new labels encountered")
 
+
 def validate_cluster_list(labels, saved_clusters):
     return _validate_cluster_list(labels, saved_clusters)
     # wrapper of _validate_cluster_list
+
 
 def _validate_cluster_list(labels, saved_clusters):
     unq = np.unique(labels)

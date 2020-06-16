@@ -79,7 +79,7 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
                                                                         score))
         else:
             logger.info("Finished clustering with k={0}.".format(k))
-        return y
+        return y, score
     # If n_clusters determined to be a list of integers
     elif isinstance(k, (list, np.ndarray)):
         return cluster_multiple(
@@ -416,7 +416,7 @@ class Clu_DBSCAN(Unit):
             self.logger.info("Found {0} labels using DBSCAN.".format(unqy))
         self.logger.info(
             "Found {0} noisy points. Assigning label -1.".format(noise))
-        return y
+        return y, score
 
 
 class Clu_GaussianMixture(Unit):
@@ -512,7 +512,8 @@ class Clu_Leiden(Unit):
         part = leidenalg.find_partition(
             ig, leidenalg.ModularityVertexPartition)
         self.logger.info(f"Found {len(np.unique(part.membership))} clusters.")
-        return np.array(part.membership)
+        # TODO fix score
+        return np.array(part.membership), 0
 
 
 class Clu_Scanpy(Unit):
@@ -557,4 +558,5 @@ class Clu_Scanpy(Unit):
         scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
         #sc.tl.umap(adata)
         scanpy.tl.leiden(ann)
-        return np.squeeze(np.array(ann.obs)).astype(np.int)
+        # TODO fix score
+        return np.squeeze(np.array(ann.obs)).astype(np.int), 0

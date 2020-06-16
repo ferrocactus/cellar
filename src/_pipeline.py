@@ -219,7 +219,7 @@ class Pipeline():
         self.clu_method = clu_method
         self.eval_method = eval_method
         self.clu_n_clusters_inp = clu_n_clusters
-        self.labels = wrap("cluster", clu_method)(
+        self.labels, scores = wrap("cluster", clu_method)(
             eval_obj=wrap("cluster_eval", eval_method)(),
             n_clusters=clu_n_clusters,
             n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
@@ -227,7 +227,7 @@ class Pipeline():
         self.key_maps = {str(i): i for i in np.unique(self.labels)}
 
     def set_labels(self, labels):
-    self.labels = labels
+        self.labels = labels
         self.n_clusters = np.unique(self.labels)
         self.key_maps = {str(i): i for i in np.unique(self.labels)}
 

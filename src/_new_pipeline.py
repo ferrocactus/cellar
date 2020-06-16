@@ -9,8 +9,75 @@ from .units import _method_exists
 from .utils.validation import _validate_x
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_n_jobs
+from .utils.validation import _validate_dim_n_components
+
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
+
+
+def reduce_dim(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'PCA',
+        n_components: Union[str, int, float] = 'knee',
+        inplace: bool = True,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Parameters
+    __________
+    x: AnnData object or np array containing the data matrix.
+
+    method: String specifying the dimensionality reduction method
+        to use. See https://github.com/ferrocactus/cellar/tree/master/doc
+        for a full list of methods available.
+
+    n_components: Number of components to use. If method is 'PCA', this
+        parameters can also be 'knee' in which case the number of
+        components will be determined automatically based on the
+        ankle heuristic.
+
+    inplace: Only valid when x is an AnnData object.
+        If set to true will update x.obsm['x_emb'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return np.ndarray of shape
+    (n_observations, n_components) containing the embedding.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        adata = _validate_x(x)
+    _method_exists('dim_reduction', method)
+    n_components_used = n_components
+    n_components = _validate_dim_n_components(n_components,
+                                              method, *adata.X.shape)
+
+    # Create dimensionality reduction object and find embedding
+    x_emb = wrap('dim_reduction', method)(
+        n_components=n_components, **kwargs).get(adata.X)
+
+    if not is_AnnData:
+        return x_emb
+
+    # Populate
+    adata.obsm['x_emb'] = x_emb
+    adata.uns['dim_reduction_info'] = {}
+    adata.uns['dim_reduction_info']['method'] = method
+    adata.uns['dim_reduction_info']['n_components'] = x_emb.shape[1]
+    adata.uns['dim_reduction_info']['n_components_used'] = n_components_used
+
+    if not inplace:
+        return adata
 
 
 def cluster(
@@ -65,7 +132,6 @@ def cluster(
     If x is not AnnData, will return np.ndarray of shape
     (n_observations,) containing the labels.
     """
-
     # Validations
     is_AnnData = isinstance(x, AnnData)
 
@@ -87,23 +153,30 @@ def cluster(
         x_to_use = adata.X
 
     # Create clustering object and get labels
-    labels = wrap("cluster", method)(
+    labels, scores = wrap("cluster", method)(
         eval_obj=wrap("cluster_eval", eval_method)(),
         n_clusters=n_clusters,
         n_jobs=n_jobs_multiple, **kwargs).get(x_to_use)
+
+    labels = np.array(labels).astype(int)
+    scores = np.array(scores).astype(float)
 
     # If x was a list or numpy array
     if not is_AnnData:
         return labels
 
+    # Populate entries
     adata.obs['labels'] = labels
-    adata.uns['unq_labels'] = np.unique(labels)
-    adata.uns['n_clusters'] = len(adata.uns['unq_labels'])
-    adata.uns['cluster_method'] = method
-    adata.uns['eval_method'] = eval_method
-    adata.uns['n_clusters_tested'] = n_clusters
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(labels)
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_info']['n_clusters_used'] = n_clusters
+    adata.uns['cluster_info']['eval_method'] = eval_method
+    adata.uns['cluster_info']['scores'] = scores
     adata.uns['cluster_names'] = bidict(
-        {i: str(i) for i in adata.uns['unq_labels']})
+        {i: str(i) for i in unq_labels})
 
     if not inplace:
         return adata
