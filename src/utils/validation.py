@@ -6,7 +6,17 @@ from .exceptions import InvalidArgument
 from .exceptions import InappropriateArgument
 from .exceptions import MethodNotImplementedError
 
+from anndata import AnnData
 from kneed import KneeLocator
+
+
+def _validate_x(x):
+    if isinstance(x, AnnData):
+        return x
+    if isinstance(x, list):
+        return AnnData(np.array(x))
+    if isinstance(x, np.ndarray):
+        return AnnData(x)
 
 
 def _validate_dim_n_components(dim_n_components, method, h, w):

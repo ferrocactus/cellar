@@ -227,7 +227,7 @@ class Pipeline():
         self.key_maps = {str(i): i for i in np.unique(self.labels)}
 
     def set_labels(self, labels):
-        self.labels = labels
+    self.labels = labels
         self.n_clusters = np.unique(self.labels)
         self.key_maps = {str(i): i for i in np.unique(self.labels)}
 
