@@ -83,28 +83,6 @@ menuItem(
                     )
                 )
             )
-
-            # splitLayout(
-            #     cellWidths = c("40%", "40%", "20%"),
-            #     actionButton("subset1", "Store Subset 1", class = "sidebtn"),
-            #     actionButton("subset2", "Store Subset 2",
-            #                  class = "sidebtn scdbtn"),
-            #     actionButton("DEsubsets", "DE", class = "sidebtn scdbtn")
-            # ),
-
-            # splitLayout(
-            #     cellWidths = c("50%", "50%"),
-            #     selectInput("chgcluster","Cluster to Rename",choice = 0),
-            #     textInput("newcluster", "New Name", value = "",
-            #               width = NULL, placeholder = NULL)
-            # ),
-            # actionButton("chg","Apply Change"),
-            #actionButton("disable","Disable buttons"),
-
-
-
-            # actionButton("runanalysis", "Run analysis for clusters",
-            #              class="sidebtn longbtn")
         )
     )
 )}

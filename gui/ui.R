@@ -14,6 +14,8 @@ source("gui/ui_logic/body/plots.R") #plots
 source("gui/ui_logic/body/cell_names.R") #cell_names
 source("gui/ui_logic/body/analysis.R") #analysis
 
+source("gui/ui_logic/tooltips.R")
+
 header <- dashboardHeader(
     titleWidth = 400,
     title = title
@@ -47,6 +49,7 @@ body <- dashboardBody(
     plots(id="ns"),
     cell_names(id="ns"),
     analysis(id="ns"),
+    tooltips(id="ns"),
     div(class = "footer",
         includeHTML("gui/ui_logic/body/copyright.html")
     )

@@ -81,7 +81,7 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
             logger.info("Finished clustering with k={0}.".format(k))
         return y
     # If n_clusters determined to be a list of integers
-    elif isinstance(k, list):
+    elif isinstance(k, (list, np.ndarray)):
         return cluster_multiple(
             x, obj_def=obj_def, k_list=k, attribute_name=attribute_name,
             eval_obj=eval_obj, method_name='fit_predict',

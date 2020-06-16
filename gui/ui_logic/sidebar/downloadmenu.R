@@ -1,4 +1,3 @@
-library(shinyBS)
 downloadmenu <- function(id, label="downloadmenu") {
     ns = NS(id)
     menuItem(
@@ -32,7 +31,7 @@ downloadmenu <- function(id, label="downloadmenu") {
                             selectInput(
                                 ns("plot_download_format"),
                                 "Select format",
-                                choices=c("SVG", "HTML", "JPEG", "PNG", "WEBP", "PDF")
+                                choices=c("HTML")
                             ),
                             downloadButton(
                                 ns("download_plot"),
@@ -50,21 +49,13 @@ downloadmenu <- function(id, label="downloadmenu") {
                             "Input Subset IDs"
                             #value = defaults$clu
                         ),
-                        bsTooltip(ns("cell_subset_download"),"Eg: 1 ; 1-7 ; 1,6,10"),
-                        # selectInput(
-                        #     ns("cell_subset_download"),
-                        #     "Select subset",
-                        #     choices=c("")
-                        # ),
-                        #splitLayout(
-                            downloadButton(
-                                ns("download_cells"),
-                                "Download Selected Subset",
-                                class = "secondcol downloadbtn",
-                                value=0
-                                #style="width:50%"
-                            )
-                        #)
+                        downloadButton(
+                            ns("download_cells"),
+                            "Download Selected Subset",
+                            class = "secondcol downloadbtn",
+                            value=0
+                            #style="width:50%"
+                        )
                     )
                 )
             )

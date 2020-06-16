@@ -59,7 +59,10 @@ def load_data(dataset, check_precomputed_PCA=False):
             df['x'] = ann.X
             df['col_ids'] = ann.var.index.to_numpy().astype('U')
             df['row_ids'] = ann.obs.index.to_numpy().astype('U')
-            df['precomputed_pca'] = ann.obsm['X_pca']
+            if hasattr(ann, 'obsm') and 'X_pca' in ann.obsm:
+                df['precomputed_pca'] = ann.obsm['X_pca']
+            else:
+                df['precomputed_pca'] = None
         elif dataset[-3:] == 'csv':
             csvdf = pd.read_csv("datasets/"  + dataset,
                              index_col=0, header=None).T

@@ -53,7 +53,7 @@ class Pipeline():
                 if self.row_ids is not None:
                     self.row_ids = np.array(self.row_ids).reshape(-1)
             except Exception as e:
-                print(str(e))
+                traceback.print_exc(file=sys.stdout)
                 return "Incorrect data format."
         else:
             try:
@@ -62,7 +62,7 @@ class Pipeline():
                 self.col_ids = np.array(col_ids).astype('U').reshape(-1)
                 self.row_ids = np.array(row_ids).astype('U').reshape(-1)
             except Exception as e:
-                print(str(e))
+                traceback.print_exc(file=sys.stdout)
                 return "Incorrect data format."
 
         self.col_ids = np.char.split(self.col_ids.astype('U').flatten(),

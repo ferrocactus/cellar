@@ -9,6 +9,8 @@ library(tools)
 library(DT)
 library(gplots)
 library(SingleR)
+library(shinyBS)
+
 source("gui/ui.R")
 source("gui/server.R")
 
