@@ -27,7 +27,7 @@ class Dim_PCA(Unit):
     See https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.PCA.html
     """
 
-    def __init__(self, n_components='knee', n_components_max=60, **kwargs):
+    def __init__(self, n_components='knee', n_components_max=100, **kwargs):
         """
         Parameters
         __________
@@ -39,7 +39,7 @@ class Dim_PCA(Unit):
             automatically figure out the n_components based on the curvature
             of the explained variance ratio graph.
 
-        n_components_max: int, default 200
+        n_components_max: int, default 100
             If is ignored if n_components is different than 'knee'.
             Specifies the number of components to use for constructing the
             initial graph of explained variance ratio.
@@ -53,7 +53,7 @@ class Dim_PCA(Unit):
         self.n_components_max = n_components_max
         self.kwargs = kwargs
 
-    def get(self, x, y=None, return_evr=False):
+    def get(self, x, return_evr=False):
         """
         Runs clustering for multiple n_clusters.
 
@@ -62,8 +62,6 @@ class Dim_PCA(Unit):
 
         x: array, shape (n_samples, n_features)
             The data array.
-
-        y: Ignored. Present for consistency.
 
         return_evr: Bool
             If set, function will also return an array of
@@ -112,7 +110,7 @@ class Dim_PCA(Unit):
 
 
 class Dim_UMAP(Unit):
-    def __init__(self, use_y=False, **kwargs):
+    def __init__(self, n_components=2, **kwargs):
         """
         Parameters
         __________
@@ -131,10 +129,10 @@ class Dim_UMAP(Unit):
         warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
 
         self.logger = setup_logger('UMAP')
-        self.use_y = use_y
+        self.n_components = n_components
         self.kwargs = kwargs
 
-    def get(self, x, y=None):
+    def get(self, x):
         """
         Reduces the dimensionality of the data.
         See https://umap-learn.readthedocs.io/en/latest/
@@ -145,12 +143,6 @@ class Dim_UMAP(Unit):
         x: array, shape (n_samples, n_features)
             The data array.
 
-        y: array, shape (n_samples,)
-            Array of labels. Will force UMAP to learn a low representation
-            of the data where formed clusters try to match those specified
-            in y as much as possible. If label is set to a negative number
-            it is not considered.
-
         Returns
         _______
 
@@ -159,12 +151,12 @@ class Dim_UMAP(Unit):
 
         """
         self.logger.info("Initializing UMAP.")
-        return UMAP(n_components=2, n_neighbors=15, min_dist=0,
-                    metric="euclidean", **self.kwargs).fit_transform(x)
+        return UMAP(n_components=self.n_components,
+                    **self.kwargs).fit_transform(x)
 
 
 class Dim_TSNE(Unit):
-    def __init__(self, **kwargs):
+    def __init__(self, n_components=2, **kwargs):
         """
         Parameters
         __________
@@ -175,9 +167,10 @@ class Dim_TSNE(Unit):
 
         """
         self.logger = setup_logger('TSNE')
+        self.n_components = n_components
         self.kwargs = kwargs
 
-    def get(self, x, y=None):
+    def get(self, x):
         """
         Reduces the dimensionality of the data.
         See https://scikit-learn.org/stable/modules/generated/sklearn.manifold.TSNE.html
@@ -187,8 +180,6 @@ class Dim_TSNE(Unit):
 
         x: array, shape (n_samples, n_features)
             The data array.
-
-        y: Ignored. Present for consistency.
 
         Returns
         _______

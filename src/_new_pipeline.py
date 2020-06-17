@@ -14,6 +14,7 @@ from .utils.validation import _validate_dim_n_components
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
 
+import scanpy
 
 def reduce_dim(
         x: Union[AnnData, np.ndarray, list],
@@ -22,6 +23,8 @@ def reduce_dim(
         inplace: bool = True,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
+    Reduce dimensionality of the data.
+
     Parameters
     __________
     x: AnnData object or np array containing the data matrix.
@@ -35,7 +38,7 @@ def reduce_dim(
         components will be determined automatically based on the
         ankle heuristic.
 
-    inplace: Only valid when x is an AnnData object.
+    inplace: Only used when x is an AnnData object.
         If set to true will update x.obsm['x_emb'], otherwise,
         return a new AnnData object.
 
@@ -75,6 +78,7 @@ def reduce_dim(
     adata.uns['dim_reduction_info']['method'] = method
     adata.uns['dim_reduction_info']['n_components'] = x_emb.shape[1]
     adata.uns['dim_reduction_info']['n_components_used'] = n_components_used
+    adata.uns['dim_reduction_info']['kwargs'] = kwargs
 
     if not inplace:
         return adata
@@ -90,6 +94,8 @@ def cluster(
         n_jobs_multiple: Optional[int] = 1,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
+    Cluster the data.
+
     Parameters
     __________
     x: AnnData object or np array containing the data matrix.
@@ -113,11 +119,11 @@ def cluster(
         as specified in x.obsm['x_emb] if x is AnnData object. If x
         is not AnnData, this argument is ignored.
 
-    inplace: Only valid when x is an AnnData object.
+    inplace: Only used when x is an AnnData object.
         If set to true will update x.obs['labels'], otherwise,
         return a new AnnData object.
 
-    n_jobs_multiple: Only valid when n_clusters results is a list
+    n_jobs_multiple: Only used when n_clusters results is a list
         of more than one integer. If n_jobs > 1, will run clustering
         for each n_cluster in parallel.
 
@@ -175,8 +181,89 @@ def cluster(
     adata.uns['cluster_info']['n_clusters_used'] = n_clusters
     adata.uns['cluster_info']['eval_method'] = eval_method
     adata.uns['cluster_info']['scores'] = scores
+    adata.uns['cluster_info']['used_emb'] = use_emb
+    adata.uns['cluster_info']['kwargs'] = kwargs
     adata.uns['cluster_names'] = bidict(
         {i: str(i) for i in unq_labels})
+
+    if not inplace:
+        return adata
+
+
+def reduce_dim_vis(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'UMAP',
+        dim: int = 2,
+        use_emb: bool = True,
+        inplace: bool = True,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Reduce dimensionality of the data for visualization.
+
+    Parameters
+    __________
+    x: AnnData object or np array containing the data matrix.
+
+    method: String specifying the dimensionality reduction method
+        to use. See https://github.com/ferrocactus/cellar/tree/master/doc
+        for a full list of methods available.
+
+    dim: Dimensionality, can be either 2 or 3.
+
+    use_emb: If True, will attempt to run on an embedding of x
+        as specified in x.obsm['x_emb] if x is AnnData object. If x
+        is not AnnData, this argument is ignored.
+
+    inplace: Only used when x is an AnnData object.
+        If set to true will update x.obsm['x_emb_2d'] if dim=2,
+        otherwise, x.obsm['x_emb_3d'] if dim=3, otherwise
+        return a new AnnData object with the appropriate
+        key added.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return np.ndarray of shape
+    (n_observations, dim) containing the visualization embedding.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        adata = _validate_x(x)
+    _method_exists('visualization', method)
+    if dim != 2 and dim != 3:
+        raise ValueError("Incorrect number of dimensions specified.")
+
+    # Determine if embeddings should be used or the full data matrix
+    if is_AnnData and use_emb:
+        if 'x_emb' not in adata.obsm:
+            raise ValueError("x_emb not found in AnnData object.")
+        x_to_use = adata.obsm['x_emb']
+    else:
+        x_to_use = adata.X
+
+    # Create dimensionality reduction object and find embedding
+    x_emb_nd = wrap("visualization", method)(
+        n_components=dim,
+        **kwargs).get(x_to_use)
+
+    if not is_AnnData:
+        return x_emb_nd
+
+    # Update the 2d or 3d keys
+    adata.obsm[f'x_emb_{dim}d'] = x_emb_nd
+    adata.uns[f'visualization_info_{dim}d'] = {}
+    adata.uns[f'visualization_info_{dim}d']['method'] = method
+    adata.uns[f'visualization_info_{dim}d']['used_emb'] = use_emb
+    adata.uns[f'visualization_info_{dim}d']['kwargs'] = kwargs
 
     if not inplace:
         return adata
