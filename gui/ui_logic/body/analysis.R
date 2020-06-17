@@ -39,23 +39,23 @@ tabsetPanel(
     ),
     tabPanel(
         "Cell Type",
-        uiOutput(ns("titleM")),
-        downloadButton(ns("downloadMKS"), "Download Markers table"),
-        DT::dataTableOutput(ns("Markerstable"))
+        uiOutput(ns("titleCellType")),
+        downloadButton(ns("downloadCellType"), "Download Cell Type table"),
+        DT::dataTableOutput(ns("CellTypetable"))
     ),
     tabPanel(
         "Disease",
-        uiOutput(ns("titleD")),
-        downloadButton(ns("downloadDis"), "Download Markers table"),
-        DT::dataTableOutput(ns("disease"))
+        uiOutput(ns("titleDisease")),
+        downloadButton(ns("downloadDisease"), "Download Disease table"),
+        DT::dataTableOutput(ns("Diseasetable"))
     ),
     tabPanel(
-        "User Markers",
-        downloadButton(ns("downloadMKSuser"), "Download Markers table"),
-        uiOutput(ns("titleUM")),
+        "User Cell Type",
+        downloadButton(ns("downloadUCellType"), "Download Cell Type table"),
+        uiOutput(ns("titleUCellType")),
         fileInput(ns("markjson"), "Choose markers JSON",
                   multiple = FALSE, accept = c(".json")),
-        DT::dataTableOutput(ns("Markerstableuser"))
+        DT::dataTableOutput(ns("UCellTypetable"))
     )
     #tabPanel(
      #   "Top Expressed Genes",

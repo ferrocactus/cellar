@@ -16,9 +16,6 @@ source("gui/server_logic/re_mark.R")
 source("gui/server_logic/re_label.R")
 source("gui/server_logic/analysis.R")
 source("gui/server_logic/update_label.R")
-source("gui/server_logic/analysis_markers.R")
-source("gui/server_logic/analysis_disease.R")
-source("gui/server_logic/analysis_markers_user.R")
 source("gui/server_logic/save_session.R")
 source("gui/server_logic/notifications.R")
 source("gui/server_logic/dataset_reset.R")
@@ -82,9 +79,6 @@ server <- shinyServer(function(input, output, session) {
                deGenes = deGenes, deButtons = deButtons,
                rebutton = rebutton, replot = replot)
     callModule(analysis, id = "ns", deGenes = deGenes, pipe = pipe)
-    callModule(analysis_markers, id = "ns", deGenes = deGenes, pipe = pipe)
-    callModule(analysis_disease, id = "ns", deGenes = deGenes, pipe = pipe)
-    callModule(analysis_markers_user, id = "ns", deGenes = deGenes, pipe = pipe)
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
                setPts = setPts, labelList = labelList, deButtons = deButtons,
                deGenes = deGenes, pipe = pipe, fullreset = fullreset,
