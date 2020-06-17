@@ -17,6 +17,7 @@ from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
 from ._de import DE_TTest
 from ._converter import Con
+from ._converter import convert
 from ._identificator import Ide_HyperGeom
 from ._ss_cluster import SSClu_SeededKMeans
 from ._ss_cluster import SSClu_ConstrainedKMeans
@@ -132,5 +133,6 @@ __all__ = [
     'SSClu_ConstrainedKMeans',
     'SSClu_ConstrainedSeededKMeans',
     'Ali_Scanpy_Ingest',
-    'Ali_Scanpy_BBKNN'
+    'Ali_Scanpy_BBKNN',
+    'convert'
 ]

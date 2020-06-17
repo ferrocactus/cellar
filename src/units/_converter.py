@@ -8,6 +8,62 @@ from ..utils.experiment import parse
 from ._unit import Unit
 
 
+path = 'markers/gene_id_name.csv'
+
+
+def convert(str_list):
+    convention = find_naming_convention(str_list)
+    d = {}
+    if convention == 'ids':
+        d['names'], d['ids'] = id_to_name(str_list)
+    else:
+        d['ids'], d['names'] = name_to_id(str_list)
+    return d
+
+
+def find_naming_convention(str_list):
+    if str_list[0][:3] == 'ENS':
+        return 'ids'
+    else:
+        return 'names'
+
+
+def id_to_name(ids):
+    """
+    Given an array of gene ids, convert them to gene names.
+    Ids: ENSG* format.
+    Args:
+        ids (np.ndarray): Array of strings.
+    """
+    gene_dict = pd.read_csv(path, index_col=0, squeeze=True).to_dict()
+    parsed_ids = parse(ids)
+
+    if parsed_ids.size == 0:
+        return np.array([])
+
+    # Leave unchanged if not found
+    return np.char.upper([gene_dict.get(i, i) for i in parsed_ids]), parsed_ids
+
+
+def name_to_id(names):
+    """
+    Does the opposite of id_to_name.
+    """
+    gene_dict = pd.read_csv(path, squeeze=True)
+    col1, col2 = gene_dict.columns
+
+    # Revert the order of columns
+    gene_dict = gene_dict[gene_dict.columns[::-1]
+                          ].set_index(col2)[col1].to_dict()
+    parsed_names = parse(names)
+
+    if parsed_names.size == 0:
+        return np.array([])
+
+    # Leave unchanged if not found
+    return np.char.upper([gene_dict.get(i, i) for i in parsed_names]), parsed_names
+
+
 class Con(Unit):
     """
     Base class for converting marker names.
