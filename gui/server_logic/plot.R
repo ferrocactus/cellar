@@ -38,7 +38,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     else
                         color = labels
                 } else {
-                    i = which(py_to_r(adata()$var_names$to_numpy()) == input$color)[1]
+                    gene_names = py_to_r(get_all_gene_names(adata()))
+                    i = which(gene_names == input$color)[1]
                     if (is.null(i)) {
                         if (input$show_names == 'show_names')
                             color = paste0(labels, ": ", label_names)

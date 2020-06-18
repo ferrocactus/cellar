@@ -358,8 +358,8 @@ def name_genes(
 
 def de(
         x: Union[AnnData, np.ndarray, list],
-        subset1: Union[np.ndarray, list],
-        subset2: Optional[Union[np.ndarray, list]] = None,
+        subset1: Union[str, np.ndarray, list],
+        subset2: Optional[Union[str, np.ndarray, list]] = None,
         method: str = 'TTest',
         alpha: float = 0.05,
         max_n_genes: int = 200,
@@ -378,7 +378,9 @@ def de(
         for a full list of methods available.
 
     subset1: An array consisting of the indices of the cells
-        for which de genes need to be found.
+        for which de genes need to be found, or a string
+        specifying the subset as stored in adata.uns['subsets].
+        If string, x has to be AnnData object.
 
     subset2: Same format at subset1. If set to None, then will
         run differential expression of cells in subset1 vs all,
@@ -416,8 +418,8 @@ def de(
     else:
         adata = _validate_x(x)
     _method_exists('de', method)
-    subset1 = _validate_subset(subset1)
-    subset2 = _validate_subset(subset2)
+    subset1 = _validate_subset(subset1, adata)
+    subset2 = _validate_subset(subset2, adata)
     alpha = _validate_mark_alpha(alpha)
     max_n_genes = _validate_mark_markers_n(max_n_genes, adata.X.shape[1])
     correction = _validate_mark_correction(correction)
@@ -438,7 +440,7 @@ def de(
         labels2 = np.ones((x2.shape[0],), dtype=int)
         labels = np.concatenate([labels1, labels2])
 
-        de_genes_d = wrap("de", de_method)(
+        de_genes_d = wrap("de", method)(
             alpha=alpha,
             markers_n=max_n_genes,
             correction=correction).get(x, labels)

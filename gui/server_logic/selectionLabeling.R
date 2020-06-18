@@ -90,7 +90,7 @@ selectionLabeling <- function(input, output, session, adata,
             session,
             "subset1",
             "Choose Subset 1",
-            choices = setNames()
+            choices = c("None", setNames())
     )})
 
     observe({
@@ -98,7 +98,7 @@ selectionLabeling <- function(input, output, session, adata,
             session,
             "subset2",
             "Choose Subset 2",
-            choices = setNames()
+            choices = c("None", setNames())
     )})
 
     observe({

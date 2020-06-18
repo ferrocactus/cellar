@@ -1,5 +1,5 @@
 dataset_reset <- function(input, output, session, reset, setNames,
-                          labelList, deGenes, adata, fullreset,
+                          labelList, adata, fullreset, deGenes,
                           curPlot, plotHistory, resubset) {
     toListenReset <- reactive({
         list(reset(), fullreset())
@@ -21,11 +21,19 @@ dataset_reset <- function(input, output, session, reset, setNames,
             resubset(resubset() + 1)
         }
 
-        updateSelectInput(
-            session = session,
-            inputId = "color",
-            choices = c("Clusters", as.character(as.character(adata()$var_names))),
-            selected = "Clusters")
+        if (has_key(adata(), 'var', 'parsed_names') == FALSE) {
+            updateSelectInput(
+                session = session,
+                inputId = "color",
+                choices = c())
+        } else {
+            names = py_to_r(get_all_gene_names(adata()))
+            updateSelectInput(
+                session = session,
+                inputId = "color",
+                choices = c("Clusters", names),
+                selected = "Clusters")
+        }
 
         # Update sets
         # anndata_has_key defined in r_helpers.py
@@ -58,6 +66,5 @@ dataset_reset <- function(input, output, session, reset, setNames,
         output$Markerstable = NULL
         output$Markerstableuser = NULL
         output$MSIGDBtable = NULL
-
     })
 }

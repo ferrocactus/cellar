@@ -14,9 +14,8 @@ cluster <- function(input, output, session, adata, replot,
             n_components = input$n_components
 
         withProgress(message = "Please Wait", value = 0, {
-            n <- 3
+            n <- 4
             incProgress(0 / n, detail = "Reducing Dimensionality")
-
             cellar$reduce_dim(
                 x = adata(),
                 method = input$dim_method,
@@ -41,6 +40,12 @@ cluster <- function(input, output, session, adata, replot,
                 use_emb = TRUE,
                 inplace = TRUE,
                 check_if_exists = TRUE)
+
+            incProgress(1 / n, detail = "Converting names")
+            cellar$name_genes(
+                x = adata(),
+                inplace = TRUE
+            )
         })
 
         replot(replot() + 1) # Notify that labels have changed

@@ -35,3 +35,26 @@ def get_cluster_name_list(adata):
 
 def get_unique_labels(adata):
     return adata.uns['cluster_info']['unique_labels']
+
+def get_var_names(adata):
+    return adata.var_names.to_numpy().astype('U')
+
+def get_all_gene_ids(adata):
+    return adata.var['parsed_ids'].to_numpy().astype('U')
+
+def get_all_gene_names(adata):
+    return adata.var['parsed_names'].to_numpy().astype('U')
+
+def get_gene_names(adata, indices, from_r=False):
+    if from_r:
+        indices -= 1
+    return adata.var['parsed_names'].to_numpy()[indices].astype('U')
+
+def get_gene_names_de(adata):
+    return adata.var['parsed_names'].to_numpy()[adata.uns['de']['indices']].astype('U')
+
+def get_gene_pvals_de(adata):
+    return adata.uns['de']['pvals']
+
+def get_gene_logFC_de(adata):
+    return adata.uns['de']['diffs']

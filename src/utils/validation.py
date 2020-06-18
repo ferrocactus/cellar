@@ -225,9 +225,17 @@ def _validate_ensemble_methods(ensemble_methods):
     return ensemble_methods
 
 
-def _validate_subset(subset):
+
+def _validate_subset(subset, adata):
     if subset is None:
         return None
+
+    if isinstance(subset, str):
+        if 'subsets' not in adata.uns:
+            raise InvalidArgument("No subsets found in x.")
+        if subset not in adata.uns['subsets']:
+            raise InvalidArgument(f"{subset} not fouond in subsets.")
+        subset = adata.uns['subsets'][subset]
 
     if isinstance(subset, (int, float)):
         return np.array([subset]).astype(np.int)

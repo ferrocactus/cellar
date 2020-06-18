@@ -3,8 +3,6 @@ source("gui/server_logic/upload_file.R")
 source("gui/server_logic/theme.R")
 source("gui/server_logic/singler.R")
 
-source("gui/server_logic/pipe_cluster.R")
-source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/pipe_align.R")
 source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis_body.R")
@@ -19,19 +17,28 @@ source("gui/server_logic/plot.R")
 
 source("gui/server_logic/selectionLabeling.R")
 
+source("gui/server_logic/de.R")
+
 # Aliases
+load_file <- cellar$utils$read$load_file
+store_subset <- cellar$utils$tools$store_subset
+update_subset_label <- cellar$utils$tools$update_subset_label
 is_active <- cellar$utils$r_helpers$is_active
 has_key <- cellar$utils$r_helpers$has_key
 get_labels <- cellar$utils$r_helpers$get_labels
 get_emb_2d <- cellar$utils$r_helpers$get_emb_2d
 get_label_names <- cellar$utils$r_helpers$get_label_names
-load_file <- cellar$utils$read$load_file
-store_subset <- cellar$utils$tools$store_subset
-update_subset_label <- cellar$utils$tools$update_subset_label
 get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
 get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
 get_unique_labels <- cellar$utils$r_helpers$get_unique_labels
 get_subsets <- cellar$utils$r_helpers$get_subsets
+get_gene_names <- cellar$utils$r_helpers$get_gene_names
+get_gene_names_de <- cellar$utils$r_helpers$get_gene_names_de
+get_gene_pvals_de <- cellar$utils$r_helpers$get_gene_pvals_de
+get_gene_logFC_de <- cellar$utils$r_helpers$get_gene_logFC_de
+get_var_names <- cellar$utils$r_helpers$get_var_names
+get_all_gene_ids <- cellar$utils$r_helpers$get_all_gene_ids
+get_all_gene_names <- cellar$utils$r_helpers$get_all_gene_names
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -44,11 +51,11 @@ server <- shinyServer(function(input, output, session) {
     pipe <- reactiveVal(0)
     pipeAlign <- reactiveVal(0)
     setNames <- reactiveVal(c("None")) # triggers update_sets on change
-    deGenes <- reactiveVal(c())
     replot <- reactiveVal(0) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
     relabel <- reactiveVal(0)
     rebutton <- reactiveVal(0)
+    deGenes <- reactiveVal(0)
     plotHistory <- reactiveVal(c())
     curPlot <- reactiveVal(0)
     reset <- reactiveVal(0)
@@ -90,11 +97,8 @@ server <- shinyServer(function(input, output, session) {
                relabel = relabel)
 
     # # Analysis menu
-    # callModule(de_run, id = "ns", pipe = pipe, remark = remark,
-    #            setNames = setNames, setPts = setPts)
-    # callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
-    #            deGenes = deGenes,
-    #            rebutton = rebutton, replot = replot)
+    callModule(differential_e, id = "ns", adata = adata, remark = remark,
+               deGenes = deGenes)
     # callModule(analysis_body, id = "ns", deGenes = deGenes, pipe = pipe)
 
     # # Appearance menu
@@ -110,8 +114,8 @@ server <- shinyServer(function(input, output, session) {
     # # Miscellaneous
     callModule(misc, id = "ns")
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
-               labelList = labelList,
-               deGenes = deGenes, adata = adata, fullreset = fullreset,
+               labelList = labelList, deGenes = deGenes,
+               adata = adata, fullreset = fullreset,
                curPlot = curPlot, plotHistory = plotHistory,
                resubset = resubset)
 })
