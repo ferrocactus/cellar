@@ -44,7 +44,6 @@ server <- shinyServer(function(input, output, session) {
     pipe <- reactiveVal(0)
     pipeAlign <- reactiveVal(0)
     setNames <- reactiveVal(c("None")) # triggers update_sets on change
-    deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
     replot <- reactiveVal(0) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
@@ -74,7 +73,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(plot, id = "ns", replot = replot, adata = adata,
                selDataset = selDataset, setNames = setNames, setPts = setPts,
                plotHistory = plotHistory, curPlot = curPlot, reset = reset,
-               relabel = relabel, resubset = resubset)
+               resubset = resubset)
 
     # Label Transfer menu
     # callModule(align_run, id = "ns", pipe = pipe, replot = replot,
@@ -94,7 +93,7 @@ server <- shinyServer(function(input, output, session) {
     # callModule(de_run, id = "ns", pipe = pipe, remark = remark,
     #            setNames = setNames, setPts = setPts)
     # callModule(re_mark, id = "ns", remark = remark, pipe = pipe,
-    #            deGenes = deGenes, deButtons = deButtons,
+    #            deGenes = deGenes,
     #            rebutton = rebutton, replot = replot)
     # callModule(analysis_body, id = "ns", deGenes = deGenes, pipe = pipe)
 
@@ -111,7 +110,7 @@ server <- shinyServer(function(input, output, session) {
     # # Miscellaneous
     callModule(misc, id = "ns")
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
-               labelList = labelList, deButtons = deButtons,
+               labelList = labelList,
                deGenes = deGenes, adata = adata, fullreset = fullreset,
                curPlot = curPlot, plotHistory = plotHistory,
                resubset = resubset)

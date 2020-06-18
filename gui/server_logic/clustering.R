@@ -44,7 +44,7 @@ cluster <- function(input, output, session, adata, replot,
         })
 
         replot(replot() + 1) # Notify that labels have changed
-        #reset(reset() + 1) # notify changes
+        reset(reset() + 1) # notify changes
         relabel(relabel() + 1)
         resubset(resubset() + 1)
     })
@@ -57,14 +57,14 @@ cluster <- function(input, output, session, adata, replot,
     # Observe change of cluster names
     observe({
         if (relabel() < 1) return()
-        if (!py_has_attr(adata()$obs, 'labels')) return()
-
         output$cell_names_outp <- renderTable(width = "100%", {
+            isolate(relabel(0))
+            if (has_key(adata(), 'uns', 'cluster_names') == FALSE) return()
+
             labels <- py_to_r(get_cluster_label_list(adata()))
             names <- py_to_r(get_cluster_name_list(adata()))
             df <- data.frame(as.character(labels), as.character(names))
             colnames(df) <- c("Cluster ID", "Name")
-            isolate(relabel(0))
             return(df)
         })
     })

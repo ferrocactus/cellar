@@ -1,14 +1,10 @@
-re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
+re_mark <- function(input, output, session, remark, pipe, deGenes,
                     rebutton, replot) {
     observe({ if (remark() > 0) {
         rebutton(rebutton() + 1)
         remark(0)
         updateTabsetPanel(session, "switcher", selected = "DE")
         reset_analysis_tabs(output)
-        if (length(deButtons()) > 0)
-            for (i in 1:length(deButtons()))
-                deButtons()[[i]]$destroy()
-        deButtons(c())
         deGenes(c())
 
         ns <- session$ns
@@ -87,11 +83,11 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
             #myValue$employee <<- paste('click on ',df$data[selectedRow,1])
         })
         deButtons(c(deButtons(),o))
-        
-        
+
+
         #################### heat map
         ## heatmap
-        
+
         observeEvent(input$heat_height,{
             degenes<-pipe()$markers[['0']][['outp_names']]
             if (length(degenes)!=0){
@@ -117,7 +113,7 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                     #set the color scale
                     scaleRYG <- colorRampPalette(c("blue","white","red"), space = "rgb")(30)
                     #plot the heatmap
-                    
+
                     heatmap.2(heatmap_dat,density.info = "none",trace = "none",col = scaleRYG,
                               xlab = "DE Genes",margins = c(9,7),
                               ylab = "Cluster")
@@ -125,32 +121,9 @@ re_mark <- function(input, output, session, remark, pipe, deGenes, deButtons,
                 )
             }
         })
-        
-        ## end of heatmap
-        
-        
-        
-        # output$DEbuttons <- renderUI({
-        #     lapply(X = 1:length(deGenes()), FUN = function(i) {
-        #             actionButton(ns(paste(deGenes()[i], "_", seq = "")),
-        #                          deGenes()[i])})
-        # })
-    }})
 
-    # observe({
-    # if (rebutton() > 0) {
-    #     lapply(X = 1:length(deGenes()), FUN = function(i) {
-    #         o <- observeEvent(input[[paste(deGenes()[i], "_", seq = "")]], {
-    #             updateSelectInput(
-    #                 session,
-    #                 'color',
-    #                 selected = deGenes()[i]
-    #             )
-    #         })
-    #         deButtons(c(deButtons(), isolate(o)))
-    #     })
-    #     rebutton(0)
-    # }})
+        ## end of heatmap
+    }})
 }
 
 reset_analysis_tabs <- function(output) {

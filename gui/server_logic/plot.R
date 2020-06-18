@@ -9,7 +9,7 @@ all_symbols <- c(
 
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, selDataset,
-                 setNames, setPts, plotHistory, curPlot, reset, relabel,
+                 setNames, setPts, plotHistory, curPlot, reset,
                  resubset) {
     # triggers when replot is set to 1
     observeEvent(replot(), {

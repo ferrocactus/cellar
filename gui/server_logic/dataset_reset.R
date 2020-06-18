@@ -1,19 +1,25 @@
 dataset_reset <- function(input, output, session, reset, setNames,
-                          labelList, deButtons, deGenes, adata, fullreset,
+                          labelList, deGenes, adata, fullreset,
                           curPlot, plotHistory, resubset) {
-    observe({ if (reset() > 0 || fullreset() > 0) {
+    toListenReset <- reactive({
+        list(reset(), fullreset())
+    })
+
+    observeEvent(toListenReset(), {
+        if (reset() < 1 && fullreset() < 1) return()
+
         if (fullreset() > 0) {
+            isolate(fullreset(0))
+            isolate(reset(0))
             setNames(c("None"))
             labelList(c())
             curPlot(0)
             plotHistory(c())
             output$plot <- NULL
         } else {
+            isolate(reset(0))
             resubset(resubset() + 1)
         }
-
-        isolate(reset(0))
-        isolate(fullreset(0))
 
         updateSelectInput(
             session = session,
@@ -23,14 +29,15 @@ dataset_reset <- function(input, output, session, reset, setNames,
 
         # Update sets
         # anndata_has_key defined in r_helpers.py
-        if (has_key(adata(), 'obs', 'labels') == TRUE) {
+        if (has_key(adata(), 'uns', 'cluster_names') == TRUE) {
             resubset(resubset() + 1)
 
+            clusters = py_to_r(get_cluster_label_list(adata()))
             if (input$tissue == 'clusters') {
                 updateSelectInput(
                     session,
                     "newlabels",
-                    choices = n_clusters
+                    choices = clusters
                 )
             }
         } else {
@@ -43,14 +50,8 @@ dataset_reset <- function(input, output, session, reset, setNames,
             }
         }
 
-        # Clear all analysis tabs
-        if (length(deButtons()) > 0)
-            for (i in 1:length(deButtons()))
-                deButtons()[[i]]$destroy()
-        deButtons(c())
         deGenes(c())
 
-        output$DEbuttons = NULL
         output$DEtable = NULL
         output$GOtable = NULL
         output$KEGGtable = NULL
@@ -58,5 +59,5 @@ dataset_reset <- function(input, output, session, reset, setNames,
         output$Markerstableuser = NULL
         output$MSIGDBtable = NULL
 
-    }})
+    })
 }
