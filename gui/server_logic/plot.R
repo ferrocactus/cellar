@@ -78,20 +78,20 @@ plot <- function(input, output, session, replot, adata, selDataset,
 
     })
 
+    toListenReplot <- reactive({
+        list(input$plot_height, input$dot_size, input$color, input$show_names)
+    })
+
+    observeEvent(toListenReplot(), {
+        replot(replot() + 1)
+    })
+
     observe({
         if (curPlot() < 1) return()
 
         output$plot <- renderPlotly({
             return(plotHistory()[[curPlot()]])
         })
-    })
-
-    observeEvent(input$plot_height, {
-        replot(replot() + 1)
-    })
-
-    observeEvent(input$dot_size, {
-        replot(replot() + 1)
     })
 
     observeEvent(input$prevplot, {
@@ -122,11 +122,6 @@ plot <- function(input, output, session, replot, adata, selDataset,
     observeEvent(input$lastplot, {
         if (curPlot() < 1) return()
         curPlot(length(plotHistory()))
-    })
-
-    # triggered when view gene expression is clicked
-    observeEvent(input$color, {
-        replot(replot() + 1)
     })
 
     # Store selected cells
@@ -181,10 +176,6 @@ plot <- function(input, output, session, replot, adata, selDataset,
         reset(reset() + 1)
         replot(replot() + 1)
         relabel(relabel() + 1)
-    })
-
-    observeEvent(input$show_names, {
-        replot(replot() + 1)
     })
 
     # Download plot
