@@ -1,16 +1,13 @@
 source("gui/server_logic/misc.R")
 source("gui/server_logic/upload_file.R")
-source("gui/server_logic/update_sets.R")
 source("gui/server_logic/theme.R")
 source("gui/server_logic/singler.R")
 
 source("gui/server_logic/pipe_cluster.R")
 source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/pipe_align.R")
-source("gui/server_logic/plot.R")
 source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis_body.R")
-source("gui/server_logic/update_label.R")
 source("gui/server_logic/save_session.R")
 source("gui/server_logic/notifications.R")
 source("gui/server_logic/dataset_reset.R")
@@ -18,6 +15,9 @@ source("gui/server_logic/download_cells.R")
 
 source("gui/server_logic/dataset.R")
 source("gui/server_logic/clustering.R")
+source("gui/server_logic/plot.R")
+
+source("gui/server_logic/selectionLabeling.R")
 
 # Aliases
 is_active <- cellar$utils$r_helpers$is_active
@@ -30,30 +30,32 @@ store_subset <- cellar$utils$tools$store_subset
 update_subset_label <- cellar$utils$tools$update_subset_label
 get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
 get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
+get_unique_labels <- cellar$utils$r_helpers$get_unique_labels
+get_subsets <- cellar$utils$r_helpers$get_subsets
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
     # should be defined here
     adata <- reactiveVal(0)
     selDataset <- reactiveVal("")
+    labelList <- reactiveVal(c())
 
     selDatasetAlign <- reactiveVal("")
     pipe <- reactiveVal(0)
     pipeAlign <- reactiveVal(0)
     setNames <- reactiveVal(c("None")) # triggers update_sets on change
-    setPts <- reactiveVal(c(NA))
     deButtons <- reactiveVal(c())
     deGenes <- reactiveVal(c())
     replot <- reactiveVal(0) # triggers re_plot on change
     remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
     relabel <- reactiveVal(0)
     rebutton <- reactiveVal(0)
-    labelList <- reactiveVal(c())
     plotHistory <- reactiveVal(c())
     curPlot <- reactiveVal(0)
     reset <- reactiveVal(0)
     fullreset <- reactiveVal(0)
     retheme <- reactiveVal(0)
+    resubset <- reactiveVal(0)
 
     # Functionality
     # We are using the same namespace for everything called "ns".
@@ -68,11 +70,11 @@ server <- shinyServer(function(input, output, session) {
 
     # Clustering menu
     callModule(cluster, id = "ns", adata = adata, replot = replot,
-               reset = reset, relabel = relabel)
+               reset = reset, relabel = relabel, resubset = resubset)
     callModule(plot, id = "ns", replot = replot, adata = adata,
                selDataset = selDataset, setNames = setNames, setPts = setPts,
                plotHistory = plotHistory, curPlot = curPlot, reset = reset,
-               relabel = relabel)
+               relabel = relabel, resubset = resubset)
 
     # Label Transfer menu
     # callModule(align_run, id = "ns", pipe = pipe, replot = replot,
@@ -83,8 +85,10 @@ server <- shinyServer(function(input, output, session) {
     #            selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
 
     # # Selection & Labeling menu
-    callModule(update_sets, id = "ns", setNames = setNames)
-    callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
+    callModule(selectionLabeling, id = "ns", adata = adata,
+               labelList = labelList, setNames = setNames,
+               resubset = resubset, reset = reset, replot = replot,
+               relabel = relabel)
 
     # # Analysis menu
     # callModule(de_run, id = "ns", pipe = pipe, remark = remark,
@@ -107,7 +111,8 @@ server <- shinyServer(function(input, output, session) {
     # # Miscellaneous
     callModule(misc, id = "ns")
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
-               setPts = setPts, labelList = labelList, deButtons = deButtons,
+               labelList = labelList, deButtons = deButtons,
                deGenes = deGenes, adata = adata, fullreset = fullreset,
-               curPlot = curPlot, plotHistory = plotHistory)
+               curPlot = curPlot, plotHistory = plotHistory,
+               resubset = resubset)
 })

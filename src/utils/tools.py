@@ -8,6 +8,8 @@ import anndata
 import numpy as np
 import pandas as pd
 
+from bidict import bidict
+
 
 def parse(x):
     if x.size == 0:
@@ -54,45 +56,54 @@ def store_subset(adata, name, indices, from_r=False):
         indices = np.array(indices).astype(int) - 1
     if 'subsets' not in adata.uns:
         adata.uns['subsets'] = {}
-    adata.uns['subsets']['name'] = indices
+    adata.uns['subsets'][name] = indices
 
 
-def update_subset_label(adata, name):
+def update_subset_label(adata, subset_name, name):
+    subset_name = str(subset_name)
     name = str(name)
-    if name not in adata.uns['subsets']:
-        raise ValueError("Subset not found in adata.")
 
-    indices = adata.uns['subsets'][name]
+    if subset_name not in adata.uns['subsets']:
+        raise ValueError(f"Subset {subset_name} not found in adata.")
+
+    indices = adata.uns['subsets'][subset_name]
 
     # adata.uns['cluster_names] is a bidict
     # with keys=cluster ids and values=cluster names
     if name in adata.uns['cluster_names'].values():
-        # name exists, so simply update cell labels
         label = adata.uns['cluster_names'].inverse[name]
-        adata.obs['labels'][indices] = label
-    else:
-        # name does not exist, so add it
-        # careful not to mess up existing label configuration
-        labels_cp = adata.obs['labels'].copy()
-        temp_label = np.max(labels_cp) + 10
-        adata.uns['cluster_names'][temp_label] = name
-        labels_cp[indices] = temp_label
+    else: # name does not exist, so add it
+        label = np.max(adata.obs['labels']) + 1
+        adata.uns['cluster_names'][label] = name
 
-        unq_new_labels = np.unique(labels_cp)
-        for label in adata.uns['cluster_names']:
-            # remove label if it dissapeared after update
-            if label not in unq_new_labels:
-                adata.uns['cluster_names'].pop(label, None)
+    adata.obs['labels'][indices] = label
+    unq_new_labels = np.unique(adata.obs['labels'])
 
-        # create empty arrays
-        new_cluster_names = bidict({})
-        new_labels = np.zeros_like(labels_cp) * (-1)
-        # assign labels starting from 0
-        for i, label in enumerate(adata.uns['cluster_names']):
-            new_labels[labels_cp == label] = i
-            new_cluster_names['i'] = adata.uns['cluster_names'][label]
+    for old_label in list(adata.uns['cluster_names'].keys()):
+        if old_label not in unq_new_labels:
+            adata.uns['cluster_names'].pop(old_label, None)
 
-        adata.obs['labels'] = new_labels
-        adata.uns['cluster_names'] = new_cluster_names
+    # Update entries
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(adata.obs['labels'])
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = "Modified"
+    populate_subsets(adata)
 
-        print(adata.uns['cluster_names'])
+
+def populate_subsets(adata):
+    # Populate subsets with the found clusters and
+    # any don't remove user defined subsets
+    if 'subsets' not in adata.uns:
+        adata.uns['subsets'] = {}
+
+    # Remove old clusters
+    for subset in list(adata.uns['subsets'].keys()):
+        if subset[:7] == 'Cluster':
+            adata.uns['subsets'].pop(subset, None)
+    # Update with new clusters
+    unq_labels = np.unique(adata.obs['labels'])
+    for label in unq_labels:
+        adata.uns['subsets'][f'Cluster_{label}'] = \
+            np.squeeze(np.where(adata.obs['labels'] == label))

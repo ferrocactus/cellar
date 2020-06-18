@@ -1,4 +1,5 @@
-cluster <- function(input, output, session, adata, replot, reset, relabel) {
+cluster <- function(input, output, session, adata, replot,
+                    reset, relabel, resubset) {
     observeEvent(input$runconfigbtn, {
         # Return if no adata loaded
         if (is_active(adata()) == FALSE) {
@@ -45,6 +46,7 @@ cluster <- function(input, output, session, adata, replot, reset, relabel) {
         replot(replot() + 1) # Notify that labels have changed
         #reset(reset() + 1) # notify changes
         relabel(relabel() + 1)
+        resubset(resubset() + 1)
     })
 
     # Show/Hide cluster names

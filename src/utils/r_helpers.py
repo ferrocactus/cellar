@@ -15,6 +15,9 @@ def get_n_obs(adata):
 def get_labels(adata):
     return adata.obs.labels.to_numpy()
 
+def get_subsets(adata):
+    return list(adata.uns['subsets'].keys())
+
 def get_label_names(adata):
     names = np.zeros_like(adata.obs.labels).astype('U200')
     for i in adata.uns['cluster_names'].values():
@@ -29,3 +32,6 @@ def get_cluster_label_list(adata):
 
 def get_cluster_name_list(adata):
     return list(adata.uns['cluster_names'].values())
+
+def get_unique_labels(adata):
+    return adata.uns['cluster_info']['unique_labels']

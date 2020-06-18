@@ -9,7 +9,8 @@ all_symbols <- c(
 
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, selDataset,
-                 setNames, setPts, plotHistory, curPlot, reset, relabel) {
+                 setNames, setPts, plotHistory, curPlot, reset, relabel,
+                 resubset) {
     # triggers when replot is set to 1
     observeEvent(replot(), {
         if (replot() < 1) return()
@@ -155,18 +156,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
         keys <- as.numeric(d$key)
         store_subset(adata(), input$newsubset, keys, from_r = TRUE)
         showNotification(paste(as.character(length(keys)), "cells stored"))
-    })
-
-    observeEvent(input$labelupd, {
-        if (is_active(adata()) == FALSE) return()
-        if (!py_has_attr(adata()$obs, 'labels')) return()
-
-        if (idx == 1) return()
-
-        update_subset_label(adata, input$newlabels)
-        reset(reset() + 1)
-        replot(replot() + 1)
-        relabel(relabel() + 1)
+        resubset(resubset() + 1)
     })
 
     # Download plot

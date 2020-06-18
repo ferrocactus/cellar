@@ -1,17 +1,15 @@
-dataset_reset <- function(input, output, session, reset, setNames, setPts,
+dataset_reset <- function(input, output, session, reset, setNames,
                           labelList, deButtons, deGenes, adata, fullreset,
-                          curPlot, plotHistory) {
+                          curPlot, plotHistory, resubset) {
     observe({ if (reset() > 0 || fullreset() > 0) {
         if (fullreset() > 0) {
             setNames(c("None"))
-            setPts(c(NA))
             labelList(c())
             curPlot(0)
             plotHistory(c())
             output$plot <- NULL
         } else {
-            setPts(setPts()[which(substr(setNames(), 1, 7) != 'Cluster')])
-            setNames(setNames()[which(substr(setNames(), 1, 7) != 'Cluster')])
+            resubset(resubset() + 1)
         }
 
         isolate(reset(0))
@@ -26,12 +24,7 @@ dataset_reset <- function(input, output, session, reset, setNames, setPts,
         # Update sets
         # anndata_has_key defined in r_helpers.py
         if (has_key(adata(), 'obs', 'labels') == TRUE) {
-            n_clusters = adata()$uns$cluster_info$n_clusters
-            for (i in n_clusters) {
-                setNames(c(setNames(),
-                           (paste("Cluster_", as.character(i), sep = ""))))
-                setPts(c(setPts(), list(which(adata()$obs$labels == i))))
-            }
+            resubset(resubset() + 1)
 
             if (input$tissue == 'clusters') {
                 updateSelectInput(

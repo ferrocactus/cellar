@@ -10,6 +10,7 @@ from .units import convert
 
 from .utils.tools import _emb_exists_in_adata
 from .utils.tools import _2d_emb_exists_in_adata
+from .utils.tools import populate_subsets
 
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_cluster_list
@@ -214,6 +215,8 @@ def cluster(
     adata.uns['cluster_info']['kwargs'] = kwargs
     adata.uns['cluster_names'] = bidict(
         {i: str(i) for i in unq_labels})
+
+    populate_subsets(adata)
 
     if not inplace:
         return adata
