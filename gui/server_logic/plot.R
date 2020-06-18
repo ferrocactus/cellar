@@ -86,6 +86,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
         replot(replot() + 1)
     })
 
+    ###########################################################################
+    # Plot Navigation
     observe({
         if (curPlot() < 1) return()
 
@@ -123,6 +125,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
         if (curPlot() < 1) return()
         curPlot(length(plotHistory()))
     })
+    ###########################################################################
 
     # Store selected cells
     observeEvent(input$store_lasso, {
@@ -131,7 +134,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
             return()
         }
         if (curPlot() == 0) return()
-        if (!pipe()$has('labels')) return()
+        if (!py_has_attr(adata()$obs, 'labels')) return()
 
         if (as.character(input$newsubset) %in% setNames()) {
             showNotification("Name already exists")
