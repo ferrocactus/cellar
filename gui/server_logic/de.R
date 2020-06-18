@@ -44,13 +44,13 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
         isolate(remark(0))
 
         # Switch to DE table
-        #reset_analysis_tabs(output)
+        reset_analysis_tabs(output)
         updateTabsetPanel(session, "switcher", selected = "DE")
         deGenes(c())
 
         ns <- session$ns
 
-        #reset_analysis_tabs(output)
+        reset_analysis_tabs(output)
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
         tabletitle = paste0(s1, " (vs. ", s2, ")")
@@ -158,18 +158,6 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
 }
 
 reset_analysis_tabs <- function(output) {
-    # Reset analysis tabs and switch to DE
-    # By default the tabs will be erased only when we switch to them
-    # so we first disable suspendWhenHidden, set them to null, and enable
-    # it again
-    outputOptions(output, "DEtable", suspendWhenHidden = FALSE)
-    outputOptions(output, "KEGGtable", suspendWhenHidden = FALSE)
-    outputOptions(output, "GOtable", suspendWhenHidden = FALSE)
-    outputOptions(output, "CellTypetable", suspendWhenHidden = FALSE)
-    outputOptions(output, "MSIGDBtable", suspendWhenHidden = FALSE)
-    outputOptions(output, "UCellTypetable", suspendWhenHidden = FALSE)
-    outputOptions(output, "Diseasetable", suspendWhenHidden = FALSE)
-    outputOptions(output, "heatmap", suspendWhenHidden = FALSE)
     output$DEtable = NULL
     output$GOtable = NULL
     output$KEGGtable = NULL
@@ -178,12 +166,4 @@ reset_analysis_tabs <- function(output) {
     output$MSIGDBtable = NULL
     output$Diseasetable = NULL
     output$heatmap = NULL
-    outputOptions(output, "DEtable", suspendWhenHidden = TRUE)
-    outputOptions(output, "KEGGtable", suspendWhenHidden = TRUE)
-    outputOptions(output, "GOtable", suspendWhenHidden = TRUE)
-    outputOptions(output, "CellTypetable", suspendWhenHidden = TRUE)
-    outputOptions(output, "MSIGDBtable", suspendWhenHidden = TRUE)
-    outputOptions(output, "UCellTypetable", suspendWhenHidden = TRUE)
-    outputOptions(output, "Diseasetable", suspendWhenHidden = TRUE)
-    outputOptions(output, "heatmap", suspendWhenHidden = TRUE)
 }

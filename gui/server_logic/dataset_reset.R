@@ -63,8 +63,10 @@ dataset_reset <- function(input, output, session, reset, setNames,
         output$DEtable = NULL
         output$GOtable = NULL
         output$KEGGtable = NULL
-        output$Markerstable = NULL
-        output$Markerstableuser = NULL
+        output$CellTypetable = NULL
+        output$UCellTypetable = NULL
         output$MSIGDBtable = NULL
+        output$Diseasetable = NULL
+        output$heatmap = NULL
     })
 }

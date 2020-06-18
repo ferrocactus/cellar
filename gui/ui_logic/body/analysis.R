@@ -7,7 +7,6 @@ tabsetPanel(
         downloadButton(ns("downloadDE"), "Download DE genes"),
         uiOutput(ns("titleDE")),
         DT::dataTableOutput(ns("DEtable")),
-        #uiOutput(ns("DEbuttons"))
     ),
     tabPanel(
       "Heat Map",
@@ -57,8 +56,4 @@ tabsetPanel(
                   multiple = FALSE, accept = c(".json")),
         DT::dataTableOutput(ns("UCellTypetable"))
     )
-    #tabPanel(
-     #   "Top Expressed Genes",
-      #   verbatimTextOutput("topgenes")
-    #)
 )}
