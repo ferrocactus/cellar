@@ -25,7 +25,7 @@ dataset <- function(input, output, session, adata, selDataset,
 
         withProgress(message = "Please wait", value = 0, {
             incProgress(1 / 2, detail = "Reading dataset")
-            isolate(adata(cellar$utils$read$load_file(selDataset())))
+            isolate(adata(load_file(selDataset())))
             fullreset(fullreset() + 1)
         })
         showNotification("Dataset loaded")

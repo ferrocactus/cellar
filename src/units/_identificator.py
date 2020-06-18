@@ -6,7 +6,7 @@ import numpy as np
 from scipy.stats import hypergeom
 
 from ..log import setup_logger
-from ..utils.experiment import parse
+from ..utils.tools import parse
 from ._unit import Unit
 
 

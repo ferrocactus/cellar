@@ -9,7 +9,7 @@ defaults <- list(
 )
 
 options <- list(
-    "dim" = c("Precomputed PCA", "PCA", "UMAP"),
+    "dim" = c("PCA", "UMAP"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
               "GaussianMixture", "Scanpy", "Ensemble"),
     "clu_ensemble" = c("All"="All", "KMeans"="KMeans", "KMedoids"="KMedoids",

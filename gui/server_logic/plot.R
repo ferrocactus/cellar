@@ -15,38 +15,34 @@ plot <- function(input, output, session, replot, adata, selDataset,
         if (replot() < 1) return()
         isolate(replot(0))
         if (is_active(adata()) == FALSE) return()
-        if (has_key(adata(), 'obs', 'labels') == FALSE) return()
+        if (!py_has_attr(adata()$obs, 'labels')) return()
 
         labels <- as.factor(py_to_r(adata()$obs$labels$to_numpy()))
+        label_names <- as.factor(py_to_r(get_label_names(adata())))
         x_emb_2d <- py_to_r(adata()$obsm[['x_emb_2d']])
 
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
-            label_names = as.factor(py_to_r(get_label_names(adata())))
+            # Defaults
+            title = "Clusters"
+            showlegend = TRUE
+            symbol = NULL
+            symbols = NULL
 
             output$plot <- renderPlotly({
                 text = ~paste("Label: ", label_names)
                 if (input$color == 'Clusters') {
                     if (input$show_names == 'show_names')
-                        color = paste0(
-                            labels, ": ",
-                            label_names)
+                        color = paste0(labels, ": ", label_names)
                     else
                         color = labels
-                    title = "Clusters"
-                    showlegend = TRUE
-                    symbol = NULL
-                    symbols = NULL
                 } else {
                     i = which(py_to_r(adata()$var_names$to_numpy()) == input$color)[1]
                     if (is.null(i)) {
                         if (input$show_names == 'show_names')
-                            color = paste0(
-                                labels, ": ",
-                                label_names)
+                            color = paste0(labels, ": ", label_names)
                         else
                             color = labels
-                        title = "Clusters"
                     } else {
                         color = py_to_r(adata()$X)[, i]
                         title = input$color
@@ -78,6 +74,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
 
     })
 
+    # Listen to multiple events that will trigger replot
     toListenReplot <- reactive({
         list(input$plot_height, input$dot_size, input$color, input$show_names)
     })
@@ -129,53 +126,44 @@ plot <- function(input, output, session, replot, adata, selDataset,
 
     # Store selected cells
     observeEvent(input$store_lasso, {
+        if (curPlot() == 0) return()
+        if (!py_has_attr(adata()$obs, 'labels')) return()
+
         if (curPlot() != length(plotHistory())) {
             showNotification("You can only select in the active plot.")
             return()
         }
-        if (curPlot() == 0) return()
-        if (!py_has_attr(adata()$obs, 'labels')) return()
 
         if (as.character(input$newsubset) %in% setNames()) {
             showNotification("Name already exists")
             return()
         }
 
-        if (substr(as.character(input$newsubset),1,7) == "Cluster") {
+        if (substr(as.character(input$newsubset), 1, 7) == "Cluster") {
             showNotification("Reserved name, please choose another.")
             return()
         }
 
-        d <- event_data("plotly_selected")
-        keys <- as.numeric(d$key)
-        cell_count <- length(keys)
-        keys <- list(keys)
-
-        if (is.null(d$key))
+        if (as.character(input$newsubset) == "") {
+            showNotification("Please enter a name for the subset.")
             return()
-
-        if (as.character(input$newsubset) != "") {
-            setPts(c(setPts(), keys))
-            setNames(c(setNames(), as.character(input$newsubset)))
-        } else {
-            setPts(c(setPts(), keys))
-            setNames(c(setNames(),
-                       paste("Newset", as.character(length(setNames())), sep="")))
         }
 
-        showNotification(paste(as.character(cell_count), "cells stored"))
+        d <- event_data("plotly_selected")
+        if (is.null(d$key)) return()
+
+        keys <- as.numeric(d$key)
+        store_subset(adata(), input$newsubset, keys, from_r = TRUE)
+        showNotification(paste(as.character(length(keys)), "cells stored"))
     })
 
     observeEvent(input$labelupd, {
-        if (pipe() == 0) return()
-        if (!pipe()$has('labels')) return()
+        if (is_active(adata()) == FALSE) return()
+        if (!py_has_attr(adata()$obs, 'labels')) return()
 
-        idx <- which(setNames() == as.character(input$subset1_upd))
         if (idx == 1) return()
 
-        keys <- setPts()[[idx]]
-        # pass name and indices
-        pipe()$update_labels(as.character(input$newlabels), keys - 1)
+        update_subset_label(adata, input$newlabels)
         reset(reset() + 1)
         replot(replot() + 1)
         relabel(relabel() + 1)

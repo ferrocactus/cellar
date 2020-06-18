@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 
 from ..log import setup_logger
-from ..utils.experiment import parse
+from ..utils.tools import parse
 from ._unit import Unit
 
 

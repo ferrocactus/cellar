@@ -8,8 +8,8 @@ from .units import wrap
 from .units import _method_exists
 from .units import convert
 
-from .utils.experiment import _emb_exists_in_adata
-from .utils.experiment import _2d_emb_exists_in_adata
+from .utils.tools import _emb_exists_in_adata
+from .utils.tools import _2d_emb_exists_in_adata
 
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_cluster_list
