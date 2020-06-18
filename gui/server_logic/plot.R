@@ -1,4 +1,4 @@
-symbols <- c(
+all_symbols <- c(
     'star-triangle-down','circle','square',"diamond",
     "x",'triangle-up','triangle-down','hexagon','asterisk',
     'diamond-cross',"square-cross","circle-cross","circle-x",
@@ -25,6 +25,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
             label_names = as.factor(py_to_r(get_label_names(adata())))
 
             output$plot <- renderPlotly({
+                text = ~paste("Label: ", label_names)
                 if (input$color == 'Clusters') {
                     if (input$show_names == 'show_names')
                         color = paste0(
@@ -32,20 +33,10 @@ plot <- function(input, output, session, replot, adata, selDataset,
                             label_names)
                     else
                         color = labels
-                    text = ~paste("Label: ", label_names)
                     title = "Clusters"
-
-                    p <- plotly_build(plot_ly(
-                        x = x_emb_2d[, 1], y = x_emb_2d[, 2],
-                        text = text,
-                        color = color,
-                        key = as.character(1:length(labels)),
-                        marker = list(size = input$dot_size),
-                        type = 'scatter',
-                        mode = 'markers',
-                        height = input$plot_height
-                    ) %>% layout(dragmode = "lasso", title = title,
-                                 margin = list(t = 50)))
+                    showlegend = TRUE
+                    symbol = NULL
+                    symbols = NULL
                 } else {
                     i = which(py_to_r(adata()$var_names$to_numpy()) == input$color)[1]
                     if (is.null(i)) {
@@ -59,24 +50,25 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     } else {
                         color = py_to_r(adata()$X)[, i]
                         title = input$color
+                        showlegend = FALSE
+                        symbol = ~labels
+                        symbols = all_symbols
                     }
-
-                    text = ~paste("Label: ", label_names)
-
-                    p <- plotly_build(plot_ly(
-                        x = x_emb_2d[, 1], y = x_emb_2d[, 2],
-                        text = text,
-                        color = color,
-                        symbol = ~labels,
-                        symbols = symbols,  ## 30 shapes
-                        key = as.character(1:length(labels)),
-                        marker = list(size = input$dot_size),
-                        type = 'scatter',
-                        mode = 'markers',
-                        height = input$plot_height
-                    ) %>% layout(dragmode = "lasso", showlegend=FALSE,title = title,
-                                 margin = list(t = 50)))
                 }
+
+                p <- plotly_build(plot_ly(
+                    x = x_emb_2d[, 1], y = x_emb_2d[, 2],
+                    text = text,
+                    color = color,
+                    symbol = symbol,
+                    symbols = symbols,  ## 30 shapes
+                    key = as.character(1:length(labels)),
+                    marker = list(size = input$dot_size),
+                    type = 'scatter',
+                    mode = 'markers',
+                    height = input$plot_height
+                ) %>% layout(dragmode = "lasso", showlegend = showlegend,
+                             title = title, margin = list(t = 50)))
 
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))
