@@ -9,7 +9,6 @@ source("gui/server_logic/pipe_de.R")
 source("gui/server_logic/pipe_align.R")
 source("gui/server_logic/plot.R")
 source("gui/server_logic/re_mark.R")
-source("gui/server_logic/re_label.R")
 source("gui/server_logic/analysis_body.R")
 source("gui/server_logic/update_label.R")
 source("gui/server_logic/save_session.R")
@@ -29,6 +28,8 @@ get_label_names <- cellar$utils$r_helpers$get_label_names
 load_file <- cellar$utils$read$load_file
 store_subset <- cellar$utils$tools$store_subset
 update_subset_label <- cellar$utils$tools$update_subset_label
+get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
+get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -82,9 +83,8 @@ server <- shinyServer(function(input, output, session) {
     #            selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
 
     # # Selection & Labeling menu
-    # callModule(update_sets, id = "ns", setNames = setNames)
-    # callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
-    # callModule(re_label, id = "ns", relabel = relabel, pipe = pipe)
+    callModule(update_sets, id = "ns", setNames = setNames)
+    callModule(update_label, id = "ns", pipe = pipe, labelList = labelList)
 
     # # Analysis menu
     # callModule(de_run, id = "ns", pipe = pipe, remark = remark,
