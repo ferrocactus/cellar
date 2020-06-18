@@ -7,6 +7,10 @@ from bidict import bidict
 from .units import wrap
 from .units import _method_exists
 from .units import convert
+
+from .utils.experiment import _emb_exists_in_adata
+from .utils.experiment import _2d_emb_exists_in_adata
+
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_cluster_list
 from .utils.validation import _validate_con_convention
@@ -31,6 +35,7 @@ def reduce_dim(
         method: str = 'PCA',
         n_components: Union[str, int, float] = 'knee',
         inplace: Optional[bool] = True,
+        check_if_exists: Optional[bool] = False,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Reduce dimensionality of the data.
@@ -51,6 +56,13 @@ def reduce_dim(
     inplace: Only used when x is an AnnData object.
         If set to true will update x.obsm['x_emb'], otherwise,
         return a new AnnData object.
+
+    check_if_exists: Only used when x is an AnnData object.
+        If set to true, will check x if it contains embeddings
+        from the same method. If found, and the number of components
+        in x.obsm['x_emb'] is greater than or equal to n_components,
+        then the first n_components columns of x.obsm['x_emb']
+        will be returned. No computation takes place.
 
     **kwargs: Additional parameters that will get passed to the
         clustering object as specified in method. For a full list
@@ -75,9 +87,16 @@ def reduce_dim(
     n_components = _validate_dim_n_components(n_components,
                                               method, *adata.X.shape)
 
+    x_emb = None
+    # Check if embeddings exist in x to save computation
+    if is_AnnData and check_if_exists:
+        x_emb = _emb_exists_in_adata(adata, method, n_components)
+
+    # If x_emb was not found in adata, it is None
     # Create dimensionality reduction object and find embedding
-    x_emb = wrap('dim_reduction', method)(
-        n_components=n_components, **kwargs).get(adata.X)
+    if x_emb is None:
+        x_emb = wrap('dim_reduction', method)(
+            n_components=n_components, **kwargs).get(adata.X)
 
     if not is_AnnData:
         return x_emb
@@ -206,6 +225,7 @@ def reduce_dim_vis(
         dim: int = 2,
         use_emb: bool = True,
         inplace: Optional[bool] = True,
+        check_if_exists: Optional[bool] = False,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Reduce dimensionality of the data for visualization.
@@ -230,6 +250,10 @@ def reduce_dim_vis(
         return a new AnnData object with the appropriate
         key added.
 
+    check_if_exists: Only used when x is an AnnData object.
+        If set to true, will check x if it contains 2d/3d embeddings
+        from the same method. If found, return those instead.
+
     **kwargs: Additional parameters that will get passed to the
         clustering object as specified in method. For a full list
         see the documentation of the corresponding method.
@@ -249,8 +273,17 @@ def reduce_dim_vis(
     else:
         adata = _validate_x(x)
     _method_exists('visualization', method)
+
+    dim = int(dim)
     if dim != 2 and dim != 3:
         raise ValueError("Incorrect number of dimensions specified.")
+
+    # Check if embedding already exists in adata
+    if is_AnnData and check_if_exists:
+        if _2d_emb_exists_in_adata(adata, method, dim, use_emb):
+            if not inplace:
+                return adata
+            return
 
     # Determine if embeddings should be used or the full data matrix
     if is_AnnData and use_emb:
@@ -262,8 +295,7 @@ def reduce_dim_vis(
 
     # Create dimensionality reduction object and find embedding
     x_emb_nd = wrap("visualization", method)(
-        n_components=dim,
-        **kwargs).get(x_to_use)
+        n_components=dim, **kwargs).get(x_to_use)
 
     if not is_AnnData:
         return x_emb_nd

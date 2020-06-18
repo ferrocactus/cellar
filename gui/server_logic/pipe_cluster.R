@@ -32,36 +32,6 @@ pipe_sscluster <- function(pipe, ssc_method, saved_clusters) {
 
 cluster_run <- function(input, output, session, pipe, selDataset, replot,
                         reset, relabel) {
-    # Clustering
-    observeEvent(input$runconfigbtn, {
-        if (pipe() == 0) {
-            showNotification("Please load the data first.")
-            return()
-        }
-
-        if (input$dim_options == "pca_auto")
-            dim_n_components = 'knee'
-        else
-            dim_n_components = input$dim_n_components
-
-        msg <- pipe_cluster(pipe, dim_method = input$dim_method,
-                        dim_n_components = dim_n_components,
-                        clu_method = input$clu_method,
-                        ensemble_methods = input$ensemble_checkbox,
-                        eval_method = input$eval_method,
-                        clu_n_clusters = input$clu_n_clusters,
-                        vis_method = input$vis_method)
-
-        if (msg != 'good') {
-            showNotification(msg)
-            return()
-        }
-
-        replot(replot() + 1) # Notify that labels have changed
-        reset(reset() + 1) # notify changes
-        relabel(relabel() + 1)
-    })
-
     # Semi-supervised clustering
     observeEvent(input$ssclurun, {
         if (pipe() == 0) return()

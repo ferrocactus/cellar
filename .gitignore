@@ -31,3 +31,4 @@ tempapp.R
 server_datasets
 tmp/*
 tmp*
+gui/old_server_logic

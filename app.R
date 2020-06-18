@@ -11,6 +11,8 @@ library(gplots)
 library(SingleR)
 library(shinyBS)
 
+cellar <- import("src", convert=FALSE)
+
 source("gui/ui.R")
 source("gui/server.R")
 

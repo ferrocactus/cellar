@@ -99,7 +99,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     })
 }
 
-analysis <- function(input, output, session, deGenes, pipe) {
+analysis_body <- function(input, output, session, deGenes, pipe) {
     markers_genelists_list <- getMarkerGeneList("markers/cell_type_marker.json")
     uploaded_file_flag <- reactiveVal(0)
 

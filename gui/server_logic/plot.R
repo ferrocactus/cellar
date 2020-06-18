@@ -1,78 +1,82 @@
+symbols <- c(
+    'star-triangle-down','circle','square',"diamond",
+    "x",'triangle-up','triangle-down','hexagon','asterisk',
+    'diamond-cross',"square-cross","circle-cross","circle-x",
+    "star-square","star","star-triangle-up","star-square",
+    "star-diamond","diamond-tall","diamond-wide","hourglass",
+    'bowtie','pentagon','hexagram-dot','triangle-se','y-right',
+    'hexagon2','octagon','triangle-nw','triangle-sw')
+
 # Define the number of colors you want
-plot <- function(input, output, session, replot, pipe, selDataset,
+plot <- function(input, output, session, replot, adata, selDataset,
                  setNames, setPts, plotHistory, curPlot, reset, relabel) {
     # triggers when replot is set to 1
     observeEvent(replot(), {
         if (replot() < 1) return()
         isolate(replot(0))
-        if (pipe() == 0) return()
-        if (!pipe()$has('labels')) return()
+        if (is_active(adata()) == FALSE) return()
+        if (has_key(adata(), 'obs', 'labels') == FALSE) return()
 
+        labels <- as.factor(py_to_r(adata()$obs$labels$to_numpy()))
+        x_emb_2d <- py_to_r(adata()$obsm[['x_emb_2d']])
 
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
-            label_names = pipe()$get_label_names()
+            label_names = as.factor(py_to_r(get_label_names(adata())))
 
             output$plot <- renderPlotly({
                 if (input$color == 'Clusters') {
                     if (input$show_names == 'show_names')
                         color = paste0(
-                            as.factor(pipe()$labels), ": ",
-                            as.factor(label_names))
+                            labels, ": ",
+                            label_names)
                     else
-                        color = as.factor(pipe()$labels)
-                    text = ~paste("Label: ", as.factor(label_names))
+                        color = labels
+                    text = ~paste("Label: ", label_names)
                     title = "Clusters"
+
                     p <- plotly_build(plot_ly(
-                        x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
+                        x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                         text = text,
                         color = color,
-                        key = as.character(1:length(pipe()$x_emb_2d[,1])),
+                        key = as.character(1:length(labels)),
                         marker = list(size = input$dot_size),
                         type = 'scatter',
                         mode = 'markers',
                         height = input$plot_height
                     ) %>% layout(dragmode = "lasso", title = title,
                                  margin = list(t = 50)))
-
                 } else {
-                    i = which(pipe()$col_names == input$color)[1]
+                    i = which(py_to_r(adata()$var_names$to_numpy()) == input$color)[1]
                     if (is.null(i)) {
                         if (input$show_names == 'show_names')
                             color = paste0(
-                                as.factor(pipe()$labels), ": ",
-                                as.factor(label_names))
+                                labels, ": ",
+                                label_names)
                         else
-                            color = as.factor(pipe()$labels)
+                            color = labels
                         title = "Clusters"
                     } else {
-                        color = pipe()$x[, i]
+                        color = py_to_r(adata()$X)[, i]
                         title = input$color
                     }
 
-                    text = ~paste("Label: ", as.factor(label_names))
+                    text = ~paste("Label: ", label_names)
 
                     p <- plotly_build(plot_ly(
-                        x = pipe()$x_emb_2d[,1], y = pipe()$x_emb_2d[,2],
+                        x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                         text = text,
                         color = color,
-                        symbol = ~as.factor(pipe()$labels),
-                        symbols = c('star-triangle-down','circle','square',"diamond",
-                                    "x",'triangle-up','triangle-down','hexagon','asterisk','diamond-cross',
-                                    "square-cross","circle-cross","circle-x","star-square","star","star-triangle-up",
-                                    "star-square","star-diamond","diamond-tall","diamond-wide","hourglass",'bowtie',
-                                    'pentagon','hexagram-dot','triangle-se','y-right','hexagon2','octagon','triangle-nw','triangle-sw'
-                        ),  ## 30 shapes
-                        key = as.character(1:length(pipe()$x_emb_2d[,1])),
+                        symbol = ~labels,
+                        symbols = symbols,  ## 30 shapes
+                        key = as.character(1:length(labels)),
                         marker = list(size = input$dot_size),
                         type = 'scatter',
                         mode = 'markers',
                         height = input$plot_height
                     ) %>% layout(dragmode = "lasso", showlegend=FALSE,title = title,
                                  margin = list(t = 50)))
-
                 }
-
 
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))

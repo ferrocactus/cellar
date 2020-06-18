@@ -7,37 +7,30 @@ import os
 import shutil
 
 
-def read_h5ad(filename):
-    ann = anndata.read_h5ad(filename)
-    return ann
+def load_file(filepath):
+    if filepath == 'default':
+        filepath = 'datasets/brain/RNAseqTPM.csv'
+    elif filepath == 'test':
+        filepath = 'datasets/hubmap/testdataset.h5ad'
+
+    if filepath[-4:] == 'h5ad':
+        return anndata.read_h5ad(filepath)
+    if filepath[-3:] == 'csv':
+        # TODO remove transpose
+        return anndata.read_csv(filepath).T
+    if filepath[-4:] == 'xlsx':
+        return anndata.read_excel(filepath)
+    if filepath[-3:] == 'mtx':
+        return anndata.read_mtx(filepath)
+    if filepath[-3:] == 'txt' or filepath[-3:] == 'tab' or filepath[-4:] == 'data':
+        return anndata.read_text(filepath)
+    if filepath[-2:] == 'h5':
+        return anndata.read_hdf(filepath)
+    if filepath[-4:] == 'loom':
+        return anndata.read_loom(filepath)
 
 
-def read_gtf(filename):
-    gtf = gtfparse.read_gtf(filename)
-    return gtf
-
-
-def dict_literal_eval(d):
-    return {key: literal_eval(d[key]) for key in d}
-
-
-def parse_config(filename):
-    configp = ConfigParser()
-    configp.read(filename)
-
-    config = configp._sections
-    for key in config:
-        config[key] = dict_literal_eval(config[key])
-    return config
-
-
-def read_config(dataset):
-    with open("configs/" + dataset + ".json", "r") as f:
-        config = literal_eval(f.read())
-    return config
-
-
-def load_data(dataset, check_precomputed_PCA=False):
+def load_data(dataset):
     # return dict with keys x, y, precomputed_pca, col_ids, row_ids
     df = {}
     if (dataset == 'default' or dataset == "brain"):
@@ -55,7 +48,7 @@ def load_data(dataset, check_precomputed_PCA=False):
         df['precomputed_pca'] = ann.obsm['X_pca']
     else:
         if dataset[-4:] == 'h5ad':
-            ann = anndata.read_h5ad("datasets/"  + dataset)
+            ann = anndata.read_h5ad("datasets/" + dataset)
             df['x'] = ann.X
             df['col_ids'] = ann.var.index.to_numpy().astype('U')
             df['row_ids'] = ann.obs.index.to_numpy().astype('U')
@@ -64,8 +57,8 @@ def load_data(dataset, check_precomputed_PCA=False):
             else:
                 df['precomputed_pca'] = None
         elif dataset[-3:] == 'csv':
-            csvdf = pd.read_csv("datasets/"  + dataset,
-                             index_col=0, header=None).T
+            csvdf = pd.read_csv("datasets/" + dataset,
+                                index_col=0, header=None).T
             df['x'] = csvdf.to_numpy()
             df['col_ids'] = csvdf.columns.to_numpy()
             df['row_ids'] = None
