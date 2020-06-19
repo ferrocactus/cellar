@@ -12,7 +12,7 @@ Documentation for the single cell analysis app hosted by the Bar-Joseph [Systems
 **[Selection and Labelling](#selection-and-labelling)**<br>
 **[Analysis](#analysis)**<br>
 **[Appearance](#appearance)**<br>
-**[Exporing and Importing](#exporting-and-importing)**<br>
+**[Exporting and Importing](#exporting-and-importing)**<br>
 
 ---
 ### The Overall Layout
@@ -243,7 +243,7 @@ This panel enable the users to adjust the appearance of the main plot.
 
 ---
 
-### Exporing and Importing
+### Exporting and Importing
 
 <img src="pic/export&import.png" alt="datasetMenu"
 	title="UI" width="300" height="350" align=left/>
