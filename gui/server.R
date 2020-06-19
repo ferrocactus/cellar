@@ -83,7 +83,7 @@ server <- shinyServer(function(input, output, session) {
     # Export/Import menu
     callModule(save_session, id = "ns", adata = adata, replot = replot,
                remark = remark, labelList = labelList, relabel = relabel,
-               resubset = resubset)
+               resubset = resubset, fullreset = fullreset)
     # callModule(download_cells, id = "ns", setNames, setPts,labelList, pipe)
 
     # # Miscellaneous

@@ -1,5 +1,7 @@
+import anndata
 from anndata import AnnData
 import numpy as np
+from bidict import bidict
 
 def has_key(adata, attr, key):
     if key in getattr(adata, attr):
@@ -61,3 +63,9 @@ def get_gene_logFC_de(adata):
 
 def write_h5ad(adata, path, compression=9):
     adata.write_h5ad(path, compression=compression)
+
+def read_h5ad(path):
+    adata = anndata.read_h5ad(path)
+    if 'cluster_names' in adata.uns:
+        adata.uns['cluster_names'] = bidict(adata.uns['cluster_names'])
+    return adata

@@ -20,3 +20,4 @@ get_all_gene_ids <- cellar$utils$r_helpers$get_all_gene_ids
 get_all_gene_names <- cellar$utils$r_helpers$get_all_gene_names
 merge_clusters <- cellar$utils$tools$merge_clusters
 write_h5ad <- cellar$utils$r_helpers$write_h5ad
+read_h5ad <- cellar$utils$r_helpers$read_h5ad

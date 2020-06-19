@@ -42,11 +42,12 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
     observe({
         if (remark() < 1) return()
         isolate(remark(0))
+        if (has_key(adata(), 'uns', 'de') == FALSE) return()
 
         # Switch to DE table
         reset_analysis_tabs(output)
         updateTabsetPanel(session, "switcher", selected = "DE")
-        deGenes(c())
+        isolate(deGenes(c()))
 
         ns <- session$ns
 
@@ -87,7 +88,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
                 "DE genes", "logFC", "adj.pval", "Show Expression Level")
             table[, 3] <- format(table[, 3], scientific = T)
 
-            deGenes(table[, 1])
+            isolate(deGenes(table[, 1]))
 
             dataset = as.character(adata()$uns[['dataset']])
             output$downloadDE <- downloadHandler(

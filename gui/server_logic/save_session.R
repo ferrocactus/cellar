@@ -1,9 +1,6 @@
-get_checksum <- function(filepath) {
-    return(tools::md5sum(filepath))
-}
-
 save_session <- function(input, output, session, adata, replot,
-                         remark, labelList, relabel, resubset) {
+                         remark, labelList, relabel, resubset,
+                         fullreset) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
@@ -15,8 +12,6 @@ save_session <- function(input, output, session, adata, replot,
                 withProgress(detail = "Saving File", value = 0, {
                     incProgress(1 / 2, detail = "Compressing")
                     #adata()$uns[['labelList']] <- labelList()
-                    print(adata())
-                    print(adata()$uns[['cluster_info']])
                     write_h5ad(adata(), path, compression = 9)
                 })
             }
@@ -25,66 +20,12 @@ save_session <- function(input, output, session, adata, replot,
 
     observeEvent(input$upload_sess, {
         req(input$upload_sess)
-        sess <- fromJSON(file = input$upload_sess$datapath)
-        tryCatch({
-            if (pipe() == 0) {
-                showNotification("Please load dataset first.")
-                return()
-            }
+        adata(read_h5ad(input$upload_sess$datapath))
 
-            checksum <- get_checksum(paste0("datasets/", selDataset()))
-            if (sess$'checksum' != checksum) {
-                showNotification("Checksums do not match.
-                                 Please load the correct dataset.")
-                return()
-            }
-
-            updateSelectInput(session, 'dim_method',
-                              selected = sess$'dim_reduction_method')
-            pipe()$load_session(sess$'pipe_sess')
-            if (pipe()$has('markers'))
-                remark(remark() + 1)
-            if (pipe()$has('labels')) {
-                replot(replot() + 1)
-                relabel(relabel() + 1)
-            }
-            if (sess$'dim_n_components' == 'Automatic') {
-                updateRadioButtons(session, 'dim_options',
-                                   selected = 'pca_auto')
-            } else {
-                updateRadioButtons(session, 'dim_options',
-                                   selected = 'pca_manual')
-                updateTextInput(session, 'dim_n_components',
-                                value = sess$'dim_n_components')
-            }
-            updateSelectInput(session, 'clu_method',
-                              selected = sess$'clustering_method')
-            updateSelectInput(session, 'eval_method',
-                              selected = sess$'clustering_evaluation')
-            if (sess$'clustering_method' == 'Ensemble')
-                updateCheckboxGroupInput(session, 'ensemble_checkbox',
-                              selected = sess$'ensemble_methods')
-            updateSelectInput(session, 'vis_method',
-                              selected = sess$'visualization_method')
-            updateSliderInput(session, 'mark_markers_n',
-                            value = sess$'de_genes_number')
-            updateTextInput(session, 'alpha',
-                            value = sess$'ttest_alpha')
-            updateTextInput(session, 'correction',
-                            value = sess$'ttest_correction')
-            if (!is.null(sess$'set_names'))
-                setNames(sess$'set_names')
-            if (!is.null(sess$'set_points'))
-                setPts(sess$'set_points')
-            if (!is.null(sess$'de_genes'))
-                deGenes(sess$'de_genes')
-            if (!is.null(sess$'label_list'))
-                labelList(sess$'label_list')
-
-            showNotification("Session loaded successfully.")
-        }, error = function(e) {
-            print(e)
-            showNotification("Error occurred in reading file.")
-        })
+        fullreset(fullreset() + 1)
+        replot(replot() + 1)
+        relabel(replot() + 1)
+        remark(replot() + 1)
+        resubset(replot() + 1)
     })
 }

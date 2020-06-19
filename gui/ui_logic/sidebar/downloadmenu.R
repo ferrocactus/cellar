@@ -20,7 +20,7 @@ downloadmenu <- function(id, label="downloadmenu") {
                             ns("upload_sess"),
                             "Import Session",
                             multiple = FALSE,
-                            accept = c(".json")
+                            accept = c(".h5ad")
                         )
                     )
                 ),
