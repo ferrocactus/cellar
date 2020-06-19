@@ -74,4 +74,4 @@ def read_h5ad(path):
     return adata
 
 def write_key(adata, keyname, value):
-    adata.uns[keyname] = np.array(value)
+    adata.uns[keyname] = np.array(value).reshape(-1)

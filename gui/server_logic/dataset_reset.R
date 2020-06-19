@@ -20,6 +20,8 @@ dataset_reset <- function(input, output, session, reset, setNames,
             isolate(reset(0))
         }
 
+        deGenes(c())
+
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {
             updateSelectInput(
                 session = session,
@@ -56,8 +58,6 @@ dataset_reset <- function(input, output, session, reset, setNames,
                 )
             }
         }
-
-        deGenes(c())
 
         output$DEtable = NULL
         output$GOtable = NULL

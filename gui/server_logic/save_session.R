@@ -11,7 +11,7 @@ save_session <- function(input, output, session, adata, replot,
                 if (is_active(adata()) == FALSE) return()
                 withProgress(message = "Saving File", value = 0, {
                     incProgress(1 / 2, detail = "Compressing")
-                    write_key(adata(), 'labelList', labelList())
+                    #write_key(adata(), 'labelList', labelList())
                     write_h5ad(adata(), path, compression = 9)
                 })
             }
@@ -28,6 +28,6 @@ save_session <- function(input, output, session, adata, replot,
         remark(remark() + 1)
         resubset(resubset() + 1)
 
-        labelList(py_to_r(adata()$uns[['labelList']]))
+        #labelList(py_to_r(adata()$uns[['labelList']]))
     })
 }
