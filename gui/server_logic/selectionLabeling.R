@@ -48,6 +48,10 @@ selectionLabeling <- function(input, output, session, adata,
     observeEvent(input$labeladd, {
         if (is.null(input$newlabelbox)) return()
         labelList(union(labelList(), input$newlabelbox))
+        showNotification("Label added")
+    })
+
+    observeEvent(labelList(), {
         if (input$tissue == 'user defined') {
             updateSelectInput(
                 session,
@@ -55,7 +59,6 @@ selectionLabeling <- function(input, output, session, adata,
                 choices = labelList()
             )
         }
-        showNotification("Label added")
     })
 
     # Observe change of subsets

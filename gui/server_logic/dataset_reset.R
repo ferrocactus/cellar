@@ -18,7 +18,6 @@ dataset_reset <- function(input, output, session, reset, setNames,
             output$plot <- NULL
         } else {
             isolate(reset(0))
-            resubset(resubset() + 1)
         }
 
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {

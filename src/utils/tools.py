@@ -71,7 +71,7 @@ def update_subset_label(adata, subset_name, name):
 
     # adata.uns['cluster_names] is a bidict
     # with keys=cluster ids and values=cluster names
-    if name in adata.uns['cluster_names'].values():
+    if name in list(adata.uns['cluster_names'].values()):
         label = adata.uns['cluster_names'].inverse[name]
     else:  # name does not exist, so add it
         label = np.max(adata.obs['labels']) + 1

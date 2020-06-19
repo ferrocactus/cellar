@@ -68,4 +68,10 @@ def read_h5ad(path):
     adata = anndata.read_h5ad(path)
     if 'cluster_names' in adata.uns:
         adata.uns['cluster_names'] = bidict(adata.uns['cluster_names'])
+        for key in list(adata.uns['cluster_names'].keys()):
+            adata.uns['cluster_names'][int(key)] = \
+                adata.uns['cluster_names'].pop(key, None)
     return adata
+
+def write_key(adata, keyname, value):
+    adata.uns[keyname] = np.array(value)
