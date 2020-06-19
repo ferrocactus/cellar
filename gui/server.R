@@ -79,7 +79,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(save_session, id = "ns", adata = adata, replot = replot,
                remark = remark, labelList = labelList, relabel = relabel,
                resubset = resubset, fullreset = fullreset)
-    # callModule(download_cells, id = "ns", setNames, setPts,labelList, pipe)
+    callModule(download_cells, id = "ns", setNames,labelList, adata)
 
     # # Miscellaneous
     callModule(misc, id = "ns")
