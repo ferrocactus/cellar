@@ -43,12 +43,6 @@ menuItem(
                             choices = list.files("datasets/hubmap")
                         )
                     ),
-                    fileInput(
-                        ns("upload_sess_align"),
-                        "Import Session",
-                        multiple = FALSE,
-                        accept = c(".json")
-                    ),
                     actionButton(
                         ns("align_btn"),
                         "Run Label Transfer",

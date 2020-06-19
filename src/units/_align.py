@@ -33,28 +33,3 @@ class Ali_Scanpy_Ingest(Unit):
 
         sc.tl.ingest(a1, a2, obs='labels')
         return a1.obs['labels']
-
-
-class Ali_Scanpy_BBKNN(Unit):
-    """
-    See https://scanpy-tutorials.readthedocs.io/en/latest/integrating-data-using-ingest.html
-    """
-    def __init__(self, **kwargs):
-        self.logger = setup_logger("Scanpy")
-
-    def get(self, x, col_ids, x_ref, col_ids_ref, labels_ref):
-        self.logger.info("Initializing Scanpy BBKNN method.")
-        common_col_ids = np.intersect1d(col_ids, col_ids_ref)
-        self.logger.info(f"Found {len(common_col_ids)} genes in common.")
-
-        x = x[:, np.isin(col_ids, common_col_ids)]
-        x_ref = x_ref[:, np.isin(col_ids_ref, common_col_ids)]
-
-        a1 = anndata.AnnData(x)
-        a2 = anndata.AnnData(x_ref)
-
-        ac = a2.concatenate(a1, batch_categories=['ref', 'new'])
-        sc.tl.pca(ac)
-        sc.external.pp.bbknn(ac, batch_key='batch')
-        sc.tl.umap(ac)
-        return

@@ -23,7 +23,6 @@ from ._ss_cluster import SSClu_SeededKMeans
 from ._ss_cluster import SSClu_ConstrainedKMeans
 from ._ss_cluster import SSClu_ConstrainedSeededKMeans
 from ._align import Ali_Scanpy_Ingest
-from ._align import Ali_Scanpy_BBKNN
 
 from ..utils.exceptions import MethodNotImplementedError
 
@@ -70,8 +69,7 @@ translation_dict = {
         "TSNE": Dim_TSNE
     },
     "align": {
-        "Scanpy Ingest": Ali_Scanpy_Ingest,
-        "Scanpy BBKNN": Ali_Scanpy_BBKNN
+        "Scanpy Ingest": Ali_Scanpy_Ingest
     }
 }
 
@@ -133,6 +131,5 @@ __all__ = [
     'SSClu_ConstrainedKMeans',
     'SSClu_ConstrainedSeededKMeans',
     'Ali_Scanpy_Ingest',
-    'Ali_Scanpy_BBKNN',
     'convert'
 ]

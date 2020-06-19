@@ -45,8 +45,9 @@ dataset <- function(input, output, session, adata, selDataset,
             isolate(selDatasetAlign(as.character(input$hubmap_dataset_align)))
 
         # Include path as well
-        isolate(selDatasetAlign(paste(input$folder_align, "/",
-                                    selDatasetAlign(), sep = "")))
+        isolate(selDatasetAlign(
+            paste("datasets/", input$folder_align, "/",
+                    selDatasetAlign(), sep = "")))
     })
     ###########################################################################
 }

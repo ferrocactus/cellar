@@ -15,7 +15,7 @@ def get_n_obs(adata):
     return int(adata.n_obs)
 
 def get_labels(adata):
-    return adata.obs.labels.to_numpy()
+    return adata.obs['labels'].to_numpy()
 
 def get_subsets(adata):
     return list(adata.uns['subsets'].keys())
@@ -40,6 +40,9 @@ def get_unique_labels(adata):
 
 def get_var_names(adata):
     return adata.var_names.to_numpy().astype('U')
+
+def get_obs_names(adata):
+    return adata.obs_names.to_numpy().astype('U')
 
 def get_all_gene_ids(adata):
     return adata.var['parsed_ids'].to_numpy().astype('U')

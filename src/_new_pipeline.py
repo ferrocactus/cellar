@@ -291,7 +291,9 @@ def reduce_dim_vis(
     # Determine if embeddings should be used or the full data matrix
     if is_AnnData and use_emb:
         if 'x_emb' not in adata.obsm:
-            raise ValueError("x_emb not found in AnnData object.")
+            print("x_emb not found. Running PCA with default parameters.")
+            print("If you don't want to use embeddings, pass use_emb=False.")
+            reduce_dim(adata, inplace=True)
         x_to_use = adata.obsm['x_emb']
     else:
         x_to_use = adata.X
@@ -494,10 +496,8 @@ def ss_cluster(
 
     Returns
     _______
-    If x is an AnnData object, will either return an AnnData object
+    Will either return an AnnData object
     or None depending on the value of inplace.
-    If x is not AnnData, will return np.ndarray of shape
-    (n_observations,) containing the labels.
     """
     # Validations
     is_AnnData = isinstance(x, AnnData)
@@ -534,7 +534,7 @@ def ss_cluster(
 
     # Create clustering object and get labels
     labels = wrap("ss_cluster", method)(**kwargs).get(
-            x_to_use, labels_cp, preserved_labels=preserved_labels_upd)
+        x_to_use, labels_cp, preserved_labels=preserved_labels_upd)
 
     labels = np.array(labels).astype(int)
     unq_labels = np.unique(labels)
@@ -553,6 +553,76 @@ def ss_cluster(
     adata.uns['cluster_info']['used_emb'] = use_emb
     adata.uns['cluster_info']['kwargs'] = kwargs
     adata.uns['cluster_names'] = cluster_names
+
+    populate_subsets(adata)
+
+    if not inplace:
+        return adata
+
+
+def transfer_labels(
+        x: AnnData,
+        ref: AnnData,
+        method: str = 'Scanpy Ingest',
+        match_along: str = 'parsed_names',
+        inplace: Optional[bool] = True,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Transfer labels using a reference dataset.
+
+    Parameters
+    __________
+    x: AnnData object containing the data.
+
+    ref: AnnData object with x.var['labels'] populated.
+
+    method: String specifying the label transfer method to use. See
+        https://github.com/ferrocactus/cellar/tree/master/doc for
+        a full list of methods available.
+
+    match_along: Column name in x.var and ref.var specifying the
+        dimension along which the two objects shalle be merged.
+
+    inplace: If set to true will update x.obs['labels'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData) and isinstance(ref, AnnData)
+    if not is_AnnData:
+        raise ValueError("x is not in AnnData format.")
+    if match_along not in x.var:
+        raise ValueError(f"{match_along} not found in object.")
+    if 'labels' not in ref.obs:
+        raise ValueError("labels not found in reference dataset.")
+    adata = x.copy() if not inplace else x
+
+    _method_exists('align', method)
+
+    # Create alignment object and get labels
+    labels = wrap("align", method)().get(
+        adata.X, adata.var[match_along],
+        ref.X, ref.var[match_along], ref.obs['labels']
+    ).astype(np.int)
+
+    # Populate entries
+    adata.obs['labels'] = labels
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(labels)
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_info']['kwargs'] = kwargs
+    adata.uns['cluster_names'] = bidict(
+        {i: str(i) for i in unq_labels})
 
     populate_subsets(adata)
 

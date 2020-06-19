@@ -59,8 +59,14 @@ upload_file <- function(input, output, session) {
                 inputId = "uploaded_dataset",
                 label = "Choose a dataset:",
                 choices = list.files("datasets/user_uploaded"),
-                showNotification("Dataset uploaded")
             )
+            updateSelectInput(
+                session = session,
+                inputId = "uploaded_dataset_align",
+                label = "Choose a dataset:",
+                choices = list.files("datasets/user_uploaded"),
+            )
+            showNotification("Dataset uploaded")
         }
     })
 }

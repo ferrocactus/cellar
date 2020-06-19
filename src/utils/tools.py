@@ -60,6 +60,19 @@ def store_subset(adata, name, indices, from_r=False):
     adata.uns['subsets'][name] = indices
 
 
+def store_labels(adata, labels, method):
+    adata.obs['labels'] = np.array(labels).astype(int)
+    # Update entries
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(adata.obs['labels'])
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_names'] = bidict(
+        {i: str(i) for i in unq_labels})
+    populate_subsets(adata)
+
+
 def update_subset_label(adata, subset_name, name):
     subset_name = str(subset_name)
     name = str(name)

@@ -1,7 +1,6 @@
 source("gui/server_logic/misc.R")
 source("gui/server_logic/upload_file.R")
 source("gui/server_logic/theme.R")
-source("gui/server_logic/singler.R")
 
 source("gui/server_logic/analysis_body.R")
 source("gui/server_logic/save_session.R")
@@ -12,9 +11,8 @@ source("gui/server_logic/download_cells.R")
 source("gui/server_logic/dataset.R")
 source("gui/server_logic/clustering.R")
 source("gui/server_logic/plot.R")
-
+source("gui/server_logic/align.R")
 source("gui/server_logic/selectionLabeling.R")
-
 source("gui/server_logic/de.R")
 
 cellar <- import("src", convert=FALSE)
@@ -59,12 +57,9 @@ server <- shinyServer(function(input, output, session) {
                reset = reset, resubset = resubset)
 
     # Label Transfer menu
-    # callModule(align_run, id = "ns", pipe = pipe, replot = replot,
-    #            reset = reset, relabel = relabel,
-    #            selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
-    # callModule(singler, id = "ns", pipe = pipe, replot = replot,
-    #            reset = reset, relabel = relabel,
-    #            selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
+    callModule(align, id = "ns", adata = adata,
+               selDatasetAlign = selDatasetAlign, replot = replot,
+               reset = reset, relabel = relabel, resubset = resubset)
 
     # Selection & Labeling menu
     callModule(selectionLabeling, id = "ns", adata = adata,
