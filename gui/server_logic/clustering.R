@@ -78,21 +78,16 @@ cluster <- function(input, output, session, adata, replot,
 
     # Merge clusters
     observeEvent(input$merge_clusters, {
-        if (pipe() == 0) return()
-        if (!pipe()$has('labels')) return()
+        if (is_active(adata()) == FALSE) return()
+        if (!py_has_attr(adata()$obs, 'labels')) return()
         if (is.null(input$clusters_to_merge)) return()
 
-        msg <- pipe()$run_step(step = 'merge_clusters',
-                            clusters = input$clusters_to_merge)
-
-        if (msg != 'good') {
-            showNotification(msg)
-            return()
-        }
+        merge_clusters(adata(), input$clusters_to_merge)
 
         replot(replot() + 1)
         reset(reset() + 1)
         relabel(relabel() + 1)
+        resubset(resubset() + 1)
     })
 
     # Show/Hide cluster names

@@ -40,6 +40,7 @@ get_gene_logFC_de <- cellar$utils$r_helpers$get_gene_logFC_de
 get_var_names <- cellar$utils$r_helpers$get_var_names
 get_all_gene_ids <- cellar$utils$r_helpers$get_all_gene_ids
 get_all_gene_names <- cellar$utils$r_helpers$get_all_gene_names
+merge_clusters <- cellar$utils$tools$merge_clusters
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
@@ -51,9 +52,9 @@ server <- shinyServer(function(input, output, session) {
     selDatasetAlign <- reactiveVal("")
     pipe <- reactiveVal(0)
     pipeAlign <- reactiveVal(0)
-    setNames <- reactiveVal(c("None")) # triggers update_sets on change
-    replot <- reactiveVal(0) # triggers re_plot on change
-    remark <- reactiveVal(0) # triggers re_mark and de_buttons on change
+    setNames <- reactiveVal(c("None"))
+    replot <- reactiveVal(0)
+    remark <- reactiveVal(0)
     relabel <- reactiveVal(0)
     rebutton <- reactiveVal(0)
     deGenes <- reactiveVal(0)
@@ -64,10 +65,7 @@ server <- shinyServer(function(input, output, session) {
     retheme <- reactiveVal(0)
     resubset <- reactiveVal(0)
 
-    # Functionality
     # We are using the same namespace for everything called "ns".
-    # This is not ideal, but a lot of our functions deal with widgets that
-    # belong to different ui components, so we are using one namespace for all.
     notificationModule = callModule(notifications, id = 'ns')
 
     # Dataset menu

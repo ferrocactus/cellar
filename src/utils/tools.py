@@ -7,8 +7,9 @@ from functools import reduce
 import anndata
 import numpy as np
 import pandas as pd
-
 from bidict import bidict
+
+from .validation import _validate_cluster_list
 
 
 def parse(x):
@@ -107,3 +108,16 @@ def populate_subsets(adata):
     for label in unq_labels:
         adata.uns['subsets'][f'Cluster_{label}'] = \
             np.squeeze(np.where(adata.obs['labels'] == label))
+
+
+def merge_clusters(adata, clusters):
+    # Merge all clusters to the first one
+    clusters = _validate_cluster_list(adata.obs['labels'], clusters)
+    if len(clusters) < 2:
+        raise InvalidArgument("Not enough clusters found to merge")
+
+    c0 = clusters[0]
+    c0_name = adata.uns['cluster_names'][c0]
+
+    for cluster in clusters[1:]:
+        update_subset_label(adata, f'Cluster_{cluster}', c0_name)
