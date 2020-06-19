@@ -146,7 +146,7 @@ def cluster(
         (a, b, c) will start at a, finish at b-1, in increments of c.
 
     use_emb: If True, will attempt to cluster on an embedding of x
-        as specified in x.obsm['x_emb] if x is AnnData object. If x
+        as specified in x.obsm['x_emb'] if x is AnnData object. If x
         is not AnnData, this argument is ignored.
 
     inplace: Only used when x is an AnnData object.
@@ -315,9 +315,9 @@ def reduce_dim_vis(
 
 
 def name_genes(
-        x: Union[AnnData, np.ndarray, list],
-        inplace: Optional[bool] = True
-    ) -> Optional[Union[AnnData, np.ndarray]]:
+    x: Union[AnnData, np.ndarray, list],
+    inplace: Optional[bool] = True
+) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Find synonyms for gene IDs/names.
 
@@ -456,6 +456,105 @@ def de(
     adata.uns['de_info']['subset1'] = subset1
     adata.uns['de_info']['subset2'] = subset2
     adata.uns['de_info']['kwargs'] = kwargs
+
+    if not inplace:
+        return adata
+
+
+def ss_cluster(
+        x: AnnData,
+        method: str = 'SeededKMeans',
+        use_emb: bool = True,
+        inplace: Optional[bool] = True,
+        preserved_labels: Optional[Union[np.ndarray, list, int]] = None,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Semi-supervised clustering of the data.
+
+    Parameters
+    __________
+    x: AnnData object with x.var['labels'] populated.
+
+    method: String specifying the ss clustering method to use. See
+        https://github.com/ferrocactus/cellar/tree/master/doc for
+        a full list of methods available.
+
+    use_emb: If True, will attempt to cluster on an embedding of x
+        as specified in x.obsm['x_emb'].
+
+    inplace: If set to true will update x.obs['labels'], otherwise,
+        return a new AnnData object.
+
+    preserved_labels: A list of labels that should be preserved
+        by the algorithm.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return np.ndarray of shape
+    (n_observations,) containing the labels.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+    if not is_AnnData:
+        raise ValueError("x is not in AnnData format.")
+    if 'labels' not in x.obs:
+        raise ValueError("'labels' not found in object.")
+    adata = x.copy() if not inplace else x
+    _method_exists('ss_cluster', method)
+    if method != 'SeededKMeans':
+        preserved_labels = _validate_cluster_list(
+            adata.obs['labels'],
+            preserved_labels)
+    else:
+        preserved_labels = np.array([])
+
+    # Determine if embeddings should be used or the full data matrix
+    if use_emb:
+        if 'x_emb' not in adata.obsm:
+            raise ValueError("x_emb not found in AnnData object.")
+        x_to_use = adata.obsm['x_emb']
+
+    labels_cp = adata.obs['labels'].copy()
+    cluster_names = bidict({})
+    unq_labels = np.unique(labels_cp)
+    n_clusters = len(unq_labels)
+    preserved_labels_upd = []
+
+    for i, label in enumerate(unq_labels):
+        labels_cp[adata.obs['labels'] == label] = i
+        if label in preserved_labels:
+            cluster_names[i] = adata.uns['cluster_names'][label]
+            preserved_labels_upd.append(i)
+
+    # Create clustering object and get labels
+    labels = wrap("ss_cluster", method)(**kwargs).get(
+            x_to_use, labels_cp, preserved_labels=preserved_labels_upd)
+
+    labels = np.array(labels).astype(int)
+    unq_labels = np.unique(labels)
+
+    for label in unq_labels:
+        if label not in list(cluster_names.keys()):
+            cluster_names[label] = str(label)
+
+    # Populate entries
+    adata.obs['labels'] = labels
+    adata.uns['cluster_info'] = {}
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_info']['n_clusters_used'] = n_clusters
+    adata.uns['cluster_info']['used_emb'] = use_emb
+    adata.uns['cluster_info']['kwargs'] = kwargs
+    adata.uns['cluster_names'] = cluster_names
+
+    populate_subsets(adata)
 
     if not inplace:
         return adata

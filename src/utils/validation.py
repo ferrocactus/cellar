@@ -286,7 +286,7 @@ def validate_cluster_list(labels, saved_clusters):
 
 def _validate_cluster_list(labels, saved_clusters):
     unq = np.unique(labels)
-    if saved_clusters is None:
+    if saved_clusters is None or len(unq) == 0:
         return np.array([])
     if isinstance(saved_clusters, str):
         if saved_clusters == "":

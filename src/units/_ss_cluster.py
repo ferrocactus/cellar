@@ -26,13 +26,13 @@ class SSClu_SeededKMeans(Unit):
         self.logger = setup_logger('SeededKMeans')
         self.kwargs = kwargs
 
-    def get(self, x, labels, saved_clusters=None):
+    def get(self, x, labels, preserved_labels=None):
         """
         Find the non-negative values and let them define the n_clusters.
         Args:
             x (np.ndarray): Data points (n_points x n_features)
             labels (np.ndarray): Labels (n_points x 1)
-            saved_clusters: ignored, used for consistency
+            preserved_labels: ignored, used for consistency
         Returns:
             (np.ndarray): New labels after clustering (n_points x 1)
         """
@@ -58,12 +58,11 @@ class SSClu_ConstrainedKMeans(Unit):
         self.logger = setup_logger('ConstrainedKMeans')
         self.kwargs = kwargs
 
-    def get(self, x, labels, saved_clusters):
+    def get(self, x, labels, preserved_labels):
         unq_labels = np.unique(labels)
-        print(unq_labels)
         n_clusters = len(unq_labels)
 
-        mask = (1 - np.isin(labels, saved_clusters)).astype(np.int32)
+        mask = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
         labels = np.asarray(labels).astype(np.int32)
 
         constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
@@ -77,7 +76,7 @@ class SSClu_ConstrainedSeededKMeans(Unit):
         self.logger = setup_logger('ConstrainedSeededKMeans')
         self.kwargs = kwargs
 
-    def get(self, x, labels, saved_clusters):
+    def get(self, x, labels, preserved_labels):
         unq_labels = np.unique(labels)
         n_clusters = len(unq_labels)
         centroids = []
@@ -89,7 +88,7 @@ class SSClu_ConstrainedSeededKMeans(Unit):
             centroids.append(centroid)
 
         centroids = np.array(centroids)
-        mask = (1 - np.isin(labels, saved_clusters)).astype(np.int32)
+        mask = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
         labels = labels.astype(np.int32)
 
         constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,

@@ -14,8 +14,8 @@ cluster <- function(input, output, session, adata, replot,
             n_components = input$n_components
 
         withProgress(message = "Please Wait", value = 0, {
-            n <- 4
-            incProgress(0 / n, detail = "Reducing Dimensionality")
+            n <- 5
+            incProgress(1 / n, detail = "Reducing Dimensionality")
             cellar$reduce_dim(
                 x = adata(),
                 method = input$dim_method,
@@ -48,10 +48,51 @@ cluster <- function(input, output, session, adata, replot,
             )
         })
 
-        replot(replot() + 1) # Notify that labels have changed
-        reset(reset() + 1) # notify changes
+        replot(replot() + 1)
+        reset(reset() + 1)
         relabel(relabel() + 1)
         resubset(resubset() + 1)
+    })
+
+    # Semi-supervised clustering
+    observeEvent(input$ssclurun, {
+        if (is_active(adata()) == FALSE) return()
+        if (!py_has_attr(adata()$obs, 'labels')) return()
+
+        withProgress(message = "Please Wait", value = 0, {
+            n <- 2
+            incProgress(1 / n, detail = "Clustering")
+            cellar$ss_cluster(
+                x = adata(),
+                method = input$ssc_method,
+                use_emb = TRUE,
+                inplace = TRUE,
+                preserved_labels = input$saved_clusters)
+        })
+
+        replot(replot() + 1)
+        reset(reset() + 1)
+        relabel(relabel() + 1)
+        resubset(resubset() + 1)
+    })
+
+    # Merge clusters
+    observeEvent(input$merge_clusters, {
+        if (pipe() == 0) return()
+        if (!pipe()$has('labels')) return()
+        if (is.null(input$clusters_to_merge)) return()
+
+        msg <- pipe()$run_step(step = 'merge_clusters',
+                            clusters = input$clusters_to_merge)
+
+        if (msg != 'good') {
+            showNotification(msg)
+            return()
+        }
+
+        replot(replot() + 1)
+        reset(reset() + 1)
+        relabel(relabel() + 1)
     })
 
     # Show/Hide cluster names

@@ -3,7 +3,6 @@ load('gui/obj/Hs.c2')
 load('gui/obj/gene_ids_all')
 load('gui/obj/kegg_genelists')
 load('gui/obj/keggidtoname')
-load('gui/obj/gene_ids_all')
 load('gui/obj/disease_genes')
 
 getMarkerGeneList <- function(path) {

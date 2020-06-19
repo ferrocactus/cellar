@@ -89,9 +89,10 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
 
             deGenes(table[, 1])
 
+            dataset = as.character(adata()$uns[['dataset']])
             output$downloadDE <- downloadHandler(
                 filename = function() {
-                    paste0("Cellar", "_DE_genes", ".csv")
+                    paste0(dataset, "_DE_genes", ".csv")
                 },
                 content = function(file) {
                     write.csv(table, file, row.names = FALSE)
