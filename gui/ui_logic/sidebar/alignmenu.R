@@ -16,32 +16,38 @@ menuItem(
                         "Select label transfer method",
                         options$ali
                     ),
-                    radioButtons(
-                        ns("folder_align"),
-                        "Select dataset group:",
-                        c(
-                            "Uploaded Datasets" = "user_uploaded",
-                            "Server Datasets" = "hubmap"
-                        ),
-                        inline = TRUE
-                    ),
-                    conditionalPanel(
-                        condition = "input.folder_align == 'user_uploaded'",
-                        ns = ns,
-                        selectInput(
-                            ns("uploaded_dataset_align"),
-                            "Choose dataset:",
-                            choices = list.files("datasets/user_uploaded")
-                        )
-                    ),
-                    conditionalPanel(
-                        condition = "input.folder_align == 'hubmap'",
-                        ns = ns,
-                        selectInput(
-                            ns("hubmap_dataset_align"),
-                            "Choose dataset:",
-                            choices = list.files("datasets/hubmap")
-                        )
+                    # radioButtons(
+                    #     ns("folder_align"),
+                    #     "Select dataset group:",
+                    #     c(
+                    #         "Uploaded Datasets" = "user_uploaded",
+                    #         "Server Datasets" = "hubmap"
+                    #     ),
+                    #     inline = TRUE
+                    # ),
+                    # conditionalPanel(
+                    #     condition = "input.folder_align == 'user_uploaded'",
+                    #     ns = ns,
+                    #     selectInput(
+                    #         ns("uploaded_dataset_align"),
+                    #         "Choose dataset:",
+                    #         choices = list.files("datasets/user_uploaded")
+                    #     )
+                    # ),
+                    # conditionalPanel(
+                    #     condition = "input.folder_align == 'hubmap'",
+                    #     ns = ns,
+                    #     selectInput(
+                    #         ns("hubmap_dataset_align"),
+                    #         "Choose dataset:",
+                    #         choices = list.files("datasets/hubmap")
+                    #     )
+                    # ),
+                    fileInput(
+                        ns("reference_dataset"),
+                        "Choose Reference Dataset (h5ad)",
+                        multiple = FALSE,
+                        accept = c(".h5ad")
                     ),
                     actionButton(
                         ns("align_btn"),

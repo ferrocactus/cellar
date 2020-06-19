@@ -2,6 +2,7 @@ import anndata
 from anndata import AnnData
 import numpy as np
 from bidict import bidict
+from .. import name_genes
 
 def has_key(adata, attr, key):
     if key in getattr(adata, attr):
