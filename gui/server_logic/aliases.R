@@ -1,0 +1,22 @@
+# Aliases
+load_file <- cellar$utils$read$load_file
+store_subset <- cellar$utils$tools$store_subset
+update_subset_label <- cellar$utils$tools$update_subset_label
+is_active <- cellar$utils$r_helpers$is_active
+has_key <- cellar$utils$r_helpers$has_key
+get_labels <- cellar$utils$r_helpers$get_labels
+get_emb_2d <- cellar$utils$r_helpers$get_emb_2d
+get_label_names <- cellar$utils$r_helpers$get_label_names
+get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
+get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
+get_unique_labels <- cellar$utils$r_helpers$get_unique_labels
+get_subsets <- cellar$utils$r_helpers$get_subsets
+get_gene_names <- cellar$utils$r_helpers$get_gene_names
+get_gene_names_de <- cellar$utils$r_helpers$get_gene_names_de
+get_gene_pvals_de <- cellar$utils$r_helpers$get_gene_pvals_de
+get_gene_logFC_de <- cellar$utils$r_helpers$get_gene_logFC_de
+get_var_names <- cellar$utils$r_helpers$get_var_names
+get_all_gene_ids <- cellar$utils$r_helpers$get_all_gene_ids
+get_all_gene_names <- cellar$utils$r_helpers$get_all_gene_names
+merge_clusters <- cellar$utils$tools$merge_clusters
+write_h5ad <- cellar$utils$r_helpers$write_h5ad

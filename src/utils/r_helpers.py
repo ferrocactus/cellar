@@ -58,3 +58,6 @@ def get_gene_pvals_de(adata):
 
 def get_gene_logFC_de(adata):
     return adata.uns['de']['diffs']
+
+def write_h5ad(adata, path, compression=9):
+    adata.write_h5ad(path, compression=compression)

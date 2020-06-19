@@ -3,7 +3,6 @@ source("gui/server_logic/upload_file.R")
 source("gui/server_logic/theme.R")
 source("gui/server_logic/singler.R")
 
-source("gui/server_logic/pipe_align.R")
 source("gui/server_logic/analysis_body.R")
 source("gui/server_logic/save_session.R")
 source("gui/server_logic/notifications.R")
@@ -19,51 +18,29 @@ source("gui/server_logic/selectionLabeling.R")
 source("gui/server_logic/de.R")
 
 cellar <- import("src", convert=FALSE)
-
-# Aliases
-load_file <- cellar$utils$read$load_file
-store_subset <- cellar$utils$tools$store_subset
-update_subset_label <- cellar$utils$tools$update_subset_label
-is_active <- cellar$utils$r_helpers$is_active
-has_key <- cellar$utils$r_helpers$has_key
-get_labels <- cellar$utils$r_helpers$get_labels
-get_emb_2d <- cellar$utils$r_helpers$get_emb_2d
-get_label_names <- cellar$utils$r_helpers$get_label_names
-get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
-get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
-get_unique_labels <- cellar$utils$r_helpers$get_unique_labels
-get_subsets <- cellar$utils$r_helpers$get_subsets
-get_gene_names <- cellar$utils$r_helpers$get_gene_names
-get_gene_names_de <- cellar$utils$r_helpers$get_gene_names_de
-get_gene_pvals_de <- cellar$utils$r_helpers$get_gene_pvals_de
-get_gene_logFC_de <- cellar$utils$r_helpers$get_gene_logFC_de
-get_var_names <- cellar$utils$r_helpers$get_var_names
-get_all_gene_ids <- cellar$utils$r_helpers$get_all_gene_ids
-get_all_gene_names <- cellar$utils$r_helpers$get_all_gene_names
-merge_clusters <- cellar$utils$tools$merge_clusters
+source("gui/server_logic/aliases.R")
 
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
     # should be defined here
     adata <- reactiveVal(0)
-    selDataset <- reactiveVal("")
-    labelList <- reactiveVal(c())
 
+    selDataset <- reactiveVal("")
     selDatasetAlign <- reactiveVal("")
-    pipe <- reactiveVal(0)
-    pipeAlign <- reactiveVal(0)
+    labelList <- reactiveVal(c())
     setNames <- reactiveVal(c("None"))
+    deGenes <- reactiveVal(0)
+
+    reset <- reactiveVal(0)
+    fullreset <- reactiveVal(0)
     replot <- reactiveVal(0)
     remark <- reactiveVal(0)
     relabel <- reactiveVal(0)
-    rebutton <- reactiveVal(0)
-    deGenes <- reactiveVal(0)
-    plotHistory <- reactiveVal(c())
-    curPlot <- reactiveVal(0)
-    reset <- reactiveVal(0)
-    fullreset <- reactiveVal(0)
-    retheme <- reactiveVal(0)
     resubset <- reactiveVal(0)
+    retheme <- reactiveVal(0)
+
+    curPlot <- reactiveVal(0)
+    plotHistory <- reactiveVal(c())
 
     # We are using the same namespace for everything called "ns".
     notificationModule = callModule(notifications, id = 'ns')
@@ -77,9 +54,9 @@ server <- shinyServer(function(input, output, session) {
     callModule(cluster, id = "ns", adata = adata, replot = replot,
                reset = reset, relabel = relabel, resubset = resubset)
     callModule(plot, id = "ns", replot = replot, adata = adata,
-               selDataset = selDataset, setNames = setNames, setPts = setPts,
-               plotHistory = plotHistory, curPlot = curPlot, reset = reset,
-               resubset = resubset)
+               selDataset = selDataset, setNames = setNames,
+               plotHistory = plotHistory, curPlot = curPlot,
+               reset = reset, resubset = resubset)
 
     # Label Transfer menu
     # callModule(align_run, id = "ns", pipe = pipe, replot = replot,
@@ -103,18 +80,16 @@ server <- shinyServer(function(input, output, session) {
     # Appearance menu
     callModule(theme, id = "ns", retheme = retheme)
 
-    # # Export/Import menu
-    # callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
-    #            setPts = setPts, deGenes = deGenes, selDataset = selDataset,
-    #            plotHistory = plotHistory, curPlot = curPlot, replot = replot,
-    #            remark = remark, labelList = labelList, relabel = relabel)
+    # Export/Import menu
+    callModule(save_session, id = "ns", adata = adata, replot = replot,
+               remark = remark, labelList = labelList, relabel = relabel,
+               resubset = resubset)
     # callModule(download_cells, id = "ns", setNames, setPts,labelList, pipe)
 
     # # Miscellaneous
     callModule(misc, id = "ns")
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
-               labelList = labelList, deGenes = deGenes,
-               adata = adata, fullreset = fullreset,
-               curPlot = curPlot, plotHistory = plotHistory,
-               resubset = resubset)
+               labelList = labelList, deGenes = deGenes, adata = adata,
+               fullreset = fullreset, curPlot = curPlot,
+               plotHistory = plotHistory, resubset = resubset)
 })

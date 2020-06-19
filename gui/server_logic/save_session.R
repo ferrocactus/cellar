@@ -2,52 +2,24 @@ get_checksum <- function(filepath) {
     return(tools::md5sum(filepath))
 }
 
-save_session <- function(input, output, session, pipe, setNames, setPts,
-                         deGenes, selDataset, plotHistory, curPlot, replot,
-                         remark, labelList, relabel) {
+save_session <- function(input, output, session, adata, replot,
+                         remark, labelList, relabel, resubset) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
-                paste0(file_path_sans_ext(basename(selDataset())),
-                       "_session.json")
+                if (is_active(adata()) == FALSE) return()
+                paste0(adata()$uns[['dataset']], "_cellar.h5ad")
             },
-            content = function(file) {
-
-            if (pipe() == 0) {
-                showNotification("No dataset has been loaded.")
-                return()
+            content = function(path) {
+                if (is_active(adata()) == FALSE) return()
+                withProgress(detail = "Saving File", value = 0, {
+                    incProgress(1 / 2, detail = "Compressing")
+                    #adata()$uns[['labelList']] <- labelList()
+                    print(adata())
+                    print(adata()$uns[['cluster_info']])
+                    write_h5ad(adata(), path, compression = 9)
+                })
             }
-
-            withProgress( 1 / 2, detail = "Creating json file", value = 0, {
-                sess <- c()
-                pipe_sess <- pipe()$save_session()
-                sess$'dataset' <- selDataset()
-                sess$'dim_reduction_method' <- input$dim_method
-                if (input$dim_options == 'pca_auto')
-                    sess$'dim_n_components' <- 'Automatic'
-                else
-                    sess$'dim_n_components' <- input$dim_n_components
-                sess$'clustering_method' <- input$clu_method
-                sess$'clustering_evaluation' <- input$eval_method
-                if (input$clu_method == 'Ensemble')
-                    sess$'ensemble_methods' <- input$ensemble_checkbox
-                sess$'visualization_method' <- input$vis_method
-                sess$'de_genes_number' <- input$mark_markers_n
-                sess$'ttest_alpha' <- input$alpha
-                sess$'ttest_correction' <- input$correction
-                sess$'pipe_sess' <- pipe_sess
-                if (length(setNames()) > 0)
-                    sess$'set_names' <- setNames()
-                if (length(setPts()) > 0)
-                    sess$'set_points' <- setPts()
-                if (length(deGenes()) > 0)
-                    sess$'de_genes' <- deGenes()
-                if (length(labelList()) > 0)
-                    sess$'label_list' <- labelList()
-                sess$'checksum' <- get_checksum(paste0("datasets/", selDataset()))
-                json_obj <- toJSON(sess, indent = 2)
-                write(json_obj, file)
-            })}
         )
     })
 

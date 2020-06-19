@@ -195,7 +195,7 @@ def cluster(
         n_jobs=n_jobs_multiple, **kwargs).get(x_to_use)
 
     labels = np.array(labels).astype(int)
-    scores = np.array(scores).astype(float)
+    scores = np.array(scores).astype(float).reshape(-1)
 
     # If x was a list or numpy array
     if not is_AnnData:
