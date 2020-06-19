@@ -99,26 +99,29 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     })
 }
 
-analysis_body <- function(input, output, session, deGenes, pipe) {
+analysis_body <- function(input, output, session, adata, deGenes) {
     markers_genelists_list <- getMarkerGeneList("markers/cell_type_marker.json")
     uploaded_file_flag <- reactiveVal(0)
 
     observe({
         # only run if deGenes have been stored
-        if (length(deGenes()) < 1 || pipe() == 0) return()
+        if (is_active(adata()) == FALSE) return()
+        if (length(deGenes()) < 1) return()
 
-        nc = length(pipe()$col_ids)
+        dataset = as.character(adata()$uns[['dataset']])
+
+        nc = py_to_r(adata()$n_vars)
 
         s1 = as.character(isolate(input$subset1))
         s2 = as.character(isolate(input$subset2))
-        tabletitle=paste(s1," (vs. ",s2,")",sep="")
+        tabletitle = paste(s1, " (vs. ", s2, ")")
 
         output$titleONTO <- renderText(tabletitle)
         output$GOtable <- DT::renderDataTable({
             build_table(output = output, mode = 'GO', fl = Hs.c5,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
-                        dataset = pipe()$dataset, ns = session$ns)
+                        dataset = dataset, ns = session$ns)
         })
 
         output$titleKEGG <- renderText(tabletitle)
@@ -126,7 +129,7 @@ analysis_body <- function(input, output, session, deGenes, pipe) {
             build_table(output = output, mode = 'KEGG', fl = kegg_genelists,
                         deGenes = deGenes,
                         nc = nc, alpha = as.numeric(input$mark_alpha),
-                        dataset = pipe()$dataset, ns = session$ns)
+                        dataset = dataset, ns = session$ns)
         })
 
         output$titleMSIG <- renderText(tabletitle)
@@ -134,7 +137,7 @@ analysis_body <- function(input, output, session, deGenes, pipe) {
             build_table(output = output, mode = 'MSIGDB', fl = Hs.c2,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
-                        dataset = pipe()$dataset, ns = session$ns)
+                        dataset = dataset, ns = session$ns)
         })
 
         output$titleCellType <- renderText(tabletitle)
@@ -143,7 +146,7 @@ analysis_body <- function(input, output, session, deGenes, pipe) {
                         fl = markers_genelists_list,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
-                        dataset = pipe()$dataset, ns = session$ns)
+                        dataset = dataset, ns = session$ns)
         })
 
         output$titleUCellType <- renderText(tabletitle)
@@ -155,7 +158,7 @@ analysis_body <- function(input, output, session, deGenes, pipe) {
                         fl = user_genelists,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
-                        dataset = pipe()$dataset, ns = session$ns)
+                        dataset = dataset, ns = session$ns)
         })
 
         output$titleDisease <- renderText(tabletitle)
@@ -164,7 +167,7 @@ analysis_body <- function(input, output, session, deGenes, pipe) {
                         fl = disease_genes,
                         deGenes = deGenes, nc = nc,
                         alpha = as.numeric(input$mark_alpha),
-                        dataset = pipe()$dataset, ns = session$ns)
+                        dataset = dataset, ns = session$ns)
         })
     })
 

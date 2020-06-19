@@ -4,7 +4,6 @@ source("gui/server_logic/theme.R")
 source("gui/server_logic/singler.R")
 
 source("gui/server_logic/pipe_align.R")
-source("gui/server_logic/re_mark.R")
 source("gui/server_logic/analysis_body.R")
 source("gui/server_logic/save_session.R")
 source("gui/server_logic/notifications.R")
@@ -18,6 +17,8 @@ source("gui/server_logic/plot.R")
 source("gui/server_logic/selectionLabeling.R")
 
 source("gui/server_logic/de.R")
+
+cellar <- import("src", convert=FALSE)
 
 # Aliases
 load_file <- cellar$utils$read$load_file
@@ -90,19 +91,19 @@ server <- shinyServer(function(input, output, session) {
     #            reset = reset, relabel = relabel,
     #            selDatasetAlign = selDatasetAlign, pipeAlign = pipeAlign)
 
-    # # Selection & Labeling menu
+    # Selection & Labeling menu
     callModule(selectionLabeling, id = "ns", adata = adata,
                labelList = labelList, setNames = setNames,
                resubset = resubset, reset = reset, replot = replot,
                relabel = relabel)
 
-    # # Analysis menu
+    # Analysis menu
     callModule(differential_e, id = "ns", adata = adata, remark = remark,
                deGenes = deGenes)
-    # callModule(analysis_body, id = "ns", deGenes = deGenes, pipe = pipe)
+    callModule(analysis_body, id = "ns", adata = adata, deGenes = deGenes)
 
-    # # Appearance menu
-    # callModule(theme, id = "ns", retheme = retheme)
+    # Appearance menu
+    callModule(theme, id = "ns", retheme = retheme)
 
     # # Export/Import menu
     # callModule(save_session, id = "ns", pipe = pipe, setNames = setNames,
