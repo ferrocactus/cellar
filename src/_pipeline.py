@@ -1,489 +1,622 @@
-import traceback
-import sys
+from typing import Optional, Union
 
 import numpy as np
-import scanpy
-import anndata
+from anndata import AnnData
+from bidict import bidict
 
 from .units import wrap
 from .units import _method_exists
-from .log import setup_logger
-from .units._unit import Unit
-from .utils.read import load_data
+from .units import convert
+
+from .utils.tools import _emb_exists_in_adata
+from .utils.tools import _2d_emb_exists_in_adata
+from .utils.tools import populate_subsets
+
 from .utils.validation import _validate_clu_n_clusters
-from .utils.validation import _validate_con_convention
+from .utils.validation import _validate_cluster_list
 from .utils.validation import _validate_dim_n_components
 from .utils.validation import _validate_ensemble_methods
 from .utils.validation import _validate_mark_alpha
 from .utils.validation import _validate_mark_correction
 from .utils.validation import _validate_mark_markers_n
-from .utils.validation import _validate_n_clusters
 from .utils.validation import _validate_n_jobs
 from .utils.validation import _validate_subset
-from .utils.validation import _validate_new_labels
-from .utils.validation import _validate_cluster_list
-from .utils.validation import _categorify
+from .utils.validation import _validate_x
+
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
-from .utils.exceptions import MethodNotImplementedError
-
-OK = 'good'
 
 
-class Pipeline():
-    def __init__(self, x='default', col_ids=None, row_ids=None):
-        self.loadmsg = self.load(x, col_ids, row_ids)
+def reduce_dim(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'PCA',
+        n_components: Union[str, int, float] = 'knee',
+        inplace: Optional[bool] = True,
+        check_if_exists: Optional[bool] = False,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Reduce dimensionality of the data.
 
-    def restate(self, x='default', col_ids=None, row_ids=None):
-        keys = list(self.__dict__.keys())
-        for var in keys:
-            delattr(self, var)
-        self.loadmsg = self.load(x, col_ids, row_ids)
+    Parameters
+    __________
+    x: AnnData object or np array containing the data matrix.
 
-    def load(self, x, col_ids, row_ids):
-        if isinstance(x, str):
-            try:
-                self.dataset = x
-                df = load_data(x)
-                self.x = df['x']
-                self.col_ids = df['col_ids']
-                self.row_ids = df['row_ids']
-                self.x_emb_precomp = df['precomputed_pca']
-                self.col_ids = np.array(self.col_ids).reshape(-1)
-                if self.row_ids is not None:
-                    self.row_ids = np.array(self.row_ids).reshape(-1)
-            except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                return "Incorrect data format."
-        else:
-            try:
-                self.dataset = "Noname"
-                self.x = np.array(x)
-                self.col_ids = np.array(col_ids).astype('U').reshape(-1)
-                self.row_ids = np.array(row_ids).astype('U').reshape(-1)
-            except Exception as e:
-                traceback.print_exc(file=sys.stdout)
-                return "Incorrect data format."
+    method: String specifying the dimensionality reduction method
+        to use. See https://github.com/ferrocactus/cellar/tree/master/doc
+        for a full list of methods available.
 
-        self.col_ids = np.char.split(self.col_ids.astype('U').flatten(),
-                                     sep='.', maxsplit=1)
-        self.col_ids = np.array([i[0] for i in self.col_ids])
-        self.col_names = wrap("conversion", "Converter")().get(self.col_ids)
+    n_components: Number of components to use. If method is 'PCA', this
+        parameters can also be 'knee' in which case the number of
+        components will be determined automatically based on the
+        ankle heuristic.
 
-        if len(self.x.shape) != 2:
-            return "Data needs to be of shape (n_samples, n_features)."
-        print("Loaded data.")
-        return OK
+    inplace: Only used when x is an AnnData object.
+        If set to true will update x.obsm['x_emb'], otherwise,
+        return a new AnnData object.
 
-    def validate_all(self, dim_method='PCA', dim_n_components='knee',
-                     clu_method='KMeans', eval_method='Silhouette',
-                     clu_n_clusters='(3, 5, 1)', clu_n_jobs=1,
-                     mark_method='TTest', mark_alpha=0.05, mark_markers_n=200,
-                     mark_correction='hs', mark_n_jobs=1, con_method="Converter",
-                     con_convention='id-to-name', con_path="markers/gene_id_name.csv",
-                     ide_method='HyperGeom', ide_path='markers/cell_type_marker.json',
-                     ide_tissue='all', vis_method='UMAP', ssc_method=None,
-                     ensemble_methods=None):
+    check_if_exists: Only used when x is an AnnData object.
+        If set to true, will check x if it contains embeddings
+        from the same method. If found, and the number of components
+        in x.obsm['x_emb'] is greater than or equal to n_components,
+        then the first n_components columns of x.obsm['x_emb']
+        will be returned. No computation takes place.
 
-        try:
-            _method_exists('dim_reduction', dim_method)
-            _validate_dim_n_components(
-                dim_n_components, dim_method, *self.x.shape)
-            _method_exists('cluster', clu_method)
-            _method_exists('cluster_eval', eval_method)
-            _validate_clu_n_clusters(clu_n_clusters, self.x.shape[0])
-            _validate_n_jobs(clu_n_jobs)
-            _method_exists('markers', mark_method)
-            _validate_mark_alpha(mark_alpha)
-            _validate_mark_markers_n(mark_markers_n, self.x.shape[1])
-            _validate_mark_correction(mark_correction)
-            _validate_n_jobs(mark_n_jobs)
-            _method_exists('conversion', con_method)
-            _validate_con_convention(con_convention)
-            _method_exists('identification', ide_method)
-            _method_exists('visualization', vis_method)
-            if clu_method == 'Ensemble':
-                _validate_ensemble_methods(ensemble_methods)
-            if ssc_method is not None:
-                _method_exists('ss_cluster', ssc_method)
-        except NotImplementedError as nie:
-            print(str(nie))
-            return str(nie)
-        except ValueError as ve:
-            print(str(ve))
-            return str(ve)
-        except Exception as e:
-            print(str(e))
-            traceback.print_exc(file=sys.stdout)
-            return "A problem occurred."
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
 
-        return OK
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return np.ndarray of shape
+    (n_observations, n_components) containing the embedding.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
 
-    def run_all(self, dim_method='PCA', dim_n_components='knee',
-                clu_method='KMeans', eval_method='Silhouette',
-                clu_n_clusters='(3, 5, 1)', clu_n_jobs=1,
-                de_method='TTest', de_alpha=0.05, de_n_genes=200,
-                de_correction='holm-sidak', de_n_jobs=1, con_method="Converter",
-                con_convention='id-to-name', con_path="markers/gene_id_name.csv",
-                ide_method='HyperGeom', ide_path='markers/cell_type_marker.json',
-                ide_tissue='all'):
-        try:
-            self.run_step('dim', dim_method=dim_method,
-                          dim_n_components=dim_n_components)
-            self.run_step('clu', clu_method=clu_method, eval_method=eval_method,
-                          clu_n_clusters=clu_n_clusters, clu_n_jobs=clu_n_jobs)
-            self.run_step('de', de_method=de_method, de_alpha=de_alpha,
-                          de_n_genes=de_n_genes, de_correction=de_correction,
-                          de_n_jobs=de_n_jobs)
-            self.run_step('con', con_method=con_method,
-                          con_convention=con_convention, con_path=con_path)
-            self.run_step('ide', ide_method=ide_method,
-                          ide_path=ide_path, ide_tissue=ide_tissue)
-        except MethodNotImplementedError as e:
-            print(str(e))
-            return str(e)
-        except InappropriateArgument as e:
-            print(str(e))
-            return str(e)
-        except InvalidArgument as e:
-            print(str(e))
-            return str(e)
-        except Exception as e:
-            print(str(e))
-            traceback.print_exc(file=sys.stdout)
-            return "An error occurred."
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        adata = _validate_x(x)
+    _method_exists('dim_reduction', method)
+    n_components_used = n_components
+    n_components = _validate_dim_n_components(n_components,
+                                              method, *adata.X.shape)
 
-    def run_step(self, step, **kwargs):
-        function_name = "run_" + step
-        if hasattr(self, function_name):
-            try:
-                getattr(self, function_name)(**kwargs)
-                return OK
-            except MethodNotImplementedError as e:
-                print(str(e))
-                return str(e)
-            except InappropriateArgument as e:
-                print(str(e))
-                return str(e)
-            except InvalidArgument as e:
-                print(str(e))
-                return str(e)
-            except Exception as e:
-                print(str(e))
-                traceback.print_exc(file=sys.stdout)
-                return "An error occurred."
-        else:
-            raise MethodNotImplementedError("Step not found.")
+    x_emb = None
+    # Check if embeddings exist in x to save computation
+    if is_AnnData and check_if_exists:
+        x_emb = _emb_exists_in_adata(adata, method, n_components)
 
-    def run_dim(self, dim_method="PCA", dim_n_components='knee', **kwargs):
-        dim_n_components = _validate_dim_n_components(
-            dim_n_components, dim_method, *self.x.shape)
+    # If x_emb was not found in adata, it is None
+    # Create dimensionality reduction object and find embedding
+    if x_emb is None:
+        x_emb = wrap('dim_reduction', method)(
+            n_components=n_components, **kwargs).get(adata.X)
 
-        if dim_method == 'Precomputed PCA':
-            if self.x_emb_precomp is not None:
-                if dim_n_components > 60:
-                    raise InappropriateArgument(
-                        "A max of 60 components is precomputed.")
-                self.x_emb = self.x_emb_precomp[:, :dim_n_components]
-                return
-            else:
-                raise InappropriateArgument("No precomputed PCA found.")
+    if not is_AnnData:
+        return x_emb
 
-        _method_exists('dim_reduction', dim_method)
+    # Populate
+    adata.obsm['x_emb'] = x_emb
+    adata.uns['dim_reduction_info'] = {}
+    adata.uns['dim_reduction_info']['method'] = method
+    adata.uns['dim_reduction_info']['n_components'] = x_emb.shape[1]
+    adata.uns['dim_reduction_info']['n_components_used'] = n_components_used
+    adata.uns['dim_reduction_info']['kwargs'] = kwargs
 
-        if hasattr(self, 'dim_method') and hasattr(self, 'dim_n_components_inp')\
-                and hasattr(self, 'x_emb'):
-            if self.dim_method == dim_method\
-                    and self.dim_n_components_inp == dim_n_components:
-                return
+    if not inplace:
+        return adata
 
-        self.dim_method = dim_method
-        self.dim_n_components_inp = dim_n_components
-        self.x_emb = wrap('dim_reduction', dim_method)(
-            n_components=dim_n_components, **kwargs).get(self.x)
-        self.n_components = self.x_emb.shape[1]
 
-    def run_clu(self, clu_method="KMeans", eval_method="Silhouette",
-                clu_n_clusters='(3, 6, 1)', clu_n_jobs=1, **kwargs):
-        _method_exists('cluster', clu_method)
-        _method_exists('cluster_eval', eval_method)
-        clu_n_clusters = _validate_clu_n_clusters(
-            clu_n_clusters, self.x.shape[0])
-        clu_n_jobs = _validate_n_jobs(clu_n_jobs)
-        if clu_method != 'Ensemble':
-            kwargs.pop('ensemble_methods', None)
-        if "ensemble_methods" in kwargs:
-            kwargs['ensemble_methods'] = _validate_ensemble_methods(
-                kwargs['ensemble_methods'])
+def cluster(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'Leiden',
+        eval_method: str = 'Silhouette',
+        n_clusters: Union[str, tuple, int, list, np.ndarray] = (3, 6, 1),
+        use_emb: bool = True,
+        inplace: Optional[bool] = True,
+        n_jobs_multiple: Optional[int] = 1,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Cluster the data.
 
-        self.clu_method = clu_method
-        self.eval_method = eval_method
-        self.clu_n_clusters_inp = clu_n_clusters
-        self.labels, scores = wrap("cluster", clu_method)(
-            eval_obj=wrap("cluster_eval", eval_method)(),
-            n_clusters=clu_n_clusters,
-            n_jobs=clu_n_jobs, **kwargs).get(self.x_emb)
-        self.n_clusters = np.unique(self.labels)
-        self.key_maps = {str(i): i for i in np.unique(self.labels)}
+    Parameters
+    __________
+    x: AnnData object or np array containing the data matrix.
 
-    def set_labels(self, labels):
-        self.labels = labels
-        self.n_clusters = np.unique(self.labels)
-        self.key_maps = {str(i): i for i in np.unique(self.labels)}
+    method: String specifying the clustering method to use. See
+        https://github.com/ferrocactus/cellar/tree/master/doc for
+        a full list of methods available.
 
-    def get_cluster_id(self, name):
-        return self.key_maps[name]
+    eval_method: String specifying the clustering method to use.
+        See https://github.com/ferrocactus/cellar/tree/master/doc
+        for a full list of methods available.
 
-    def get_cluster_name(self, id):
-        all_values = list(self.key_maps.values())
-        all_keys = list(self.key_maps.keys())
-        name = all_keys[all_values.index(id)]
-        return name
+    n_clusters: Can be a single integer of a list/tuple specifying
+        multiple number of clusters to use. The evaluation method
+        in eval_method will be used to determine the number of
+        clusters with the best score. In the case of a tuple,
+        a list is formed by treating the tuple as a pythonic range;
+        (a, b, c) will start at a, finish at b-1, in increments of c.
 
-    def run_merge_clusters(self, clusters):
-        clusters = _validate_cluster_list(self.labels, clusters)
-        if len(clusters) < 2:
-            raise InvalidArgument("Not enough clusters found to merge")
+    use_emb: If True, will attempt to cluster on an embedding of x
+        as specified in x.obsm['x_emb'] if x is AnnData object. If x
+        is not AnnData, this argument is ignored.
 
-        for cluster in clusters[1:]:
-            name = self.get_cluster_name(cluster)
-            self.key_maps.pop(name, None)
-            self.labels[self.labels == cluster] = clusters[0]
+    inplace: Only used when x is an AnnData object.
+        If set to true will update x.obs['labels'], otherwise,
+        return a new AnnData object.
 
-    def update_labels(self, name, indices):
-        indices = np.array(indices).astype(np.int)
-        name = str(name)
+    n_jobs_multiple: Only used when n_clusters results is a list
+        of more than one integer. If n_jobs > 1, will run clustering
+        for each n_cluster in parallel.
 
-        if name in self.key_maps:
-            cid = self.get_cluster_id(name)
-            self.labels[indices] = cid
-        else:
-            unq = np.unique(self.labels)
-            for x in range(1000):
-                if x not in unq:
-                    self.key_maps[name] = x
-                    self.labels[indices] = x
-                    newunq = np.unique(self.labels)
-                    oldlabels = list(self.key_maps.values())
-                    for oldlabel in oldlabels:
-                        if oldlabel not in newunq:
-                            oldname = self.get_cluster_name(oldlabel)
-                            self.key_maps.pop(oldname, None)
-                    break
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
 
-        self.n_clusters = np.unique(self.labels)
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return np.ndarray of shape
+    (n_observations,) containing the labels.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
 
-    def run_de(self, de_method="TTest", de_alpha=0.05, de_n_genes=200,
-               de_correction='holm-sidak', de_n_jobs=1):
-        _method_exists('de', de_method)
-        de_alpha = _validate_mark_alpha(de_alpha)
-        de_n_genes = _validate_mark_markers_n(de_n_genes, self.x.shape[1])
-        de_correction = _validate_mark_correction(de_correction)
-        de_n_jobs = _validate_n_jobs(de_n_jobs)
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        adata = _validate_x(x)
+    _method_exists('cluster', method)
+    _method_exists('cluster_eval', eval_method)
+    n_clusters = _validate_clu_n_clusters(n_clusters, adata.X.shape[0])
+    n_jobs_multiple = _validate_n_jobs(n_jobs_multiple)
 
-        self.de_method = de_method
-        self.de_alpha = de_alpha
-        self.de_n_genes = de_n_genes
-        self.de_correction = de_correction
-        self.markers = wrap("de", de_method)(
-            alpha=de_alpha, markers_n=de_n_genes,
-            correction=de_correction, n_jobs=de_n_jobs
-        ).get(self.x, self.labels, self.n_clusters)
+    # Determine if embeddings should be used or the full data matrix
+    if is_AnnData and use_emb:
+        if 'x_emb' not in adata.obsm:
+            raise InvalidArgument("x_emb not found in AnnData object.")
+        x_to_use = adata.obsm['x_emb']
+    else:
+        x_to_use = adata.X
 
-    def run_de_subset(self, subset1, subset2=None, de_method='TTest',
-                      de_alpha=0.05, de_n_genes=200,
-                      de_correction='holm-sidak'):
-        _method_exists('de', de_method)
-        subset1 = _validate_subset(subset1)
-        subset2 = _validate_subset(subset2)
-        de_alpha = _validate_mark_alpha(de_alpha)
-        de_n_genes = _validate_mark_markers_n(de_n_genes, self.x.shape[1])
-        de_correction = _validate_mark_correction(de_correction)
+    # Create clustering object and get labels
+    labels, scores = wrap("cluster", method)(
+        eval_obj=wrap("cluster_eval", eval_method)(),
+        n_clusters=n_clusters,
+        n_jobs=n_jobs_multiple, **kwargs).get(x_to_use)
 
-        self.de_method = de_method
-        self.de_alpha = de_alpha
-        self.de_n_genes = de_n_genes
-        self.de_correction = de_correction
+    labels = np.array(labels).astype(int)
+    scores = np.array(scores).astype(float).reshape(-1)
 
-        if subset2 is None:
-            self.markers = wrap("de", de_method)(
-                alpha=de_alpha, markers_n=de_n_genes,
-                correction=de_correction).get_subset(self.x, subset1)
-        else:
-            # Artificially create dataset and labels
-            x1 = self.x[subset1]
-            x2 = self.x[subset2]
-            x = np.concatenate([x1, x2])
+    # If x was a list or numpy array
+    if not is_AnnData:
+        return labels
 
-            labels1 = np.zeros((x1.shape[0],), dtype=int)
-            labels2 = np.ones((x2.shape[0],), dtype=int)
-            labels = np.concatenate([labels1, labels2])
+    # Populate entries
+    adata.obs['labels'] = labels
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(labels)
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_info']['n_clusters_used'] = n_clusters
+    adata.uns['cluster_info']['eval_method'] = eval_method
+    adata.uns['cluster_info']['scores'] = scores
+    adata.uns['cluster_info']['used_emb'] = use_emb
+    adata.uns['cluster_info']['kwargs'] = kwargs
+    adata.uns['cluster_names'] = bidict(
+        {i: str(i) for i in unq_labels})
 
-            self.markers = wrap("de", de_method)(
-                alpha=de_alpha, markers_n=de_n_genes,
-                correction=de_correction).get(x, labels)
+    populate_subsets(adata)
 
-    def run_con(self, con_method="Converter", con_convention='id-to-name',
-                con_path='markers/gene_id_name.csv'):
-        _method_exists('conversion', con_method)
-        con_convention = _validate_con_convention(con_convention)
+    if not inplace:
+        return adata
 
-        self.con_method = con_method
-        self.con_convention = con_convention
-        con = wrap("conversion", con_method)(
-            convention=con_convention, path=con_path)
-        for marker in self.markers:
-            self.markers[marker]['inp_names'] = self.col_ids[
-                self.markers[marker]['indices']
-            ]
-            self.markers[marker]['outp_names'] = con.get(
-                self.markers[marker]['inp_names']
-            )
 
-    def run_ide(self, ide_method="HyperGeom",
-                ide_path='markers/cell_type_marker.json', ide_tissue='all'):
-        _method_exists('identification', ide_method)
+def reduce_dim_vis(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'UMAP',
+        dim: int = 2,
+        use_emb: bool = True,
+        inplace: Optional[bool] = True,
+        check_if_exists: Optional[bool] = False,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Reduce dimensionality of the data for visualization.
 
-        self.ide_method = ide_method
-        self.markers = wrap("identification", ide_method)(
-            path=ide_path, tissue=ide_tissue,
-        ).get(self.markers.copy())
+    Parameters
+    __________
+    x: AnnData object or np array containing the data matrix.
 
-    def run_ssclu(self, ssclu_method='SeededKMeans', **kwargs):
-        _method_exists('ss_cluster', ssclu_method)
-        if 'saved_clusters' in kwargs:
-            kwargs['saved_clusters'] = _validate_cluster_list(self.labels,
-                                                              kwargs['saved_clusters'])
-            saved = {}
-            for saved_cluster in kwargs['saved_clusters']:
-                name = self.get_cluster_name(saved_cluster)
-                if not name.isnumeric():
-                    saved[saved_cluster] = (
-                        name, np.where(self.labels == saved_cluster))
+    method: String specifying the dimensionality reduction method
+        to use. See https://github.com/ferrocactus/cellar/tree/master/doc
+        for a full list of methods available.
 
-            self.labels, kwargs['saved_clusters'], repl = _categorify(
-                self.labels, kwargs['saved_clusters']
-            )
+    dim: Dimensionality, can be either 2 or 3.
 
-        self.ssclu_method = ssclu_method
-        self.labels = wrap(
-            "ss_cluster",
-            ssclu_method)().get(self.x_emb, self.labels, **kwargs)
-        self.n_clusters = np.unique(self.labels)
+    use_emb: If True, will attempt to run on an embedding of x
+        as specified in x.obsm['x_emb] if x is AnnData object. If x
+        is not AnnData, this argument is ignored.
 
-        self.key_maps = {str(i): i for i in np.unique(self.labels)}
+    inplace: Only used when x is an AnnData object.
+        If set to true will update x.obsm['x_emb_2d'] if dim=2,
+        otherwise, x.obsm['x_emb_3d'] if dim=3, otherwise
+        return a new AnnData object with the appropriate
+        key added.
 
-        if 'saved_clusters' in kwargs:
-            for i in saved:
-                new_lbl = self.labels[saved[i][1]][0]
-                old_name = self.get_cluster_name(new_lbl)
-                if old_name in self.key_maps:
-                    self.key_maps.pop(old_name, None)
-                self.key_maps[saved[i][0]] = new_lbl
+    check_if_exists: Only used when x is an AnnData object.
+        If set to true, will check x if it contains 2d/3d embeddings
+        from the same method. If found, return those instead.
 
-    def run_vis(self, vis_method='UMAP', **kwargs):
-        _method_exists('visualization', vis_method)
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
 
-        if hasattr(self, 'vis_method') and hasattr(self, 'x_emb_2d'):
-            if self.vis_method == vis_method:
-                return
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return np.ndarray of shape
+    (n_observations, dim) containing the visualization embedding.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
 
-        if not hasattr(self, 'x_emb'):
-            self.run_step('dim')
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        adata = _validate_x(x)
+    _method_exists('visualization', method)
 
-        if hasattr(self, 'clu_method'):
-            if self.clu_method == "Scanpy":
-                ann = anndata.AnnData(X=self.x_emb)
-                scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
-                scanpy.tl.umap(ann)
-                self.x_emb_2d = ann.obsm['X_umap']
-                return
-        if hasattr(self, 'align_method'):
-            if self.align_method == "Scanpy":
-                ann = anndata.AnnData(X=self.x_emb)
-                scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
-                scanpy.tl.umap(ann)
-                self.x_emb_2d = ann.obsm['X_umap']
-                return
+    dim = int(dim)
+    if dim != 2 and dim != 3:
+        raise InvalidArgument("Incorrect number of dimensions specified.")
 
-        self.vis_method = vis_method
-        self.x_emb_2d = wrap("visualization", vis_method)().get(self.x_emb)
+    # Check if embedding already exists in adata
+    if is_AnnData and check_if_exists:
+        if _2d_emb_exists_in_adata(adata, method, dim, use_emb):
+            if not inplace:
+                return adata
+            return
 
-    def run_align(self, align_method, x_ref, col_ids_ref, labels_ref,
-                  key_maps, **kwargs):
-        _method_exists('align', align_method)
-        self.align_method = align_method
+    # Determine if embeddings should be used or the full data matrix
+    if is_AnnData and use_emb:
+        if 'x_emb' not in adata.obsm:
+            print("x_emb not found. Running PCA with default parameters.")
+            print("If you don't want to use embeddings, pass use_emb=False.")
+            reduce_dim(adata, inplace=True)
+        x_to_use = adata.obsm['x_emb']
+    else:
+        x_to_use = adata.X
 
-        self.labels = wrap("align", align_method)().get(
-            self.x, self.col_ids, x_ref, col_ids_ref, labels_ref
-        ).astype(np.int)
-        self.n_clusters = np.unique(self.labels)
-        self.key_maps = key_maps.copy()
-        for name in key_maps:
-            if self.get_cluster_id(name) not in self.n_clusters:
-                self.key_maps.pop(name, None)
+    # Create dimensionality reduction object and find embedding
+    x_emb_nd = wrap("visualization", method)(
+        n_components=dim, **kwargs).get(x_to_use)
 
-    def has(self, attr):
-        # Needed to make calls from R easier
-        if hasattr(self, attr):
-            return True
-        return False
+    if not is_AnnData:
+        return x_emb_nd
 
-    def get_cluster_names(self):
-        sd = {k: v for k, v in sorted(
-            self.key_maps.items(), key=lambda item: item[1])}
-        return {'labels': list(sd.values()), 'names': list(sd.keys())}
+    # Update the 2d or 3d keys
+    adata.obsm[f'x_emb_{dim}d'] = x_emb_nd
+    adata.uns[f'visualization_info_{dim}d'] = {}
+    adata.uns[f'visualization_info_{dim}d']['method'] = method
+    adata.uns[f'visualization_info_{dim}d']['used_emb'] = use_emb
+    adata.uns[f'visualization_info_{dim}d']['kwargs'] = kwargs
 
-    def get_label_names(self):
-        names = np.zeros_like(self.labels).astype('U200')
-        for i in self.key_maps:
-            names[np.where(self.labels == self.key_maps[i])] = i
-        return names
+    if not inplace:
+        return adata
 
-    def save_session(self):
-        sess = {}
-        to_save = [
-            'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
-            'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
-            'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
-            'markers', 'vis_method', 'key_maps'
-        ]
 
-        for attr in to_save:
-            if hasattr(self, attr):
-                sess[attr] = getattr(self, attr)
-        if hasattr(self, 'x_emb'):
-            for comp in range(self.x_emb.shape[1]):
-                sess['comp' + str(comp)] = self.x_emb[:, comp]
-        if hasattr(self, 'x_emb_2d'):
-            sess['x1'] = self.x_emb_2d[:, 0]
-            sess['x2'] = self.x_emb_2d[:, 1]
+def name_genes(
+    x: Union[AnnData, np.ndarray, list],
+    inplace: Optional[bool] = True
+) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Find synonyms for gene IDs/names.
 
-        return sess
+    Parameters
+    __________
+    x: AnnData object or np array containing names to be converted.
 
-    def load_session(self, sess):
-        to_load = [
-            'dataset', 'dim_method', 'dim_n_components_inp', 'n_components',
-            'clu_method', 'eval_method', 'clu_n_clusters_inp', 'labels',
-            'n_clusters', 'de_alpha', 'de_n_genes', 'de_correction',
-            'markers', 'vis_method', 'key_maps'
-        ]
+    inplace: Only used when x is an AnnData object.
+        If set to true will update x.var['names'] if var.index is
+        determined to consist of gene ensembl ids, or will update
+        x.var['ids'] if var.index is determined to consist of gene names.
+        In either case, a new column with the other name is crated for
+        consistency.
 
-        for attr in to_load:
-            if attr in sess:
-                try:
-                    setattr(self, attr, sess[attr])
-                except:
-                    raise KeyError("Error loading session.")
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return a dictionary with two keys
+    'ids' and 'names'.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
 
-        if 'x1' in sess:
-            self.x_emb_2d = np.vstack([sess['x1'], sess['x2']]).T
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        d = convert(np.array(x))
+        return d
 
-        if 'comp0' in sess:
-            comps = []
-            for comp in range(1000):
-                if 'comp' + str(comp) in sess:
-                    comps.append(sess['comp' + str(comp)])
-                else:
-                    break
-            self.x_emb = np.vstack(comps).T
+    d = convert(adata.var.index.to_numpy().astype('U'))
+    for key in d:
+        adata.var['parsed_' + key] = d[key]
+
+    if not inplace:
+        return adata
+
+
+def de(
+        x: Union[AnnData, np.ndarray, list],
+        subset1: Union[str, np.ndarray, list],
+        subset2: Optional[Union[str, np.ndarray, list]] = None,
+        method: str = 'TTest',
+        alpha: float = 0.05,
+        max_n_genes: int = 200,
+        correction: str = 'holm-sidak',
+        inplace: Optional[bool] = True,
+        **kwargs) -> Optional[Union[AnnData, dict]]:
+    """
+    Run differential expression.
+
+    Parameters
+    __________
+    x: AnnData object or np array containing the data matrix.
+
+    method: String specifying the de method to use. See
+        https://github.com/ferrocactus/cellar/tree/master/doc
+        for a full list of methods available.
+
+    subset1: An array consisting of the indices of the cells
+        for which de genes need to be found, or a string
+        specifying the subset as stored in adata.uns['subsets].
+        If string, x has to be AnnData object.
+
+    subset2: Same format at subset1. If set to None, then will
+        run differential expression of cells in subset1 vs all,
+        otherwise, will run de of subset1 vs subset2.
+
+    alpha: Cutoff for p values. Default to 0.05.
+
+    max_n_genes: Maximum number of differential genes to look for.
+        The returned number may be smaller if not enough p values
+        are found to be less then alpha.
+
+    correction: String specifying the correction method to
+        use for p values. For a full list see
+        https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html
+        Can also be set to 'None' (string), in which case no correction
+        is performed.
+
+    inplace: Only used when x is an AnnData object.
+        If set to true will update x.uns['de'].
+
+    **kwargs: Additional parameters.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    If x is not AnnData, will return a dictionary containing all the
+    de information.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+
+    if is_AnnData:
+        adata = x.copy() if not inplace else x
+    else:
+        adata = _validate_x(x)
+    _method_exists('de', method)
+    subset1 = _validate_subset(subset1, adata)
+    subset2 = _validate_subset(subset2, adata)
+    alpha = _validate_mark_alpha(alpha)
+    max_n_genes = _validate_mark_markers_n(max_n_genes, adata.X.shape[1])
+    correction = _validate_mark_correction(correction)
+
+    if subset2 is None:
+        # Run subset1 vs all
+        de_genes_d = wrap("de", method)(
+            alpha=alpha,
+            markers_n=max_n_genes,
+            correction=correction).get_subset(adata.X, subset1)
+    else:
+        # Run subset1 vs subset2
+        # First, artificially create dataset and labels
+        x1 = adata.X[subset1]
+        x2 = adata.X[subset2]
+        x = np.concatenate([x1, x2])
+        labels1 = np.zeros((x1.shape[0],), dtype=int)
+        labels2 = np.ones((x2.shape[0],), dtype=int)
+        labels = np.concatenate([labels1, labels2])
+
+        de_genes_d = wrap("de", method)(
+            alpha=alpha,
+            markers_n=max_n_genes,
+            correction=correction).get(x, labels)
+
+    # Assign first dict key to anndata object
+    # This is the only key if subset2 is None
+    adata.uns['de'] = de_genes_d[next(iter(de_genes_d))]
+    adata.uns['de_info'] = {}
+    adata.uns['de_info']['method'] = method
+    adata.uns['de_info']['alpha'] = alpha
+    adata.uns['de_info']['max_n_genes'] = max_n_genes
+    adata.uns['de_info']['correction'] = correction
+    adata.uns['de_info']['subset1'] = subset1
+    adata.uns['de_info']['subset2'] = subset2
+    adata.uns['de_info']['kwargs'] = kwargs
+
+    if not inplace:
+        return adata
+
+
+def ss_cluster(
+        x: AnnData,
+        method: str = 'SeededKMeans',
+        use_emb: bool = True,
+        inplace: Optional[bool] = True,
+        preserved_labels: Optional[Union[np.ndarray, list, int]] = None,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Semi-supervised clustering of the data.
+
+    Parameters
+    __________
+    x: AnnData object with x.var['labels'] populated.
+
+    method: String specifying the ss clustering method to use. See
+        https://github.com/ferrocactus/cellar/tree/master/doc for
+        a full list of methods available.
+
+    use_emb: If True, will attempt to cluster on an embedding of x
+        as specified in x.obsm['x_emb'].
+
+    inplace: If set to true will update x.obs['labels'], otherwise,
+        return a new AnnData object.
+
+    preserved_labels: A list of labels that should be preserved
+        by the algorithm.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    Will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+    if not is_AnnData:
+        raise InvalidArgument("x is not in AnnData format.")
+    if 'labels' not in x.obs:
+        raise InvalidArgument("'labels' not found in object.")
+    adata = x.copy() if not inplace else x
+    _method_exists('ss_cluster', method)
+    if method != 'SeededKMeans':
+        preserved_labels = _validate_cluster_list(
+            adata.obs['labels'],
+            preserved_labels)
+    else:
+        preserved_labels = np.array([])
+
+    # Determine if embeddings should be used or the full data matrix
+    if use_emb:
+        if 'x_emb' not in adata.obsm:
+            raise InvalidArgument("x_emb not found in AnnData object.")
+        x_to_use = adata.obsm['x_emb']
+
+    labels_cp = adata.obs['labels'].copy()
+    cluster_names = bidict({})
+    unq_labels = np.unique(labels_cp)
+    n_clusters = len(unq_labels)
+    preserved_labels_upd = []
+
+    for i, label in enumerate(unq_labels):
+        labels_cp[adata.obs['labels'] == label] = i
+        if label in preserved_labels:
+            cluster_names[i] = adata.uns['cluster_names'][label]
+            preserved_labels_upd.append(i)
+
+    # Create clustering object and get labels
+    labels = wrap("ss_cluster", method)(**kwargs).get(
+        x_to_use, labels_cp, preserved_labels=preserved_labels_upd)
+
+    labels = np.array(labels).astype(int)
+    unq_labels = np.unique(labels)
+
+    for label in unq_labels:
+        if label not in list(cluster_names.keys()):
+            cluster_names[label] = str(label)
+
+    # Populate entries
+    adata.obs['labels'] = labels
+    adata.uns['cluster_info'] = {}
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_info']['n_clusters_used'] = n_clusters
+    adata.uns['cluster_info']['used_emb'] = use_emb
+    adata.uns['cluster_info']['kwargs'] = kwargs
+    adata.uns['cluster_names'] = cluster_names
+
+    populate_subsets(adata)
+
+    if not inplace:
+        return adata
+
+
+def transfer_labels(
+        x: AnnData,
+        ref: AnnData,
+        method: str = 'Scanpy Ingest',
+        inplace: Optional[bool] = True,
+        **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
+    """
+    Transfer labels using a reference dataset.
+
+    Parameters
+    __________
+    x: AnnData object containing the data.
+
+    ref: AnnData object with x.var['labels'] populated.
+
+    method: String specifying the label transfer method to use. See
+        https://github.com/ferrocactus/cellar/tree/master/doc for
+        a full list of methods available.
+
+    inplace: If set to true will update x.obs['labels'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData) and isinstance(ref, AnnData)
+    if not is_AnnData:
+        raise InvalidArgument("x is not in AnnData format.")
+    adata = x.copy() if not inplace else x
+
+    if 'labels' not in ref.obs:
+        raise InvalidArgument("labels not found in reference dataset.")
+
+    _method_exists('align', method)
+
+    # Create alignment object and get labels
+    labels = wrap("align", method)().get(
+        adata.X, adata.var.index.to_numpy().astype('U'),
+        ref.X, ref.var.index.to_numpy().astype('U'),
+        ref.obs['labels'].to_numpy().astype(np.int)
+    ).astype(np.int)
+
+    # Populate entries
+    adata.obs['labels'] = labels
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(labels)
+    adata.uns['cluster_info']['unique_labels'] = unq_labels
+    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['method'] = method
+    adata.uns['cluster_info']['kwargs'] = kwargs
+    adata.uns['cluster_names'] = bidict(
+        {i: str(i) for i in unq_labels})
+
+    populate_subsets(adata)
+
+    if not inplace:
+        return adata

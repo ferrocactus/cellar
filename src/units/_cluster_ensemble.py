@@ -112,14 +112,16 @@ class Ens_HyperGraph(Unit):
 
         # initialize empty partition matrix
         partitions = np.zeros((len(self.methods), x.shape[0]))
+        scores = []
 
         for i, method in enumerate(self.methods):
             clu_obj = clu_wrap(method)(
                 eval_obj=self.eval_obj, n_clusters=self.n_clusters,
                 n_jobs=self.n_jobs, **self.kwargs
             )
-            partitions[i, :] = clu_obj.get(x)
+            partitions[i, :], score = clu_obj.get(x)
+            scores.append(np.max(score))
 
         ensemble_labels = CE.cluster_ensembles(partitions.astype(np.int))
 
-        return ensemble_labels
+        return ensemble_labels, scores

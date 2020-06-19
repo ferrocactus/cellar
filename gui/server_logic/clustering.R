@@ -11,7 +11,7 @@ cluster <- function(input, output, session, adata, replot,
         if (input$dim_options == "pca_auto")
             n_components = 'knee'
         else
-            n_components = input$n_components
+            n_components = input$dim_n_components
 
         withProgress(message = "Please Wait", value = 0, {
             n <- 5
@@ -30,7 +30,8 @@ cluster <- function(input, output, session, adata, replot,
                 eval_method = input$eval_method,
                 n_clusters = input$clu_n_clusters,
                 use_emb = TRUE,
-                inplace = TRUE)
+                inplace = TRUE,
+                ensemble_methods = input$ensemble_checkbox)
 
             incProgress(1 / n, detail = "Visualizing")
             cellar$reduce_dim_vis(

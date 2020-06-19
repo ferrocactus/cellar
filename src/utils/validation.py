@@ -225,7 +225,6 @@ def _validate_ensemble_methods(ensemble_methods):
     return ensemble_methods
 
 
-
 def _validate_subset(subset, adata):
     if subset is None:
         return None
@@ -245,38 +244,6 @@ def _validate_subset(subset, adata):
         return np.array(subset).astype(np.int)
     else:
         raise InvalidArgument("Invalid subset encountered.")
-
-
-def _validate_new_labels(new_labels, old_key_maps):
-    if isinstance(new_labels, (int, float)):
-        return np.array([new_labels]).astype(np.int), 0
-    elif isinstance(new_labels, (list, np.ndarray)):
-        new_labels = np.array(new_labels)
-        key_maps = {}
-        unq = np.unique(new_labels)
-        used = []
-        for label in unq:
-            try:
-                label = int(label)
-            except:
-                pass
-
-            if str(label) in old_key_maps:
-                new_labels[new_labels == label] = old_key_maps[str(label)]
-                key_maps[str(label)] = label
-            elif isinstance(label, int):
-                used.append(label)
-                key_maps[str(label)] = label
-            else:
-                for x in range(1000):
-                    if str(x) not in used:
-                        new_labels[new_labels == label] = x
-                        used.append(str(x))
-                        key_maps[str(label)] = x
-                        break
-        return new_labels.astype(np.int), key_maps
-    else:
-        raise InvalidArgument("Invalid list of new labels encountered")
 
 
 def validate_cluster_list(labels, saved_clusters):
@@ -314,21 +281,3 @@ def _validate_cluster_list(labels, saved_clusters):
         return saved_clusters
     else:
         raise InvalidArgument("Invalid list of clusters encountered.")
-
-
-def _categorify(labels, saved_clusters):
-    labels_new = labels.copy()
-    saved_clusters_new = saved_clusters.copy()
-    unq = np.sort(np.unique(labels))
-    repl = {}
-    last = -1
-    for i in range(len(unq)):
-        if i not in unq:
-            labels_new[labels == unq[last]] = i
-            if unq[last] in saved_clusters:
-                saved_clusters_new[saved_clusters == unq[last]] = i
-            last -= 1
-            repl[unq[last]] = i
-        else:
-            repl[i] = i
-    return labels_new, saved_clusters_new, repl
