@@ -21,6 +21,7 @@ class Ali_Scanpy_Ingest(Unit):
 
         x = x[:, np.isin(col_ids, common_col_ids)]
         x_ref = x_ref[:, np.isin(col_ids_ref, common_col_ids)]
+
         a1 = anndata.AnnData(x)
         a2 = anndata.AnnData(x_ref)
         sc.pp.pca(a1)
@@ -32,4 +33,4 @@ class Ali_Scanpy_Ingest(Unit):
         a2.obs['labels'] = labels_ref
 
         sc.tl.ingest(a1, a2, obs='labels')
-        return a1.obs['labels']
+        return np.array(a1.obs['labels']).astype(np.int).reshape(-1)

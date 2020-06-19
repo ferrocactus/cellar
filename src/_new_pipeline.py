@@ -564,7 +564,6 @@ def transfer_labels(
         x: AnnData,
         ref: AnnData,
         method: str = 'Scanpy Ingest',
-        match_along: str = 'parsed_names',
         inplace: Optional[bool] = True,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
@@ -579,9 +578,6 @@ def transfer_labels(
     method: String specifying the label transfer method to use. See
         https://github.com/ferrocactus/cellar/tree/master/doc for
         a full list of methods available.
-
-    match_along: Column name in x.var and ref.var specifying the
-        dimension along which the two objects shalle be merged.
 
     inplace: If set to true will update x.obs['labels'], otherwise,
         return a new AnnData object.
@@ -599,18 +595,18 @@ def transfer_labels(
     is_AnnData = isinstance(x, AnnData) and isinstance(ref, AnnData)
     if not is_AnnData:
         raise ValueError("x is not in AnnData format.")
-    if match_along not in x.var:
-        raise ValueError(f"{match_along} not found in object.")
+    adata = x.copy() if not inplace else x
+
     if 'labels' not in ref.obs:
         raise ValueError("labels not found in reference dataset.")
-    adata = x.copy() if not inplace else x
 
     _method_exists('align', method)
 
     # Create alignment object and get labels
     labels = wrap("align", method)().get(
-        adata.X, adata.var[match_along],
-        ref.X, ref.var[match_along], ref.obs['labels']
+        adata.X, adata.var.index.to_numpy().astype('U'),
+        ref.X, ref.var.index.to_numpy().astype('U'),
+        ref.obs['labels'].to_numpy().astype(np.int)
     ).astype(np.int)
 
     # Populate entries

@@ -65,6 +65,8 @@ def get_gene_logFC_de(adata):
     return adata.uns['de']['diffs']
 
 def write_h5ad(adata, path, compression=9):
+    adata.var.pop('parsed_names', None)
+    adata.var.pop('parsed_ids', None)
     adata.write_h5ad(path, compression=compression)
 
 def read_h5ad(path):
@@ -74,6 +76,7 @@ def read_h5ad(path):
         for key in list(adata.uns['cluster_names'].keys()):
             adata.uns['cluster_names'][int(key)] = \
                 adata.uns['cluster_names'].pop(key, None)
+    name_genes(adata, inplace=True)
     return adata
 
 def write_key(adata, keyname, value):
