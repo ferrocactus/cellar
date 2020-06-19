@@ -12,7 +12,7 @@ Documentation for the single cell analysis app hosted by the Bar-Joseph [Systems
 **[Selection and Labelling](#selection-and-labelling)**<br>
 **[Analysis](#analysis)**<br>
 **[Appearance](#appearance)**<br>
-**[Exporing and Importing](#exporting-and-importing)**<br>
+**[Exporting and Importing](#exporting-and-importing)**<br>
 
 ---
 ### The Overall Layout
@@ -26,7 +26,7 @@ The above image show the layout of our single cell analysis app.
 On the left is the sidebar menu, with toggle panels enabling users to do various analysis as well as configure various settings, which will be elaborated later on.
 
 <img src="pic/UI_expression.png" alt="datasetMenu"
-	title="UI" width="300" height="300" align=left/>
+	title="UI" width="700" height="500" align=left/>
 
 On the right is the main body, which shows the results of the analysis. The top of the body is the main plot visualizing the cells being analyzed. The colors can represent the clusters of cells  or the gene expression level of any selected gene, which can be changed in the analysis panel. For example the expression level of the gene IL7R is shown in the above plot. When the expression level is shown, shapes of the points represent the clusters they belong to.
 
@@ -243,7 +243,7 @@ This panel enable the users to adjust the appearance of the main plot.
 
 ---
 
-### Exporing and Importing
+### Exporting and Importing
 
 <img src="pic/export&import.png" alt="datasetMenu"
 	title="UI" width="300" height="350" align=left/>
