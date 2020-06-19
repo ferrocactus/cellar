@@ -16,25 +16,44 @@ cluster <- function(input, output, session, adata, replot,
         withProgress(message = "Please Wait", value = 0, {
             n <- 5
             incProgress(1 / n, detail = "Reducing Dimensionality")
-            cellar$reduce_dim(
+            msg <- cellar$safe(cellar$reduce_dim,
                 x = adata(),
                 method = input$dim_method,
                 n_components = n_components,
                 inplace = TRUE,
                 check_if_exists = TRUE)
 
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
+
             incProgress(1 / n, detail = "Clustering")
-            cellar$cluster(
-                x = adata(),
-                method = input$clu_method,
-                eval_method = input$eval_method,
-                n_clusters = input$clu_n_clusters,
-                use_emb = TRUE,
-                inplace = TRUE,
-                ensemble_methods = input$ensemble_checkbox)
+            if (input$clu_method == 'Ensemble')
+                msg <- cellar$safe(cellar$cluster,
+                    x = adata(),
+                    method = input$clu_method,
+                    eval_method = input$eval_method,
+                    n_clusters = input$clu_n_clusters,
+                    use_emb = TRUE,
+                    inplace = TRUE,
+                    ensemble_methods = input$ensemble_checkbox)
+            else
+                msg <- cellar$safe(cellar$cluster,
+                    x = adata(),
+                    method = input$clu_method,
+                    eval_method = input$eval_method,
+                    n_clusters = input$clu_n_clusters,
+                    use_emb = TRUE,
+                    inplace = TRUE)
+
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
 
             incProgress(1 / n, detail = "Visualizing")
-            cellar$reduce_dim_vis(
+            msg <- cellar$safe(cellar$reduce_dim_vis,
                 x = adata(),
                 method = input$vis_method,
                 dim = 2,
@@ -42,12 +61,26 @@ cluster <- function(input, output, session, adata, replot,
                 inplace = TRUE,
                 check_if_exists = TRUE)
 
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
+
             incProgress(1 / n, detail = "Converting names")
-            cellar$name_genes(
+            msg <- cellar$safe(cellar$name_genes,
                 x = adata(),
                 inplace = TRUE
             )
+
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
         })
+
+        if (msg != 'good') {
+            return()
+        }
 
         replot(replot() + 1)
         reset(reset() + 1)
@@ -63,12 +96,17 @@ cluster <- function(input, output, session, adata, replot,
         withProgress(message = "Please Wait", value = 0, {
             n <- 2
             incProgress(1 / n, detail = "Clustering")
-            cellar$ss_cluster(
+            msg <- cellar$safe(cellar$ss_cluster,
                 x = adata(),
                 method = input$ssc_method,
                 use_emb = TRUE,
                 inplace = TRUE,
                 preserved_labels = input$saved_clusters)
+
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
         })
 
         replot(replot() + 1)

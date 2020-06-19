@@ -25,30 +25,45 @@ align <- function(input, output, session, adata, selDatasetAlign,
 
                 store_labels(adata(), as.integer(pred$labels), 'SingleR')
             } else {
-                cellar$transfer_labels(
+                msg <- cellar$safe(cellar$transfer_labels,
                     x = adata(),
                     ref = adataAlign(),
                     method = input$align_method,
                     inplace = TRUE
                 )
+
+                if (msg != 'good') {
+                    showNotification(py_to_r(msg))
+                    return()
+                }
             }
 
             adataAlign(0)
 
             incProgress(1 / n, detail = "Converting names")
-            cellar$name_genes(
+            msg <- cellar$safe(cellar$name_genes,
                 x = adata(),
                 inplace = TRUE
             )
 
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
+
             incProgress(1 / n, detail = "Visualizing")
-            cellar$reduce_dim_vis(
+            msg <- cellar$safe(cellar$reduce_dim_vis,
                 x = adata(),
                 method = input$vis_method,
                 dim = 2,
                 use_emb = TRUE,
                 inplace = TRUE,
                 check_if_exists = TRUE)
+
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
         })
 
         replot(replot() + 1)
