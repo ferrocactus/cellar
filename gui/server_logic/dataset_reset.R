@@ -22,6 +22,8 @@ dataset_reset <- function(input, output, session, reset, setNames,
 
         deGenes(c())
 
+        if (is_active(adata()) == FALSE) return()
+
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {
             updateSelectInput(
                 session = session,

@@ -65,8 +65,8 @@ def get_gene_logFC_de(adata):
     return adata.uns['de']['diffs']
 
 def write_h5ad(adata, path, compression=9):
-    adata.var.pop('parsed_names', None)
-    adata.var.pop('parsed_ids', None)
+    adata.var['parsed_names'] = None
+    adata.var['parsed_ids'] = None
     adata.write_h5ad(path, compression=compression)
 
 def read_h5ad(path):
