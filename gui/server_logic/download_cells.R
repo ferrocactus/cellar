@@ -1,6 +1,6 @@
-
-download_cells <- function(input, output, session,setNames, setPts,
-                           labelList, pipe) 
+source_python("__init__.py")
+download_cells <- function(input, output, session,setNames, 
+                           labelList, adata) 
 {
   
   
@@ -13,7 +13,7 @@ download_cells <- function(input, output, session,setNames, setPts,
       return()
     }
     
-    labels=pipe()$get_cluster_names()$labels
+    labels=get_cluster_label_list(adata())
     clusters=as.character(input$cell_subset_download)
     #print(labels)
     #print(clusters)
@@ -25,16 +25,16 @@ download_cells <- function(input, output, session,setNames, setPts,
       ids=c()
       for (i in 1:length(subsets)){
         id=(subsets[[i]])
-        ids=c(ids,setPts()[[which(setNames() == paste("Cluster_",id,sep=""))]])
+        
+        obs=py_to_r(adata()$obs)
+        ids=c(ids,obs$n_genes[which(obs$labels == id)])
       }
-      if (identical(pipe()$row_ids,NULL)==FALSE){
-        allkeys=pipe()$row_ids
-      }
-      else{
-        allkeys=c(1:length(pipe()$labels))
-      }
-      alldata=data.frame(allkeys,as.character(pipe()$get_label_names()))#pipe()$labels)
-      colnames(alldata)<-c("Cell IDs","Updates Labels")
+      #print(ids)
+      
+      allkeys=as.character(py_to_r(adata()$obs$index$to_numpy()))
+      #print(allkeys)
+      alldata=data.frame(allkeys,as.character(py_to_r(get_label_names(adata()))))
+      colnames(alldata)<-c("Cell IDs","Updated Labels")
       ouput_labeldat<-alldata[ids,]
       output$download_cells <- downloadHandler(
         filename = "subsets.csv",
