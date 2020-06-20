@@ -10,6 +10,7 @@ download_cells <- function(input, output, session, adata) {
             if (identical(input$cell_subset_download, NULL)) {
                 return()
             }
+            
             else if (input$cell_subset_download == "") {
                 return()
             }
