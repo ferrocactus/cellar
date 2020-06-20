@@ -1,5 +1,6 @@
 # Aliases
 load_file <- cellar$utils$read$load_file
+get_dic <- cellar$utils$tools$get_dic
 store_subset <- cellar$utils$tools$store_subset
 update_subset_label <- cellar$utils$tools$update_subset_label
 is_active <- cellar$utils$r_helpers$is_active
