@@ -1,10 +1,10 @@
 download_cells <- function(input, output, session, adata) {
-    observe({
+    observeEvent(input$cell_subset_download,{
         output$download_cells <- downloadHandler(
         filename = "subsets.csv",
         content = function(file) {
             if (py_to_r(is_active(adata())) == FALSE) return()
-            if (py_to_r(has_key(adata(), 'obs', 'labels')) == FALSE) return()
+            #if (py_to_r(has_key(adata(), 'obs', 'labels')) == FALSE) return()
 
             subsets = ""
             if (identical(input$cell_subset_download, NULL)) {
@@ -14,29 +14,41 @@ download_cells <- function(input, output, session, adata) {
                 return()
             }
 
-            labels = get_cluster_label_list(adata())
-            clusters = as.character(input$cell_subset_download)
-            print(labels)
-            print(clusters)
+            labels = (get_cluster_label_list(adata())) # all cluster labels
+            clusters = as.character(input$cell_subset_download) # clusters selected
+
             try(
-              subsets <- validate_cluster_list(labels, clusters)
+              subsets <- py_to_r(validate_cluster_list(labels, clusters)) ##check if the selected clusters are valid
             )
+            
+            # print(py_to_r(get_subsets(adata())))
+            # print(py_to_r(get_cluster_label_list(adata())))
+            # print(py_to_r(get_cluster_name_list(adata())))
             if (subsets != "") {
-                ids = c()
-                for (i in 1:length(subsets)) {
-                    id = (subsets[[i]])
-
-                    obs = py_to_r(adata()$obs)
-                    ids = c(ids, obs$n_genes[which(obs$labels == id)])
+                outfile=data.frame("Cell_ID"="", "Label"="") ## initiate download file with an empty first row
+                for (i in 1:length(subsets)) {        # for any input subset
+                    id = as.character(subsets[[i]])               # get cluster id
+                    allnames=py_to_r(get_subsets(adata()))
+                    alllabels=py_to_r(get_cluster_label_list(adata()))
+                    assigned_names=py_to_r(get_cluster_name_list(adata()))
+                    subsetname=allnames[which(allnames==paste0("Cluster_",as.character(id)))]  # eg. cluster_0 
+                    updated_name=assigned_names[which(alllabels==as.numeric(id))]
+                    indices=py_to_r(adata()$uns['subsets'][subsetname])       # get indices of cells in that subset 
+                    updated_names=rep(as.character(updated_name),times=length(indices))
+                    cell_ids=as.character(py_to_r(adata()$obs$index$to_numpy()))
+                    df = data.frame("Cell_ID"=cell_ids[indices], "Label"=updated_names)  # dataframe of this cluster
+                    outfile=rbind(outfile,df)  # add this cluster to the output file
+ 
                 }
-                #print(ids)
-
-                allkeys = as.character(py_to_r(adata()$obs$index$to_numpy()))
-                #print(allkeys)
-                alldata = data.frame(allkeys, as.character(py_to_r(get_label_names(adata()))))
-                colnames(alldata) <- c("Cell IDs", "Updated Labels")
-                ouput_labeldat <- alldata[ids,]
-                write.csv(ouput_labeldat, file, row.names = FALSE)
+                outfile=outfile[-1,]
+                rownames(outfile)=1:length(outfile[,1])
+                #allkeys = as.character(py_to_r(adata()$obs$index$to_numpy())) ## cell ids, i.e. row names
+                #alllabels = py_to_r(get_label_names(adata()))
+                #print(allkeys[1])
+                #alldata = data.frame(allkeys, alllabels)
+                #colnames(alldata) <- c("Cell IDs", "Updated Labels")
+                #ouput_labeldat <- alldata[ids,]
+                write.csv(outfile, file, row.names = FALSE)
             }
         }
       )
