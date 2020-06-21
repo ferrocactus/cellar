@@ -1,5 +1,6 @@
-source_python("gui/server_logic/read_onto.py")
-dic = get_dic()
+#source_python("src/utils/tools.py")
+
+#dic = (get_dic())
 
 defaults <- list(
     "dim" = '10',
@@ -30,5 +31,6 @@ options <- list(
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans", "ConstrainedSeededKMeans"),
     "de" = c("TTest"),
     "ali" = c("Scanpy Ingest", "SingleR"),
-    "tissues" = c(sort(names(dic)), 'Clusters', 'User defined')
+#    "tissues" = c(sort(names(dic)), 'Clusters', 'User defined')
+    "tissues" = c('Clusters','User defined')
 )

@@ -1,9 +1,11 @@
 
+
 selectionLabeling <- function(input, output, session, adata,
                               labelList, setNames, resubset,
                               reset, replot, relabel) {
-    dic = py_to_r(get_dic())
 
+    dic = py_to_r(get_dic())
+    
     observeEvent(input$tissue, {
         tissue = as.character(input$tissue)
         if (tissue == "") return()
