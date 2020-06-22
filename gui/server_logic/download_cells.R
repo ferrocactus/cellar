@@ -31,12 +31,17 @@ download_cells <- function(input, output, session, adata) {
                     id = as.character(subsets[[i]])               # get cluster id
                     allnames=py_to_r(get_subsets(adata()))
                     alllabels=py_to_r(get_cluster_label_list(adata()))
-                    assigned_names=py_to_r(get_cluster_name_list(adata()))
+                    assigned_names=py_to_r(get_cluster_name_list(adata()))   # get updated cluster names
                     subsetname=allnames[which(allnames==paste0("Cluster_",as.character(id)))]  # eg. cluster_0 
                     updated_name=assigned_names[which(alllabels==as.numeric(id))]
                     indices=py_to_r(adata()$uns['subsets'][subsetname])       # get indices of cells in that subset 
                     updated_names=rep(as.character(updated_name),times=length(indices))
                     cell_ids=as.character(py_to_r(adata()$obs$index$to_numpy()))
+                    indices=indices+1  # index in R starts from 1
+                    #print(length(updated_names))
+                    #print(length(indices))
+                    #print(length(cell_ids[indices]))
+                    #print(indices)
                     df = data.frame("Cell_ID"=cell_ids[indices], "Label"=updated_names)  # dataframe of this cluster
                     outfile=rbind(outfile,df)  # add this cluster to the output file
  
