@@ -6,6 +6,8 @@ from ._pipeline import de
 from ._pipeline import ss_cluster
 from ._pipeline import transfer_labels
 
+from ._plotter import plot
+
 from .utils.exceptions import InvalidArgument
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import MethodNotImplementedError

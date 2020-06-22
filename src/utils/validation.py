@@ -90,7 +90,7 @@ def _validate_clu_n_clusters(clu_n_clusters, h):
     _validate_n_clusters(clu_n_clusters[0], h)
     _validate_n_clusters(clu_n_clusters[-1], h)
 
-    return clu_n_clusters
+    return np.sort(clu_n_clusters)
 
 
 def _validate_n_jobs(n_jobs):

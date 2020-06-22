@@ -1,8 +1,14 @@
-from .units import wrap
+from typing import Optional, Union
 
-from matplotlib import pyplot as plt
-import seaborn as sns
 import numpy as np
+import plotly.express as px
+from plotly.graph_objects import Figure
+from anndata import AnnData
+
+from .units import wrap
+from . import reduce_dim_vis
+from . import name_genes
+
 
 COLORS = [
     '#cc5151', '#51cccc', '#337f7f', '#8ecc51', '#7f3333', '#597f33', '#8e51cc',
@@ -12,217 +18,157 @@ COLORS = [
 ]
 
 
-class Plotter:
+def _find_gene_index(adata, gene):
+    if isinstance(gene, int):
+        if gene > adata.var.index.to_numpy().shape[0]:
+            raise ValueError("Index out of bounds.")
+        return gene
+    if not isinstance(gene, str):
+        raise ValueError("Incorrect gene format.")
+    if gene in adata.var.index.to_numpy():
+        return np.where(adata.var.index.to_numpy() == gene)[0]
+    if 'parsed_names' not in adata.var:
+        name_genes(adata)
+    if gene in adata.var['parsed_names'].to_numpy():
+        return np.where(adata.var['parsed_names'] == gene)[0]
+    if gene in adata.var['parsed_ids'].to_numpy():
+        return np.where(adata.var['parsed_ids'] == gene)[0]
+
+    return -1
+
+
+def _plot_labels(
+    adata: AnnData,
+    show_title: Optional[bool] = False,
+    return_fig: Optional[bool] = False
+) -> Figure:
     """
-    Class used for plotting intermediary steps of a Pipeline object.
+    Helper function for plot.
     """
+    if 'labels' not in adata.obs:
+        raise ValueError("Labels not found in object.")
+    if 'x_emb_2d' not in adata.obsm:
+        print("2d embeddings not found.")
+        print("Running default visualization method.")
+        reduce_dim_vis(adata)
+    color = adata.obs['labels'].to_numpy().astype(str)
+    method = adata.uns['visualization_info_2d']['method']
+    fig = px.scatter(
+        x=adata.obsm['x_emb_2d'][:, 0],
+        y=adata.obsm['x_emb_2d'][:, 1],
+        color=color,
+        hover_data={'Cell': adata.obs.index.to_numpy()},
+        labels={
+            'x': f'{method}1',
+            'y': f'{method}2'
+        },
+        title=adata.uns['dataset'] if show_title else None,
+        template='none'
+    )
+    if return_fig:
+        return fig
+    fig.show()
 
-    def __init__(self, pipe):
-        """
-        Args:
-            pipe (Pipeline): Pipeline object.
-        """
-        self.pipe = pipe
 
-    def plot_dim(self, cumulative=True, path=None):
-        """
-        Plots explained variance ratio per component.
-        Args:
-            cumulative (Boolean): If set, show extra plot of cumulative var.
-        """
-        fig, ax = plt.subplots(1, cumulative+1, squeeze=False)
+def _plot_gene(
+    adata: AnnData,
+    gene: Optional[Union[str, int]] = None,
+    show_title: Optional[bool] = False,
+    return_fig: Optional[bool] = False
+) -> Figure:
+    """
+    Helper function for plot.
+    """
+    if gene is None:
+        raise ValueError("Please specify gene to plot.")
+    index = _find_gene_index(adata, gene)
+    if index == -1:
+        print("Gene not found.")
+        return
+    color = adata.X[:, index]
+    method = adata.uns['visualization_info_2d']['method']
+    fig = px.scatter(
+        x=adata.obsm['x_emb_2d'][:, 0],
+        y=adata.obsm['x_emb_2d'][:, 1],
+        color=color,
+        hover_data={'Cell': adata.obs.index.to_numpy()},
+        labels={
+            'x': f'{method}1',
+            'y': f'{method}2'
+        },
+        title=adata.uns['dataset'] if show_title else None,
+        template='none'
+    )
+    if return_fig:
+        return fig
+    fig.show()
 
-        y = self.pipe.dim.ev_pca.explained_variance_ratio_
-        x = list(range(1, len(y)+1))
 
-        ax[0][0].plot(x, y*100)
-        ax[0][0].set_xlabel("Number of components")
-        ax[0][0].set_ylabel("Percentage of Explained Variance per Component")
-        ax[0][0].set_ylim(0)
+def _plot_scores(
+    adata: AnnData,
+    show_title: Optional[bool] = False,
+    return_fig: Optional[bool] = False
+) -> Figure:
+    """
+    Helper function for plot.
+    """
+    if 'scores' not in adata.uns['cluster_info']:
+        raise ValueError("Scores not found in object.")
 
-        if cumulative:
-            ax[0][1].plot(x, np.cumsum(y*100))
-            ax[0][1].set_xlabel("Number of components")
-            ax[0][1].set_ylabel("Cumulative Percentage of Explained Variance")
-            ax[0][1].set_ylim(0)
+    eval_method = adata.uns['cluster_info']['eval_method']
+    fig = px.line(
+        x=adata.uns['cluster_info']['n_clusters_used'],
+        y=adata.uns['cluster_info']['scores'],
+        labels={
+            'x': 'n_clusters',
+            'y': f'{eval_method} score'
+        },
+        title=adata.uns['dataset'] if show_title else None,
+        template='none'
+    )
+    if return_fig:
+        return_fig
+    fig.show()
 
-        ax[0][0].set_title('PCA')
 
-        sns.despine()
-        fig.set_size_inches(5*(cumulative + 1), 5)
-        if path is not None:
-            plt.savefig(path)
-        plt.show()
+def plot(
+    x: AnnData,
+    by: Optional[str] = None,
+    gene: Optional[Union[str, int]] = None,
+    show_title: Optional[bool] = False,
+    return_fig: Optional[bool] = False
+) -> None:
+    """
+    Plotting functionality.
 
-    def plot_clu(self, use_markers=True, path=None):
-        """
-        Plots the clusters in 2D for a single k.
-        """
-        hue = self.pipe.labels
-        self.pipe.run_vis()
-        x = self.pipe.x_emb_2d
-        if x.shape[1] != 2:
-            raise ValueError('Incorrect number of dimensions.')
+    Parameters
+    __________
+    x: AnnData object containing the data matrix and the plot keys.
 
-        labels = []
-        if use_markers == True:
-            for label in self.pipe.markers:
-                lvl1_type = self.pipe.markers[label]['lvl1_type']
-                lvl1_sv = self.pipe.markers[label]['lvl1_sv']
-                lvl1_intersec_n = len(
-                    self.pipe.markers[label]['lvl1_intersec'])
-                lvl1_total = self.pipe.markers[label]['lvl1_total']
-                lvl2_type = self.pipe.markers[label]['lvl2_type']
-                lvl2_sv = self.pipe.markers[label]['lvl2_sv']
-                lvl2_total = self.pipe.markers[label]['lvl2_total']
-                lvl2_intersec_n = len(
-                    self.pipe.markers[label]['lvl2_intersec'])
+    by: String specifying what to plot.
 
-                if lvl1_type == "User Defined":
-                    labels.append("{0}: {1}, sv={2:.2f}, IoU={3}/{4}".format(
-                        self.pipe.ide.tissue, lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
-                    ))
-                else:
-                    labels.append("Lvl1: {0}, sv={1:.2f}, IoU={2}/{3}".format(
-                        lvl1_type, lvl1_sv, lvl1_intersec_n, lvl1_total
-                    ) + "\nLvl2: {0}, sv={1:.2f}, IoU={2}/{3}".format(
-                        lvl2_type, lvl2_sv, lvl2_intersec_n, lvl2_total
-                    )
-                    )
+    gene: Will be used only if by is None or by == 'gene'.
+        Specify the name of the gene for which to plot expression for.
+        Can be in ensembl format, gene name, or index. If name is
+        specified and names are not found in adata, then will run
+        name_genes, but will not save the names in the adata object.
 
-        unq = len(np.unique(hue))
-        pal = COLORS[:unq]
-        for i in range(len(COLORS), unq):  # In case more colors are needed.
-            pal.append("#" + '%06x' % np.random.randint(16**6))
+    show_title: Boolean specifying whether to show the name of the
+        dataset in the plot.
 
-        plt.figure(figsize=(10, 5))
-        sns.scatterplot(x=x[:, 0], y=x[:, 1], hue=hue, palette=pal, linewidth=0,
-                        s=10, legend='full')
-        lgd = plt.legend(bbox_to_anchor=(1.05, 1), loc=2,
-                   borderaxespad=0, labels=labels)
+    return_fig: Boolean specifying whether to return a fig object if
+        set to True, otherwise will plot immediately.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+    if not is_AnnData:
+        raise ValueError("Object not in AnnData format.")
 
-        sns.despine(left=True, bottom=True)
-        plt.xticks([])
-        plt.yticks([])
-        if path is not None:
-            plt.savefig(path, bbox_extra_artists=(lgd,), bbox_inches='tight')
-        plt.show()
+    adata = x.copy()
 
-    def plot_clu_all(self, cols=3, path=None):
-        """
-        Plots the clusters in 2D for different k.
-        Args:
-            cols (int): Number of columns to use in the plot.
-        """
-        clu_method = self.pipe.config["methods"]["cluster"]
-        kwargs = self.pipe.clu.kwargs.copy()  # Copy original kwargs
-        k = kwargs['n_clusters']
-
-        if not isinstance(k, tuple):  # Single cluster_n
-            self.plot_clu()
-            return
-
-        # Get the embedding using vis
-        if not hasattr(self.pipe, 'x_emb_2d'):
-            emb = self.pipe.vis.get(self.pipe.x_emb)
-        else:
-            emb = self.pipe.x_emb_2d
-
-        ks = list(range(*k))
-        rows = (len(ks) + cols - 1) // cols
-        fig, ax = plt.subplots(rows, cols, squeeze=False)
-
-        # Iterate over all k
-        for i, kk in enumerate(ks):
-            kwargs['n_clusters'] = kk
-            clu = wrap("cluster", clu_method)(**kwargs)
-            labels = clu.get(self.pipe.x_emb, self.pipe.eval)
-
-            ax[i // cols][i %
-                          cols].scatter(emb[:, 0], emb[:, 1], s=.5, c=labels)
-            ax[i // cols][i % cols].set_title('k={0}, score={1:.2f}'.format(
-                kk, clu.score_list[0]))
-            ax[i // cols][i % cols].set_xticks([])
-            ax[i // cols][i % cols].set_yticks([])
-
-        # Remove unused boxes
-        for i in range(len(ks), cols*rows):
-            ax[i // cols][i % cols].spines['right'].set_visible(False)
-            ax[i // cols][i % cols].spines['top'].set_visible(False)
-            ax[i // cols][i % cols].spines['left'].set_visible(False)
-            ax[i // cols][i % cols].spines['bottom'].set_visible(False)
-            ax[i // cols][i % cols].set_xticks([])
-            ax[i // cols][i % cols].set_yticks([])
-
-        fig.set_size_inches(5 * cols, 5 * rows)
-        if path is not None:
-            plt.savefig(path)
-        plt.show()
-
-    def plot_eval(self, path=None):
-        """
-        Plots the scores of the clusters for different k. Branch if k is int.
-        """
-        fig, ax = plt.subplots()
-
-        k = self.pipe.clu.kwargs['n_clusters']
-        if isinstance(k, tuple):
-            x = list(range(*k))
-            ax.set_xticks(x)
-        else:
-            x = k
-            ax.set_xticks([x-1, x, x+1])
-
-        y = self.pipe.clu.score_list
-
-        ax.bar(x, y)
-        ax.set_xlabel('Number of Clusters')
-        ax.set_ylabel('Score')
-        sns.despine()
-        fig.set_size_inches(10, 5)
-        if path is not None:
-            plt.savefig(path)
-        plt.show()
-
-    def plot_mark(self, convention="names", path=None):
-        """
-        Plots marker information.
-        """
-        n_clusters = len(self.pipe.unq_labels)
-
-        fig, ax = plt.subplots(n_clusters, 2)
-
-        for i, label in enumerate(self.pipe.unq_labels):
-            pvals = self.pipe.markers[label]['pvals']
-            diffs = self.pipe.markers[label]['diffs']
-            names = self.pipe.markers[label]['outp_names']
-
-            ax[i][0].hist(pvals, color='b', alpha=.4, label="pvals")
-            ax[i][0].set_xlabel("p-values")
-            ax[i][0].set_ylabel("gene count")
-            ax[i][0].legend(loc=1)
-            ax[i][0].spines['bottom'].set_color('blue')
-
-            ax2 = ax[i][0].twiny()
-            ax2.hist(diffs, color='r', alpha=.4, label="diffs")
-            ax2.set_xlabel("absolute difference")
-            ax2.xaxis.tick_top()
-            ax2.xaxis.set_label_position('top')
-            ax2.legend(loc=5)
-            ax2.spines['top'].set_color('red')
-
-            k = 10
-            x = np.arange(len(pvals[:k]))
-            ax[i][1].scatter(x, diffs[:k], c=np.arange(len(pvals[:k])))
-            ax[i][1].set_xticklabels(np.round(pvals[:k], 3))
-            ax[i][1].set_title("Cluster: {0}".format(label))
-            ax[i][1].set_xlabel("p-value")
-            ax[i][1].set_ylabel("mean difference")
-            for j, txt in enumerate(names[:k]):
-                ax[i][1].text(x[j], diffs[j]+0.02, names[j],
-                              fontsize=10, rotation=90)
-
-        fig.set_size_inches(10, n_clusters * 6)
-        if path is not None:
-            plt.savefig(path)
-        plt.show()
+    if by == 'labels' or (by is None and gene is None):
+        return _plot_labels(adata, show_title, return_fig)
+    elif by is None or by == 'gene':
+        return _plot_gene(adata, gene, show_title, return_fig)
+    elif by == 'scores':
+        return _plot_scores(adata, show_title, return_fig)

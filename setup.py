@@ -17,7 +17,8 @@ install_requires = [
     'leidenalg',
     'scanpy',
     'Cluster_Ensembles',
-    'psutil'
+    'psutil',
+    'plotly'
 ]
 
 setup(
