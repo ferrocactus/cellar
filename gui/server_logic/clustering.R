@@ -121,7 +121,14 @@ cluster <- function(input, output, session, adata, replot,
         if (!py_has_attr(adata()$obs, 'labels')) return()
         if (is.null(input$clusters_to_merge)) return()
 
-        merge_clusters(adata(), input$clusters_to_merge)
+        msg <- cellar$safe(merge_clusters,
+            adata = adata(),
+            clusters = input$clusters_to_merge)
+
+        if (msg != 'good') {
+            showNotification(py_to_r(msg))
+            return()
+        }
 
         replot(replot() + 1)
         reset(reset() + 1)

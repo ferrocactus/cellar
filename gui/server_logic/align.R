@@ -30,7 +30,16 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 pred <- SingleR(test = x1, ref = x2,
                                 labels = py_to_r(get_labels(adataAlign())))
 
-                store_labels(adata(), as.integer(pred$labels), 'SingleR')
+                msg <- cellar$safe(store_labels,
+                    adata = adata(),
+                    labls = as.integer(pred$labels),
+                    method = 'SingleR')
+
+                if (msg != 'good') {
+                    showNotification(py_to_r(msg))
+                    adataAlign(0)
+                    return()
+                }
             } else {
                 msg <- cellar$safe(cellar$transfer_labels,
                     x = adata(),

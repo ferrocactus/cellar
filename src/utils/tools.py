@@ -9,6 +9,8 @@ import numpy as np
 import pandas as pd
 from bidict import bidict
 
+from .exceptions import InvalidArgument
+from .exceptions import InappropriateArgument
 from .validation import _validate_cluster_list
 
 
@@ -80,7 +82,7 @@ def update_subset_label(adata, subset_name, name):
     name = str(name)
 
     if subset_name not in adata.uns['subsets']:
-        raise ValueError(f"Subset {subset_name} not found in adata.")
+        raise InvalidArgument(f"Subset {subset_name} not found in adata.")
 
     indices = adata.uns['subsets'][subset_name]
 

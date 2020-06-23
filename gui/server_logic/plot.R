@@ -182,7 +182,16 @@ plot <- function(input, output, session, replot, adata, selDataset,
         if (is.null(d$key)) return()
 
         keys <- as.numeric(d$key)
-        store_subset(adata(), input$newsubset, keys, from_r = TRUE)
+        msg <- cellar$safe(store_subset,
+            adata = adata(),
+            name = input$newsubset,
+            dim = keys,
+            from_r = TRUE)
+
+        if (msg != 'good') {
+            showNotification(py_to_r(msg))
+            return()
+        }
         showNotification(paste(as.character(length(keys)), "cells stored"))
         resubset(resubset() + 1)
     })

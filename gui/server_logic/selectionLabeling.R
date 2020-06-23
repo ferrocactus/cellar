@@ -85,7 +85,15 @@ selectionLabeling <- function(input, output, session, adata,
         if (input$newlabels == 'None') return()
         if (input$subset1_upd == 'None') return()
 
-        update_subset_label(adata(), input$subset1_upd, input$newlabels)
+        msg <- cellar$safe(update_subset_label,
+            adata = adata(),
+            subset_name = input$subset1_upd,
+            name = input$newlabels)
+
+        if (msg != 'good') {
+            showNotification(py_to_r(msg))
+            return()
+        }
         reset(reset() + 1)
         replot(replot() + 1)
         relabel(relabel() + 1)

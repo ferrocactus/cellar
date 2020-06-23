@@ -52,8 +52,8 @@ downloadmenu <- function(id, label="downloadmenu") {
                         downloadButton(
                             ns("download_cells"),
                             "Download Selected Subset",
-                            class = "secondcol downloadbtn",
-                            value=0
+                            class = "longbtn downloadbtn",
+                            value = 0
                             #style="width:50%"
                         )
                     )

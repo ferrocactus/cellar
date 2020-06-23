@@ -4,11 +4,11 @@ save_session <- function(input, output, session, adata, replot,
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
-                if (is_active(adata()) == FALSE) return()
+                if (py_to_r(is_active(adata())) == FALSE) return()
                 paste0(adata()$uns[['dataset']], "_cellar.h5ad")
             },
             content = function(path) {
-                if (is_active(adata()) == FALSE) return()
+                if (py_to_r(is_active(adata())) == FALSE) return()
                 withProgress(message = "Saving File", value = 0, {
                     incProgress(1 / 2, detail = "Compressing")
                     #write_key(adata(), 'labelList', labelList())

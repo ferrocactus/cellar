@@ -26,7 +26,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
             n <- 2
 
             incProgress(1 / n, detail = "Finding DE Genes")
-            cellar$de(
+            msg <- cellar$safe(cellar$de,
                 x = adata(),
                 subset1 = s1,
                 subset2 = s2,
@@ -34,6 +34,11 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
                 max_n_genes = input$mark_markers_n,
                 correction = input$mark_correction,
                 inplace = TRUE)
+
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
         })
 
         remark(remark() + 1)

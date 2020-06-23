@@ -6,6 +6,12 @@ from ._pipeline import de
 from ._pipeline import ss_cluster
 from ._pipeline import transfer_labels
 
+from .utils.tools import store_subset
+from .utils.tools import store_labels
+from .utils.tools import update_subset_label
+from .utils.tools import merge_clusters
+
+
 from ._plotter import plot
 
 from .utils.exceptions import InvalidArgument
@@ -16,9 +22,6 @@ import traceback
 import sys
 
 OK = 'good'
-
-units = ['reduce_dim', 'cluster', 'reduce_dim_vis',
-         'name_genes', 'de', 'ss_cluster', 'transfer_labels']
 
 
 def safe(f, **kwargs):
