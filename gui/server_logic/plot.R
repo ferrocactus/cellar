@@ -54,6 +54,22 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     }
                 }
 
+                if (input$theme_mode == 'dark_mode') {
+                    plot_bgcolor = 'rgb(44, 59, 65)'
+                    paper_bgcolor = 'rgb(44, 59, 65)'
+                    font = list(color = 'rgb(255, 255, 255)')
+                    xaxis = list(gridcolor = 'rgb(85, 85, 85)',
+                                 zerolinecolor = 'rgb(125, 125, 125)')
+                    yaxis = list(gridcolor = 'rgb(85, 85, 85)',
+                                 zerolinecolor = 'rgb(125, 125, 125)')
+                } else {
+                    plot_bgcolor = NULL
+                    paper_bgcolor = NULL
+                    font = NULL
+                    xaxis = NULL
+                    yaxis = NULL
+                }
+
                 p <- plotly_build(plot_ly(
                     x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                     text = text,
@@ -66,6 +82,11 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     mode = 'markers',
                     height = input$plot_height
                 ) %>% layout(dragmode = "lasso", showlegend = showlegend,
+                             plot_bgcolor = plot_bgcolor,
+                             paper_bgcolor = paper_bgcolor,
+                             font = font,
+                             xaxis = xaxis,
+                             yaxis = yaxis,
                              title = title, margin = list(t = 50)))
 
                 isolate(plotHistory(c(plotHistory(), list(p))))
@@ -78,7 +99,13 @@ plot <- function(input, output, session, replot, adata, selDataset,
 
     # Listen to multiple events that will trigger replot
     toListenReplot <- reactive({
-        list(input$plot_height, input$dot_size, input$color, input$show_names)
+        list(
+            input$plot_height,
+            input$dot_size,
+            input$color,
+            input$show_names,
+            input$theme_mode
+        )
     })
 
     observeEvent(toListenReplot(), {

@@ -1,21 +1,25 @@
 :root {
-  --green: rgb(0, 166, 90);
-  --darkgreen: rgb(0, 141, 76);
-  --lightgreen: rgb(0, 180, 110);
-  --gray: rgb(80, 80, 112);
-  --darkgray: rgb(150, 150, 150);
-  --bluegray: rgb(44, 59, 65);
-  --darkbluegray: rgb(34, 45, 50);
+    --mainbg: #F5F5F5;
+    --gray: rgb(80, 80, 112);
+    --darkgray: rgb(150, 150, 150);
+    --bluegray: rgb(44, 59, 65);
+    --darkbluegray: rgb(34, 45, 50);
+    --btncolor: #1F7499;
+    --btncolorhover: #2386B0;
+}
+
+.content-wrapper, .right-side {
+    background-color: var(--mainbg);
 }
 
 section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-input.action-link {
-    background-color: var(--green) !important;
+    background-color: var(--btncolor) !important;
     color: white !important;
-    border-color: var(--darkgreen) !important;
+    border-color: var(--btncolor) !important;
 }
 
 section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:hover .shiny-bound-input.action-link :hover {
-    background-color: var(--lightgreen) !important;
+    background-color: var(--btncolorhover) !important;
 }
 
 .sidebar-menu .treeview-menu > li > a {
@@ -24,10 +28,6 @@ section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:ho
 
 .sidebar-menu .treeview-menu {
     padding-bottom: 20px !important;
-}
-
-section.sidebar .shiny-bound-input.action-button, section.sidebar .shiny-bound-input.action-link {
-    /*margin: 10px !important;*/
 }
 
 .shiny-input-container:not(.shiny-input-container-inline) {
@@ -103,10 +103,14 @@ input:disabled {
 }
 
 .downloadbtn {
-    background-color: var(--green) !important;
+    background-color: var(--btncolor) !important;
     color: white !important;
-    border-color: var(--darkgreen) !important;
+    border-color: var(--btncolor) !important;
     margin-left: 14px !important;
+}
+
+.downloadbtn:hover {
+    background-color: var(--btncolorhover) !important;
 }
 
 .wrapper {
@@ -186,8 +190,9 @@ input:disabled {
 
 .nextbtn {
     border-radius: 50%;
-    background-color: var(--green);
+    background-color: var(--btncolor);
     color: white;
+    border-color: var(--btncolor);
 }
 
 .body_dark_mode {

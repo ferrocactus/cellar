@@ -45,6 +45,10 @@ body <- dashboardBody(
     $("header").find("nav").append(\'<span class="maintitle"> Cellar </span>\');
     })')),
     #tags$script(src = "gui/ui_logic/sidebar/anchor.js"),
+    tags$script(HTML('
+        $("link[href*=\'_all-skins.min.css\']").remove();
+    ')),
+    tags$head(includeCSS("gui/ui_logic/styles/_all-skins.min.css")),
     history(id='ns'),
     plots(id="ns"),
     cell_names(id="ns"),
@@ -55,4 +59,4 @@ body <- dashboardBody(
     )
 )
 
-ui <- dashboardPage(header, sidebar, body, skin = 'green', title = 'Cellar')
+ui <- dashboardPage(header, sidebar, body, skin = 'purple', title = 'Cellar')
