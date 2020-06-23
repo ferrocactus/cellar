@@ -135,7 +135,6 @@ cluster <- function(input, output, session, adata, replot,
     })
 
     # Observe change of cluster names
-    observe({
         output$cell_names_outp <- renderTable(width = "100%", {
             if (relabel() < 1) return()
             isolate(relabel(0))
@@ -148,5 +147,4 @@ cluster <- function(input, output, session, adata, replot,
             colnames(df) <- c("Cluster ID", "Name")
             return(df)
         })
-    })
 }

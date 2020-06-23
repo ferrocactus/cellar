@@ -8,9 +8,12 @@ from ._pipeline import transfer_labels
 
 from ._plotter import plot
 
+from .utils.read import load_file
+
 from .utils.exceptions import InvalidArgument
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import MethodNotImplementedError
+from .utils.exceptions import IncorrectFileFormat
 
 import traceback
 import sys
@@ -18,7 +21,8 @@ import sys
 OK = 'good'
 
 units = ['reduce_dim', 'cluster', 'reduce_dim_vis',
-         'name_genes', 'de', 'ss_cluster', 'transfer_labels']
+         'name_genes', 'de', 'ss_cluster', 'transfer_labels',
+         'load_file']
 
 
 def safe(f, **kwargs):
@@ -27,7 +31,8 @@ def safe(f, **kwargs):
         return OK
     except (InappropriateArgument,
             InvalidArgument,
-            MethodNotImplementedError) as e:
+            MethodNotImplementedError,
+            IncorrectFileFormat) as e:
         print(str(e))
         return str(e)
     except Exception as e:

@@ -8,3 +8,6 @@ class InappropriateArgument(Exception):
 
 class MethodNotImplementedError(NotImplementedError):
     pass
+
+class IncorrectFileFormat(RuntimeError):
+    pass
