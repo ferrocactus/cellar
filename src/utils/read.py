@@ -10,6 +10,17 @@ import sys
 from .exceptions import IncorrectFileFormat
 
 
+def safe_load_file(filepath):
+    try:
+        return load_file(filepath)
+    except IncorrectFileFormat as e:
+        print("Incorrect file format")
+        return "file_error"
+    except Exception as e:
+        traceback.print_exc(file=sys.stdout)
+        return "file_error"
+
+
 def load_file(filepath):
     if filepath == 'default':
         filepath = 'datasets/brain/RNAseqTPM.csv'
@@ -35,11 +46,9 @@ def load_file(filepath):
             adata = anndata.read_hdf(filepath)
         if filepath[-4:] == 'loom':
             adata = anndata.read_loom(filepath)
-    except ValueError as e:
+    except (ValueError, IndexError) as e:
         print(str(e))
         raise IncorrectFileFormat("File format incorrect.")
-    except Exception as e:
-        raise Exception()
 
     adata.uns['dataset'] = dataset
     return adata

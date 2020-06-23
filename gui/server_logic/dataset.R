@@ -25,18 +25,15 @@ dataset <- function(input, output, session, adata, selDataset,
 
         withProgress(message = "Please wait", value = 0, {
             incProgress(1 / 2, detail = "Reading dataset")
-            isolate(adata(cellar$safe(
-                load_file,
-                filepath=selDataset()
-            )))
+            isolate(adata(safe_load_file(selDataset())))
         })
-        if (is.character(py_to_r(adata())) & length(py_to_r(adata())) == 1) {
+        if (py_to_r(is_str(adata()))) {
             showNotification("Incorrect file format.")
-            adata(0)
-            return()
+            isolate(adata(0))
+        } else {
+            fullreset(fullreset() + 1)
+            showNotification("Dataset loaded")
         }
-        fullreset(fullreset() + 1)
-        showNotification("Dataset loaded")
     })
 
     ###########################################################################

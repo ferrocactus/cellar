@@ -2,7 +2,7 @@ cluster <- function(input, output, session, adata, replot,
                     reset, relabel, resubset) {
     observeEvent(input$runconfigbtn, {
         # Return if no adata loaded
-        if (is_active(adata()) == FALSE) {
+        if (py_to_r(is_active(adata())) == FALSE) {
             showNotification("Please load the data first.")
             return()
         }

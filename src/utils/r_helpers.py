@@ -12,6 +12,9 @@ def has_key(adata, attr, key):
 def is_active(adata):
     return isinstance(adata, AnnData)
 
+def is_str(obj):
+    return isinstance(obj, str)
+
 def get_n_obs(adata):
     return int(adata.n_obs)
 

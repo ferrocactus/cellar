@@ -1,5 +1,6 @@
 # Aliases
-load_file <- cellar$utils$read$load_file
+safe_load_file <- cellar$utils$read$safe_load_file
+is_str <- cellar$utils$r_helpers$is_str
 get_dic <- cellar$utils$tools$get_dic  # moved to read.py
 store_subset <- cellar$utils$tools$store_subset
 update_subset_label <- cellar$utils$tools$update_subset_label
