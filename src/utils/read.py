@@ -46,7 +46,7 @@ def load_file(filepath):
             adata = anndata.read_hdf(filepath)
         if filepath[-4:] == 'loom':
             adata = anndata.read_loom(filepath)
-    except (ValueError, IndexError) as e:
+    except Exception as e:
         print(str(e))
         raise IncorrectFileFormat("File format incorrect.")
 

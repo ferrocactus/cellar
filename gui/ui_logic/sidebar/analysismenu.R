@@ -47,12 +47,12 @@ menuItem(
                         selectInput(
                             ns("subset1"),
                             "Choose Subset 1",
-                            choices = c("")
+                            choices = c("None")
                         ),
                         selectInput(
                             ns("subset2"),
                             "Choose Subset 2",
-                            choices = c("")
+                            choices = c("None")
                         )
                     ),
                     actionButton(

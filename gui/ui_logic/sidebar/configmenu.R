@@ -22,7 +22,7 @@ menuItem(
                     selectInput(
                         ns("dim_method"),
                         "Dimensionality reduction",
-                        choices=options$dim
+                        choices = options$dim
                     ),
                     splitLayout(
                         cellWidths = c("60%", "47%"),

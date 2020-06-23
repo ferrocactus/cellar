@@ -10,6 +10,11 @@ align <- function(input, output, session, adata, selDatasetAlign,
             n <- 6
             incProgress(1 / n, detail = paste("Step: Reading data"))
             isolate(adataAlign(read_h5ad(input$reference_dataset$datapath)))
+            if (py_to_r(is_str(adataAlign()))) {
+                showNotification("Incorrect file format.")
+                isolate(adataAlign(0))
+                return()
+            }
             #isolate(adataAlign(load_file(selDatasetAlign())))
 
             if (input$align_method == 'SingleR') {

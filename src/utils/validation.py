@@ -233,7 +233,7 @@ def _validate_subset(subset, adata):
         if 'subsets' not in adata.uns:
             raise InvalidArgument("No subsets found in x.")
         if subset not in adata.uns['subsets']:
-            raise InvalidArgument(f"{subset} not fouond in subsets.")
+            raise InvalidArgument(f"{subset} not found in subsets.")
         subset = adata.uns['subsets'][subset]
 
     if isinstance(subset, (int, float)):

@@ -5,7 +5,7 @@ selectionLabeling <- function(input, output, session, adata,
                               reset, replot, relabel) {
 
     dic = py_to_r(get_dic())
-    
+
     observeEvent(input$tissue, {
         tissue = as.character(input$tissue)
         if (tissue == "") return()
@@ -48,6 +48,7 @@ selectionLabeling <- function(input, output, session, adata,
     # Observe adding new labels
     observeEvent(input$labeladd, {
         if (is.null(input$newlabelbox)) return()
+        if (input$newlabelbox == '') return()
         labelList(union(labelList(), input$newlabelbox))
         showNotification("Label added")
     })
@@ -81,6 +82,8 @@ selectionLabeling <- function(input, output, session, adata,
     observeEvent(input$labelupd, {
         if (is_active(adata()) == FALSE) return()
         if (!py_has_attr(adata()$obs, 'labels')) return()
+        if (input$newlabels == 'None') return()
+        if (input$subset1_upd == 'None') return()
 
         update_subset_label(adata(), input$subset1_upd, input$newlabels)
         reset(reset() + 1)
@@ -110,6 +113,6 @@ selectionLabeling <- function(input, output, session, adata,
             session,
             "subset1_upd",
             "Choose Subset",
-            choices = setNames()
+            choices = c("None", setNames())
     )})
 }

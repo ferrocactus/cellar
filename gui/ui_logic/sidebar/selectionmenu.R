@@ -54,14 +54,14 @@ menuItem(
                     selectInput(
                         ns("newlabels"),
                         "Select cell type",
-                        choices = ''
+                        choices = c('None')
                     ),
 
                     splitLayout(
                         selectInput(
                             ns("subset1_upd"),
                             "Choose Subset",
-                            choices = c("")
+                            choices = c("None")
                         ),
                         actionButton(
                             ns("labelupd"),
