@@ -74,7 +74,11 @@ def write_h5ad(adata, path, compression=9):
     adata.write_h5ad(path, compression=compression)
 
 def read_h5ad(path):
-    adata = anndata.read_h5ad(path)
+    try:
+        adata = anndata.read_h5ad(path)
+    except:
+        return "file_error"
+
     if 'cluster_names' in adata.uns:
         adata.uns['cluster_names'] = bidict(adata.uns['cluster_names'])
         for key in list(adata.uns['cluster_names'].keys()):

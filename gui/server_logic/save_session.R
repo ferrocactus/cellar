@@ -21,6 +21,11 @@ save_session <- function(input, output, session, adata, replot,
     observeEvent(input$upload_sess, {
         req(input$upload_sess)
         adata(read_h5ad(input$upload_sess$datapath))
+        if (py_to_r(is_str(adata()))) {
+            showNotification("Incorrect file format")
+            isolate(adata(0))
+            return()
+        }
 
         fullreset(fullreset() + 1)
         replot(replot() + 1)
