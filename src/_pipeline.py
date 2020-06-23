@@ -528,6 +528,7 @@ def ss_cluster(
             cluster_names[i] = adata.uns['cluster_names'][label]
             preserved_labels_upd.append(i)
 
+    preserved_labels_upd = np.array(preserved_labels_upd)
     # Create clustering object and get labels
     labels = wrap("ss_cluster", method)(**kwargs).get(
         x_to_use, labels_cp, preserved_labels=preserved_labels_upd)
