@@ -160,6 +160,10 @@ input:disabled {
     margin-top: 30px;
 }
 
+#ns-plot {
+    min-height: 400px;
+}
+
 #ns-switcher {
     margin-top: 40px !important;
 }
