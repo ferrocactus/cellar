@@ -27,7 +27,7 @@ menuItem(
                     sliderInput(
                         ns("mark_markers_n"),
                         "Select number of genes",
-                        min = 1, max = 500, value = 50
+                        min = 5, max = 500, value = 50
                     ),
                     splitLayout(
                         cellWidths = c("50%", "50%"),

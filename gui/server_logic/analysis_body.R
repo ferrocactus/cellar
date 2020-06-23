@@ -64,7 +64,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
                 dispdat[i, 4] <- 1.0
             } else {
                 dispdat[i, 4] <- phyper(leni, lenhs, nc-1-lenhs,
-                                      lende_i, lower.tail = F)
+                                        lende_i, lower.tail = F)
 
                 if (mode != 'CellType' && mode != 'UCellType' && mode != 'Disease') {
                     rownames(gene_ids_all) <- gene_ids_all[, 3]
