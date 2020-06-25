@@ -31,7 +31,7 @@ downloadmenu <- function(id, label="downloadmenu") {
                             selectInput(
                                 ns("plot_download_format"),
                                 "Select format",
-                                choices=c("HTML")
+                                choices=c("PNG", "JPEG", "SVG", "HTML", "PDF", "WEBP")
                             ),
                             downloadButton(
                                 ns("download_plot"),
