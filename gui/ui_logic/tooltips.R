@@ -1,8 +1,7 @@
 tooltips <- function(id, label='tooltips') {ns = NS(id); list(
     # Dataset Menu
     bsTooltip(ns("folder"),
-              paste0("Select the datasets on the server or the datasets uploaded by the user ",
-                     "type.")),
+              paste0("Select the datasets on the server or the datasets uploaded by the useR")),
     bsTooltip(ns("uploaded_dataset"),
               paste0("Choose a specific dataset")),
     bsTooltip(ns("file1"),
@@ -11,13 +10,11 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
     bsTooltip(ns("runconfigbtn"),
               paste0("Do clustering with current configuration")),
     bsTooltip(ns("dim_method"),
-              paste0("Choose a dimension reduction method",
-                     "type.")),
+              paste0("Choose a dimension reduction method")),
     bsTooltip(ns("clu_method"),
               paste0("Choose a clustering method")),
     bsTooltip(ns("clu_method"),
-              paste0("Choose a clustering method",
-                     "type.")),
+              paste0("Choose a clustering method")),
     bsTooltip(ns("dim_options"),
               paste0("If automatic, will try and detect the optimal ",
               "number of components using the ankle heuristic of finding the ",
@@ -29,9 +26,12 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
               "a list of comma separated values, ",
               "or a tuple specifying a range, e.g., (3, 9, 2) will start ",
               "at 3 and finish at 9 on increments of 2.")),
-    #bsTooltip(ns("eval_method"),
-    #          paste0("Used to determine the best number of clusters ",
-    #                 "if number of clusters is a list.")),
+    bsTooltip(ns("eval_method"),
+              paste0("Used to determine the best number of clusters ",
+                     "if number of clusters is a list.")),
+    bsTooltip(ns("ssc_method"),
+              paste0("Semi-supervised clustering takes into account the ",
+                     "existing labels and tries to refine the clusters.")),
     bsTooltip(ns("saved_clusters"),
               paste0("Clusters whose label should not be changed by ",
                      "the algorithm. Can be integers ",
@@ -57,8 +57,7 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
     bsTooltip(ns("newlabels"),
               paste0("Select the cell type you want to label")),
     bsTooltip(ns("subset1_upd"),
-              paste0("Update the name of this subset to the selected cell ",
-                     "type.")),
+              paste0("Update the name of this subset to the selected cell ")),
 
     # Analysis
     bsTooltip(ns("subset1"),
@@ -68,10 +67,10 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
     bsTooltip(ns("searchgene"),
              paste0("Gene name to search for.")),
 
-    
-    
+
+
     # Appearance
-    
+
     bsTooltip(ns("dot_size"), paste0("Select the size of the dots in the plot")),
     bsTooltip(ns("show_names"), paste0("show cluster names in the plot")),
 
