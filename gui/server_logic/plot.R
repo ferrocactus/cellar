@@ -185,7 +185,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
         msg <- cellar$safe(store_subset,
             adata = adata(),
             name = input$newsubset,
-            dim = keys,
+            indices = keys,
             from_r = TRUE)
 
         if (msg != 'good') {
