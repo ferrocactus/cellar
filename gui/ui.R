@@ -33,7 +33,8 @@ sidebar <- dashboardSidebar(
         analysismenu(id='ns'),
         appearancemenu(id='ns'),
         downloadmenu(id='ns')
-    )
+    ),
+    tags$a(href="https://github.com/ferrocactus/cellar/blob/master/doc/cellar_guide.md", "Click here for the User Guide")
 )
 
 body <- dashboardBody(
