@@ -72,19 +72,21 @@ The **Run with current configuration** button is to be clicked after the user ha
 
 - **Visualization Method** :
 
-The following methods are for constrained clustering, which is done after ?
+The following methods are for constrained clustering, which is done after the user has run clustering once and has relabelled cells.
 
 - **Constrained clustering**
 
 - **Clusters to preserve**
 
-- **Clusters to merge**
+- **Clusters to merge** : Enables users to select clusters they think have to be merged into a single cluster.
 
 ---
 
 ### Label Transfer
 <img src="pic/labeltransferMenu.png" alt="clusrterMenu"
 	title="Choose Dataset" width="300" height="360" />
+
+This panel allows the user to assign labels to a new dataset by importing a previous session of already labelled cells (from **Import Session**), and choosing a dataset, and a transfer method. This labels cells in the new dataset by looking at which cells it is closely related to in the already labelled session, and assigns new cells that particular label.
 
 ---
 
@@ -167,7 +169,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
   <img src="pic/onto.png" alt="datasetMenu"
 	title="UI" width="600" height="200" align=left/>
 
-	This tab shows the results of the hypergeometric test intersection of the DE genes with genes in each curated GO term. The option exists for users can download the entire table as a csv.
+	This tab shows the results of the hypergeometric test intersection of the DE genes with genes in each curated GO term. The option exists for users to download the entire table as a csv.
 
 - **KEGG** :
 
