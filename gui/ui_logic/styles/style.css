@@ -321,7 +321,6 @@ input:disabled {
     color: gray;
     text-align: center;
     position: absolute;
-    position:absolute;
     left:0;
     right:0;
     margin-left:auto;
@@ -342,4 +341,13 @@ input:disabled {
     padding: 0 15px;
     overflow: hidden;
     color: white;
+}
+
+#links {
+    margin-top: 70px;
+    text-align: center;
+}
+
+.link-icon {
+    height: 30px;
 }
