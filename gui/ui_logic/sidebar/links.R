@@ -1,7 +1,3 @@
-github <- base64enc::dataURI(file="gui/ui_logic/icons/github.png", mime="image/png")
-docs <- base64enc::dataURI(file="gui/ui_logic/icons/docs.png", mime="image/png")
-mail <- base64enc::dataURI(file="gui/ui_logic/icons/mail.png", mime="image/png")
-
 links = list(
     tags$li(a(href = 'https://github.com/ferrocactus/cellar',
             target = "_blank",

@@ -342,12 +342,3 @@ input:disabled {
     overflow: hidden;
     color: white;
 }
-
-#links {
-    margin-top: 70px;
-    text-align: center;
-}
-
-.link-icon {
-    height: 30px;
-}
