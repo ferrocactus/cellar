@@ -516,7 +516,7 @@ def ss_cluster(
             raise InvalidArgument("x_emb not found in AnnData object.")
         x_to_use = adata.obsm['x_emb']
 
-    labels_cp = adata.obs['labels'].copy()
+    labels_cp = adata.obs['labels'].to_numpy().copy()
     cluster_names = bidict({})
     unq_labels = np.unique(labels_cp)
     n_clusters = len(unq_labels)
