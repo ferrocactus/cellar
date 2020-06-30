@@ -89,6 +89,9 @@ normalization part out of the package for now, so the user is free
 to choose and apply any available normalization methods before feeding
 their data into our pipeline.
 
+Dimensionality Reduction
+~~~~~~~~~~~~~~~~~~~~~~~~
+
 After acquiring and loading the normalized data, typically the first
 step is to reduce the dimensionality. PCA is the most popular choice
 which applies a linear map to a lower dimensional space where each
@@ -114,6 +117,36 @@ with a high number of components (default: 200), and then use the knee detector
 algorithm of https://github.com/arvkevi/kneed to find the number of
 components (minimum: 10) that corresponds to the 'knee' of the plot.
 
+Unless specified otherwise, ``cl.reduce_dim`` will populate the
+``adata.obsm['x_emb']`` key and more information will be stored in
+``adata.uns['dim_reduction_info']``.
+
+Clustering
+~~~~~~~~~~
+
+The default clustering method is 'Leiden', although more methods
+are available as listed in `<link/>`_. Similar as before, the
+desired method can be changed by passing the method's name to
+the method parameter. E.g.
+
+.. code:: python
+
+    cl.cluster(adata, method='KMeans', eval_method='Silhouette', n_clusters=(5, 16, 1))
+
+There are a few things to take notice here. Instead of specifying a single integer
+for the number of clusters, the user can specify a list or a range tuple instead.
+In our example above, ``n_clusters=(5, 16, 1)`` will run the clustering
+algorithm several times with ``n_clusters`` ranging from 5 to 16 in increments of 1.
+Then, using the method specified in ``eval_method``, the ``n_clusters`` which
+achieved the highest score is the one whose labels are returned.
+
+``cl.cluster`` also accepts parameters that will get passed down to the
+original implementation of the method.
+
+This method populates ``adata.obs['labels']``, ``adata.uns['cluster_info']``, and
+``adata.uns['cluster_names']``. The latter is a `bidict`_ that stores a cell type
+for each cluster. These types can be changed using ``cl.update_subset_label``.
+
 
 .. _numpy: https://numpy.org/
 .. _scikit-learn: https://scikit-learn.org/stable/
@@ -124,3 +157,4 @@ components (minimum: 10) that corresponds to the 'knee' of the plot.
 .. _Leiden: https://github.com/vtraag/leidenalg
 .. _UMAP: https://umap-learn.readthedocs.io/en/latest/
 .. _Plotly: https://plotly.com/
+.. _bidict: https://bidict.readthedocs.io/en/master/basic-usage.html

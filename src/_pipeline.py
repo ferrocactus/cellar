@@ -140,6 +140,7 @@ def cluster(
         clusters with the best score. In the case of a tuple,
         a list is formed by treating the tuple as a pythonic range;
         (a, b, c) will start at a, finish at b-1, in increments of c.
+        Ignored if method is 'Leiden' or 'Scanpy'.
 
     use_emb: If True, will attempt to cluster on an embedding of x
         as specified in x.obsm['x_emb'] if x is AnnData object. If x
