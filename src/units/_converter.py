@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import os
 
 import numpy as np
 import pandas as pd
@@ -8,7 +9,11 @@ from ..utils.tools import parse
 from ._unit import Unit
 
 
-path = 'markers/gene_id_name.csv'
+this_dir = os.path.dirname(__file__)
+def join_root(path):
+    return os.path.abspath(os.path.join(this_dir, '../../', path))
+
+path = join_root('markers/gene_id_name.csv')
 
 
 def convert(str_list):
@@ -70,7 +75,7 @@ class Con(Unit):
     """
 
     def __init__(self, convention='id-to-name',
-                 path='markers/gene_id_name.csv'):
+                 path=join_root('markers/gene_id_name.csv')):
         """
         Parameters
         __________

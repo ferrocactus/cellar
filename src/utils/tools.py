@@ -6,7 +6,6 @@ from functools import reduce
 
 import anndata
 import numpy as np
-import pandas as pd
 from bidict import bidict
 
 from .exceptions import InvalidArgument

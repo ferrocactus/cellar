@@ -6,13 +6,16 @@ from ._pipeline import de
 from ._pipeline import ss_cluster
 from ._pipeline import transfer_labels
 
+from ._plotter import plot
+
+from .utils.tools import parse
 from .utils.tools import store_subset
 from .utils.tools import store_labels
 from .utils.tools import update_subset_label
+from .utils.tools import populate_subsets
 from .utils.tools import merge_clusters
 
-
-from ._plotter import plot
+from .utils.read import load_file
 
 from .utils.exceptions import InvalidArgument
 from .utils.exceptions import InappropriateArgument
@@ -20,6 +23,7 @@ from .utils.exceptions import MethodNotImplementedError
 
 import traceback
 import sys
+
 
 OK = 'good'
 

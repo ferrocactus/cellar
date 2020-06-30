@@ -6,6 +6,9 @@ __*
 states
 markers/worker.py
 .*
+build
+dist
+cellar.egg*
 !.gitignore
 datasets/spleen/*
 datasets/brain/*
@@ -32,3 +35,4 @@ server_datasets
 tmp/*
 tmp*
 gui/old_server_logic
+src/cellar.egg-info
