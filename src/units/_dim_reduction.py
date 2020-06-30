@@ -81,8 +81,7 @@ class Dim_PCA(Unit):
 
         if self.n_components == 'knee':
             n_components = min(self.n_components_max, np.min(x.shape))
-            obj = PCA(n_components=n_components,
-                      svd_solver='arpack', **self.kwargs).fit(x)
+            obj = PCA(n_components=n_components, **self.kwargs).fit(x)
 
             # Construct axis for KneeLocator
             x_axis = list(range(1, obj.n_components_ + 1))
@@ -96,11 +95,9 @@ class Dim_PCA(Unit):
 
             self.logger.info("Knee found at {0}.".format(n_components))
             x_emb = PCA(n_components=n_components,
-                        svd_solver='arpack',
                         **self.kwargs).fit_transform(x)
         else:
             x_emb = PCA(n_components=self.n_components,
-                        svd_solver='arpack',
                         **self.kwargs).fit_transform(x)
 
         if return_evr == True:

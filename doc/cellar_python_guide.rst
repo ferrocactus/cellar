@@ -57,6 +57,64 @@ The following units are available in the python version of cellar:
 * ``cl.transfer_labels``: given a reference labeled dataset, use that to transfer the labels into another dataset using the method specified.
 * ``cl.plot``: plots the 2D embeddings colored by cluster, or colored by the expression value of a gene.
 
+Some additional tools that we include here for completeness are:
+
+* ``cl.load_file``: given a filepath, loads a dataset into an AnnData object.
+* ``cl.store_subset``: given a list of indices, store it as a named subset.
+* ``cl.store_labels``: set the labels field. It is recommended to use this function instead of manually updating the ``adata.obs['labels']`` entry.
+* ``cl.update_subset_label``: set the cell type for the given subset.
+* ``cl.populate_subsets``: after manually updating the cluster structure, run this to resolve subset/naming issues.
+* ``cl.merge_clusters``: merge two or more clusters into a single one.
+
+Usage
+_____
+
+The main structure used by cellar is the `AnnData`_ object.
+While it is possible to call some of the units using a numpy array
+or a list, it is recommended to use an AnnData object since it is
+easier to maneuver the pipeline and more information is stored in
+the object. To load a dataset you can either use ``cl.load_file``
+or use the ``anndata`` read functionality as explained in
+`<https://anndata.readthedocs.io/en/stable/api.html#reading/>`_.
+We provide a test dataset borrowed from the Allen Brain Atlas
+at `<https://human.brain-map.org/static/download/>`_ that you can
+access by running
+
+.. code:: python
+
+    adata = cl.load_file('default')
+
+**We assume the dataset is normalized.** We have decided to keep the
+normalization part out of the package for now, so the user is free
+to choose and apply any available normalization methods before feeding
+their data into our pipeline.
+
+After acquiring and loading the normalized data, typically the first
+step is to reduce the dimensionality. PCA is the most popular choice
+which applies a linear map to a lower dimensional space where each
+dimension tries to preserve as much of the variance as possible.
+To see a full list of what methods are available consult `<link/>`_.
+
+To choose a method simply pass its name to the method parameter as
+
+.. code:: python
+
+    cl.reduce_dim(adata, method='PCA', n_components=20)
+
+Any parameter that is listed in the method's web page can also be passed
+down to ``cl.reduce_dim``. For example, if one wishes to use ``svd_solver='arpack'``
+in scikit-learn's implementation of PCA, you simply need to run
+
+.. code:: python
+
+    cl.reduce_dim(adata, method='PCA', n_components=20, svd_solver='arpack')
+
+If ``n_components='knee'``, then we compute the explained variance graph
+with a high number of components (default: 200), and then use the knee detector
+algorithm of https://github.com/arvkevi/kneed to find the number of
+components (minimum: 10) that corresponds to the 'knee' of the plot.
+
+
 .. _numpy: https://numpy.org/
 .. _scikit-learn: https://scikit-learn.org/stable/
 .. _pandas: https://pandas.pydata.org/
@@ -66,4 +124,3 @@ The following units are available in the python version of cellar:
 .. _Leiden: https://github.com/vtraag/leidenalg
 .. _UMAP: https://umap-learn.readthedocs.io/en/latest/
 .. _Plotly: https://plotly.com/
-.. _cellar: https://data.test.hubmapconsortium.org/app/cellar
