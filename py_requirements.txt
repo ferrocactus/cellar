@@ -1,0 +1,15 @@
+matplotlib
+numpy
+pandas
+scikit-learn
+sklearn
+umap-learn
+kneed
+statsmodels
+joblib
+anndata
+leidenalg
+scanpy
+psutil
+plotly
+bidict

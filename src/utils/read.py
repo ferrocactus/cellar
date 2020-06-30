@@ -1,7 +1,6 @@
 from ast import literal_eval
 from configparser import ConfigParser
 import anndata
-import gtfparse
 import os
 import shutil
 import traceback
@@ -26,7 +25,7 @@ def safe_load_file(filepath):
 
 def load_file(filepath):
     if filepath == 'default':
-        filepath = join_root("datasets/RNAseqTPM.csv")
+        filepath = join_root("src/datasets/default.csv")
     elif filepath == 'test':
         filepath = join_root('datasets/hubmap/testdataset.h5ad')
 

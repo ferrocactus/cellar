@@ -15,6 +15,7 @@ datasets/spleen/*
 datasets/brain/*
 datasets/*
 !/datasets/RNAseqTPM.csv
+!/src/datasets/default.csv
 packages
 notebooks/misc.ipynb
 notebooks/*
