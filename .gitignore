@@ -14,7 +14,7 @@ datasets/spleen/*
 datasets/brain/*
 datasets/*
 !/datasets/Spellman.csv
-!/datasets/brain/RNAseqTPM.csv
+!/datasets/RNAseqTPM.csv
 packages
 notebooks/misc.ipynb
 notebooks/*
