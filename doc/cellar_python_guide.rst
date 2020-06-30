@@ -9,7 +9,7 @@ Here we provide a quick tour of the main components
 and describe how to extend its functionality.
 
 To get started, you can install cellar using pip by runnin
-the following command (requires Python >3.7):
+the following command (requires Python >3.7)::
 
     $ pip install git+https://github.com/ferrocactus/cellar
 
@@ -33,4 +33,4 @@ You can test the installation by running the following simple snippet::
 .. _numpy: https://numpy.org/
 .. _scikit-learn: https://scikit-learn.org/stable/
 .. _pandas: https://pandas.pydata.org/
-.. _py_requirements: https://github.com/ferrocactus/cellar/blob/master/_py_requirements.txt
+.. _py_requirements: https://github.com/ferrocactus/cellar/blob/master/py_requirements.txt

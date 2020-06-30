@@ -30,7 +30,7 @@ menuItem(
                 selectInput(
                     ns("uploaded_dataset"),
                     "Choose dataset:",
-                    choices = list.files("datasets/user_uploaded")
+                    choices = c("default", list.files("datasets/user_uploaded"))
                 )%>%
                     shinyInput_label_embed(
                         shiny::icon("info-circle") %>%
