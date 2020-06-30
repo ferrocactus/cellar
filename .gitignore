@@ -10,10 +10,10 @@ build
 dist
 cellar.egg*
 !.gitignore
+!/src/markers/gene_id_name.csv
 datasets/spleen/*
 datasets/brain/*
 datasets/*
-!/datasets/Spellman.csv
 !/datasets/RNAseqTPM.csv
 packages
 notebooks/misc.ipynb
