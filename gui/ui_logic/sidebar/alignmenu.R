@@ -48,7 +48,16 @@ menuItem(
                         "Choose Reference Dataset (h5ad)",
                         multiple = FALSE,
                         accept = c(".h5ad")
-                    ),
+                    )%>%
+                        shinyInput_label_embed(
+                            shiny::icon("info-circle") %>%
+                                bs_embed_tooltip(
+                                    paste0("Choose the reference dataset. Should be the same ",
+                                           "as the one on the session file."),
+                                    placement= "bottom"
+                                )
+                        )
+                    ,
                     actionButton(
                         ns("align_btn"),
                         "Run Label Transfer",

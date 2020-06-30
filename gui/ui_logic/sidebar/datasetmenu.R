@@ -16,8 +16,14 @@ menuItem(
                     "Server Datasets" = "hubmap"
                 ),
                 inline = TRUE
-            ),
-
+            ) %>%
+                shinyInput_label_embed(
+                    shiny::icon("info-circle") %>%
+                        bs_embed_tooltip(
+                            "Select the datasets on the server or the datasets uploaded by the useR",
+                            placement= "bottom"
+                        )
+                ),
             conditionalPanel(
                 condition = "input.folder == 'user_uploaded'",
                 ns = ns,
@@ -25,7 +31,14 @@ menuItem(
                     ns("uploaded_dataset"),
                     "Choose dataset:",
                     choices = list.files("datasets/user_uploaded")
-                ),
+                )%>%
+                    shinyInput_label_embed(
+                        shiny::icon("info-circle") %>%
+                            bs_embed_tooltip(
+                                "Choose a specific dataset",
+                                placement= "bottom"
+                            )
+                    ),
                 fileInput(
                     ns("file1"),
                     "Choose CSV/h5ad File",
@@ -35,7 +48,14 @@ menuItem(
                         "text/comma-separated-values",
                         ".csv", ".h5ad"
                     )
-                )
+                )%>%
+                    shinyInput_label_embed(
+                        shiny::icon("info-circle") %>%
+                            bs_embed_tooltip(
+                                "Upload a dataset",
+                                placement= "bottom"
+                            )
+                    )
             ),
 
             conditionalPanel(
@@ -45,7 +65,14 @@ menuItem(
                     ns("hubmap_dataset"),
                     "Choose dataset:",
                     choices = list.files("datasets/hubmap")
-                )
+                )%>%
+                    shinyInput_label_embed(
+                        shiny::icon("info-circle") %>%
+                            bs_embed_tooltip(
+                                "Choose a specific dataset",
+                                placement= "bottom"
+                            )
+                    )
             ),
 
             actionButton(

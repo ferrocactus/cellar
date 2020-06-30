@@ -31,6 +31,9 @@ misc <- function(input, output, session) {
         }
     })
 
+    runjs("document.getElementById('ns-menu').onclick = function() {
+       window.open('https://github.com/ferrocactus/cellar/blob/master/doc/cellar_guide.md', '_blank'); };")
+    
     runjs("document.getElementById('ns-search').onclick = function() {
        window.open('https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + document.getElementById('ns-searchgene').value, '_blank'); };")
 }

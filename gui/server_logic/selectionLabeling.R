@@ -116,6 +116,38 @@ selectionLabeling <- function(input, output, session, adata,
             choices = c("None", setNames())
     )})
 
+    
+    # output$subset1_upd<-renderUI({
+    #     selectInput(
+    #         session,
+    #         ns("subset1_upd"),
+    #         "Choose Subset",
+    #         choices = c("None", setNames())
+    #     ) %>%
+    #         shinyInput_label_embed(
+    #             shiny_iconlink() %>%
+    #                 bs_embed_tooltip(
+    #                     "Select the subset to be updated",
+    #                     placement= "bottom"
+    #                 )
+    #         )
+    # })
+    
+    # output$subset1_upd<-renderUI({
+    #     selectInput(
+    #         ns("subset1_upd"),
+    #         "Choose Subset",
+    #         choices = c("None", setNames())
+    #     ) %>%
+    #         shinyInput_label_embed(
+    #             shiny_iconlink() %>%
+    #                 bs_embed_tooltip(
+    #                     "Select the subset to be updated",
+    #                     placement= "bottom"
+    #                 )
+    #         )
+    # })
+    
     observe({
         updateSelectInput(
             session,
