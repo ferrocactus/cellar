@@ -236,7 +236,7 @@ and for the former, run
 
 .. code:: python
 
-    cl.plot(gene='gene_name_here')
+    cl.plot(adata, gene='gene_name_here')
 
 Examples are shown below:
 

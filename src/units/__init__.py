@@ -12,6 +12,7 @@ from ._cluster_ensemble import Ens_HyperGraph
 from ._dim_reduction import Dim_PCA
 from ._dim_reduction import Dim_UMAP
 from ._dim_reduction import Dim_TSNE
+from ._dim_reduction import Dim_MDS
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
@@ -42,7 +43,8 @@ translation_dict = {
     "dim_reduction": {
         "PCA": Dim_PCA,
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE
+        "TSNE": Dim_TSNE,
+        "MDS": Dim_MDS
         # "Autoencoder": Dim_AE
     },
     "cluster_eval": {
@@ -66,7 +68,8 @@ translation_dict = {
     },
     "visualization": {
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE
+        "TSNE": Dim_TSNE,
+        "MDS": Dim_MDS
     },
     "align": {
         "Scanpy Ingest": Ali_Scanpy_Ingest
@@ -121,6 +124,7 @@ __all__ = [
     'Dim_PCA',
     'Dim_UMAP',
     'Dim_TSNE',
+    'Dim_MDS',
     'Eval_Silhouette',
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',

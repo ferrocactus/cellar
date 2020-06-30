@@ -5,6 +5,7 @@ import numpy as np
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
+from sklearn.manifold import MDS
 from umap import UMAP
 
 from ..log import setup_logger
@@ -106,15 +107,55 @@ class Dim_PCA(Unit):
             return x_emb
 
 
+class Dim_MDS(Unit):
+    def __init__(self, n_components=10, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int
+            Number of components to use.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
+        self.logger = setup_logger("MDS")
+        self.n_components = n_components
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Reduces the dimensionality of the data.
+        See https://scikit-learn.org/stable/modules/generated/sklearn.manifold.MDS.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
+        self.logger.info("Initializing MDS.")
+        return MDS(n_components=self.n_components,
+                    **self.kwargs).fit_transform(x)
+
+
 class Dim_UMAP(Unit):
     def __init__(self, n_components=2, **kwargs):
         """
         Parameters
         __________
 
-        use_y: Bool, default True
-            If set, will also pass labels to UMAP for constrained
-            dimensionality reduction.
+        n_components: int
+            Number of components to use.
 
         **kwargs: dictionary
             Dictionary of parameters that will get passed to obj
