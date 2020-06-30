@@ -2,12 +2,15 @@ from ast import literal_eval
 from configparser import ConfigParser
 import anndata
 import gtfparse
-import pandas as pd
 import os
 import shutil
 import traceback
 import sys
 from .exceptions import IncorrectFileFormat
+
+this_dir = os.path.dirname(__file__)
+def join_root(path):
+    return os.path.abspath(os.path.join(this_dir, '../../', path))
 
 
 def safe_load_file(filepath):
@@ -23,9 +26,9 @@ def safe_load_file(filepath):
 
 def load_file(filepath):
     if filepath == 'default':
-        filepath = 'datasets/brain/RNAseqTPM.csv'
+        filepath = join_root("datasets/RNAseqTPM.csv")
     elif filepath == 'test':
-        filepath = 'datasets/hubmap/testdataset.h5ad'
+        filepath = join_root('datasets/hubmap/testdataset.h5ad')
 
     dataset = os.path.basename(filepath)
     dataset = os.path.splitext(dataset)[0]
@@ -48,7 +51,8 @@ def load_file(filepath):
             adata = anndata.read_loom(filepath)
     except Exception as e:
         print(str(e))
-        raise IncorrectFileFormat("File format incorrect.")
+        raise IncorrectFileFormat(
+            "File does not exist or file format is incorrect.")
 
     adata.uns['dataset'] = dataset
     return adata
@@ -57,7 +61,7 @@ def load_file(filepath):
 def upload_file(dataset, path):
     try:
         filename, file_extension = os.path.splitext(path)
-        shutil.move(path, "datasets/user_uploaded/" + dataset + file_extension)
+        shutil.move(path, join_root("datasets/user_uploaded") + "/" + dataset + file_extension)
     except Exception as e:
         print(str(e))
         raise OSError("A problem occured when reading dataset.")

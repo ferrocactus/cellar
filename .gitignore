@@ -6,12 +6,15 @@ __*
 states
 markers/worker.py
 .*
+build
+dist
+cellar.egg*
 !.gitignore
+!/src/markers/gene_id_name.csv
 datasets/spleen/*
 datasets/brain/*
 datasets/*
-!/datasets/Spellman.csv
-!/datasets/brain/RNAseqTPM.csv
+!/datasets/RNAseqTPM.csv
 packages
 notebooks/misc.ipynb
 notebooks/*
@@ -32,3 +35,4 @@ server_datasets
 tmp/*
 tmp*
 gui/old_server_logic
+src/cellar.egg-info

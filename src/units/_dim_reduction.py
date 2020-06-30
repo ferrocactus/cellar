@@ -124,9 +124,12 @@ class Dim_UMAP(Unit):
             when instantiating it.
 
         """
-        import warnings
-        from numba.errors import NumbaPerformanceWarning
-        warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
+        try:
+            import warnings
+            from numba.errors import NumbaPerformanceWarning
+            warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
+        except:
+            pass
 
         self.logger = setup_logger('UMAP')
         self.n_components = n_components

@@ -1,5 +1,4 @@
 import numpy as np
-import Cluster_Ensembles as CE
 from ..log import setup_logger
 from ._unit import Unit
 from ._cluster import Clu_KMeans
@@ -98,6 +97,13 @@ class Ens_HyperGraph(Unit):
             evaluated by eval_obj.
 
         """
+        try:
+            import Cluster_Ensembles as CE
+        except ImportError:
+            raise ImportError("Manually install Cluster_Ensembles package if you "
+                              "wish to run ensemble clustering. For more information ",
+                              "see here: https://pypi.org/project/Cluster_Ensembles/")
+
         self.logger.info("Initializing Ensemble Clustering.")
         self.logger.info("Using the following methods:")
         self.logger.info(", ".join(self.methods))
@@ -105,8 +111,8 @@ class Ens_HyperGraph(Unit):
         if len(self.methods) == 1:
             # No need to do ensemble if only one method
             return clu_wrap(self.methods[0])(eval_obj=self.eval_obj,
-                                    n_clusters=self.n_clusters,
-                                    n_jobs=self.n_jobs, **self.kwargs).get(x)
+                                             n_clusters=self.n_clusters,
+                                             n_jobs=self.n_jobs, **self.kwargs).get(x)
         elif len(self.methods) < 1:
             raise ValueError("No methods specified for ensemble clustering.")
 
