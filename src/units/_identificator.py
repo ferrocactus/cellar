@@ -13,7 +13,7 @@ from ._unit import Unit
 
 this_dir = os.path.dirname(__file__)
 def join_root(path):
-    return os.path.abspath(os.path.join(this_dir, '../../', path))
+    return os.path.abspath(os.path.join(this_dir, path))
 
 
 def _get_dict(path):
@@ -69,7 +69,7 @@ class Ide_HyperGeom(Unit):
     hierarchy of types. First determine the lvl1 type, then the lvl2 subtype.
     """
 
-    def __init__(self, path=join_root('markers/cell_type_marker.json'), tissue='all'):
+    def __init__(self, path=join_root('../markers/cell_type_marker.json'), tissue='all'):
         self.logger = setup_logger("HyperGeom")
         self.path = path
         self.tissue = tissue

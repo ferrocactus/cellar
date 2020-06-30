@@ -1,1 +1,4 @@
 include datasets/RNAseqTPM.csv
+include src/markers/cell_type_marker.json
+include src/markers/cl-simple.json
+include src/markers/gene_id_name.csv

@@ -11,9 +11,9 @@ from ._unit import Unit
 
 this_dir = os.path.dirname(__file__)
 def join_root(path):
-    return os.path.abspath(os.path.join(this_dir, '../../', path))
+    return os.path.abspath(os.path.join(this_dir, path))
 
-path = join_root('markers/gene_id_name.csv')
+path = join_root('../markers/gene_id_name.csv')
 
 
 def convert(str_list):

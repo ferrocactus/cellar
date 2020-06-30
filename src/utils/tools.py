@@ -1,6 +1,7 @@
 import itertools
 import json
 import re
+import os
 from ast import literal_eval
 from functools import reduce
 
@@ -11,6 +12,11 @@ from bidict import bidict
 from .exceptions import InvalidArgument
 from .exceptions import InappropriateArgument
 from .validation import _validate_cluster_list
+
+
+this_dir = os.path.dirname(__file__)
+def join_root(path):
+    return os.path.abspath(os.path.join(this_dir, path))
 
 
 def parse(x):
@@ -139,7 +145,7 @@ def merge_clusters(adata, clusters):
         update_subset_label(adata, f'Cluster_{cluster}', c0_name)
 
 def get_dic():
-    f=open("markers/cl-simple.json","rb")
+    f=open(join_root("../markers/cl-simple.json"),"rb")
     onto_data=json.load(f)
     cells=onto_data['graphs'][0]['nodes']    # dictionary of length 2632
     tissue=[]
