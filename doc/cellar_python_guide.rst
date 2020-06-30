@@ -8,6 +8,8 @@ although its functionality is more limited.
 Here we provide a quick tour of the main components
 and describe how to extend existing methods.
 
+.. contents::
+
 Installation
 ____________
 
