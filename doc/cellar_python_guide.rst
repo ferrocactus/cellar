@@ -125,8 +125,8 @@ Clustering
 ~~~~~~~~~~
 
 The default clustering method is 'Leiden', although more methods
-are available as listed in `<link/>`_. Similar as before, the
-desired method can be changed by passing the method's name to
+are available as listed in `<link2/>`_. Similar as before, the
+desired method can be changed by passing the its name to
 the method parameter. E.g.
 
 .. code:: python
@@ -146,6 +146,102 @@ original implementation of the method.
 This method populates ``adata.obs['labels']``, ``adata.uns['cluster_info']``, and
 ``adata.uns['cluster_names']``. The latter is a `bidict`_ that stores a cell type
 for each cluster. These types can be changed using ``cl.update_subset_label``.
+
+Visualization
+~~~~~~~~~~~~~
+
+The default method for creating the 2D embeddings is UMAP and also the one we
+recommend. Running it is as simple as
+
+.. code:: python
+
+    cl.reduce_dim_vis(adata, method='UMAP', dim=2)
+
+This populates ``adata.obsm['x_emb_2d']`` or ``adata.obsm['x_emb_3d']`` depending
+on whether ``dim=2`` or ``dim=3``. Additional info is stored in
+``adata.uns[f'visualization_info_{dim}d']``.
+
+Differential Expression
+~~~~~~~~~~~~~~~~~~~~~~~
+
+DE analysis requires a subset to analyze and optionally a second subset
+to use for comparison. If the second subset is not set, then it is assumed
+to be all the remanining points. Our DE analysis consists of running
+Welch's TTest which we use to filter genes at an ``alpha=0.05`` and then sort
+the genes based on their logFC value with the top ones being the most
+significant. This can be achieved via ``cl.de`` method as follows:
+
+.. code:: python
+
+    cl.de(adata, subset1='Cluster_0', alpha=0.05, correction='holm-sidak')
+
+The correction parameter is used to adjust the p-values. If no correction
+is preferred, set ``correction=None``.
+
+``cl.de`` populates ``adata.uns['de']`` and ``adata.uns['de_info']``.
+
+Semi-Supervised Clustering
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Semi-supervised clustering consists of clustering algorithms that
+take into account partial information about the data. In our case
+this side information takes the form of known labels for some
+subset of the data. The way semi-supervised clustering it is meant
+to be used in our pipeline is as follows:
+
+The user initially runs a clustering algorithm such as 'Leiden' or
+'KMeans'. After observing the new clusters, merging/changing labels
+the user may wish to re-run clustering while preserving their changes.
+E.g., if they updated clusters 0 and 3, and are confident that
+these clusters are well-defined, they may wish to preserve them
+and run semi-supervised clustering for the remaining clusters.
+Different methods achieve this in different ways. For a full list
+see `<list3/>`_. To run semi-supervised clustering, the
+``adata.obs['labels']`` key must be set, after which one can run:
+
+.. code:: python
+
+    cl.ss_cluster(adata, method='ConstrainedKMeans', preserved_labels=[0, 1])
+
+``cl.ss_cluster`` populates the same keys as ``cl.cluster``.
+
+Transfer Labels
+~~~~~~~~~~~~~~~
+
+Transferring labels (a.k.a. alignment) is a method that uses a
+reference dataset that has already been labeled and tries to
+label a new dataset whose labels are unknown using the reference dataset.
+This requires two AnnData objects:
+
+.. code:: python
+
+    cl.transfer_labels(adata, ref=reference_adata, method='Scanpy Ingest')
+
+``cl.transfer_labels`` populates the same keys as ``cl.cluster``.
+
+Plotting
+~~~~~~~~
+
+Finally, to plot the results, one can rely on ``cl.plot``. Currently,
+it is possible to plot the clusters or the expression value of a
+particular gene. For the former, run
+
+.. code:: python
+
+    cl.plot(adata)
+
+and for the former, run
+
+.. code:: python
+
+    cl.plot(gene='gene_name_here')
+
+Examples are shown below:
+
+.. image:: pic/cluster_plot.png
+    :width: 350pt
+.. image:: pic/gene_expression_plot.png
+    :width: 350pt
 
 
 .. _numpy: https://numpy.org/

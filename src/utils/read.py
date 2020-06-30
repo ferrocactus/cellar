@@ -27,7 +27,7 @@ def load_file(filepath):
     if filepath == 'default' or filepath == 'datasets/user_uploaded/default':
         filepath = join_root("../datasets/default.csv")
     elif filepath == 'test':
-        filepath = join_root('../../hubmap/testdataset.h5ad')
+        filepath = join_root('../../datasets/hubmap/testdataset.h5ad')
 
     dataset = os.path.basename(filepath)
     dataset = os.path.splitext(dataset)[0]
