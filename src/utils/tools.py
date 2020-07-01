@@ -42,6 +42,8 @@ def _emb_exists_in_adata(adata, method, n_components):
     if 'dim_reduction_info' in adata.uns:
         if adata.uns['dim_reduction_info']['method'] != method:
             return None
+        elif adata.obsm['x_emb'].shape[1] == n_components:
+            return adata.obsm['x_emb']
     if method != 'PCA':
         return None
     if isinstance(n_components, str):

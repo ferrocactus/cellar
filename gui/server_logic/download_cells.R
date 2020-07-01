@@ -4,13 +4,13 @@ download_cells <- function(input, output, session, adata) {
         filename = "subsets.csv",
         content = function(file) {
             if (py_to_r(is_active(adata())) == FALSE) return()
-            #if (py_to_r(has_key(adata(), 'obs', 'labels')) == FALSE) return()
+            if (py_to_r(has_key(adata(), 'obs', 'labels')) == FALSE) return()
 
             subsets = ""
             if (identical(input$cell_subset_download, NULL)) {
                 return()
             }
-            
+
             else if (input$cell_subset_download == "") {
                 return()
             }
@@ -21,7 +21,7 @@ download_cells <- function(input, output, session, adata) {
             try(
               subsets <- py_to_r(validate_cluster_list(labels, clusters)) ##check if the selected clusters are valid
             )
-            
+
             # print(py_to_r(get_subsets(adata())))
             # print(py_to_r(get_cluster_label_list(adata())))
             # print(py_to_r(get_cluster_name_list(adata())))
@@ -32,9 +32,9 @@ download_cells <- function(input, output, session, adata) {
                     allnames=py_to_r(get_subsets(adata()))
                     alllabels=py_to_r(get_cluster_label_list(adata()))
                     assigned_names=py_to_r(get_cluster_name_list(adata()))   # get updated cluster names
-                    subsetname=allnames[which(allnames==paste0("Cluster_",as.character(id)))]  # eg. cluster_0 
+                    subsetname=allnames[which(allnames==paste0("Cluster_",as.character(id)))]  # eg. cluster_0
                     updated_name=assigned_names[which(alllabels==as.numeric(id))]
-                    indices=py_to_r(adata()$uns['subsets'][subsetname])       # get indices of cells in that subset 
+                    indices=py_to_r(adata()$uns['subsets'][subsetname])       # get indices of cells in that subset
                     updated_names=rep(as.character(updated_name),times=length(indices))
                     cell_ids=as.character(py_to_r(adata()$obs$index$to_numpy()))
                     indices=indices+1  # index in R starts from 1
@@ -44,7 +44,7 @@ download_cells <- function(input, output, session, adata) {
                     #print(indices)
                     df = data.frame("Cell_ID"=cell_ids[indices], "Label"=updated_names)  # dataframe of this cluster
                     outfile=rbind(outfile,df)  # add this cluster to the output file
- 
+
                 }
                 outfile=outfile[-1,]
                 rownames(outfile)=1:length(outfile[,1])

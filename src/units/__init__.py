@@ -13,6 +13,7 @@ from ._dim_reduction import Dim_PCA
 from ._dim_reduction import Dim_UMAP
 from ._dim_reduction import Dim_TSNE
 from ._dim_reduction import Dim_MDS
+from ._dim_reduction import Dim_FeatureAgglomeration
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
@@ -43,8 +44,8 @@ translation_dict = {
     "dim_reduction": {
         "PCA": Dim_PCA,
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE,
-        "MDS": Dim_MDS
+        "MDS": Dim_MDS,
+        "Feature Agglomeration": Dim_FeatureAgglomeration
         # "Autoencoder": Dim_AE
     },
     "cluster_eval": {
@@ -69,6 +70,8 @@ translation_dict = {
     "visualization": {
         "UMAP": Dim_UMAP,
         "TSNE": Dim_TSNE,
+        "PCA": Dim_PCA,
+        "Feature Agglomeration": Dim_FeatureAgglomeration,
         "MDS": Dim_MDS
     },
     "align": {
@@ -125,6 +128,7 @@ __all__ = [
     'Dim_UMAP',
     'Dim_TSNE',
     'Dim_MDS',
+    'Dim_FeatureAgglomeration',
     'Eval_Silhouette',
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',
