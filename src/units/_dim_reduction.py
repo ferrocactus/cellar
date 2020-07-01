@@ -6,6 +6,7 @@ from kneed import KneeLocator
 from sklearn.decomposition import PCA
 from sklearn.manifold import TSNE
 from sklearn.manifold import MDS
+from sklearn.manifold import Isomap
 from sklearn.cluster import FeatureAgglomeration
 from umap import UMAP
 
@@ -187,6 +188,47 @@ class Dim_FeatureAgglomeration(Unit):
         """
         self.logger.info("Initializing Feature Agglomeration.")
         return FeatureAgglomeration(n_clusters=self.n_components,
+                    **self.kwargs).fit_transform(x)
+
+
+class Dim_Isomap(Unit):
+    def __init__(self, n_components=10, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int
+            Number of components to use.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
+        self.logger = setup_logger("Isomap")
+        self.n_components = n_components
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Reduces the dimensionality of the data.
+        See https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
+        self.logger.info("Initializing Isomap.")
+        return Isomap(n_components=self.n_components,
                     **self.kwargs).fit_transform(x)
 
 

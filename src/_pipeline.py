@@ -94,6 +94,13 @@ def reduce_dim(
     if x_emb is None:
         x_emb = wrap('dim_reduction', method)(
             n_components=n_components, **kwargs).get(adata.X)
+        # Clear visualization if it used previous embeddings
+        for dim in [2, 3]:
+            if f'x_emb_{dim}d' in adata.obsm:
+                if adata.uns[f'visualization_info_{dim}d']['used_emb'] == True:
+                    print('Clearing 2d embeddings...')
+                    adata.obsm.pop(f'x_emb_{dim}d', None)
+                    adata.uns.pop(f'visualization_info_{dim}d', None)
 
     if not is_AnnData:
         return x_emb

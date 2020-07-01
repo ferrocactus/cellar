@@ -6,7 +6,7 @@ defaults <- list(
 )
 
 options <- list(
-    "dim" = c("PCA", "MDS", "UMAP", "Feature Agglomeration"),
+    "dim" = c("PCA", "MDS", "UMAP", "Isomap", "Feature Agglomeration"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
               "GaussianMixture", "Scanpy", "Ensemble"),
     "clu_ensemble" = c("All"="All", "KMeans"="KMeans", "KMedoids"="KMedoids",
@@ -23,7 +23,7 @@ options <- list(
                   "large intestine", "liver", "lymph", "muscle", "other",
                   "placenta", "small intestine", "spleen", "stomach", "thymus",
                   "thyroid", "clusters", "user defined"),
-    "vis" = c("UMAP", "MDS", "PCA", "TSNE", "Feature Agglomeration"),
+    "vis" = c("UMAP", "MDS", "PCA", "TSNE", "Isomap", "Feature Agglomeration"),
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans", "ConstrainedSeededKMeans"),
     "de" = c("TTest"),
     "ali" = c("Scanpy Ingest", "SingleR"),
