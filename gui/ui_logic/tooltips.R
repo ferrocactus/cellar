@@ -15,11 +15,20 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
                      "as the one on the session file.")),
 
     # Selection & Labeling
-
- 
+    bsTooltip(ns("subset1_upd"),
+              paste0("Select the subset you want to update")),
+  
     # Analysis
-
-
+    
+    bsTooltip(ns("subset1"),
+                "If None, will consider all cells not in Subset 1.",
+                placement= "bottom"
+    ),
+    bsTooltip(ns("subset2"),
+                "Subset to run the analysis for against Subset 2.",
+                placement= "bottom"
+    ),
+        
     # Appearance
     
     

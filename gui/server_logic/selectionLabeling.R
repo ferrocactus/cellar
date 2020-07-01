@@ -133,6 +133,8 @@ selectionLabeling <- function(input, output, session, adata,
     #         )
     # })
     
+    
+    # observe({
     # output$subset1_upd<-renderUI({
     #     selectInput(
     #         ns("subset1_upd"),
@@ -147,12 +149,13 @@ selectionLabeling <- function(input, output, session, adata,
     #                 )
     #         )
     # })
-    
+    # })
     observe({
         updateSelectInput(
             session,
             "subset1_upd",
             "Choose Subset",
             choices = c("None", setNames())
-    )})
+        )
+    })
 }
