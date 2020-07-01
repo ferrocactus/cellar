@@ -1,10 +1,13 @@
 download_cells <- function(input, output, session, adata) {
     observeEvent(input$cell_subset_download,{
+        if (py_to_r(is_active(adata())) == FALSE) return()
+        if (py_to_r(has_key(adata(), 'uns', 'cluster_names')) == FALSE) return()
+
         output$download_cells <- downloadHandler(
         filename = "subsets.csv",
         content = function(file) {
             if (py_to_r(is_active(adata())) == FALSE) return()
-            if (py_to_r(has_key(adata(), 'obs', 'labels')) == FALSE) return()
+            if (py_to_r(has_key(adata(), 'uns', 'cluster_names')) == FALSE) return()
 
             subsets = ""
             if (identical(input$cell_subset_download, NULL)) {

@@ -22,7 +22,8 @@ install_requires = [
     'scanpy',
     'psutil',
     'plotly',
-    'bidict'
+    'bidict',
+    'pydiffmap'
 ]
 
 ext_modules = [

@@ -36,7 +36,6 @@ def parse(x):
 
 
 def _emb_exists_in_adata(adata, method, n_components):
-    print(method)
     if 'x_emb' not in adata.obsm and 'X_pca' not in adata.obsm:
         return None
     if 'dim_reduction_info' in adata.uns:

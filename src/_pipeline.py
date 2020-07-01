@@ -33,6 +33,7 @@ def reduce_dim(
         n_components: Union[str, int, float] = 'knee',
         inplace: Optional[bool] = True,
         check_if_exists: Optional[bool] = False,
+        clear_2d_emb: Optional[bool] = True,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Reduce dimensionality of the data.
@@ -60,6 +61,9 @@ def reduce_dim(
         in x.obsm['x_emb'] is greater than or equal to n_components,
         then the first n_components columns of x.obsm['x_emb']
         will be returned. No computation takes place.
+
+    clear_2d_emb: If set to true and x_emb changes, then will also
+        clear f'x_emb_{dim}d' if any exist.
 
     **kwargs: Additional parameters that will get passed to the
         clustering object as specified in method. For a full list
@@ -96,7 +100,7 @@ def reduce_dim(
             n_components=n_components, **kwargs).get(adata.X)
         # Clear visualization if it used previous embeddings
         for dim in [2, 3]:
-            if f'x_emb_{dim}d' in adata.obsm:
+            if f'x_emb_{dim}d' in adata.obsm and clear_2d_emb:
                 if adata.uns[f'visualization_info_{dim}d']['used_emb'] == True:
                     print('Clearing 2d embeddings...')
                     adata.obsm.pop(f'x_emb_{dim}d', None)

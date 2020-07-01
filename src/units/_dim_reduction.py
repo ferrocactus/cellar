@@ -4,10 +4,12 @@ import logging
 import numpy as np
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
+from sklearn.decomposition import KernelPCA
 from sklearn.manifold import TSNE
 from sklearn.manifold import MDS
 from sklearn.manifold import Isomap
 from sklearn.cluster import FeatureAgglomeration
+from pydiffmap import diffusion_map as dm
 from umap import UMAP
 
 from ..log import setup_logger
@@ -147,7 +149,48 @@ class Dim_MDS(Unit):
         """
         self.logger.info("Initializing MDS.")
         return MDS(n_components=self.n_components,
-                    **self.kwargs).fit_transform(x)
+                   **self.kwargs).fit_transform(x)
+
+
+class Dim_KernelPCA(Unit):
+    def __init__(self, n_components=10, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int
+            Number of components to use.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
+        self.logger = setup_logger("Kernel PCA")
+        self.n_components = n_components
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Reduces the dimensionality of the data.
+        See https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.KernelPCA.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
+        self.logger.info("Initializing Kernel PCA.")
+        return KernelPCA(n_components=self.n_components,
+                         **self.kwargs).fit_transform(x)
 
 
 class Dim_FeatureAgglomeration(Unit):
@@ -188,7 +231,7 @@ class Dim_FeatureAgglomeration(Unit):
         """
         self.logger.info("Initializing Feature Agglomeration.")
         return FeatureAgglomeration(n_clusters=self.n_components,
-                    **self.kwargs).fit_transform(x)
+                                    **self.kwargs).fit_transform(x)
 
 
 class Dim_Isomap(Unit):
@@ -229,7 +272,48 @@ class Dim_Isomap(Unit):
         """
         self.logger.info("Initializing Isomap.")
         return Isomap(n_components=self.n_components,
-                    **self.kwargs).fit_transform(x)
+                      **self.kwargs).fit_transform(x)
+
+
+class Dim_DiffusionMap(Unit):
+    def __init__(self, n_components=10, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int
+            Number of components to use.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
+        self.logger = setup_logger("Diffusion Map")
+        self.n_components = n_components
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Reduces the dimensionality of the data.
+        See https://pydiffmap.readthedocs.io/en/master/readme.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
+        self.logger.info("Initializing Diffusion Map.")
+        return dm.DiffusionMap.from_sklearn(n_evecs=self.n_components,
+                                            **self.kwargs).fit_transform(x)
 
 
 class Dim_UMAP(Unit):
