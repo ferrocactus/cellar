@@ -9,6 +9,7 @@ source("gui/ui_logic/sidebar/alignmenu.R") #downloadmenu
 source("gui/ui_logic/sidebar/selectionmenu.R") #mainmenu
 source("gui/ui_logic/sidebar/analysismenu.R") #analysismenu
 source("gui/ui_logic/sidebar/downloadmenu.R") #downloadmenu
+source("gui/ui_logic/sidebar/links.R") #links
 
 source("gui/ui_logic/body/plots.R") #plots
 source("gui/ui_logic/body/cell_names.R") #cell_names
@@ -18,8 +19,10 @@ source("gui/ui_logic/tooltips.R")
 
 header <- dashboardHeader(
     titleWidth = 400,
-    title = title
-    #info(id="ns")
+    title = title,
+    links[[1]],
+    links[[2]],
+    links[[3]]
 )
 
 sidebar <- dashboardSidebar(
@@ -33,8 +36,7 @@ sidebar <- dashboardSidebar(
         analysismenu(id='ns'),
         appearancemenu(id='ns'),
         downloadmenu(id='ns')
-    ),
-    tags$a(href="https://github.com/ferrocactus/cellar/blob/master/doc/cellar_guide.md", "Click here for the User Guide")
+    )
 )
 
 body <- dashboardBody(

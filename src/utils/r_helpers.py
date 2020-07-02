@@ -34,10 +34,16 @@ def get_emb_2d(adata):
     return adata.obsm.x_emb_2d.to_numpy()
 
 def get_cluster_label_list(adata):
-    return list(adata.uns['cluster_names'].keys())
+    if 'cluster_names' in adata.uns:
+        return list(adata.uns['cluster_names'].keys())
+    else:
+        return []
 
 def get_cluster_name_list(adata):
-    return list(adata.uns['cluster_names'].values())
+    if 'cluster_names' in adata.uns:
+        return list(adata.uns['cluster_names'].values())
+    else:
+        return []
 
 def get_unique_labels(adata):
     return adata.uns['cluster_info']['unique_labels']

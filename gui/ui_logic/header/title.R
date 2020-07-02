@@ -1,4 +1,4 @@
-b64 <- base64enc::dataURI(file="gui/ui_logic/header/logo.png", mime="image/png")
+b64 <- base64enc::dataURI(file="gui/ui_logic/icons/logo.png", mime="image/png")
 
 title = tags$a(href="http://www.sb.cs.cmu.edu/", target="_blank",
     style="text-decoration: none; color: white;",

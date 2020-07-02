@@ -10,8 +10,13 @@ from ._cluster import Clu_Leiden
 from ._cluster import Clu_Scanpy
 from ._cluster_ensemble import Ens_HyperGraph
 from ._dim_reduction import Dim_PCA
+from ._dim_reduction import Dim_KernelPCA
 from ._dim_reduction import Dim_UMAP
 from ._dim_reduction import Dim_TSNE
+from ._dim_reduction import Dim_MDS
+from ._dim_reduction import Dim_FeatureAgglomeration
+from ._dim_reduction import Dim_DiffusionMap
+from ._dim_reduction import Dim_Isomap
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
@@ -41,8 +46,12 @@ translation_dict = {
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
+        "Kernel PCA": Dim_KernelPCA,
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE
+        "MDS": Dim_MDS,
+        "Feature Agglomeration": Dim_FeatureAgglomeration,
+        "Diffusion Map": Dim_DiffusionMap,
+        "Isomap": Dim_Isomap
         # "Autoencoder": Dim_AE
     },
     "cluster_eval": {
@@ -66,7 +75,13 @@ translation_dict = {
     },
     "visualization": {
         "UMAP": Dim_UMAP,
-        "TSNE": Dim_TSNE
+        "TSNE": Dim_TSNE,
+        "PCA": Dim_PCA,
+        "Kernel PCA": Dim_KernelPCA,
+        "Feature Agglomeration": Dim_FeatureAgglomeration,
+        "MDS": Dim_MDS,
+        "Diffusion Map": Dim_DiffusionMap,
+        "Isomap": Dim_Isomap
     },
     "align": {
         "Scanpy Ingest": Ali_Scanpy_Ingest
@@ -119,8 +134,13 @@ __all__ = [
     'Clu_Scanpy',
     'Ens_HyperGraph',
     'Dim_PCA',
+    'Dim_KernelPCA',
     'Dim_UMAP',
     'Dim_TSNE',
+    'Dim_MDS',
+    'Dim_Isomap',
+    'Dim_FeatureAgglomeration',
+    'Dim_DiffusionMap',
     'Eval_Silhouette',
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',

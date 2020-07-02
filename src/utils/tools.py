@@ -1,17 +1,24 @@
 import itertools
 import json
 import re
+import os
 from ast import literal_eval
 from functools import reduce
 
 import anndata
 import numpy as np
-import pandas as pd
 from bidict import bidict
 
 from .exceptions import InvalidArgument
 from .exceptions import InappropriateArgument
 from .validation import _validate_cluster_list
+
+
+this_dir = os.path.dirname(__file__)
+
+
+def join_root(path):
+    return os.path.abspath(os.path.join(this_dir, path))
 
 
 def parse(x):
@@ -34,6 +41,10 @@ def _emb_exists_in_adata(adata, method, n_components):
     if 'dim_reduction_info' in adata.uns:
         if adata.uns['dim_reduction_info']['method'] != method:
             return None
+        elif adata.obsm['x_emb'].shape[1] == n_components:
+            return adata.obsm['x_emb']
+    if method != 'PCA':
+        return None
     if isinstance(n_components, str):
         n_components = 10
     if 'x_emb' in adata.obsm:
@@ -139,39 +150,40 @@ def merge_clusters(adata, clusters):
     for cluster in clusters[1:]:
         update_subset_label(adata, f'Cluster_{cluster}', c0_name)
 
-def get_dic():
-    f=open("markers/cl-simple.json","rb")
-    onto_data=json.load(f)
-    cells=onto_data['graphs'][0]['nodes']    # dictionary of length 2632
-    tissue=[]
-    cell_type=[]
-    tissues=['kidney', 'thymus', 'spleen', "liver",'lymph', 'stomach', 'heart',
-         'small intestine', 'large intestine','blood',"brain","thyroid",
-         'placenta','eye','other', "embryo", "muscle"]
 
-    identifiers=[['kidney'], ['thymocyte'], ['splenic'], ["hepat","liver"],
-            ['T','B'], ['stomach','gastric'], ['heart','cardiac'],
-         ['small intestine'], ['large intestine'],['blood'],["brain"],["thyroid"],
-         ['placenta'],['eye','retina'], ['other'],["embryo"], ["muscle",'myo']]
+def get_dic():
+    f = open(join_root("../markers/cl-simple.json"), "rb")
+    onto_data = json.load(f)
+    cells = onto_data['graphs'][0]['nodes']    # dictionary of length 2632
+    tissue = []
+    cell_type = []
+    tissues = ['kidney', 'thymus', 'spleen', "liver", 'lymph', 'stomach', 'heart',
+               'small intestine', 'large intestine', 'blood', "brain", "thyroid",
+               'placenta', 'eye', 'other', "embryo", "muscle"]
+
+    identifiers = [['kidney'], ['thymocyte'], ['splenic'], ["hepat", "liver"],
+                   ['T', 'B'], ['stomach', 'gastric'], ['heart', 'cardiac'],
+                   ['small intestine'], ['large intestine'], [
+                       'blood'], ["brain"], ["thyroid"],
+                   ['placenta'], ['eye', 'retina'], ['other'], ["embryo"], ["muscle", 'myo']]
 
     for i in cells:
-        f=0
+        f = 0
         if ('lbl' in i.keys()):
             for j in range(len(identifiers)):
                 for k in identifiers[j]:
-                    if ((k in i['lbl']) and f==0):
+                    if ((k in i['lbl']) and f == 0):
                         tissue.append(tissues[j])
-                        f=1
-            if (f==0):
+                        f = 1
+            if (f == 0):
                 tissue.append('other')
             cell_type.append(i['id'].split('/')[-1]+': '+i['lbl'])
         else:
             tissue.append('other')
             cell_type.append(i['id'].split('/')[-1])
-    dic={}
+    dic = {}
     for i in tissue:
-        dic[i]=[]
+        dic[i] = []
     for i in range(len(cell_type)):
         dic[tissue[i]].append(cell_type[i])
     return dic
-

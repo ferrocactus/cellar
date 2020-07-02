@@ -33,6 +33,7 @@ def reduce_dim(
         n_components: Union[str, int, float] = 'knee',
         inplace: Optional[bool] = True,
         check_if_exists: Optional[bool] = False,
+        clear_2d_emb: Optional[bool] = True,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Reduce dimensionality of the data.
@@ -60,6 +61,9 @@ def reduce_dim(
         in x.obsm['x_emb'] is greater than or equal to n_components,
         then the first n_components columns of x.obsm['x_emb']
         will be returned. No computation takes place.
+
+    clear_2d_emb: If set to true and x_emb changes, then will also
+        clear f'x_emb_{dim}d' if any exist.
 
     **kwargs: Additional parameters that will get passed to the
         clustering object as specified in method. For a full list
@@ -94,6 +98,13 @@ def reduce_dim(
     if x_emb is None:
         x_emb = wrap('dim_reduction', method)(
             n_components=n_components, **kwargs).get(adata.X)
+        # Clear visualization if it used previous embeddings
+        for dim in [2, 3]:
+            if f'x_emb_{dim}d' in adata.obsm and clear_2d_emb:
+                if adata.uns[f'visualization_info_{dim}d']['used_emb'] == True:
+                    print('Clearing 2d embeddings...')
+                    adata.obsm.pop(f'x_emb_{dim}d', None)
+                    adata.uns.pop(f'visualization_info_{dim}d', None)
 
     if not is_AnnData:
         return x_emb
@@ -140,6 +151,7 @@ def cluster(
         clusters with the best score. In the case of a tuple,
         a list is formed by treating the tuple as a pythonic range;
         (a, b, c) will start at a, finish at b-1, in increments of c.
+        Ignored if method is 'Leiden' or 'Scanpy'.
 
     use_emb: If True, will attempt to cluster on an embedding of x
         as specified in x.obsm['x_emb'] if x is AnnData object. If x
@@ -516,7 +528,7 @@ def ss_cluster(
             raise InvalidArgument("x_emb not found in AnnData object.")
         x_to_use = adata.obsm['x_emb']
 
-    labels_cp = adata.obs['labels'].copy()
+    labels_cp = adata.obs['labels'].to_numpy().copy()
     cluster_names = bidict({})
     unq_labels = np.unique(labels_cp)
     n_clusters = len(unq_labels)

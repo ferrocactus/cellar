@@ -40,7 +40,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
 
         # Update sets
         # anndata_has_key defined in r_helpers.py
-        if (has_key(adata(), 'uns', 'cluster_names') == TRUE) {
+        if (py_to_r(has_key(adata(), 'uns', 'cluster_names')) == TRUE) {
             resubset(resubset() + 1)
 
             clusters = py_to_r(get_cluster_label_list(adata()))
