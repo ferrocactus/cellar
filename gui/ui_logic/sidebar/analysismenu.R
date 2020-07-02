@@ -64,26 +64,23 @@ menuItem(
                             ns("subset1"),
                             "Choose Subset 1",
                             choices = c("None")
-                        ) %>%
-                            shinyInput_label_embed(
-                                shiny::icon("info-circle") %>%
-                                    bs_embed_tooltip(
-                                        "Subset to run the analysis for against Subset 2.",
-                                        placement= "bottom"
-                                    )
-                            ),
+                        ) ,
+                        # shiny::icon("info-circle") %>%
+                        #     bs_embed_tooltip(
+                        #         "Subset to run the analysis for against Subset 2.",
+                        #         placement= "bottom"
+                        #     ),
                         selectInput(
                             ns("subset2"),
                             "Choose Subset 2",
                             choices = c("None")
-                        ) %>%
-                            shinyInput_label_embed(
-                                shiny::icon("info-circle") %>%
-                                    bs_embed_tooltip(
-                                        "If None, will consider all cells not in Subset 1.",
-                                        placement= "bottom"
-                                    )
-                            )
+                        ) 
+                        # shiny::icon("info-circle") %>%
+                        #     bs_embed_tooltip(
+                        #         "If None, will consider all cells not in Subset 1.",
+                        #         placement= "bottom"
+                        #     )
+                        
                     ),
                     actionButton(
                         ns("getdegenes"),

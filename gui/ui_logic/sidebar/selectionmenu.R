@@ -89,19 +89,29 @@ menuItem(
                         ),
                     
                     splitLayout(
-                        selectInput(
-                            ns("subset1_upd"),
-                            "Choose Subset",
-                            choices = c("None")
-                        ),
-                        #  %>%
+                        #cellWidths = c("49%", "1%","50%"),
+                        
+                        
+                        #uiOutput("subset1_upd")
+                        
+                    #uiOutput("subset1_upd"),                        
+                    selectInput(
+                        ns("subset1_upd"),
+                        "Choose Subset",
+                        choices = c("None")
+                    ),
+                        # redundant tooltip
+                        # %>%
                         #     shinyInput_label_embed(
-                        #         shiny_iconlink() %>%
+                        #         shiny::icon("info-circle") %>%
                         #             bs_embed_tooltip(
-                        #                 "Select the subset to be updated",
+                        #                 "Select the tissue of the cell you want to label",
                         #                 placement= "bottom"
                         #             )
                         #     ),
+
+                        
+
                         actionButton(
                             ns("labelupd"),
                             "Update Subset Labels",
