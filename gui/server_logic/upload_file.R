@@ -58,7 +58,7 @@ upload_file <- function(input, output, session) {
                 session = session,
                 inputId = "uploaded_dataset",
                 label = "Choose a dataset:",
-                choices = list.files("datasets/user_uploaded"),
+                choices = c("default", list.files("datasets/user_uploaded")),
             )
             updateSelectInput(
                 session = session,

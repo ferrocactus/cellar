@@ -18,11 +18,12 @@ RUN apt-get install -y\
     libssl-dev\
     wget\
     libxml2-dev\
-    software-properties-common\
     xvfb\
     libgtk2.0\
     libgconf-2-4\
     libnss3
+
+RUN apt-get install -y software-properties-common
 
 ### Install R
 RUN apt-key adv --keyserver keyserver.ubuntu.com\
@@ -61,8 +62,12 @@ RUN apt-get clean
 
 EXPOSE 23123
 
-USER cellar
-
 WORKDIR /home/cellar
 
-ENTRYPOINT [“Rscript”, “app.R”]
+RUN python3 src/methods/setup.py build_ext --inplace
+RUN python3 src/methods/setup.py clean
+
+RUN chmod 777 /home/cellar
+RUN chmod 777 /tmp
+
+ENTRYPOINT ["Rscript", "app.R"]

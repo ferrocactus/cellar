@@ -62,5 +62,5 @@ def upload_file(dataset, path):
         filename, file_extension = os.path.splitext(path)
         shutil.move(path, join_root("../../datasets/user_uploaded") + "/" + dataset + file_extension)
     except Exception as e:
-        print(str(e))
+        traceback.print_exc(file=sys.stdout)
         raise OSError("A problem occured when reading dataset.")
