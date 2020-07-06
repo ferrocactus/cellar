@@ -21,7 +21,7 @@ menuItem(
                     #     "Select dataset group:",
                     #     c(
                     #         "Uploaded Datasets" = "user_uploaded",
-                    #         "Server Datasets" = "hubmap"
+                    #         "Server Datasets" = "server"
                     #     ),
                     #     inline = TRUE
                     # ),
@@ -35,12 +35,12 @@ menuItem(
                     #     )
                     # ),
                     # conditionalPanel(
-                    #     condition = "input.folder_align == 'hubmap'",
+                    #     condition = "input.folder_align == 'server'",
                     #     ns = ns,
                     #     selectInput(
-                    #         ns("hubmap_dataset_align"),
+                    #         ns("server_dataset_align"),
                     #         "Choose dataset:",
-                    #         choices = list.files("datasets/hubmap")
+                    #         choices = list.files("datasets/server")
                     #     )
                     # ),
                     fileInput(

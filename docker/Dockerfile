@@ -47,10 +47,6 @@ RUN Rscript -e 'install.packages("bsplus")'
 RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install("SingleR")'
 
-RUN git clone https://github.com/ferrocactus/cellar /home/cellar
-### Install python3 dependencies
-RUN pip3 install -r /home/cellar/py_requirements.txt
-
 # Install orca needed for plotly
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
 RUN chmod 777 /opt/orca-1.1.1-x86_64.AppImage
@@ -64,10 +60,13 @@ EXPOSE 23123
 
 WORKDIR /home/cellar
 
+RUN git clone https://github.com/ferrocactus/cellar /home/cellar
+### Install python3 dependencies
+RUN pip3 install -r /home/cellar/py_requirements.txt
+
 RUN python3 src/methods/setup.py build_ext --inplace
 RUN python3 src/methods/setup.py clean
 
-RUN chmod 777 /home/cellar
-RUN chmod 777 /tmp
+RUN mkdir -p datasets/user_uploaded
 
 ENTRYPOINT ["Rscript", "app.R"]

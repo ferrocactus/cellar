@@ -13,10 +13,10 @@ menuItem(
                 "Select dataset group:",
                 c(
                     "Uploaded Datasets" = "user_uploaded",
-                    "Server Datasets" = "hubmap"
+                    "Server Datasets" = "server"
                 ),
                 inline = TRUE
-            ) 
+            )
             # redundant tooltip
             # %>%
             #     shinyInput_label_embed(
@@ -65,12 +65,12 @@ menuItem(
             ),
 
             conditionalPanel(
-                condition = "input.folder == 'hubmap'",
+                condition = "input.folder == 'server'",
                 ns = ns,
                 selectInput(
-                    ns("hubmap_dataset"),
+                    ns("server_dataset"),
                     "Choose dataset:",
-                    choices = list.files("datasets/hubmap")
+                    choices = list.files("datasets/server")
                 )
                 %>%
                     shinyInput_label_embed(

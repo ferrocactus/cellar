@@ -3,7 +3,7 @@ dataset <- function(input, output, session, adata, selDataset,
     ###########################################################################
     # Main Dataset
     toListen <- reactive({
-        list(input$folder, input$uploaded_dataset, input$hubmap_dataset)
+        list(input$folder, input$uploaded_dataset, input$server_dataset)
     })
 
     # Stores selected dataset
@@ -11,7 +11,7 @@ dataset <- function(input, output, session, adata, selDataset,
         if (input$folder == 'user_uploaded')
             isolate(selDataset(as.character(input$uploaded_dataset)))
         else
-            isolate(selDataset(as.character(input$hubmap_dataset)))
+            isolate(selDataset(as.character(input$server_dataset)))
 
         # Include path as well
         isolate(selDataset(
@@ -40,14 +40,14 @@ dataset <- function(input, output, session, adata, selDataset,
     # Dataset used for alignment
     # toListenAlign <- reactive({
     #     list(input$folder_align, input$uploaded_dataset_align,
-    #          input$hubmap_dataset_align)
+    #          input$server_dataset_align)
     # })
 
     # observeEvent(toListenAlign(), {
     #     if (input$folder_align == 'user_uploaded')
     #         isolate(selDatasetAlign(as.character(input$uploaded_dataset_align)))
     #     else
-    #         isolate(selDatasetAlign(as.character(input$hubmap_dataset_align)))
+    #         isolate(selDatasetAlign(as.character(input$server_dataset_align)))
 
     #     # Include path as well
     #     isolate(selDatasetAlign(
