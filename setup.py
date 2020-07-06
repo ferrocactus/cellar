@@ -23,7 +23,8 @@ install_requires = [
     'psutil',
     'plotly',
     'bidict',
-    'pydiffmap'
+    'pydiffmap',
+    'Cython'
 ]
 
 ext_modules = [

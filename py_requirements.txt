@@ -13,3 +13,5 @@ scanpy
 psutil
 plotly
 bidict
+pydiffmap
+Cython
