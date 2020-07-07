@@ -85,7 +85,7 @@ pip install git+https://github.com/ferrocactus/Cluster_Ensembles
 ```
 and also must have metis in your path. Follow the instructions in
 <a href="https://pypi.org/project/Cluster_Ensembles/" target="_blank">
-https://pypi.org/project/Cluster_Ensembles/</a>
+https://pypi.org/project/Cluster_Ensembles/</a>.
 
 You will also need the following R packages
 
