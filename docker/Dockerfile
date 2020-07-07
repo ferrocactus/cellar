@@ -60,11 +60,18 @@ EXPOSE 23123
 WORKDIR /home/cellar
 
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
+
 ### Install python3 dependencies
 RUN pip3 install -r /home/cellar/py_requirements.txt
 
 RUN python3 src/methods/setup.py build_ext --inplace
 RUN python3 src/methods/setup.py clean
+
+### Install Cluster Ensembles
+RUN dpkg --add-architecture i386
+RUN apt-get install -y metis libc6-i386
+RUN pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
+RUN echo "export PATH=$PATH:/usr/local/lib/python3.8/dist-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/" >> /root/.bashrc
 
 RUN mkdir -p datasets/user_uploaded
 RUN mkdir -p datasets/server
