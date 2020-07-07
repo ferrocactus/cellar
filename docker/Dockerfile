@@ -36,7 +36,6 @@ RUN Rscript -e 'install.packages("shiny")'
 RUN Rscript -e 'install.packages("shinydashboard")'
 RUN Rscript -e 'install.packages("shinyjs")'
 RUN Rscript -e 'install.packages("shinyBS")'
-RUN Rscript -e 'install.packages("RLumShiny")'
 RUN Rscript -e 'install.packages("reticulate")'
 RUN Rscript -e 'install.packages("ggplot2")'
 RUN Rscript -e 'install.packages("plotly")'
@@ -47,7 +46,7 @@ RUN Rscript -e 'install.packages("bsplus")'
 RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install("SingleR")'
 
-# Install orca needed for plotly
+# Install orca dependency for plotly
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
 RUN chmod 777 /opt/orca-1.1.1-x86_64.AppImage
 RUN cd /opt && /opt/orca-1.1.1-x86_64.AppImage --appimage-extract
