@@ -17,15 +17,7 @@ menuItem(
                 ),
                 inline = TRUE
             )
-            # redundant tooltip
-            # %>%
-            #     shinyInput_label_embed(
-            #         shiny::icon("info-circle") %>%
-            #             bs_embed_tooltip(
-            #                 "Select the datasets on the server or the datasets uploaded by the user",
-            #                 placement= "bottom"
-            #             )
-            #     )
+
             ,
             conditionalPanel(
                 condition = "input.folder == 'user_uploaded'",
@@ -69,10 +61,14 @@ menuItem(
                 ns = ns,
                 selectInput(
                     ns("data_source"),
-                    "Choose dataset source:",
+                    "Choose dataset center:",
                     choices = list.files("datasets/server")
                 ),
-                
+                selectInput(
+                    ns("data_tissue"),
+                    "Choose tissue:",
+                    choices = c("")
+                ),
                 selectInput(
                     ns("server_dataset"),
                     "Choose dataset:",
