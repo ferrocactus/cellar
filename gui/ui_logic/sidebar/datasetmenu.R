@@ -68,18 +68,18 @@ menuItem(
                 condition = "input.folder == 'server'",
                 ns = ns,
                 selectInput(
+                    ns("data_source"),
+                    "Choose dataset source:",
+                    choices = list.files("datasets/server")
+                ),
+                
+                selectInput(
                     ns("server_dataset"),
                     "Choose dataset:",
-                    choices = list.files("datasets/server")
+                    choices = c("")
                 )
-                %>%
-                    shinyInput_label_embed(
-                        shiny::icon("info-circle") %>%
-                            bs_embed_tooltip(
-                                "Choose a specific dataset for analysis",
-                                placement= "bottom"
-                            )
-                    )
+                
+                
             ),
 
             actionButton(

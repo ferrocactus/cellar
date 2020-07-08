@@ -1,6 +1,18 @@
 dataset <- function(input, output, session, adata, selDataset,
                     selDatasetAlign, fullreset) {
     ###########################################################################
+    
+    # udpate data source
+    observeEvent(input$data_source,{
+        updateSelectInput(
+            session,
+            "server_dataset",
+            choices = list.files(paste0("datasets/server/",input$data_source))
+        )
+    })
+    
+    
+    
     # Main Dataset
     toListen <- reactive({
         list(input$folder, input$uploaded_dataset, input$server_dataset)
