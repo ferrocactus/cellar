@@ -23,7 +23,7 @@ dataset <- function(input, output, session, adata, selDataset,
         if (input$folder == 'user_uploaded')
             isolate(selDataset(as.character(input$uploaded_dataset)))
         else
-            isolate(selDataset(as.character(input$server_dataset)))
+            isolate(selDataset(as.character(paste0(input$data_source,"/",input$server_dataset))))
 
         # Include path as well
         isolate(selDataset(
