@@ -130,3 +130,9 @@ Rscript app.R
 ```
 
 and open `localhost:23123` in your web browser.
+
+<h2>Documentation</h2>
+
+You can find the documentation <a href="doc/cellar_guide.md" target="_blank">here</a>.
+
+Alternatively, you can find the documentation to the cellar python library <a href="doc/cellar_python_guide.rst" target="_blank">here</a>.
