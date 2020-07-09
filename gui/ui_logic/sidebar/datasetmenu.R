@@ -61,7 +61,7 @@ menuItem(
                 ns = ns,
                 selectInput(
                     ns("data_source"),
-                    "Choose dataset center:",
+                    "Choose data center:",
                     choices = list.files("datasets/server")
                 ),
                 selectInput(
