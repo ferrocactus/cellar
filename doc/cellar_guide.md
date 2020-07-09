@@ -39,6 +39,7 @@ The bottom of the body shows the results of various analysis, such as GO and KEG
 
 **Load Dataset** : Loads the dataset from memory. Must be run before any analysis can take place.
 </div>
+<br/><br/><br/>
 
 ---
 
@@ -84,6 +85,7 @@ The bottom of the body shows the results of various analysis, such as GO and KEG
 **Choose reference dataset (h5ad)** : Upload the reference dataset. Must be in h5ad format and must have the 'labels' key populated.
 
 </div>
+<br/><br/><br/><br/><br/><br/><br/><br/>
 
 ---
 
@@ -147,6 +149,7 @@ Task 3:
 
 After finishing DE analysis, the DE panel of the bottom of the UI body will show the results. Other panels will also be activated for subsequent analysis.
 </div>
+<br/>
 
 ---
 
@@ -164,6 +167,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
 
 **Select plot height** : Select the height of the plot.
 </div>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 ---
 
@@ -182,6 +186,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
 **Input Subset IDs** / **Download Selected Subsets** : Enter the subset IDs you want to download. For example 1,2,5 means downloading subsets 1,2 and 5.
 
 </div>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
 
 ---
 
@@ -191,7 +196,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
 
 #### Plot Example
 
-<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/plot.png">
+<img align="left" style="margin-bottom: 50px; width: 800px;" src="pic/plot.png">
 
 </div>
 
@@ -199,7 +204,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
 
 #### DE genes Example
 
-<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/de.png">
+<img align="left" style="margin-bottom: 50px; width: 800px;" src="pic/de.png">
 
 </div>
 
@@ -207,7 +212,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
 
 #### Expression for the most significant gene of Cluster 0 (green)
 
-<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/gene.png">
+<img align="left" style="margin-bottom: 50px; width: 800px;" src="pic/gene.png">
 
 </div>
 
@@ -215,7 +220,7 @@ After finishing DE analysis, the DE panel of the bottom of the UI body will show
 
 #### GO Analysis Example
 
-<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/go.png">
+<img align="left" style="margin-bottom: 50px; width: 800px;" src="pic/go.png">
 
 </div>
 
