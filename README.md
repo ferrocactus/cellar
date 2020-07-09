@@ -29,13 +29,13 @@ If you wish to install Cellar locally, follow one of these methods:
 If you have docker installed, you can pull the image with
 
 ```bash
-docker pull euxhen/cellar:v1
+docker pull euxhen/cellar
 ```
 
 and then run it
 
 ```bash
-docker run -p 23123:23123 euxhen/cellar:v1
+docker run -p 23123:23123 euxhen/cellar
 ```
 
 After a short delay, the container will start listening to port 23123.
@@ -46,7 +46,7 @@ you can avoid copying files in and out of the container by
 instead running
 
 ```bash
-docker run -p 23123:23123 -v /path/to/your/datasets/folder:/home/cellar/datasets/server euxhen/cellar:v1
+docker run -p 23123:23123 -v /path/to/your/datasets/folder:/home/cellar/datasets/server euxhen/cellar
 ```
 
 You can find your datasets by checking `Server Datasets` under

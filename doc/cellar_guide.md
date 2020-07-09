@@ -1,271 +1,228 @@
-## README
+## Cell Type Annotation Robot (Cellar) User Guide
 
-Documentation for the single cell analysis app hosted by the Bar-Joseph [Systems Biology group](http://www.sb.cs.cmu.edu/) at Carnegie Mellon University accessible [here](https://data.test.hubmapconsortium.org/app/cellar).
-
----
+Documentation for the single cell analysis app hosted by the Bar-Joseph [Systems Biology group](http://www.sb.cs.cmu.edu/) at Carnegie Mellon University, accessible [here](https://data.test.hubmapconsortium.org/app/cellar).
 
 ### Table of Contents
-**[The Overall Layout](#the-overall-layout)**<br>
-**[Choose Dataset](#choose-dataset)**<br>
+**[Layout](#layout)**<br>
+**[Dataset](#dataset)**<br>
 **[Clustering](#clustering)**<br>
 **[Label Transfer](#label-transfer)**<br>
-**[Selection and Labelling](#selection-and-labelling)**<br>
+**[Selection and Labeling](#selection-and-labeling)**<br>
 **[Analysis](#analysis)**<br>
 **[Appearance](#appearance)**<br>
-**[Exporting and Importing](#exporting-and-importing)**<br>
+**[Export Import](#export-import)**<br>
+**[Examples](#examples)**<br>
 
----
-### The Overall Layout
+### Layout
 
+<img src="pic/UI.png">
 
-<img src="pic/UI.png" alt="datasetMenu"
-	title="UI" width="600" height="450" align=left/>
+The above image shows the default layout of cellar. The sidebar menu is on the left, with panels enabling users to do various analysis as well as configure various settings.
 
-The above image show the layout of our single cell analysis app.
-
-On the left is the sidebar menu, with toggle panels enabling users to do various analysis as well as configure various settings, which will be elaborated later on.
-
-<img src="pic/UI_expression.png" alt="datasetMenu"
-	title="UI" width="700" height="500" align=left/>
-
-On the right is the main body, which shows the results of the analysis. The top of the body is the main plot visualizing the cells being analyzed. The colors can represent the clusters of cells  or the gene expression level of any selected gene, which can be changed in the analysis panel. For example the expression level of the gene IL7R is shown in the above plot. When the expression level is shown, shapes of the points represent the clusters they belong to.
+On the right is the main body, which shows the results of the analysis. The top of the body is the main plot, visualizing the 2d embeddings of the cells being analyzed. The colors can represent the clusters of the cells or the gene expression level of any selected gene, which can be changed in the analysis panel. When the expression level is shown, shapes of the points represent the clusters they belong to.
 
 The button "view cluster names" controls the collapsible table showing the user assigned names for each cluster and subset of cells. Detailed illustration of assigning names operation is in the "selection & labeling" section.
 
-<img src="pic/UI_analysis.png" alt="datasetMenu"
-	title="UI" width="500" height="200" align=left/>
+The bottom of the body shows the results of various analysis, such as GO and KEGG.
 
-The bottom of the body shows the results of various analysis that users can do, which will be elaborated in the "analysis" section.
+<div style="clear: left;">
 
-The subsequent sections will introduce the functions in the sidebar panels.
+### Dataset
 
----
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/datasetMenu.png">
 
-### Choose Dataset
+**Select dataset group** : Under `Uploaded Datasets` the user will find all of their uploaded datasets. Under `Server Datasets` the user will find a list of datasets provided by cellar and collected from different sources.
 
-<img src="pic/datasetMenu.png" alt="datasetMenu"
-	title="Choose Dataset" width="300" height="300" align=left/>
+**Choose Dataset** : Choose the desired dataset from the corresponding group.
 
-In this tab, users can either upload their own single cell gene expression data
-as a _csv_ or _h5ad_ file, with rows corresponding to cells and columns corresponding
-to genes. For gene ids, please make sure they are either in _HGNC_, _entrez ID_, or _ENSEMBL_ format.
+**Choose CSV/h5ad file** : Upload a dataset. The accepted formats for the dataset are `h5ad` or `csv` (rows are cells, columns are genes). For gene ids, please make sure they are either in _HGNC_, _entrez ID_, or _ENSEMBL_ format.
 
-Clicking the **Load Dataset** button loads the dataset into the app for use.
+**Load Dataset** : Loads the dataset from memory. Must be run before any analysis can take place.
+</div>
 
 ---
+
+<div style="clear: left;">
 
 ### Clustering
-<img src="pic/clusteringMenu.png" alt="clusrterMenu"
-	title="Choose Dataset" width="300" height="600" />
 
-The **Run with current configuration** button is to be clicked after the user has selected the desired clustering parameters below, or is satisfied the provided defaults.
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/clusteringMenu.png">
 
-- **Dimensionality reduction** : Enables user to choose the method to reduce dimensions prior to clustering.
+**Run with current configuration** : To be run after the user has selected the desired settings below.
 
-- **Number of components** : Enables the user to either manually choose the number of components after dimensionality reduction that clustering is carried on, or choose automatic to let the program choose optimal number of components based on explained variance.
+**Dimensionality reduction** : Choose the desired method to use for dimensionality reduction. The reduced embeddings will be used in the clustering step.
 
-- **Clustering** : Enables the user to choose the clustering algorithm.
+**Number of components** : Specify the number of components to use for the selected dimensionality reduction method. Can be either Automatic (only for `PCA`) or Manual. In case of PCA/Automatic, the ankle heuristic on the explained variance graph will be used. By default, the app will search the data file for any previously existing embeddings of the same method and number of components. If found, will return those instead. This can speed up the computation immensely.
 
-- **Number of clusters** : Enables the user to choose the number of clusters they wish the data to correspond to.
+**Clustering** : Choose the clustering algorithm to use on the reduced data.
 
-- **Evaluation** :
+**Number of clusters** : Specify the number of clusters to use for the selected clustering algorithm (if applicable). This can be a single integer, a list of comma-separated values, or a tuple specifying a range. E.g., if user inputs `(4, 16, 1)`, then the app will run the selected clustering algorithm with a number of clusters ranging from 4 to 16 in increments of 1.
 
-- **Visualization Method** :
+**Evaluation** : In case the number of clusters as specified earlier is a list or a range, then this evaluation method will be used to determine the number of clusters which achieved the highest score.
 
-The following methods are for constrained clustering, which is done after the user has run clustering once and has relabelled cells.
+**Visualization Method** : Choose the visualization method that will be used to create 2D embeddings for plotting purposes.
 
-- **Constrained clustering**
+**Constrained clustering** : Choose the constrained clustering algorithm to run. This requires existing labels and is mainly used to refine existing clusters after the user has manually modified them.
 
-- **Clusters to preserve**
+**Clusters to preserve** : If applicable, these clusters (as specified by their ID) will be preserved by the constrained clustering algorithm.
 
-- **Clusters to merge** : Enables users to select clusters they think have to be merged into a single cluster.
+**Run constrained clustering** : Can only be run if there is a plot available. Run the selected constrained clustering method.
+
+**Clusters to merge** : Merge the desired clusters into a single one. This single cluster inherits the label of the first cluster in the list.
+</div>
 
 ---
+
+<div style="clear: left;">
 
 ### Label Transfer
-<img src="pic/labeltransferMenu.png" alt="clusrterMenu"
-	title="Choose Dataset" width="300" height="360" />
 
-This panel allows the user to assign labels to a new dataset by importing a previous session of already labelled cells (from **Import Session**), and choosing a dataset, and a transfer method. This labels cells in the new dataset by looking at which cells it is closely related to in the already labelled session, and assigns new cells that particular label.
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/labeltransferMenu.png">
+
+**Select label transfer method** : Choose the method to run label transfer. This uses an annotated reference dataset to annotate the currently active dataset.
+
+**Choose reference dataset (h5ad)** : Upload the reference dataset. Must be in h5ad format and must have the 'labels' key populated.
+
+</div>
+
+---
+
+<div style="clear: left;">
+
+### Selection and Labeling
+
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/selection.png">
+
+This tab allows users to annotate clusters, add new clusters, and select a preferred cell type for the clusters using the provided cell ontology labels. These tasks can be split into several groups:
+
+    1. Store a subset of cells to use for downstream analysis
+    2. Add new labels (cell types)
+    3. Change the label of a cluster or subset
+
+Task 1:
+
+**New Subset** : Enter the subset name for the currently selected cells.
+
+**Add Subset** : Store the new subset.
+
+Task 2:
+
+**New label** : Enter the name of a new label.
+
+**Add Label** : Add the label to the list.
+
+Task 3:
+
+**Select tissue** : Select the tissue that the cell subset belongs to. User defined labels can be found under the "user defined" option.
+
+**Select cell type** : The cell types in the selected tissue will be in the choice list.
+
+**Choose subset** : Select the cell subset or cluster you want to update.
+
+**Update Subset Labels** : Update the selected subset with the selected cell type.
+
+</div>
 
 ---
 
-### Selection and Labelling
-<img src="pic/selection.png" alt="datasetMenu"
-	title="UI" width="300" height="300" align=left/>
-
-This tab allows users to annotate clusters, use the lasso on the plot to add user defined clusters, and select a preferred cell type for the clusters using provided cell ontology labels. These tasks can be split as:
-
-1. Selecting a group of cells and make them a new subset
-2. Adding a new label for cells
-3. Changing the label (cell type) of any defined subsets
-
-For 1:
-
-- **New Subset** : Input the name for the new subset.
-
-- **Add Subset** : After selecting a group of cells in the main plot isong the lasso and entering the new subset name, clicking this button will define a new subset.
-
-For 2:
-
-- **New label** : Input the name of new label.
-
-- **Add Label** : Clicking after entering the new label name will add the label name into the choice list.
-
-For 3:
-
-- **Select tissue** : Select the tissue that the cell subset belongs to. User defined labels are in the "user defined" option.
-
-- **Select cell type** : The cell types in the selected tissue will be in the choice list.
-
-- **Choose subset** : Select the cell subset you want to update.
-
-- **Update Subset Labels** : Update the selected subset with the select cell type.
-
-
----
+<div style="clear: left;">
 
 ### Analysis
 
-<img src="pic/analysis.png" alt="datasetMenu"
-	title="UI" width="300" height="300" align=left/>
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/analysis.png">
 
-Users can do various analysis including differentially expressed genes (DE genes) analysis in this panel.
+**View gene expression** : Show the expression level of the selected gene. When "Clusters" is selected, the clusters are shown instead.
 
-- **View gene expression** : Let the colors in the plot show the expression level of the selected gene. When "Clusters" is selected, the colors show different clusters.
+**Select number of genes** : Lets users define the maximum number of DE genes that are used in the differential expression analysis. The returned number of genes may be lower than this value if they were not found to be significant.
 
-- **Select number of genes** : Lets users define the number of top DE genes that are used in the analysis for the heatmap, or any of the following ontology tabs. If the number of DE genes is less than this number, then all the DE genes are used.
+**alpha** : The cut-off for p-values.
 
-- **alpha** :
+**Correction** : The correction method to use for p-values. If no correction is desired, choose `None`.
 
-- **Correction** :
+**Choose subset 1 & 2** : Choose the subsets to use in the DE gene analysis. Selecting "None" uses all the cells but those in the other subset.
 
-- **Choose subset 1&2** : Choose the subsets you want to do DE gene analysis. Selecting "None" means selecting all the cells but those in the other subset.
+**Run DE analysis** : Calculate DE genes of Subset1 (vs. Subset2).
 
-- **Run DE analysis** : Calculate DE genes of Subset1 (vs. Subset2)
-
-- **Search Gene card** : Enter the gene you want to search.
-
-- **Search Card** : Clicking the button will open the gene card website of the entered gene.
+**Search Gene card** : Enter the gene name you want to search for (opens a new tab to genecards.org).
 
 After finishing DE analysis, the DE panel of the bottom of the UI body will show the results. Other panels will also be activated for subsequent analysis.
+</div>
 
-- **DE** :
-
-  <img src="pic/DE.png" alt="datasetMenu"
-	title="UI" width="600" height="200" align=left/>
-
-	Shows the list of DE genes, arranged by their _logFC_
-
-- **heatmap** :
-
-  <img src="pic/heatmap.png" alt="datasetMenu"
-	title="UI" width="600" height="300" align=left/>
-
-	Shows heatmap of average expression of DE genes across all clusters. Both genes and clusters are clustered using heirarchical clustering.
-
-- **Gene Ontology** :
-
-  <img src="pic/onto.png" alt="datasetMenu"
-	title="UI" width="600" height="200" align=left/>
-
-	This tab shows the results of the hypergeometric test intersection of the DE genes with genes in each curated GO term. The option exists for users to download the entire table as a csv.
-
-- **KEGG** :
-
-  <img src="pic/KEGG.png" alt="datasetMenu"
-	title="UI" width="600" height="200" align=left/>
-
-	Similar to GO
-
-- **MsigDB C2** :
-
-  <img src="pic/msigdb.png" alt="datasetMenu"
-	title="UI" width="600" height="200" align=left/>
-
-	Similar to GO
-
-- **Cell Type** :
-
-  <img src="pic/celltype.png" alt="datasetMenu"
-	title="UI" width="600" height="200" align=left/>
-
-	Similar to GO, but using cell type specific marker genes.
-
-- **Disease** :
-
-  <img src="pic/disease.png" alt="datasetMenu"
-	title="UI" width="600" height="200" align=left/>
-
-	Similar to GO
-
-- **User Markers** :
-
-  <img src="pic/usermarker.png" alt="datasetMenu"
-	title="UI" width="600" height="100" align=left/>
-
-	This tab allows the user to upload a list of marker genes, which should be in `json` format. for example, the json snippet below gives us 3 terms, _B cell, Cancer stem cell,_ and _T cell_.
-
-	```
-	{
-    "B cell": [
-      "CD79A"
-    ],
-    "Cancer stem cell": [
-      "CD44",
-      "CD24",
-      "NES",
-      "PROM1",
-      "ALDH1A1"
-    ],
-    "T cell": [
-      "CD4",
-      "CD3G",
-      "CD8A",
-      "CD3E",
-      "CD3D"
-    ]
-  }
-	```
 ---
+
+<div style="clear: left;">
 
 ### Appearance
-<img src="pic/appearance.png" alt="datasetMenu"
-	title="UI" width="300" height="340" align=left/>
 
-This panel enable the users to adjust the appearance of the main plot.
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/appearance.png">
 
-- **Select theme** : Change the UI body to Light/Dark mode.
+**Select theme** : Change the theme to Light or Dark mode. Sometimes gene expression values/clusters may be seen clearly in Dark mode.
 
-- **Select dot size** : Select the size of the dots in the main plot.
+**Show names in plot** : Show or hide cluster labels in the main plot.
 
-- **Choose subset** : Select whether showing the cluster names or only IDs in the plot.
+**Select dot size** : Select the size of the points in the main plot.
 
-- **Choose subset** : Select the height of the plot.
+**Select plot height** : Select the height of the plot.
+</div>
 
 ---
 
-### Exporting and Importing
+<div style="clear: left;">
 
-<img src="pic/export&import.png" alt="datasetMenu"
-	title="UI" width="300" height="350" align=left/>
+### Export Import
 
-This panel enables users to do the following:
-1. Exporting the current session and import later for subsequent analysis or sharing the analysis results
-2. Importing session after loading the dataset
-3. Downloading the main plot.
-4. Downloading a csv file including cell IDs with corresponding labels.
+<img align="left" style="margin-bottom: 20px; width: 300px; margin-right: 20px;" src="pic/exportImport.png">
 
-For 1:
-- **Export Session** : Download the current session.
+**Export Session** : Download the current session in an h5ad file.
 
-For 2:
-- **Import Session** : Upload a session and load it.
+**Import Session** : Upload a session and load it.
 
-For 3:
-- **Select format** : Select which format of the plot to download.
-- **Download Plot** : Download the plot.
+**Select format** / **Download plot** : Converts the plot to the specified file format and downloads it.
 
-For 4:
-- **Input Subset IDs** : Enter the subset IDs you want to download. For example 1,2,5 means downloading subsets 1,2 and 5.
-- **Download Selected Subsets** : Download subsets entered above together with their labels as a csv file.
+**Input Subset IDs** / **Download Selected Subsets** : Enter the subset IDs you want to download. For example 1,2,5 means downloading subsets 1,2 and 5.
+
+</div>
+
+---
+
+<div style="clear: left;">
+
+### Examples
+
+#### Plot Example
+
+<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/plot.png">
+
+</div>
+
+<div style="clear: left;">
+
+#### DE genes Example
+
+<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/de.png">
+
+</div>
+
+<div style="clear: left;">
+
+#### Expression for the most significant gene of Cluster 0 (green)
+
+<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/gene.png">
+
+</div>
+
+<div style="clear: left;">
+
+#### GO Analysis Example
+
+<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/go.png">
+
+</div>
+
+<div style="clear: left;">
+
+#### Heatmap Example
+
+<img align="left" style="margin-bottom: 20px; width: 800px;" src="pic/heatmap.png">
+
+</div>

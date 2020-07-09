@@ -53,27 +53,29 @@ RUN cd /opt && /opt/orca-1.1.1-x86_64.AppImage --appimage-extract
 RUN printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640x480x24" /opt/squashfs-root/app/orca "$@"' > /usr/bin/orca
 RUN chmod 777 /usr/bin/orca
 
-RUN apt-get clean
-
-EXPOSE 23123
-
-WORKDIR /home/cellar
-
-RUN git clone https://github.com/ferrocactus/cellar /home/cellar
-
-### Install python3 dependencies
-RUN pip3 install -r /home/cellar/py_requirements.txt
-
-RUN python3 src/methods/setup.py build_ext --inplace
-RUN python3 src/methods/setup.py clean
-
 ### Install Cluster Ensembles
 RUN dpkg --add-architecture i386
 RUN apt-get install -y metis libc6-i386
 RUN pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
 RUN echo "export PATH=$PATH:/usr/local/lib/python3.8/dist-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/" >> /root/.bashrc
 
+RUN apt-get clean
+
+EXPOSE 23123
+
+RUN git clone https://github.com/ferrocactus/cellar /home/cellar
+### Install python3 dependencies
+RUN pip3 install -r /home/cellar/py_requirements.txt
+
+WORKDIR /home/cellar
+# Compile Cython modules
+RUN python3 src/methods/setup.py build_ext --inplace
+RUN python3 src/methods/setup.py clean
+
 RUN mkdir -p datasets/user_uploaded
 RUN mkdir -p datasets/server
+
+ADD https://api.github.com/repos/ferrocactus/cellar/git/refs/heads/master version.json
+RUN git pull
 
 ENTRYPOINT ["Rscript", "app.R"]
