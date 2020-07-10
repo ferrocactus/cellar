@@ -52,7 +52,29 @@ docker run -p 23123:23123 -v /path/to/your/datasets/folder:/home/cellar/datasets
 You can find your datasets by checking `Server Datasets` under
 the `Dataset` menu once the app starts.
 
-<h3>Method 2: Manual Installation</h3>
+<h3>Method 2: Use the install script</h3>
+
+Assuming `python (>=3.7)` and `R (>=4.0)` are installed, run the `install.sh` script
+and that will take care of installing the dependencies for you.
+
+```bash
+git clone https://github.com/ferrocactus/cellar
+cd cellar
+bash install.sh
+```
+
+Finally, run with
+```bash
+Rscript app.R
+```
+
+Note: Cluster_Ensembles (Optional) and orca (Optional) need to be installed manually.
+Follow instructions in <a href="https://pypi.org/project/Cluster_Ensembles/" target="_blank">
+https://pypi.org/project/Cluster_Ensembles/</a> and
+<a href="https://github.com/plotly/orca" target="_blank">https://github.com/plotly/orca</a>,
+respectively.
+
+<h3>Method 3: Manual Installation</h3>
 
 Cellar requires `python (>=3.7)` and `R (>=4.0)`.
 
