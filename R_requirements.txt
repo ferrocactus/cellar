@@ -1,0 +1,14 @@
+shiny
+shinyjs
+shinydashboard
+shinyBS
+ggplot2
+plotly
+reticulate
+rjson
+DT
+gplots
+htmltools
+bsplus
+BiocManager
+SingleR
