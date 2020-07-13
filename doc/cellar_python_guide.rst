@@ -98,7 +98,8 @@ After acquiring and loading the normalized data, typically the first
 step is to reduce the dimensionality. PCA is the most popular choice
 which applies a linear map to a lower dimensional space where each
 dimension tries to preserve as much of the variance as possible.
-To see a full list of what methods are available consult `<link/>`_.
+To see a full list of what methods are available consult
+`<https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#dimensionality-reduction/>`_.
 
 To choose a method simply pass its name to the method parameter as
 
@@ -127,7 +128,9 @@ Clustering
 ~~~~~~~~~~
 
 The default clustering method is 'Leiden', although more methods
-are available as listed in `<link2/>`_. Similar as before, the
+are available as listed in
+`<https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#clustering/>`_.
+Similar as before, the
 desired method can be changed by passing the its name to
 the method parameter. E.g.
 
@@ -152,6 +155,9 @@ for each cluster. These types can be changed using ``cl.update_subset_label``.
 Visualization
 ~~~~~~~~~~~~~
 
+The list of visualization methods is similar to the one for dimensionality
+reduction and can be found here
+`<https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#visualization/>`_
 The default method for creating the 2D embeddings is UMAP and also the one we
 recommend. Running it is as simple as
 
@@ -197,8 +203,8 @@ the user may wish to re-run clustering while preserving their changes.
 E.g., if they updated clusters 0 and 3, and are confident that
 these clusters are well-defined, they may wish to preserve them
 and run semi-supervised clustering for the remaining clusters.
-Different methods achieve this in different ways. For a full list
-see `<list3/>`_. To run semi-supervised clustering, the
+Different methods achieve this in different ways.
+To run semi-supervised clustering, the
 ``adata.obs['labels']`` key must be set, after which one can run:
 
 .. code:: python
@@ -213,6 +219,8 @@ Transfer Labels
 Transferring labels (a.k.a. alignment) is a method that uses a
 reference dataset that has already been labeled and tries to
 label a new dataset whose labels are unknown using the reference dataset.
+A list of methods can be found here
+`</https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#label-transfer>`_.
 This requires two AnnData objects:
 
 .. code:: python
@@ -240,9 +248,9 @@ and for the former, run
 
 Examples are shown below:
 
-.. image:: pic/cluster_plot.png
+.. image:: pic/plot.png
     :width: 350pt
-.. image:: pic/gene_expression_plot.png
+.. image:: pic/gene.png
     :width: 350pt
 
 
@@ -256,3 +264,4 @@ Examples are shown below:
 .. _UMAP: https://umap-learn.readthedocs.io/en/latest/
 .. _Plotly: https://plotly.com/
 .. _bidict: https://bidict.readthedocs.io/en/master/basic-usage.html
+.. _dim: https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#id1
