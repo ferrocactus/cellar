@@ -99,7 +99,7 @@ step is to reduce the dimensionality. PCA is the most popular choice
 which applies a linear map to a lower dimensional space where each
 dimension tries to preserve as much of the variance as possible.
 To see a full list of what methods are available consult
-`<https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#dimensionality-reduction/>`_.
+https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#dimensionality-reduction.
 
 To choose a method simply pass its name to the method parameter as
 
@@ -129,7 +129,7 @@ Clustering
 
 The default clustering method is 'Leiden', although more methods
 are available as listed in
-`<https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#clustering/>`_.
+https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#clustering.
 Similar as before, the
 desired method can be changed by passing the its name to
 the method parameter. E.g.
@@ -157,7 +157,7 @@ Visualization
 
 The list of visualization methods is similar to the one for dimensionality
 reduction and can be found here
-`<https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#visualization/>`_
+https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#visualization
 The default method for creating the 2D embeddings is UMAP and also the one we
 recommend. Running it is as simple as
 
@@ -220,7 +220,7 @@ Transferring labels (a.k.a. alignment) is a method that uses a
 reference dataset that has already been labeled and tries to
 label a new dataset whose labels are unknown using the reference dataset.
 A list of methods can be found here
-`</https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#label-transfer>`_.
+https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#label-transfer.
 This requires two AnnData objects:
 
 .. code:: python
