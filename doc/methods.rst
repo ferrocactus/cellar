@@ -37,15 +37,28 @@ Clustering
 +---------------------+-------------------------------------------------------------------------------------------------+
 |KMedoids             |https://scikit-learn-extra.readthedocs.io/en/latest/generated/sklearn_extra.cluster.KMedoids.html|
 +---------------------+-------------------------------------------------------------------------------------------------+
-|Spectral Clustering  |https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html        |
+|Spectral             |https://scikit-learn.org/stable/modules/generated/sklearn.cluster.SpectralClustering.html        |
 +---------------------+-------------------------------------------------------------------------------------------------+
 |Agglomerative        |https://scikit-learn.org/stable/modules/generated/sklearn.cluster.AgglomerativeClustering.html   |
 +---------------------+-------------------------------------------------------------------------------------------------+
-|Gaussian Mixture     |https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html           |
+|GaussianMixture      |https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html           |
 +---------------------+-------------------------------------------------------------------------------------------------+
 |Scanpy               |https://scanpy-tutorials.readthedocs.io/en/latest/pbmc3k.html                                    |
 +---------------------+-------------------------------------------------------------------------------------------------+
-|Ensemble Clustering  |https://github.com/GGiecold/Cluster_Ensembles                                                    |
+|Ensemble             |https://github.com/GGiecold/Cluster_Ensembles                                                    |
++---------------------+-------------------------------------------------------------------------------------------------+
+
+Cluster Evaluation
+##################
+
++---------------------+-------------------------------------------------------------------------------------------------+
+|   Method            |   Source                                                                                        |
++=====================+=================================================================================================+
+|Silhouette           |https://scikit-learn.org/stable/modules/generated/sklearn.metrics.silhouette_score.html          |
++---------------------+-------------------------------------------------------------------------------------------------+
+|DaviesBouldin        |https://scikit-learn.org/stable/modules/generated/sklearn.metrics.davies_bouldin_score.html      |
++---------------------+-------------------------------------------------------------------------------------------------+
+|CalinskiHarabasz     |https://scikit-learn.org/stable/modules/generated/sklearn.metrics.calinski_harabasz_score.html   |
 +---------------------+-------------------------------------------------------------------------------------------------+
 
 Visualization
@@ -77,7 +90,7 @@ Label Transfer
 +---------------------+-------------------------------------------------------------------------------------------+
 |   Method            |   Source                                                                                  |
 +=====================+===========================================================================================+
-|Ingest               |https://scanpy.readthedocs.io/en/stable/api/scanpy.tl.ingest.html                          |
+|Scanpy Ingest        |https://scanpy.readthedocs.io/en/stable/api/scanpy.tl.ingest.html                          |
 +---------------------+-------------------------------------------------------------------------------------------+
 |SingleR              |https://github.com/dviraran/SingleR                                                        |
 +---------------------+-------------------------------------------------------------------------------------------+

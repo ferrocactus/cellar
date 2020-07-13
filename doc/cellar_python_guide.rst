@@ -143,7 +143,10 @@ for the number of clusters, the user can specify a list or a range tuple instead
 In our example above, ``n_clusters=(5, 16, 1)`` will run the clustering
 algorithm several times with ``n_clusters`` ranging from 5 to 16 in increments of 1.
 Then, using the method specified in ``eval_method``, the ``n_clusters`` which
-achieved the highest score is the one whose labels are returned.
+achieved the highest score is the one whose labels are returned. For a list
+of evaluation methods see
+https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#cluster_evaluation
+
 
 ``cl.cluster`` also accepts parameters that will get passed down to the
 original implementation of the method.
