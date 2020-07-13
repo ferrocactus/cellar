@@ -145,7 +145,7 @@ algorithm several times with ``n_clusters`` ranging from 5 to 16 in increments o
 Then, using the method specified in ``eval_method``, the ``n_clusters`` which
 achieved the highest score is the one whose labels are returned. For a list
 of evaluation methods see
-https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#cluster_evaluation
+https://github.com/ferrocactus/cellar/blob/master/doc/methods.rst#cluster-evaluation
 
 
 ``cl.cluster`` also accepts parameters that will get passed down to the
