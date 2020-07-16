@@ -38,6 +38,7 @@ cluster <- function(input, output, session, adata, replot,
                     n_clusters = input$clu_n_clusters,
                     use_emb = TRUE,
                     inplace = TRUE,
+                    check_if_exists = TRUE,
                     ensemble_methods = input$ensemble_checkbox)
             else
                 msg <- cellar$safe(cellar$cluster,
@@ -46,7 +47,8 @@ cluster <- function(input, output, session, adata, replot,
                     eval_method = input$eval_method,
                     n_clusters = input$clu_n_clusters,
                     use_emb = TRUE,
-                    inplace = TRUE)
+                    inplace = TRUE,
+                    check_if_exists = TRUE)
 
             if (msg != 'good') {
                 showNotification(py_to_r(msg))

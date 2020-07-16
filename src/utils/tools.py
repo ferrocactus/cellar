@@ -56,6 +56,16 @@ def _emb_exists_in_adata(adata, method, n_components):
     return None
 
 
+def _labels_exist_in_adata(adata, method, n_clusters):
+    if 'labels' not in adata.obs:
+        return False
+    if method != adata.uns['cluster_info']['method']:
+        return False
+    if np.array_equal(n_clusters, adata.uns['cluster_info']['n_clusters_used']):
+        return True
+    return False
+
+
 def _2d_emb_exists_in_adata(adata, method, dim, use_emb):
     if f'x_emb_{dim}d' not in adata.obsm:
         return False

@@ -9,6 +9,7 @@ from .units import _method_exists
 from .units import convert
 
 from .utils.tools import _emb_exists_in_adata
+from .utils.tools import _labels_exist_in_adata
 from .utils.tools import _2d_emb_exists_in_adata
 from .utils.tools import populate_subsets
 
@@ -130,6 +131,7 @@ def cluster(
         n_clusters: Union[str, tuple, int, list, np.ndarray] = (3, 6, 1),
         use_emb: bool = True,
         inplace: Optional[bool] = True,
+        check_if_exists: Optional[bool] = False,
         n_jobs_multiple: Optional[int] = 1,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
@@ -163,6 +165,10 @@ def cluster(
         If set to true will update x.obs['labels'], otherwise,
         return a new AnnData object.
 
+    check_if_exists: Only used when x is an AnnData object.
+        If set to true, will check if x contains labels
+        from the same method.
+
     n_jobs_multiple: Only used when n_clusters results is a list
         of more than one integer. If n_jobs > 1, will run clustering
         for each n_cluster in parallel.
@@ -191,6 +197,13 @@ def cluster(
         n_clusters = _validate_clu_n_clusters(n_clusters, adata.X.shape[0])
     else:
         n_clusters = 'NA'
+
+    # Check if labels exist and return if they do
+    if _labels_exist_in_adata(adata, method, n_clusters):
+        if not inplace:
+            return adata
+        return
+
     n_jobs_multiple = _validate_n_jobs(n_jobs_multiple)
 
     # Determine if embeddings should be used or the full data matrix
