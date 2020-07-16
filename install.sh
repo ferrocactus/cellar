@@ -58,6 +58,7 @@ Rscript -e 'install.packages("rjson")'
 Rscript -e 'install.packages("DT")'
 Rscript -e 'install.packages("gplots")'
 Rscript -e 'install.packages("bsplus")'
+Rscript -e 'install.packages("htmlTable")'
 Rscript -e 'install.packages("BiocManager")'
 Rscript -e 'BiocManager::install("SingleR")'
 echo "Note: If you wish to convert plots to images, first install orca by following the instructions in https://github.com/plotly/orca"

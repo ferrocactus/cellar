@@ -45,6 +45,7 @@ RUN Rscript -e 'install.packages("gplots")'
 RUN Rscript -e 'install.packages("bsplus")'
 RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install("SingleR")'
+RUN Rscript -e 'install.packages("htmlTable")'
 
 # Install orca dependency for plotly
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
