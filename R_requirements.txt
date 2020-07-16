@@ -12,3 +12,4 @@ htmltools
 bsplus
 BiocManager
 SingleR
+htmlTable
