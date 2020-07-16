@@ -96,9 +96,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 isolate(curPlot(length(plotHistory())))
                 return(p)
             })
-
         })
-
     })
 
     # Listen to multiple events that will trigger replot

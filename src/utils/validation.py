@@ -33,7 +33,7 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
         else:
             if method == 'Precomputed PCA':
                 return 10  # default 10 components
-            return dim_n_components
+            return dim_n_components  # return 'knee'
 
     if isinstance(dim_n_components, int):
         if dim_n_components >= h or dim_n_components >= w:
@@ -45,6 +45,9 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
                 "Number of components needs to be greater than 0.")
     else:
         raise InvalidArgument("Incorrect number of components specified.")
+
+    if dim_n_components > 70:
+        raise InappropriateArgument("Number of components is too high.")
 
     return dim_n_components
 

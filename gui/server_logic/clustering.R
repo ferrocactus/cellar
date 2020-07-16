@@ -149,11 +149,10 @@ cluster <- function(input, output, session, adata, replot,
             names <- py_to_r(get_cluster_name_list(adata()))
             df <- data.frame(as.character(labels), as.character(names))
             colnames(df) <- c("Cluster ID", "Label")
-            rownames(df) <- NULL
 
             tb <- df %>% addHtmlTableStyle(
                 align='l', css.cell = "padding-right: 10em;") %>%
-                htmlTable(caption = "Cluster Labels")
+                htmlTable(caption = "Cluster Labels", rnames = FALSE)
             isolate(cellNamesTb(c(cellNamesTb(), list(tb))))
             isolate(relabel(0))
             return(tb)
