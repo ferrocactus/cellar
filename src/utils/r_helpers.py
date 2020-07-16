@@ -9,6 +9,19 @@ def has_key(adata, attr, key):
         return True
     return False
 
+def get_key(adata, attr, key):
+    return adata[attr][key]
+
+def has_key_tri(adata, key1, key2, key3):
+    if key2 not in getattr(adata, key1):
+        return False
+    if key3 not in getattr(adata, key1)[key2]:
+        return False
+    return True
+
+def get_key_tri(adata, key1, key2, key3):
+    return getattr(adata, key1)[key2][key3]
+
 def is_active(adata):
     return isinstance(adata, AnnData)
 

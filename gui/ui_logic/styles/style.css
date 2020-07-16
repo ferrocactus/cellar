@@ -248,9 +248,7 @@ input:disabled {
 }
 
 #ns-collapse_cell_names {
-    float: right;
-    margin-right: 50px;
-    margin-bottom: -20px;
+    margin-bottom: 20px;
     margin-top: 20px;
     border: none;
     background: none;

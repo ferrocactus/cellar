@@ -34,11 +34,15 @@ server <- shinyServer(function(input, output, session) {
     replot <- reactiveVal(0)
     remark <- reactiveVal(0)
     relabel <- reactiveVal(0)
+    reinfo <- reactiveVal(0)
     resubset <- reactiveVal(0)
     retheme <- reactiveVal(0)
 
     curPlot <- reactiveVal(0)
     plotHistory <- reactiveVal(c())
+
+    cellNamesTb <- reactiveVal(c())
+    infoTb <- reactiveVal(c())
 
     # We are using the same namespace for everything called "ns".
     notificationModule = callModule(notifications, id = 'ns')
@@ -50,22 +54,27 @@ server <- shinyServer(function(input, output, session) {
 
     # Clustering menu
     callModule(cluster, id = "ns", adata = adata, replot = replot,
-               reset = reset, relabel = relabel, resubset = resubset)
+               reset = reset, relabel = relabel, resubset = resubset,
+               reinfo = reinfo,
+               cellNamesTb = cellNamesTb, infoTb = infoTb)
     callModule(plot, id = "ns", replot = replot, adata = adata,
                selDataset = selDataset, setNames = setNames,
                plotHistory = plotHistory, curPlot = curPlot,
-               reset = reset, resubset = resubset)
+               reset = reset, resubset = resubset,
+               cellNamesTb = cellNamesTb, infoTb = infoTb,
+               reinfo = reinfo, relabel = relabel)
 
     # Label Transfer menu
     callModule(align, id = "ns", adata = adata,
                selDatasetAlign = selDatasetAlign, replot = replot,
-               reset = reset, relabel = relabel, resubset = resubset)
+               reset = reset, relabel = relabel, resubset = resubset,
+               reinfo = reinfo)
 
     # Selection & Labeling menu
     callModule(selectionLabeling, id = "ns", adata = adata,
                labelList = labelList, setNames = setNames,
                resubset = resubset, reset = reset, replot = replot,
-               relabel = relabel)
+               relabel = relabel, reinfo = reinfo)
 
     # Analysis menu
     callModule(differential_e, id = "ns", adata = adata, remark = remark,
@@ -78,7 +87,7 @@ server <- shinyServer(function(input, output, session) {
     # Export/Import menu
     callModule(save_session, id = "ns", adata = adata, replot = replot,
                remark = remark, labelList = labelList, relabel = relabel,
-               resubset = resubset, fullreset = fullreset)
+               resubset = resubset, fullreset = fullreset, reinfo = reinfo)
     callModule(download_cells, id = "ns", adata = adata)
 
     # # Miscellaneous

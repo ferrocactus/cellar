@@ -10,8 +10,10 @@ library(DT)
 library(gplots)
 library(SingleR)
 library(shinyBS)
-library("htmltools")
-library("bsplus")
+library(htmltools)
+library(bsplus)
+library(htmlTable)
+
 source("gui/ui.R")
 source("gui/server.R")
 

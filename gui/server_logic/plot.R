@@ -10,13 +10,16 @@ all_symbols <- c(
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, selDataset,
                  setNames, setPts, plotHistory, curPlot, reset,
-                 resubset) {
+                 resubset, cellNamesTb, infoTb, reinfo, relabel) {
     # triggers when replot is set to 1
     observeEvent(replot(), {
         if (replot() < 1) return()
         isolate(replot(0))
         if (is_active(adata()) == FALSE) return()
         if (!py_has_attr(adata()$obs, 'labels')) return()
+
+        relabel(relabel() + 1)
+        reinfo(reinfo() + 1)
 
         labels <- as.factor(py_to_r(adata()$obs$labels$to_numpy()))
         label_names <- as.factor(py_to_r(get_label_names(adata())))
@@ -93,6 +96,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 isolate(curPlot(length(plotHistory())))
                 return(p)
             })
+
         })
 
     })
@@ -119,6 +123,12 @@ plot <- function(input, output, session, replot, adata, selDataset,
 
         output$plot <- renderPlotly({
             return(plotHistory()[[curPlot()]])
+        })
+        output$cell_names_outp <- renderUI({
+            return(cellNamesTb()[[curPlot()]])
+        })
+        output$clustering_info <- renderUI({
+            return(infoTb()[[curPlot()]])
         })
     })
 

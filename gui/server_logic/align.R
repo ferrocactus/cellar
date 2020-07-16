@@ -1,5 +1,5 @@
 align <- function(input, output, session, adata, selDatasetAlign,
-                  replot, reset, relabel, resubset) {
+                  replot, reset, relabel, resubset, reinfo) {
     adataAlign <- reactiveVal(0)
 
     observeEvent(input$align_btn, {
@@ -84,7 +84,6 @@ align <- function(input, output, session, adata, selDatasetAlign,
 
         replot(replot() + 1)
         reset(reset() + 1)
-        relabel(relabel() + 1)
         resubset(resubset() + 1)
     })
 }

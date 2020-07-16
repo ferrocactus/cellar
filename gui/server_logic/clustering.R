@@ -1,5 +1,6 @@
 cluster <- function(input, output, session, adata, replot,
-                    reset, relabel, resubset) {
+                    reset, relabel, resubset, reinfo,
+                    cellNamesTb, infoTb) {
     observeEvent(input$runconfigbtn, {
         # Return if no adata loaded
         if (py_to_r(is_active(adata())) == FALSE) {
@@ -84,7 +85,6 @@ cluster <- function(input, output, session, adata, replot,
 
         replot(replot() + 1)
         reset(reset() + 1)
-        relabel(relabel() + 1)
         resubset(resubset() + 1)
     })
 
@@ -111,7 +111,6 @@ cluster <- function(input, output, session, adata, replot,
 
         replot(replot() + 1)
         reset(reset() + 1)
-        relabel(relabel() + 1)
         resubset(resubset() + 1)
     })
 
@@ -132,26 +131,85 @@ cluster <- function(input, output, session, adata, replot,
 
         replot(replot() + 1)
         reset(reset() + 1)
-        relabel(relabel() + 1)
         resubset(resubset() + 1)
     })
 
     # Show/Hide cluster names
     observeEvent(input$collapse_cell_names, {
         shinyjs::toggle("cell_names_outp")
+        shinyjs::toggle("clustering_info")
     })
 
     # Observe change of cluster names
     observe({
         if (relabel() < 1) return()
 
-        output$cell_names_outp <- renderTable({
+        output$cell_names_outp <- renderUI({
             labels <- py_to_r(get_cluster_label_list(adata()))
             names <- py_to_r(get_cluster_name_list(adata()))
             df <- data.frame(as.character(labels), as.character(names))
-            colnames(df) <- c("Cluster ID", "Name")
+            colnames(df) <- c("Cluster ID", "Label")
+            rownames(df) <- NULL
+
+            tb <- df %>% addHtmlTableStyle(
+                align='l', css.cell = "padding-right: 10em;") %>%
+                htmlTable(caption = "Cluster Labels")
+            isolate(cellNamesTb(c(cellNamesTb(), list(tb))))
             isolate(relabel(0))
-            return(df)
-        }, width='100%')
+            return(tb)
+        })
+    })
+
+    observe({
+        if (reinfo() < 1) return()
+
+        output$clustering_info <- renderUI({
+            mx <- matrix(ncol = 1, nrow = 8)
+            i <- 1
+            cats = list(
+                "dim_reduction_info" = c(
+                    "method", "n_components", "n_components_used"),
+                "cluster_info" = c(
+                    "method", "n_clusters", "n_clusters_used", "eval_method"),
+                "visualization_info_2d" = c(
+                    "method"))
+
+            for (cat in names(cats)) {
+                for (tag in get(cat, cats)) {
+                    if (py_to_r(has_key_tri(adata(), 'uns', cat, tag)))
+                        mx[i, 1] = paste(as.character(py_to_r(get_key_tri(
+                            adata(), 'uns', cat, tag))), collapse=', ')
+                    else
+                        mx[i, 1] = "NA"
+                    i = i+1
+                }
+            }
+
+            rownames(mx) <- c(
+                "Method",
+                "Number of Components",
+                "Number of Components Used",
+                "Method",
+                "Number of Clusters",
+                "Clusters Used",
+                "Evaluation Method",
+                "Method"
+            )
+
+            colnames(mx) <- c("Value")
+
+            tb <- mx %>% addHtmlTableStyle(
+                align='l',
+                css.cell = "padding-right: 10em;"
+                ) %>%
+                htmlTable(
+                    caption = "General Info",
+                    rgroup = c("Dimensionality Reduction", "Clustering", "Visualization"),
+                    n.rgroup = c(3, 4, 1)
+                )
+            isolate(infoTb(c(infoTb(), list(tb))))
+            isolate(reinfo(0))
+            return(tb)
+        })
     })
 }

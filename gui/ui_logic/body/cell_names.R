@@ -5,10 +5,13 @@ cell_names <- function(id, label='cell_names') {
         list(
             actionButton(
                 ns("collapse_cell_names"),
-                "\u2199 View cluster names",
+                "View additional info",
                 class = "collapsebtn"
             ),
-            tableOutput(ns("cell_names_outp"))
+            splitLayout(
+                htmlOutput(ns("clustering_info")),
+                htmlOutput(ns("cell_names_outp"))
+            )
         )
     )
 }

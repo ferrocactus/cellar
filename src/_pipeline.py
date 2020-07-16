@@ -114,6 +114,8 @@ def reduce_dim(
     adata.uns['dim_reduction_info'] = {}
     adata.uns['dim_reduction_info']['method'] = method
     adata.uns['dim_reduction_info']['n_components'] = x_emb.shape[1]
+    if n_components_used == 'knee':
+        n_components_used = 'Automatic'
     adata.uns['dim_reduction_info']['n_components_used'] = n_components_used
     adata.uns['dim_reduction_info']['kwargs'] = kwargs
 
@@ -185,7 +187,10 @@ def cluster(
         adata = _validate_x(x)
     _method_exists('cluster', method)
     _method_exists('cluster_eval', eval_method)
-    n_clusters = _validate_clu_n_clusters(n_clusters, adata.X.shape[0])
+    if method not in ['Leiden', 'Scanpy']:
+        n_clusters = _validate_clu_n_clusters(n_clusters, adata.X.shape[0])
+    else:
+        n_clusters = 'NA'
     n_jobs_multiple = _validate_n_jobs(n_jobs_multiple)
 
     # Determine if embeddings should be used or the full data matrix
@@ -217,6 +222,9 @@ def cluster(
     adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
     adata.uns['cluster_info']['method'] = method
     adata.uns['cluster_info']['n_clusters_used'] = n_clusters
+    if method in ['Leiden', 'Scanpy']:
+        eval_method = "NA"
+        scores = "NA"
     adata.uns['cluster_info']['eval_method'] = eval_method
     adata.uns['cluster_info']['scores'] = scores
     adata.uns['cluster_info']['used_emb'] = use_emb

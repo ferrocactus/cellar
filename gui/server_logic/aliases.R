@@ -6,6 +6,9 @@ store_subset <- cellar$utils$tools$store_subset
 update_subset_label <- cellar$utils$tools$update_subset_label
 is_active <- cellar$utils$r_helpers$is_active
 has_key <- cellar$utils$r_helpers$has_key
+get_key <- cellar$utils$r_helpers$get_key
+has_key_tri <- cellar$utils$r_helpers$has_key_tri
+get_key_tri <- cellar$utils$r_helpers$get_key_tri
 get_labels <- cellar$utils$r_helpers$get_labels
 get_emb_2d <- cellar$utils$r_helpers$get_emb_2d
 get_label_names <- cellar$utils$r_helpers$get_label_names

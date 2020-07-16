@@ -2,7 +2,7 @@
 
 selectionLabeling <- function(input, output, session, adata,
                               labelList, setNames, resubset,
-                              reset, replot, relabel) {
+                              reset, replot, relabel, reinfo) {
 
     dic = py_to_r(get_dic())
 
@@ -96,7 +96,6 @@ selectionLabeling <- function(input, output, session, adata,
         }
         reset(reset() + 1)
         replot(replot() + 1)
-        relabel(relabel() + 1)
     })
 
     # Observe changes of sets
@@ -115,26 +114,7 @@ selectionLabeling <- function(input, output, session, adata,
             "Choose Subset 2",
             choices = c("None", setNames())
     )})
-    
-    # observe({
-    #     print("rendering")
-    #     output$subset1_upd<-renderUI({
-    #     selectInput(
-    #         ns("subset1_upd"),
-    #         "Choose Subset",
-    #         choices = c("None", setNames())
-    #     ) 
-        # %>%
-        #     shinyInput_label_embed(
-        #         shiny::icon("info-circle") %>%
-        #             bs_embed_tooltip(
-        #                 "Select the subset to be updated",
-        #                 placement= "bottom"
-        #             )
-    #     #     )
-    #     })
-    # })
-    
+
     observe({
         updateSelectInput(
             session,

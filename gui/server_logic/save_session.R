@@ -1,6 +1,6 @@
 save_session <- function(input, output, session, adata, replot,
                          remark, labelList, relabel, resubset,
-                         fullreset) {
+                         fullreset, reinfo) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
@@ -29,7 +29,6 @@ save_session <- function(input, output, session, adata, replot,
 
         fullreset(fullreset() + 1)
         replot(replot() + 1)
-        relabel(relabel() + 1)
         remark(remark() + 1)
         resubset(resubset() + 1)
 
