@@ -1,6 +1,15 @@
 cluster <- function(input, output, session, adata, replot,
                     reset, relabel, resubset, reinfo,
                     cellNamesTb, infoTb) {
+    # Keep info tab active at all times
+    output$cell_names_outp <- NULL
+    output$clustering_info <- NULL
+    outputOptions(output, "cell_names_outp", suspendWhenHidden = FALSE)
+    outputOptions(output, "clustering_info", suspendWhenHidden = FALSE)
+    # Start hidden
+    shinyjs::hide("cell_names_outp")
+    shinyjs::hide("clustering_info")
+
     observeEvent(input$runconfigbtn, {
         # Return if no adata loaded
         if (py_to_r(is_active(adata())) == FALSE) {
