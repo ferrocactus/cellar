@@ -87,6 +87,12 @@ def get_gene_pvals_de(adata):
 def get_gene_logFC_de(adata):
     return adata.uns['de']['diffs']
 
+def get_neighbors(adata):
+    return adata.uns['neighbors']
+
+def get_neighbor_labels(adata):
+    return adata.uns['neighbor_labels']
+
 def write_h5ad(adata, path, compression=9):
     adata.var['parsed_names'] = None
     adata.var['parsed_ids'] = None

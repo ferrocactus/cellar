@@ -654,3 +654,143 @@ def transfer_labels(
 
     if not inplace:
         return adata
+
+def get_neighbors(
+        x: Union[AnnData, np.ndarray, list],
+        dist: str = 'Euclidean',
+        n_neighbor = 10,
+        inplace: Optional[bool] = True,
+        **kwargs) :
+    """
+    Calculate the neighbors based on the 2d embedding 
+
+    Parameters
+    __________
+    x: AnnData object containing the data.
+
+    dist: The kind of distance used to calculate neighbors
+        Manhattan:
+        Euclidean:
+    
+    n_neighbor: the number of closest points as neighbors
+            
+    inplace: If set to true will update x.obs['uncertainty'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+    
+    # Validations
+    is_AnnData = isinstance(x, AnnData) 
+    if not is_AnnData:
+        raise InvalidArgument("x is not in AnnData format.")
+    
+    adata = x.copy() if not inplace else x
+    data_2d=adata.obsm['x_emb_2d']
+    pairwise_dist=[]
+    
+    for i in range(len(data_2d)):  # calculate pairwise distance
+        di=[]
+        for j in range(len(data_2d)):
+            if (dist=="Manhattan"):
+                d=data_2d[i, 0]-data_2d[j, 0]+data_2d[i, 1]-data_2d[j, 1]
+            elif (dist=="Euclidean"):
+                d=(data_2d[i, 0]-data_2d[j, 0])**2+(data_2d[i, 1]-data_2d[j, 1])**2
+                d=d**0.5
+            else:
+                raise InvalidArgument("invalid distance option")
+            di.append(d)
+        pairwise_dist.append(di)
+    pairwise_dist=np.array(pairwise_dist)
+    distance=pairwise_dist.copy()
+    
+    #calculate neighbors based on the pairwise distance and n_neighbor
+    neighbors=[]
+    neighbor_labels=[]
+    inf=888
+    for i in range(len(data_2d)):  # find neighbors 
+        neighbors_i=[] # neighbors of i
+        n_l=[] # neighbor labels of i
+        for j in range(n_neighbor): # find n_neighbors of i
+            n=pairwise_dist[i].argmin()
+            n_l.append(adata.obs['labels'][n])
+            neighbors_i.append(n)
+            pairwise_dist[i][n]=inf
+        neighbors.append(neighbors_i)
+        neighbor_labels.append(n_l)
+    
+    # Populate entries
+    #adata.uns['distance'] = distance
+    adata.uns['neighbors'] = neighbors
+    adata.uns['neighbor_labels'] = neighbor_labels
+    if not inplace:
+        return adata    
+    
+def uncertainty(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'confidence',
+        n_neighbor=10,
+        inplace: Optional[bool] = True,
+        **kwargs) :
+    """
+    Calculate the uncertainty for each point 
+
+    Parameters
+    __________
+    x: AnnData object containing the data.
+
+    method: The method used to calculate uncertainty
+
+    n_neighbor: the number of closest points as neighbors
+
+    inplace: If set to true will update x.obs['uncertainty'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+    
+    # Validations
+    is_AnnData = isinstance(x, AnnData) 
+    if not is_AnnData:
+        raise InvalidArgument("x is not in AnnData format.")
+    
+    adata = x.copy() if not inplace else x
+     
+    if 'labels' not in x.obs:
+        raise InvalidArgument("cannot calculate uncertainty for dataset without labels")
+    
+    if ('neighbors' not in x.uns) or ('neighbor_labels' not in x.uns):
+        get_neighbors(x,'Euclidean',n_neighbor,inplace=True)
+    
+    # uncertainty calculation:
+    uncertainty=[]
+    if (method=='confidence'):
+        for i in range(len(adata.obs.labels)):
+            u, indices = np.unique(adata.uns['neighbor_labels'][i], return_inverse=True)
+            knn_label_freq=np.bincount(indices).max()
+            confidence=knn_label_freq/n_neighbor
+            uncertain_score=(1-confidence)*100
+            uncertainty.append(uncertain_score)
+    else:
+        raise InvalidArgument("invalid uncertainty choice")
+    
+    # Populate entries
+    adata.obs['uncertainty'] = uncertainty
+    
+    if not inplace:
+        return adata
+    

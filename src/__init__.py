@@ -5,6 +5,8 @@ from ._pipeline import name_genes
 from ._pipeline import de
 from ._pipeline import ss_cluster
 from ._pipeline import transfer_labels
+from ._pipeline import get_neighbors
+from ._pipeline import uncertainty
 
 from ._plotter import plot
 

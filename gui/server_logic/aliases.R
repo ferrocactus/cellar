@@ -30,3 +30,5 @@ write_h5ad <- cellar$utils$r_helpers$write_h5ad
 read_h5ad <- cellar$utils$r_helpers$read_h5ad
 write_key <- cellar$utils$r_helpers$write_key
 validate_cluster_list <- cellar$utils$validation$validate_cluster_list
+get_neighbors <- cellar$utils$r_helpers$get_neighbors
+get_neighbor_labels <- cellar$utils$r_helpers$get_neighbor_labels

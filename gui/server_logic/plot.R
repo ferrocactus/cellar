@@ -40,7 +40,23 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         color = paste0(labels, ": ", label_names)
                     else
                         color = labels
-                } else {
+                }
+                else if (input$color == 'Uncertainty'){
+                    if (!py_has_attr(adata()$obs, 'uncertainty')) {
+                        if (input$show_names == 'show_names')
+                            color = paste0(labels, ": ", label_names)
+                        else
+                            color = labels
+                    }
+                    else{
+                        color = py_to_r(adata()$obs$uncertainty)/100
+                        title = "Uncertainty"
+                        showlegend = FALSE
+                        symbol = ~labels
+                        symbols = all_symbols
+                    }
+                }
+                else {
                     gene_names = py_to_r(get_all_gene_names(adata()))
                     i = which(gene_names == input$color)[1]
                     if (is.null(i)) {
