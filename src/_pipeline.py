@@ -3,6 +3,7 @@ from typing import Optional, Union
 import numpy as np
 from anndata import AnnData
 from bidict import bidict
+from sklearn.neighbors import NearestNeighbors
 
 from .units import wrap
 from .units import _method_exists
@@ -693,43 +694,22 @@ def get_neighbors(
         raise InvalidArgument("x is not in AnnData format.")
     
     adata = x.copy() if not inplace else x
-    data_2d=adata.obsm['x_emb_2d']
-    pairwise_dist=[]
+    data_reduced=adata.obsm['x_emb']
     
-    for i in range(len(data_2d)):  # calculate pairwise distance
-        di=[]
-        for j in range(len(data_2d)):
-            if (dist=="Manhattan"):
-                d=data_2d[i, 0]-data_2d[j, 0]+data_2d[i, 1]-data_2d[j, 1]
-            elif (dist=="Euclidean"):
-                d=(data_2d[i, 0]-data_2d[j, 0])**2+(data_2d[i, 1]-data_2d[j, 1])**2
-                d=d**0.5
-            else:
-                raise InvalidArgument("invalid distance option")
-            di.append(d)
-        pairwise_dist.append(di)
-    pairwise_dist=np.array(pairwise_dist)
-    distance=pairwise_dist.copy()
-    
-    #calculate neighbors based on the pairwise distance and n_neighbor
-    neighbors=[]
+    nbrs = NearestNeighbors(n_neighbors=10, algorithm='auto').fit(data_reduced)
+    distances, indices = nbrs.kneighbors(data_reduced)
+    neighbors_matrix=nbrs.kneighbors_graph(data_reduced).toarray()
     neighbor_labels=[]
-    inf=888
-    for i in range(len(data_2d)):  # find neighbors 
-        neighbors_i=[] # neighbors of i
-        n_l=[] # neighbor labels of i
-        for j in range(n_neighbor): # find n_neighbors of i
-            n=pairwise_dist[i].argmin()
-            n_l.append(adata.obs['labels'][n])
-            neighbors_i.append(n)
-            pairwise_dist[i][n]=inf
-        neighbors.append(neighbors_i)
-        neighbor_labels.append(n_l)
-    
+    for i in range(len(x)):
+        labels=[]
+        for j in range(n_neighbor-1):
+            labels.append(x.obs['labels'][indices[i][j]])
+        neighbor_labels.append(labels)
+        
     # Populate entries
     #adata.uns['distance'] = distance
-    adata.uns['neighbors'] = neighbors
-    adata.uns['neighbor_labels'] = neighbor_labels
+    #adata.uns['neighbors_matrix'] = neighbors_matrix
+    adata.obs['neighbor_labels'] = neighbor_labels
     if not inplace:
         return adata    
     
@@ -780,7 +760,7 @@ def uncertainty(
     uncertainty=[]
     if (method=='confidence'):
         for i in range(len(adata.obs.labels)):
-            u, indices = np.unique(adata.uns['neighbor_labels'][i], return_inverse=True)
+            u, indices = np.unique(adata.obs['neighbor_labels'][i], return_inverse=True)
             knn_label_freq=np.bincount(indices).max()
             confidence=knn_label_freq/n_neighbor
             uncertain_score=(1-confidence)*100
