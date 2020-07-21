@@ -82,9 +82,13 @@ def get_gene_names_de(adata):
     return adata.var['parsed_names'].to_numpy()[adata.uns['de']['indices']].astype('U')
 
 def get_gene_pvals_de(adata):
+    if 'de' not in adata.uns:
+        return None
     return adata.uns['de']['pvals']
 
 def get_gene_logFC_de(adata):
+    if 'de' not in adata.uns:
+        return None
     return adata.uns['de']['diffs']
 
 def write_h5ad(adata, path, compression=9):
