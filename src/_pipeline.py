@@ -4,6 +4,7 @@ import numpy as np
 from anndata import AnnData
 from bidict import bidict
 from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import kneighbors_graph
 
 from .units import wrap
 from .units import _method_exists
@@ -658,23 +659,21 @@ def transfer_labels(
 
 def get_neighbors(
         x: Union[AnnData, np.ndarray, list],
-        dist: str = 'Euclidean',
-        n_neighbor = 10,
+        n_neighbors: int = 10,
+        metric: str = 'euclidean',
         inplace: Optional[bool] = True,
         **kwargs) :
     """
-    Calculate the neighbors based on the 2d embedding 
+    Calculate the neighbors based on the 2d embedding
 
     Parameters
     __________
     x: AnnData object containing the data.
 
-    dist: The kind of distance used to calculate neighbors
-        Manhattan:
-        Euclidean:
-    
-    n_neighbor: the number of closest points as neighbors
-            
+    metric: The kind of metric used to calculate neighbors
+
+    n_neighbors: the number of closest points as neighbors
+
     inplace: If set to true will update x.obs['uncertainty'], otherwise,
         return a new AnnData object.
 
@@ -687,40 +686,28 @@ def get_neighbors(
     If x is an AnnData object, will either return an AnnData object
     or None depending on the value of inplace.
     """
-    
     # Validations
-    is_AnnData = isinstance(x, AnnData) 
+    is_AnnData = isinstance(x, AnnData)
     if not is_AnnData:
         raise InvalidArgument("x is not in AnnData format.")
-    
     adata = x.copy() if not inplace else x
-    data_reduced=adata.obsm['x_emb']
-    
-    nbrs = NearestNeighbors(n_neighbors=10, algorithm='auto').fit(data_reduced)
-    distances, indices = nbrs.kneighbors(data_reduced)
-    neighbors_matrix=nbrs.kneighbors_graph(data_reduced).toarray()
-    neighbor_labels=[]
-    for i in range(len(x)):
-        labels=[]
-        for j in range(n_neighbor-1):
-            labels.append(x.obs['labels'][indices[i][j]])
-        neighbor_labels.append(labels)
-        
-    # Populate entries
-    #adata.uns['distance'] = distance
-    #adata.uns['neighbors_matrix'] = neighbors_matrix
-    adata.obs['neighbor_labels'] = neighbor_labels
+
+    nn = kneighbors_graph(adata.obsm['x_emb'], n_neighbors=n_neighbors,
+                          include_self=True, metric=metric).nonzero()
+    indices = nn[1].reshape(-1, n_neighbors)
+    adata.obsm['neighbor_labels'] = adata.obs['labels'][indices]
+
     if not inplace:
-        return adata    
-    
+        return adata
+
 def uncertainty(
         x: Union[AnnData, np.ndarray, list],
         method: str = 'confidence',
-        n_neighbor=10,
+        n_neighbors: int = 10,
         inplace: Optional[bool] = True,
         **kwargs) :
     """
-    Calculate the uncertainty for each point 
+    Calculate the uncertainty for each point
 
     Parameters
     __________
@@ -742,35 +729,36 @@ def uncertainty(
     If x is an AnnData object, will either return an AnnData object
     or None depending on the value of inplace.
     """
-    
+
     # Validations
-    is_AnnData = isinstance(x, AnnData) 
+    is_AnnData = isinstance(x, AnnData)
     if not is_AnnData:
         raise InvalidArgument("x is not in AnnData format.")
-    
+
     adata = x.copy() if not inplace else x
-     
+
     if 'labels' not in x.obs:
-        raise InvalidArgument("cannot calculate uncertainty for dataset without labels")
-    
-    if ('neighbors' not in x.uns) or ('neighbor_labels' not in x.uns):
-        get_neighbors(x,'Euclidean',n_neighbor,inplace=True)
-    
+        raise InvalidArgument("Cannot calculate uncertainty for dataset without labels")
+
+    if 'neighbor_labels' not in x.obsm:
+        get_neighbors(x, n_neighbors=n_neighbors)
+
     # uncertainty calculation:
-    uncertainty=[]
-    if (method=='confidence'):
+    uncertainty = []
+    if (method == 'confidence'):
         for i in range(len(adata.obs.labels)):
-            u, indices = np.unique(adata.obs['neighbor_labels'][i], return_inverse=True)
-            knn_label_freq=np.bincount(indices).max()
-            confidence=knn_label_freq/n_neighbor
-            uncertain_score=(1-confidence)*100
+            u, indices = np.unique(adata.obsm['neighbor_labels'][i],
+                                    return_inverse=True)
+            knn_label_freq = np.bincount(indices).max()
+            confidence = knn_label_freq / n_neighbors
+            uncertain_score = (1 - confidence) * 100
             uncertainty.append(uncertain_score)
     else:
-        raise InvalidArgument("invalid uncertainty choice")
-    
+        raise InvalidArgument("Invalid uncertainty method")
+
     # Populate entries
     adata.obs['uncertainty'] = uncertainty
-    
+
     if not inplace:
         return adata
-    
+
