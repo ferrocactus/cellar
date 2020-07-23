@@ -101,7 +101,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
                     paste0(dataset, "_DE_genes", ".csv")
                 },
                 content = function(file) {
-                    write.csv(table, file, row.names = FALSE)
+                    write.csv(table[,1:ncol(table)-1], file, row.names = FALSE)
                 }
             )
 

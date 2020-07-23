@@ -48,6 +48,7 @@ RUN Rscript -e 'BiocManager::install("SingleR")'
 RUN Rscript -e 'install.packages("htmlTable")'
 
 # Install orca dependency for plotly
+RUN apt-get install -y libasound2
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
 RUN chmod 777 /opt/orca-1.1.1-x86_64.AppImage
 RUN cd /opt && /opt/orca-1.1.1-x86_64.AppImage --appimage-extract

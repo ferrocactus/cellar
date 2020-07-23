@@ -69,5 +69,8 @@ dataset_reset <- function(input, output, session, reset, setNames,
         output$MSIGDBtable = NULL
         output$Diseasetable = NULL
         output$heatmap = NULL
+
+        output$cell_names_outp = NULL
+        output$clustering_info = NULL
     })
 }
