@@ -659,12 +659,12 @@ def transfer_labels(
 
 def get_neighbors(
         x: Union[AnnData, np.ndarray, list],
-        n_neighbors: int = 10,
+        n_neighbors: int = 5,
         metric: str = 'euclidean',
         inplace: Optional[bool] = True,
         **kwargs) :
     """
-    Calculate the neighbors based on the 2d embedding
+    Calculate the neighbors based on the dimension reduced data
 
     Parameters
     __________
@@ -692,18 +692,25 @@ def get_neighbors(
         raise InvalidArgument("x is not in AnnData format.")
     adata = x.copy() if not inplace else x
 
-    nn = kneighbors_graph(adata.obsm['x_emb'], n_neighbors=n_neighbors,
-                          include_self=True, metric=metric).nonzero()
+    n_graph = kneighbors_graph(adata.obsm['x_emb'], n_neighbors=n_neighbors,
+                          include_self=False, metric=metric,
+                          mode='distance').toarray()
+
+    nn=n_graph.nonzero()
     indices = nn[1].reshape(-1, n_neighbors)
     adata.obsm['neighbor_labels'] = adata.obs['labels'][indices]
-
+    
+    distances=[n_graph[nn[0][i],nn[1][i]] for i in range(len(x)*n_neighbors)]
+    distances=np.array(distances).reshape(-1,n_neighbors)
+    adata.obsm['neighbor_dist'] = distances
+    
     if not inplace:
         return adata
 
 def uncertainty(
         x: Union[AnnData, np.ndarray, list],
-        method: str = 'confidence',
-        n_neighbors: int = 10,
+        method: str = 'conformal',
+        n_neighbors: int = 5,
         inplace: Optional[bool] = True,
         **kwargs) :
     """
@@ -745,7 +752,28 @@ def uncertainty(
 
     # uncertainty calculation:
     uncertainty = []
-    if (method == 'confidence'):
+    
+    if (method == "conformal"):
+        threshold=0.1
+        #x.obsm['neighbor_dist'].sort()
+        dist=x.obsm['neighbor_dist']
+        n_labels=x.obsm['neighbor_labels']
+        labels=np.array(x.obs['labels'])
+        nonconformity=[]
+        for i in range(len(np.unique(labels))):       
+            #same_label=(n_labels.transpose()==labels.transpose()).transpose()
+            same_label=(n_labels==i)
+            diff_label=(n_labels!=i)
+            a=(dist*same_label).sum(axis=1)
+            b=(dist*diff_label).sum(axis=1)
+            nonconformity.append(a/(b+threshold))
+        nonconformity=np.array(nonconformity).transpose()
+        order=nonconformity.argsort(axis=1) # argsort twice to get the ranking
+        ranking=order.argsort(axis=1)  ## the reversed ranking of nonconformity score
+        p=ranking/(len(np.unique(labels))+1) # p_value for each label
+        p=p[range(len(p)),labels] # selected p
+        uncertainty=1-p
+    elif (method == 'confidence'):
         for i in range(len(adata.obs.labels)):
             u, indices = np.unique(adata.obsm['neighbor_labels'][i],
                                     return_inverse=True)
