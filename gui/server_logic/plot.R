@@ -45,15 +45,24 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     if (!py_has_attr(adata()$obs, 'uncertainty')) {
                         if (input$show_names == 'show_names')
                             color = paste0(labels, ": ", label_names)
-                        else
+                        else{
+                            showNotification("Please calculate uncertainty first.")
                             color = labels
+                        }
+                            
                     }
                     else{
-                        color = py_to_r(adata()$obs$uncertainty)/100
+                        color = as.numeric(py_to_r(adata()$obs['uncertainty']))
                         title = "Uncertainty"
                         showlegend = FALSE
                         symbol = ~labels
                         symbols = all_symbols
+                        cell_ids=as.character(py_to_r(adata()$obs$index$to_numpy()))
+                        
+                        text=~paste0(replicate(length(label_names),"Label: "),
+                                    label_names,replicate(length(label_names),", Uncertainty: "),
+                                    as.character(py_to_r(adata()$obs['uncertainty'])))
+                        
                     }
                 }
                 else {
