@@ -6,6 +6,7 @@ from ._pipeline import de
 from ._pipeline import ss_cluster
 from ._pipeline import transfer_labels
 
+
 from ._plotter import plot
 
 from .utils.tools import parse
@@ -14,6 +15,8 @@ from .utils.tools import store_labels
 from .utils.tools import update_subset_label
 from .utils.tools import populate_subsets
 from .utils.tools import merge_clusters
+from .utils.tools import get_neighbors
+from .utils.tools import uncertainty
 
 from .utils.read import load_file
 

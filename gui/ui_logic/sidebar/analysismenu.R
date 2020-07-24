@@ -116,7 +116,17 @@ menuItem(
                         )
                     )
                 )
+            ),
+            
+            div(
+                class = "div_step div_uncertainty",
+                actionButton(
+                    ns("uncertain"),
+                    "Calculate uncertainty",
+                    class = "secondcol"
+                )
             )
+            
         )
     )
 )}

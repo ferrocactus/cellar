@@ -2,6 +2,12 @@ import itertools
 import json
 import re
 import os
+
+from typing import Optional, Union
+from anndata import AnnData
+from sklearn.neighbors import NearestNeighbors
+from sklearn.neighbors import kneighbors_graph
+
 from ast import literal_eval
 from functools import reduce
 
@@ -197,3 +203,141 @@ def get_dic():
     for i in range(len(cell_type)):
         dic[tissue[i]].append(cell_type[i])
     return dic
+
+
+def get_neighbors(
+        x: Union[AnnData, np.ndarray, list],
+        n_neighbors: int = 5,
+        metric: str = 'euclidean',
+        inplace: Optional[bool] = True,
+        **kwargs) :
+    """
+    Calculate the neighbors based on the dimension reduced data
+
+    Parameters
+    __________
+    x: AnnData object containing the data.
+
+    metric: The kind of metric used to calculate neighbors
+
+    n_neighbors: the number of closest points as neighbors
+
+    inplace: If set to true will update x.obs['uncertainty'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+    if not is_AnnData:
+        raise InvalidArgument("x is not in AnnData format.")
+    adata = x.copy() if not inplace else x
+
+    n_graph = kneighbors_graph(adata.obsm['x_emb'], n_neighbors=n_neighbors,
+                          include_self=False, metric=metric,
+                          mode='distance').toarray()
+
+    nn=n_graph.nonzero()
+    indices = nn[1].reshape(-1, n_neighbors)
+    adata.obsm['neighbor_labels'] = adata.obs['labels'][indices]
+    
+    distances=[n_graph[nn[0][i],nn[1][i]] for i in range(len(x)*n_neighbors)]
+    distances=np.array(distances).reshape(-1,n_neighbors)
+    adata.obsm['neighbor_dist'] = distances
+    
+    if not inplace:
+        return adata
+
+def uncertainty(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'conformal',
+        n_neighbors: int = 5,
+        inplace: Optional[bool] = True,
+        **kwargs) :
+    """
+    Calculate the uncertainty for each point
+
+    Parameters
+    __________
+    x: AnnData object containing the data.
+
+    method: The method used to calculate uncertainty
+
+    n_neighbor: the number of closest points as neighbors
+
+    inplace: If set to true will update x.obs['uncertainty'], otherwise,
+        return a new AnnData object.
+
+    **kwargs: Additional parameters that will get passed to the
+        clustering object as specified in method. For a full list
+        see the documentation of the corresponding method.
+
+    Returns
+    _______
+    If x is an AnnData object, will either return an AnnData object
+    or None depending on the value of inplace.
+    """
+
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+    if not is_AnnData:
+        raise InvalidArgument("x is not in AnnData format.")
+
+    adata = x.copy() if not inplace else x
+
+    if 'labels' not in x.obs:
+        raise InvalidArgument("Cannot calculate uncertainty for dataset without labels")
+
+    if 'neighbor_labels' not in x.obsm:
+        get_neighbors(x, n_neighbors=n_neighbors)
+
+    # uncertainty calculation:
+    uncertainty = []
+    
+    if (method == "conformal"):
+        threshold=1 # make sure 'b' is larger than 0
+        #x.obsm['neighbor_dist'].sort()
+        dist=x.obsm['neighbor_dist']
+        n_labels=x.obsm['neighbor_labels']
+        labels=np.array(x.obs['labels'])
+        nonconformity=[]
+        for i in range(len(np.unique(labels))):       
+            #same_label=(n_labels.transpose()==labels.transpose()).transpose()
+            same_label=(n_labels==i)
+            diff_label=(n_labels!=i)
+            a=(dist*same_label).sum(axis=1)
+            b=(dist*diff_label).sum(axis=1)
+            nonconformity.append(a/(b+threshold))
+        nonconformity=np.array(nonconformity).transpose()
+        order=nonconformity.argsort(axis=1) # argsort twice to get the ranking
+        ranking=order.argsort(axis=1)  ## the reversed ranking of nonconformity score
+        p=ranking/(len(np.unique(labels))+1) # p_value for each label
+        for i in range(len(np.unique(labels))):
+            for j in range(len(n_labels)):
+                if i not in n_labels[j]:
+                    p[j][i]=0
+        p=p[range(len(p)),labels] # selected p
+        uncertainty=1-p
+    elif (method == 'confidence'):
+        for i in range(len(adata.obs.labels)):
+            u, indices = np.unique(adata.obsm['neighbor_labels'][i],
+                                    return_inverse=True)
+            knn_label_freq = np.bincount(indices).max()
+            confidence = knn_label_freq / n_neighbors
+            uncertain_score = (1 - confidence) * 100
+            uncertainty.append(uncertain_score)
+    else:
+        raise InvalidArgument("Invalid uncertainty method")
+
+    # Populate entries
+    adata.obs['uncertainty'] = uncertainty
+
+    if not inplace:
+        return adata

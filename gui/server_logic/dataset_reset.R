@@ -34,7 +34,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
             updateSelectInput(
                 session = session,
                 inputId = "color",
-                choices = c("Clusters", names),
+                choices = c("Clusters","Uncertainty", names),
                 selected = "Clusters")
         }
 
