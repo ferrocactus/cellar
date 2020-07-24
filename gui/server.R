@@ -14,7 +14,7 @@ source("gui/server_logic/plot.R")
 source("gui/server_logic/align.R")
 source("gui/server_logic/selectionLabeling.R")
 source("gui/server_logic/de.R")
-source("gui/server_logic/uncertainty.R")
+
 cellar <- import("src", convert=FALSE)
 source("gui/server_logic/aliases.R")
 
@@ -80,8 +80,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(differential_e, id = "ns", adata = adata, remark = remark,
                deGenes = deGenes)
     callModule(analysis_body, id = "ns", adata = adata, deGenes = deGenes)
-    callModule(uncertain, id = "ns", adata = adata)
-    
+
     # Appearance menu
     callModule(theme, id = "ns", retheme = retheme)
 

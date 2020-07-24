@@ -42,16 +42,29 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         color = labels
                 }
                 else if (input$color == 'Uncertainty'){
-                    if (!py_has_attr(adata()$obs, 'uncertainty')) {
-                        if (input$show_names == 'show_names')
-                            color = paste0(labels, ": ", label_names)
-                        else{
-                            showNotification("Please calculate uncertainty first.")
-                            color = labels
+                        if (anyNA(as.integer(input$n_neighbors))==TRUE){
+                            n_neighbors=as.integer(sqrt(length(labels)))
                         }
-                            
-                    }
-                    else{
+                        else if (as.integer(input$n_neighbors) > as.integer(length(labels)/2)){
+                            n_neighbors=as.integer(sqrt(length(labels)))
+                        }
+                        else{
+                            n_neighbors=as.integer(input$n_neighbors)
+                        }
+                    
+                        showNotification("calculating uncertainty")
+                        withProgress(message = "Please Wait", value = 0, {
+                            incProgress(1 / 3, detail = "Data processing...")
+                            cellar$safe(cellar$get_neighbors,
+                                        x=adata(),
+                                        n_neighbors=n_neighbors)
+                            incProgress(1 / 3, detail = "Calculating uncertainty...")
+                            cellar$safe(cellar$uncertainty,
+                                        x=adata(),
+                                        n_neighbors=n_neighbors)
+                        })
+                        showNotification("finished")
+                        
                         color = as.numeric(py_to_r(adata()$obs['uncertainty']))
                         title = "Uncertainty"
                         showlegend = FALSE
@@ -62,8 +75,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         text=~paste0(replicate(length(label_names),"Label: "),
                                     label_names,replicate(length(label_names),", Uncertainty: "),
                                     as.character(py_to_r(adata()$obs['uncertainty'])))
-                        
-                    }
+                    
                 }
                 else {
                     gene_names = py_to_r(get_all_gene_names(adata()))

@@ -22,7 +22,7 @@ menuItem(
                         shinyInput_label_embed(
                             shiny::icon("info-circle") %>%
                                 bs_embed_tooltip(
-                                    "View the expression level of the selected gene in the plot.",
+                                    "View the expression level of the selected gene in the plot. ",
                                     placement= "bottom"
                                 )
                         )
@@ -117,15 +117,24 @@ menuItem(
                     )
                 )
             ),
-            
             div(
-                class = "div_step div_uncertainty",
-                actionButton(
-                    ns("uncertain"),
-                    "Calculate uncertainty",
-                    class = "secondcol"
+                class = "div_step div_genecard",
+                list(
+                    textInput(
+                        ns("n_neighbors"),
+                        label = "Neighbors",
+                        value = 20
+                    )%>%
+                        shinyInput_label_embed(
+                            shiny::icon("info-circle") %>%
+                                bs_embed_tooltip(
+                                    "K nearest neighbors for calculating uncertainty.",
+                                    placement= "bottom"
+                                )
+                        )
                 )
             )
+            
             
         )
     )
