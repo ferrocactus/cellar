@@ -38,7 +38,6 @@ def load_file(filepath):
         if filepath[-4:] == 'h5ad':
             adata = anndata.read_h5ad(filepath)
         if filepath[-3:] == 'csv':
-            # TODO remove transpose
             adata = anndata.read_csv(filepath)
             if t_flag:
                 adata = adata.T
