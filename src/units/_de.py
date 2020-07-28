@@ -32,7 +32,7 @@ class DE_TTest(Unit):
         )
 
         test = test.summary(qval_thres=self.alpha, fc_upper_thres=1)
-        test.drop('gene', axis=1)
+        test = test.drop('gene', axis=1)
         test = test.sort_values(by='log2fc', ascending=False)
         test = test[:self.max_n_genes]
 
@@ -63,7 +63,7 @@ class DE_Rank(Unit):
         )
 
         test = test.summary(qval_thres=self.alpha, fc_upper_thres=1)
-        test.drop('gene', axis=1)
+        test = test.drop('gene', axis=1)
         test = test.sort_values(by='log2fc', ascending=False)
         test = test[:self.max_n_genes]
 
@@ -95,7 +95,7 @@ class DE_LRT(Unit):
         )
 
         test = test.summary(qval_thres=self.alpha, fc_upper_thres=1)
-        test.drop('gene', axis=1)
+        test = test.drop('gene', axis=1)
         test = test.sort_values(by='log2fc', ascending=False)
         test = test[:self.max_n_genes]
 
@@ -127,7 +127,7 @@ class DE_Wald(Unit):
         )
 
         test = test.summary(qval_thres=self.alpha, fc_upper_thres=1)
-        test.drop('gene', axis=1)
+        test = test.drop('gene', axis=1)
         test = test.sort_values(by='log2fc', ascending=False)
         test = test[:self.max_n_genes]
 
