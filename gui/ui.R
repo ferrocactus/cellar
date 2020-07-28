@@ -1,19 +1,20 @@
-source("gui/ui_logic/header/history.R") # history
-source("gui/ui_logic/header/title.R") # title
-source("gui/ui_logic/header/info.R") # title
+source("gui/ui_logic/header/history.R")
+source("gui/ui_logic/header/title.R")
+source("gui/ui_logic/header/info.R")
 
-source("gui/ui_logic/sidebar/datasetmenu.R") #datasetmenu
-source("gui/ui_logic/sidebar/appearancemenu.R") #appearancemenu
-source("gui/ui_logic/sidebar/configmenu.R") #configmenu
-source("gui/ui_logic/sidebar/alignmenu.R") #downloadmenu
-source("gui/ui_logic/sidebar/selectionmenu.R") #mainmenu
-source("gui/ui_logic/sidebar/analysismenu.R") #analysismenu
-source("gui/ui_logic/sidebar/downloadmenu.R") #downloadmenu
-source("gui/ui_logic/sidebar/links.R") #links
+source("gui/ui_logic/sidebar/datasetmenu.R")
+source("gui/ui_logic/sidebar/appearancemenu.R")
+source("gui/ui_logic/sidebar/clusterimenu.R")
+source("gui/ui_logic/sidebar/clusteriimenu.R")
+source("gui/ui_logic/sidebar/alignmenu.R")
+source("gui/ui_logic/sidebar/selectionmenu.R")
+source("gui/ui_logic/sidebar/analysismenu.R")
+source("gui/ui_logic/sidebar/downloadmenu.R")
+source("gui/ui_logic/sidebar/links.R")
 
-source("gui/ui_logic/body/plots.R") #plots
-source("gui/ui_logic/body/cell_names.R") #cell_names
-source("gui/ui_logic/body/analysis.R") #analysis
+source("gui/ui_logic/body/plots.R")
+source("gui/ui_logic/body/cell_names.R")
+source("gui/ui_logic/body/analysis.R")
 
 source("gui/ui_logic/tooltips.R")
 
@@ -30,7 +31,8 @@ sidebar <- dashboardSidebar(
     width = 400,
     sidebarMenu(
         datasetmenu(id='ns'),
-        configmenu(id='ns'),
+        clusterimenu(id='ns'),
+        clusteriimenu(id='ns'),
         alignmenu(id='ns'),
         selectionmenu(id='ns'),
         analysismenu(id='ns'),

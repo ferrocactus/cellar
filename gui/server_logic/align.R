@@ -6,7 +6,7 @@ align <- function(input, output, session, adata, selDatasetAlign,
         if (is_active(adata()) == FALSE) return()
         req(input$reference_dataset)
 
-        withProgress(message = "Running SingleR", value = 0, {
+        withProgress(message = "Running Label Transfer", value = 0, {
             n <- 6
             incProgress(1 / n, detail = paste("Step: Reading data"))
             isolate(adataAlign(read_h5ad(input$reference_dataset$datapath)))

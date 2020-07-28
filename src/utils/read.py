@@ -24,8 +24,10 @@ def safe_load_file(filepath):
 
 
 def load_file(filepath):
+    t_flag = False
     if filepath == 'default' or filepath == 'datasets/user_uploaded/default':
         filepath = join_root("../datasets/default.csv")
+        t_flag = True
     elif filepath == 'test':
         filepath = join_root('../../datasets/server/testdataset.h5ad')
 
@@ -36,8 +38,9 @@ def load_file(filepath):
         if filepath[-4:] == 'h5ad':
             adata = anndata.read_h5ad(filepath)
         if filepath[-3:] == 'csv':
-            # TODO remove transpose
-            adata = anndata.read_csv(filepath).T
+            adata = anndata.read_csv(filepath)
+            if t_flag:
+                adata = adata.T
         if filepath[-4:] == 'xlsx':
             adata = anndata.read_excel(filepath)
         if filepath[-3:] == 'mtx':
