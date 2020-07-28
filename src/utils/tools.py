@@ -321,12 +321,17 @@ def uncertainty(
         order=nonconformity.argsort(axis=1) # argsort twice to get the ranking
         ranking=order.argsort(axis=1)  ## the reversed ranking of nonconformity score
         p=ranking/(len(np.unique(labels))+1) # p_value for each label
-        for i in range(len(np.unique(labels))):
-            for j in range(len(n_labels)):
-                if i not in n_labels[j]:
-                    p[j][i]=0
-        p=p[range(len(p)),labels] # selected p
-        uncertainty=1-p
+        sp=p
+        sp=sp[range(len(sp)),labels] # selected p
+        uncertainty=1-sp
+        
+        ## calculate possible labels
+        mask=(np.ones((len(labels),len(np.unique(labels))))==1)
+        mask[range(len(labels)),labels]=False
+        p=p*mask # p value expect the selected ones
+        pos_label=p.argmax(axis=1)
+        adata.obs['pos_label']=pos_label
+        
     elif (method == 'confidence'):
         for i in range(len(adata.obs.labels)):
             u, indices = np.unique(adata.obsm['neighbor_labels'][i],
@@ -342,13 +347,17 @@ def uncertainty(
     
     ### make different labels for certain and uncertain points
     t=np.average(uncertainty)+np.std(uncertainty) ## threshhold for defining uncertain points
+    adata.uns['uncertainty_threshold']=t
     uncertain_matrix=(uncertainty>t)
+    
+    
+    #adata.obs['uncertain_matrix']=uncertain_matrix
     labels=np.array(adata.obs['labels'])
     uncertain_labels=labels*2+uncertain_matrix #certain labels are even numbers,
     #uncertain labels are odd numbers
     # origin labels = uncertain labels -1 / 2
     #               = certain labels / 2
-    adata.obs['uncertain_labels']=uncertain_labels
+    #adata.obs['uncertain_labels']=uncertain_labels
     
     ### make different subsets for certain and uncertain points
     clusters=list(adata.uns['subsets'].keys())
