@@ -93,7 +93,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         symbols = all_symbols
                     }
                 }
-
+                resubset(1) # split each subset into certain & uncertain subset or get back to original
                 if (input$theme_mode == 'dark_mode') {
                     plot_bgcolor = 'rgb(44, 59, 65)'
                     paper_bgcolor = 'rgb(44, 59, 65)'

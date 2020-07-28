@@ -3,6 +3,8 @@ import json
 import re
 import os
 
+
+
 from typing import Optional, Union
 from anndata import AnnData
 from sklearn.neighbors import NearestNeighbors
@@ -335,9 +337,36 @@ def uncertainty(
             uncertainty.append(uncertain_score)
     else:
         raise InvalidArgument("Invalid uncertainty method")
-
-    # Populate entries
+    
     adata.obs['uncertainty'] = uncertainty
-
+    
+    ### make different labels for certain and uncertain points
+    t=np.average(uncertainty)+np.std(uncertainty) ## threshhold for defining uncertain points
+    uncertain_matrix=(uncertainty>t)
+    labels=np.array(adata.obs['labels'])
+    uncertain_labels=labels*2+uncertain_matrix #certain labels are even numbers,
+    #uncertain labels are odd numbers
+    # origin labels = uncertain labels -1 / 2
+    #               = certain labels / 2
+    adata.obs['uncertain_labels']=uncertain_labels
+    
+    ### make different subsets for certain and uncertain points
+    clusters=list(adata.uns['subsets'].keys())
+    uncertain_clusters={}
+    for i in clusters:
+        uncertain_clusters[i+'_certain']=np.array([],dtype='int64')
+        uncertain_clusters[i+'_uncertain']=np.array([],dtype='int64')
+    for i in range(len(labels)):  # put points into certain/uncertain clusters
+        if uncertain_labels[i]%2==0:  # even, certain points
+            cluster=list(adata.uns['subsets'].keys())[int(uncertain_labels[i]/2)] # the cluster it belongs to
+            uncertain_clusters[cluster+'_certain']=np.append(uncertain_clusters[cluster+'_certain'],i)
+        else: # odd, uncertain points
+            cluster=list(adata.uns['subsets'].keys())[int((uncertain_labels[i]-1)/2)] # the cluster it belongs to
+            uncertain_clusters[cluster+'_uncertain']=np.append(uncertain_clusters[cluster+'_uncertain'],i)
+    
+    adata.uns['uncertain_subsets']=uncertain_clusters
+    
     if not inplace:
         return adata
+
+

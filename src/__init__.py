@@ -18,6 +18,7 @@ from .utils.tools import merge_clusters
 from .utils.tools import get_neighbors
 from .utils.tools import uncertainty
 
+
 from .utils.read import load_file
 
 from .utils.exceptions import InvalidArgument

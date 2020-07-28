@@ -248,6 +248,26 @@ def _validate_subset(subset, adata):
     else:
         raise InvalidArgument("Invalid subset encountered.")
 
+def _validate_uncertain_subset(subset, adata): # the version for adata.uns['uncertain_subsets']
+    if subset is None:
+        return None
+
+    if isinstance(subset, str):
+        if 'subsets' not in adata.uns:
+            raise InvalidArgument("No subsets found in x.")
+        if subset not in adata.uns['uncertain_subsets']:
+            raise InvalidArgument(f"{subset} not found in subsets.")
+        subset = adata.uns['uncertain_subsets'][subset]
+
+    if isinstance(subset, (int, float)):
+        return np.array([subset]).astype(np.int)
+    elif isinstance(subset, (list, np.ndarray)):
+        if len(subset) == 0:
+            return None
+        return np.array(subset).astype(np.int)
+    else:
+        raise InvalidArgument("Invalid subset encountered.")
+
 
 def validate_cluster_list(labels, saved_clusters):
     return _validate_cluster_list(labels, saved_clusters)

@@ -72,10 +72,17 @@ selectionLabeling <- function(input, output, session, adata,
 
         if (is_active(adata()) == FALSE) return()
         if (!py_has_attr(adata()$obs, 'labels')) return()
-
-        subsets <- py_to_r(get_subsets(adata()))
-        for (subset in subsets)
-            setNames(c(setNames(), as.character(subset)))
+        if (input$color=="Uncertainty"){
+            subsets <- py_to_r(get_uncertain_subsets(adata()))
+            for (subset in subsets)
+                setNames(c(setNames(), as.character(subset))) 
+        }
+        else{
+            subsets <- py_to_r(get_subsets(adata()))
+            for (subset in subsets)
+                setNames(c(setNames(), as.character(subset)))    
+        }
+        
     })
 
     # Update the label of a subset

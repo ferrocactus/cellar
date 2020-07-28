@@ -37,6 +37,9 @@ def get_labels(adata):
 def get_subsets(adata):
     return list(adata.uns['subsets'].keys())
 
+def get_uncertain_subsets(adata):
+    return list(adata.uns['uncertain_subsets'].keys())
+
 def get_label_names(adata):
     names = np.zeros_like(adata.obs.labels).astype('U200')
     for i in adata.uns['cluster_names'].values():

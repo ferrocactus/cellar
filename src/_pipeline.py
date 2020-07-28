@@ -13,6 +13,7 @@ from .utils.tools import _labels_exist_in_adata
 from .utils.tools import _2d_emb_exists_in_adata
 from .utils.tools import populate_subsets
 
+
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_cluster_list
 from .utils.validation import _validate_dim_n_components
@@ -22,6 +23,7 @@ from .utils.validation import _validate_mark_correction
 from .utils.validation import _validate_mark_markers_n
 from .utils.validation import _validate_n_jobs
 from .utils.validation import _validate_subset
+from .utils.validation import _validate_uncertain_subset
 from .utils.validation import _validate_x
 
 from .utils.exceptions import InappropriateArgument
@@ -396,6 +398,7 @@ def de(
         max_n_genes: int = 200,
         correction: str = 'holm-sidak',
         inplace: Optional[bool] = True,
+        uncertain: Optional[bool] = False,
         **kwargs) -> Optional[Union[AnnData, dict]]:
     """
     Run differential expression.
@@ -449,8 +452,12 @@ def de(
     else:
         adata = _validate_x(x)
     _method_exists('de', method)
-    subset1 = _validate_subset(subset1, adata)
-    subset2 = _validate_subset(subset2, adata)
+    if (uncertain):
+        subset1 = _validate_uncertain_subset(subset1, adata)
+        subset2 = _validate_uncertain_subset(subset2, adata)
+    else:
+        subset1 = _validate_subset(subset1, adata)
+        subset2 = _validate_subset(subset2, adata)
     alpha = _validate_mark_alpha(alpha)
     max_n_genes = _validate_mark_markers_n(max_n_genes, adata.X.shape[1])
     correction = _validate_mark_correction(correction)
@@ -490,6 +497,7 @@ def de(
 
     if not inplace:
         return adata
+
 
 
 def ss_cluster(

@@ -5,7 +5,8 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
 
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
-
+        
+        
         if (s1 == 'None' && s2 == 'None') {
             showNotification("Please select a subset to analyze.")
             return()
@@ -26,14 +27,28 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
             n <- 2
 
             incProgress(1 / n, detail = "Finding DE Genes")
-            msg <- cellar$safe(cellar$de,
-                x = adata(),
-                subset1 = s1,
-                subset2 = s2,
-                alpha = input$mark_alpha,
-                max_n_genes = input$mark_markers_n,
-                correction = input$mark_correction,
-                inplace = TRUE)
+            if (input$color=='Uncertainty'){
+                msg <- cellar$safe(cellar$de,
+                                   x = adata(),
+                                   subset1 = s1,
+                                   subset2 = s2,
+                                   alpha = input$mark_alpha,
+                                   max_n_genes = input$mark_markers_n,
+                                   correction = input$mark_correction,
+                                   uncertain=TRUE,
+                                   inplace = TRUE)
+            }
+            else{
+                msg <- cellar$safe(cellar$de,
+                                   x = adata(),
+                                   subset1 = s1,
+                                   subset2 = s2,
+                                   alpha = input$mark_alpha,
+                                   max_n_genes = input$mark_markers_n,
+                                   correction = input$mark_correction,
+                                   inplace = TRUE)    
+            }
+            
 
             if (msg != 'good') {
                 showNotification(py_to_r(msg))

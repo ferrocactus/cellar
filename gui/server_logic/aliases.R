@@ -16,6 +16,7 @@ get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
 get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
 get_unique_labels <- cellar$utils$r_helpers$get_unique_labels
 get_subsets <- cellar$utils$r_helpers$get_subsets
+get_uncertain_subsets <- cellar$utils$r_helpers$get_uncertain_subsets
 get_gene_names <- cellar$utils$r_helpers$get_gene_names
 get_gene_names_de <- cellar$utils$r_helpers$get_gene_names_de
 get_gene_pvals_de <- cellar$utils$r_helpers$get_gene_pvals_de
