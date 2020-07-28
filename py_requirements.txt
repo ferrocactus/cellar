@@ -15,3 +15,4 @@ plotly
 bidict
 pydiffmap
 Cython
+diffxpy
