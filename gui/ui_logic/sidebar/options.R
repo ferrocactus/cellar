@@ -28,7 +28,7 @@ options <- list(
               "Isomap", "Feature Agglomeration"),
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans",
                 "ConstrainedSeededKMeans"),
-    "de" = c("TTest"),
+    "de" = c("TTest", "Rank", "Wald"),
     "ali" = c("Scanpy Ingest", "SingleR"),
     "tissues" = c('Clusters','User defined')
 )

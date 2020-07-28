@@ -26,13 +26,18 @@ menuItem(
                                     placement= "bottom"
                                 )
                         )
-                    
+
                 ),
             ),
 
             div(
                 class = "div_step div_n_genes",
                 list(
+                    selectInput(
+                        ns("test_method"),
+                        "Choose test method",
+                        choices = options$de
+                    ),
                     sliderInput(
                         ns("mark_markers_n"),
                         "Select number of genes",
@@ -74,17 +79,17 @@ menuItem(
                             ns("subset2"),
                             "Choose Subset 2",
                             choices = c("None")
-                        ) 
+                        )
                         # shiny::icon("info-circle") %>%
                         #     bs_embed_tooltip(
                         #         "If None, will consider all cells not in Subset 1.",
                         #         placement= "bottom"
                         #     )
-                        
+
                     ),
                     actionButton(
                         ns("getdegenes"),
-                        "Run DE analysis",
+                        "Run Test",
                         class="longbtn",
                         onclick=sprintf("Shiny.onInputChange('%s', 'reset')", ns("select_button")),
                     )
@@ -134,8 +139,8 @@ menuItem(
                         )
                 )
             )
-            
-            
+
+
         )
     )
 )}

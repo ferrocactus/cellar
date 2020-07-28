@@ -5,8 +5,8 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
 
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
-        
-        
+
+
         if (s1 == 'None' && s2 == 'None') {
             showNotification("Please select a subset to analyze.")
             return()
@@ -32,6 +32,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
                                    x = adata(),
                                    subset1 = s1,
                                    subset2 = s2,
+                                   method = input$test_method,
                                    alpha = input$mark_alpha,
                                    max_n_genes = input$mark_markers_n,
                                    correction = input$mark_correction,
@@ -43,12 +44,13 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
                                    x = adata(),
                                    subset1 = s1,
                                    subset2 = s2,
+                                   method = input$test_method,
                                    alpha = input$mark_alpha,
                                    max_n_genes = input$mark_markers_n,
                                    correction = input$mark_correction,
-                                   inplace = TRUE)    
+                                   inplace = TRUE)
             }
-            
+
 
             if (msg != 'good') {
                 showNotification(py_to_r(msg))
@@ -90,8 +92,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
         output$DEtable <- DT::renderDataTable({
             table <- data.frame(
                 de_gene_names,
-                py_to_r(get_gene_logFC_de(adata())),
-                py_to_r(get_gene_pvals_de(adata())),
+                py_to_r(get_de_table(adata())),
                 Actions = shinyInput(
                     actionButton,
                     length(de_gene_names),
@@ -103,10 +104,10 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
                 check.names = TRUE, # remove duplicates etc
                 stringsAsFactors = FALSE
             )
-            table <- table[order(table[, 2], decreasing = TRUE),]
-            colnames(table) <- c(
-                "DE genes", "logFC", "adj.pval", "Show Expression Level")
-            table[, 3] <- format(table[, 3], scientific = T)
+            table <- table[order(table$'log2fc', decreasing = TRUE),]
+            #colnames(table) <- c(
+            #    "DE genes", "logFC", "adj.pval", "Show Expression Level")
+            table <- format(table, scientific=T)
 
             isolate(deGenes(table[, 1]))
 

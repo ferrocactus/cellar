@@ -82,17 +82,22 @@ def get_gene_names(adata, indices, from_r=False):
     return adata.var['parsed_names'].to_numpy()[indices].astype('U')
 
 def get_gene_names_de(adata):
-    return adata.var['parsed_names'].to_numpy()[adata.uns['de']['indices']].astype('U')
+    return adata.var['parsed_names'].to_numpy()[adata.uns['de'].index].astype('U')
 
 def get_gene_pvals_de(adata):
     if 'de' not in adata.uns:
         return None
-    return adata.uns['de']['pvals']
+    return adata.uns['de']['qvals']
 
 def get_gene_logFC_de(adata):
     if 'de' not in adata.uns:
         return None
-    return adata.uns['de']['diffs']
+    return adata.uns['de']['log2fc']
+
+def get_de_table(adata):
+    if 'de' not in adata.uns:
+        return None
+    return adata.uns['de']
 
 def write_h5ad(adata, path, compression=9):
     adata.var['parsed_names'] = None

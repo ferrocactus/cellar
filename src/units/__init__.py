@@ -20,7 +20,11 @@ from ._dim_reduction import Dim_Isomap
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
+from ._de import DE_TTest_Cellar
 from ._de import DE_TTest
+from ._de import DE_Rank
+from ._de import DE_LRT
+from ._de import DE_Wald
 from ._converter import Con
 from ._converter import convert
 from ._identificator import Ide_HyperGeom
@@ -60,7 +64,11 @@ translation_dict = {
         "CalinskiHarabasz": Eval_CalinskiHarabasz
     },
     "de": {
-        "TTest": DE_TTest
+        "Cellar (TTest)": DE_TTest_Cellar,
+        "TTest": DE_TTest,
+        "Rank": DE_Rank,
+        "Likelihood Ratio": DE_LRT,
+        "Wald": DE_Wald
     },
     "conversion": {
         "Converter": Con
@@ -145,6 +153,9 @@ __all__ = [
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',
     'DE_TTest',
+    'DE_Rank',
+    'DE_LRT',
+    'DE_Wald',
     'Con',
     'Ide_HyperGeom',
     'SSClu_SeededKMeans',
