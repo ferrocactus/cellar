@@ -71,21 +71,10 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         symbol = ~labels
                         symbols = all_symbols
                         cell_ids=as.character(py_to_r(adata()$obs$index$to_numpy()))
-                        certainty=c()
-                        t=py_to_r(adata()$uns['uncertainty_threshold'])
-                        for (i in 1:length(labels)){
-                            if (py_to_r(adata()$obs['uncertainty'])[i]>t){ #uncertain
-                                pos_label=py_to_r(adata()$obs['pos_label'])[i]
-                                certainty=c(certainty,paste0("Uncertain point, possible label = ",as.character(pos_label)))
-                            }
-                            else   # certain
-                            {
-                                certainty=c(certainty,"")
-                            }
-                        }
+                        certainty=py_to_r(adata()$uns['uncertainty_text'])
                         text=~paste0(replicate(length(label_names),"Label: "),
                                     label_names,replicate(length(label_names),", Uncertainty: "),
-                                    as.character(py_to_r(adata()$obs['uncertainty'])),'\n',certainty)
+                                    as.character(py_to_r(adata()$obs['uncertainty'])),'\n',as.character(certainty))
                     
                 }
                 else {

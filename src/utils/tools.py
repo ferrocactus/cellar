@@ -324,13 +324,24 @@ def uncertainty(
         sp=p
         sp=sp[range(len(sp)),labels] # selected p
         uncertainty=1-sp
-        
+        uncertainty=np.around(uncertainty,3)
         ## calculate possible labels
         mask=(np.ones((len(labels),len(np.unique(labels))))==1)
         mask[range(len(labels)),labels]=False
         p=p*mask # p value expect the selected ones
-        pos_label=p.argmax(axis=1)
-        adata.obs['pos_label']=pos_label
+        
+        p=p*(p>(np.average(p,axis=1)+np.std(p,axis=1)).reshape(len(p),-1)) # only leave entry>ave+std
+        p=p/(p.sum(axis=1).reshape(len(p),-1)) # normalization
+        order=p.argsort(axis=1)
+        rank=order.argsort(axis=1)
+        rank=rank[:,::-1]
+        p.sort(axis=1)
+        p=p[:,::-1]
+        p=np.around(p,3)
+        #adata.uns['pos_labels']=rank
+        #adata.uns['label_prob']=p
+        
+        
         
     elif (method == 'confidence'):
         for i in range(len(adata.obs.labels)):
@@ -347,8 +358,19 @@ def uncertainty(
     
     ### make different labels for certain and uncertain points
     t=np.average(uncertainty)+np.std(uncertainty) ## threshhold for defining uncertain points
-    adata.uns['uncertainty_threshold']=t
     uncertain_matrix=(uncertainty>t)
+    certainty=[]
+    t=np.average(uncertainty)+np.std(uncertainty)
+    for i in range(len(labels)):
+        if (uncertainty[i]>t):
+            pos_label=""
+            for j in range(len(np.unique(labels))):
+                prob=p[i,j]
+                if (prob>0):
+                    lb=str(rank[i,j])
+                    pos_label=pos_label+lb+": "+str(prob)+"\n"
+            certainty.append("Uncertain point, other possible label(s):\n"+str(pos_label))
+    adata.uns['uncertainty_text']=certainty
     
     
     #adata.obs['uncertain_matrix']=uncertain_matrix
