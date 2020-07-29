@@ -35,7 +35,7 @@ def welch_ttest(x1, x2):
     return p
 
 
-def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
+def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, max_n_genes=200,
                                    correction='hs'):
     """
     Find significant genes in pop1 compared to pop2 using ttest.
@@ -52,7 +52,7 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
     alpha: float, between 0 and 1
         Alpha value to use for hypothesis testing.
 
-    markers_n: int
+    max_n_genes: int
         Number of top markers to return. Note: return number could be smaller.
 
     correction: string
@@ -64,9 +64,9 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
 
     test_results: dict
         Dictionary of the form {
-            'indices': array, shape (<=markers_n,)
-            'pvals': array, shape (<=markers_n,)
-            'diffs': array, shape (<=markers_n,)
+            'indices': array, shape (<=max_n_genes,)
+            'pvals': array, shape (<=max_n_genes,)
+            'diffs': array, shape (<=max_n_genes,)
         }
         where indices correspond to the indices of the columns which
         were found to be significant, pvals corresponds to the p-value
@@ -101,12 +101,12 @@ def _ttest_differential_expression(x_i, x_not_i, alpha=0.05, markers_n=200,
     last_positive = np.argmin(diffs[sorted_diff_indices] > 0)
 
     # accept only positive differences since those are markers
-    # or until we reach markers_n
+    # or until we reach max_n_genes
 
     # argmin updates only if it finds something smaller
     if last_positive == 0 and diffs[0] > 0:  # everything is positive
         last_positive = sorted_diff_indices.shape[0]
-    final_indices = sorted_diff_indices[:min(last_positive, markers_n)]
+    final_indices = sorted_diff_indices[:min(last_positive, max_n_genes)]
 
     test_results = {'indices': final_indices,
                     'pvals': pvals[final_indices],

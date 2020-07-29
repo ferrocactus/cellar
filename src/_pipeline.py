@@ -395,7 +395,7 @@ def de(
         subset2: Optional[Union[str, np.ndarray, list]] = None,
         method: str = 'TTest',
         alpha: float = 0.05,
-        max_n_genes: int = 200,
+        max_n_genes: int = 50,
         correction: str = 'holm-sidak',
         inplace: Optional[bool] = True,
         uncertain: Optional[bool] = False,
@@ -413,7 +413,7 @@ def de(
 
     subset1: An array consisting of the indices of the cells
         for which de genes need to be found, or a string
-        specifying the subset as stored in adata.uns['subsets].
+        specifying the subset as stored in adata.uns['subsets'].
         If string, x has to be AnnData object.
 
     subset2: Same format at subset1. If set to None, then will
@@ -466,26 +466,24 @@ def de(
         # Run subset1 vs all
         de_genes_d = wrap("de", method)(
             alpha=alpha,
-            markers_n=max_n_genes,
-            correction=correction).get_subset(adata.X, subset1)
+            max_n_genes=max_n_genes,
+            correction=correction).get(adata.X, indices=subset1, is_logged=True)
     else:
         # Run subset1 vs subset2
         # First, artificially create dataset and labels
         x1 = adata.X[subset1]
         x2 = adata.X[subset2]
         x = np.concatenate([x1, x2])
-        labels1 = np.zeros((x1.shape[0],), dtype=int)
-        labels2 = np.ones((x2.shape[0],), dtype=int)
-        labels = np.concatenate([labels1, labels2])
+        indices = np.arange(x1.shape[0])
 
         de_genes_d = wrap("de", method)(
             alpha=alpha,
-            markers_n=max_n_genes,
-            correction=correction).get(x, labels)
+            max_n_genes=max_n_genes,
+            correction=correction).get(x, indices=indices, is_logged=True)
 
     # Assign first dict key to anndata object
     # This is the only key if subset2 is None
-    adata.uns['de'] = de_genes_d[next(iter(de_genes_d))]
+    adata.uns['de'] = de_genes_d
     adata.uns['de_info'] = {}
     adata.uns['de_info']['method'] = method
     adata.uns['de_info']['alpha'] = alpha
@@ -497,7 +495,6 @@ def de(
 
     if not inplace:
         return adata
-
 
 
 def ss_cluster(
@@ -662,5 +659,3 @@ def transfer_labels(
 
     if not inplace:
         return adata
-
-

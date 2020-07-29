@@ -24,7 +24,8 @@ install_requires = [
     'plotly',
     'bidict',
     'pydiffmap',
-    'Cython'
+    'Cython',
+    'diffxpy'
 ]
 
 ext_modules = [

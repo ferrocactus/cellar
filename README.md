@@ -98,6 +98,7 @@ Cellar requires the following python packages that can be installed via `pip`:
 * pydiffmap
 * Cython
 * Cluster_Ensembles
+* diffxpy
 
 NOTE: Cluster_Ensembles package is only available for linux systems.
 If using the latest version of sklearn, you can install via
@@ -124,6 +125,7 @@ You will also need the following R packages
 * htmltools
 * bsplus
 * SingleR (installed via BiocManager, follow instructions in https://bioconductor.org/packages/release/bioc/html/SingleR.html)
+* htmlTable
 
 Assuming all dependencies have been met, clone the github repo
 and cd into it

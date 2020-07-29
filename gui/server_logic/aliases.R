@@ -25,6 +25,7 @@ get_var_names <- cellar$utils$r_helpers$get_var_names
 get_obs_names <- cellar$utils$r_helpers$get_obs_names
 get_all_gene_ids <- cellar$utils$r_helpers$get_all_gene_ids
 get_all_gene_names <- cellar$utils$r_helpers$get_all_gene_names
+get_de_table <- cellar$utils$r_helpers$get_de_table
 merge_clusters <- cellar$utils$tools$merge_clusters
 store_labels <- cellar$utils$tools$store_labels
 write_h5ad <- cellar$utils$r_helpers$write_h5ad
