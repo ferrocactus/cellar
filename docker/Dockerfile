@@ -77,6 +77,7 @@ RUN python3 src/methods/setup.py clean
 RUN mkdir -p datasets/user_uploaded
 RUN mkdir -p datasets/server
 
+RUN pip3 install diffxpy
 ADD https://api.github.com/repos/ferrocactus/cellar/git/refs/heads/master version.json
 RUN git pull
 

@@ -45,14 +45,11 @@ body <- dashboardBody(
     useShinyjs(),
     tags$head(includeCSS("gui/ui_logic/styles/style.css")),
     tags$head(includeHTML(("gui/ui_logic/header/google-analytics.html"))),
-    #tags$script(HTML('
-    #$(document).ready(function() {
-    #$("header").find("nav").append(\'<span class="maintitle"> Cellar </span>\');
-    #})')),
     tags$head(tags$link(rel = "icon", type = "image/x-icon",
               href = base64enc::dataURI(
                   file="gui/ui_logic/icons/favicon.ico", mime="image/ico"))),
-    includeScript("gui/ui_logic/header/cellar.js"),
+    includeScript("gui/scripts/cellar.js"),
+    includeScript("gui/scripts/anchor_scroll_fix.js"),
     tags$script(HTML('
         $("link[href*=\'_all-skins.min.css\']").remove();
     ')),
