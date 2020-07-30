@@ -38,3 +38,4 @@ tmp*
 gui/old_server_logic
 src/cellar.egg-info
 !datasets/user_uploaded
+!datasets/annotated
