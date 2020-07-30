@@ -11,12 +11,12 @@ downloadmenu <- function(id, label="downloadmenu") {
                 div(
                     class = "div_step div_download_session",
                     list(
-                        
+
                         downloadButton(
                             ns("download_sess"),
                             "Export Session",
                             class = "longbtn downloadbtn"
-                        ) ,
+                        ),
                         # %>%
                         #     shinyInput_label_embed(
                         #         shiny_iconlink() %>%
@@ -32,13 +32,28 @@ downloadmenu <- function(id, label="downloadmenu") {
                             shinyInput_label_embed(
                                 shiny::icon("info-circle") %>%
                                     bs_embed_tooltip( title = paste0("Load a local session"), placement = "bottom")
-                            )
+                            ),
                         # fileInput(
                         #     ns("upload_sess"),
                         #     "Import Session",
                         #     multiple = FALSE,
                         #     accept = c(".h5ad")
                         # )
+                        div(
+                            class = "annotated_div",
+                            list(
+                                selectInput(
+                                    ns("annotated_datasets"),
+                                    "Choose Annotated Dataset",
+                                    choices = c(list.files("datasets/annotated"))
+                                ),
+                                actionButton(
+                                    ns("load_ann_dataset"),
+                                    "Load Annotated Dataset",
+                                    class = "sidebtn longbtn"
+                                )
+                            )
+                        )
                     )
                 ),
                 div(
@@ -54,7 +69,7 @@ downloadmenu <- function(id, label="downloadmenu") {
                                     shiny::icon("info-circle") %>%
                                         bs_embed_tooltip( title = paste0("Select the format of the plot to be downloaded"), placement = "bottom")
                                 ),
-                            
+
                             downloadButton(
                                 ns("download_plot"),
                                 "Download Plot",
@@ -66,26 +81,23 @@ downloadmenu <- function(id, label="downloadmenu") {
                 div(
                     class = "div_step div_download_cells",
                     list(
-                        textInput(
-                            ns("cell_subset_download"),
-                            "Input Subset IDs",
-                            #value = defaults$clu
-                        ) %>%
-                            shinyInput_label_embed(
-                                shiny::icon("info-circle") %>%
-                                    bs_embed_tooltip( title = paste0("Integer, list, or range specified by a dash, e.g., 1-7."), placement = "bottom")
-                            ),
-                        #textInput(
-                        #    ns("cell_subset_download"),
-                        #    "Input Subset IDs",
-                        #    #value = defaults$clu
-                        #),
-                        downloadButton(
-                            ns("download_cells"),
-                            "Download Selected Subset",
-                            class = "longbtn downloadbtn",
-                            value = 0
-                            #style="width:50%"
+                        splitLayout(
+                            textInput(
+                                ns("cell_subset_download"),
+                                "Input Subset IDs",
+                                #value = defaults$clu
+                            ) %>%
+                                shinyInput_label_embed(
+                                    shiny::icon("info-circle") %>%
+                                        bs_embed_tooltip( title = paste0("Integer, list, or range specified by a dash, e.g., 1-7."), placement = "bottom")
+                                ),
+                            downloadButton(
+                                ns("download_cells"),
+                                "Download Subsets",
+                                class = "secondcol downloadbtn",
+                                value = 0
+                                #style="width:50%"
+                            )
                         )
                     )
                 )

@@ -9,7 +9,7 @@ options <- list(
     "dim" = c("PCA", "Kernel PCA", "Diffusion Map", "MDS", "UMAP", "Isomap",
               "Feature Agglomeration"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
-              "GaussianMixture", "Scanpy", "Ensemble"),
+              "GaussianMixture", "Scanpy", "Ensemble", "Fixed"),
     "clu_ensemble" = c("All"="All", "KMeans"="KMeans", "KMedoids"="KMedoids",
                        "GaussianMixture"="GaussianMixture",
                        "Spectral"="Spectral", "Agglomerative"="Agglomerative",

@@ -42,6 +42,13 @@ def get_uncertain_subsets(adata):
 
 def get_label_names(adata):
     names = np.zeros_like(adata.obs.labels).astype('U200')
+    if isinstance(adata.uns['cluster_names'], bidict) == False:
+        adata.uns['cluster_names'] = bidict(adata.uns['cluster_names'])
+        for key in list(adata.uns['cluster_names'].keys()):
+            adata.uns['cluster_names'][int(key)] = \
+                adata.uns['cluster_names'].pop(key, None)
+        #name_genes(adata, inplace=True)
+
     for i in adata.uns['cluster_names'].values():
         names[np.where(adata.obs.labels == adata.uns['cluster_names'].inverse[i])] = i
     return names
@@ -99,10 +106,10 @@ def get_de_table(adata):
         return None
     return adata.uns['de']
 
-def write_h5ad(adata, path, compression=9):
+def write_h5ad(adata, path, compression=9, force_dense=True):
     adata.var['parsed_names'] = None
     adata.var['parsed_ids'] = None
-    adata.write_h5ad(path, compression=compression)
+    adata.write_h5ad(path, compression=compression, force_dense=force_dense)
 
 def read_h5ad(path):
     try:

@@ -145,7 +145,8 @@ def cluster(
 
     method: String specifying the clustering method to use. See
         https://github.com/ferrocactus/cellar/tree/master/doc for
-        a full list of methods available.
+        a full list of methods available. If set to 'Fixed',
+        return without doing anything.
 
     eval_method: String specifying the clustering method to use.
         See https://github.com/ferrocactus/cellar/tree/master/doc
@@ -186,6 +187,10 @@ def cluster(
     If x is not AnnData, will return np.ndarray of shape
     (n_observations,) containing the labels.
     """
+    #TODO fix hack
+    if method == 'Fixed':
+        return
+
     # Validations
     is_AnnData = isinstance(x, AnnData)
 

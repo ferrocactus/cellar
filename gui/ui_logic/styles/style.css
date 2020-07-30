@@ -340,3 +340,8 @@ input:disabled {
     overflow: hidden;
     color: white;
 }
+
+.annotated_div {
+    margin-top: -30px;
+    margin-bottom: 30px;
+}

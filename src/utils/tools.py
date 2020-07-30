@@ -67,6 +67,9 @@ def _emb_exists_in_adata(adata, method, n_components):
 def _labels_exist_in_adata(adata, method, n_clusters):
     if 'labels' not in adata.obs:
         return False
+    # Manually labelled file, used for debugging
+    #if adata.uns['cluster_info']['method'] == 'F':
+    #    return True
     if method != adata.uns['cluster_info']['method']:
         return False
     if np.array_equal(n_clusters, adata.uns['cluster_info']['n_clusters_used']):
@@ -249,11 +252,11 @@ def get_neighbors(
     nn=n_graph.nonzero()
     indices = nn[1].reshape(-1, n_neighbors)
     adata.obsm['neighbor_labels'] = adata.obs['labels'][indices]
-    
+
     distances=[n_graph[nn[0][i],nn[1][i]] for i in range(len(x)*n_neighbors)]
     distances=np.array(distances).reshape(-1,n_neighbors)
     adata.obsm['neighbor_dist'] = distances
-    
+
     if not inplace:
         return adata
 
@@ -302,7 +305,7 @@ def uncertainty(
 
     # uncertainty calculation:
     uncertainty = []
-    
+
     if (method == "conformal"):
         threshold=1 # make sure 'b' is larger than 0
         #x.obsm['neighbor_dist'].sort()
@@ -310,7 +313,7 @@ def uncertainty(
         n_labels=x.obsm['neighbor_labels']
         labels=np.array(x.obs['labels'])
         nonconformity=[]
-        for i in range(len(np.unique(labels))):       
+        for i in range(len(np.unique(labels))):
             #same_label=(n_labels.transpose()==labels.transpose()).transpose()
             same_label=(n_labels==i)
             diff_label=(n_labels!=i)
@@ -329,7 +332,7 @@ def uncertainty(
         mask=(np.ones((len(labels),len(np.unique(labels))))==1)
         mask[range(len(labels)),labels]=False
         p=p*mask # p value expect the selected ones
-        
+
         p=p*(p>(np.average(p,axis=1)+np.std(p,axis=1)).reshape(len(p),-1)) # only leave entry>ave+std
         p=p/(p.sum(axis=1).reshape(len(p),-1)) # normalization
         order=p.argsort(axis=1)
@@ -340,9 +343,9 @@ def uncertainty(
         p=np.around(p,3)
         #adata.uns['pos_labels']=rank
         #adata.uns['label_prob']=p
-        
-        
-        
+
+
+
     elif (method == 'confidence'):
         for i in range(len(adata.obs.labels)):
             u, indices = np.unique(adata.obsm['neighbor_labels'][i],
@@ -353,9 +356,9 @@ def uncertainty(
             uncertainty.append(uncertain_score)
     else:
         raise InvalidArgument("Invalid uncertainty method")
-    
+
     adata.obs['uncertainty'] = uncertainty
-    
+
     ### make different labels for certain and uncertain points
     t=np.average(uncertainty)+np.std(uncertainty) ## threshhold for defining uncertain points
     uncertain_matrix=(uncertainty>t)
@@ -371,8 +374,8 @@ def uncertainty(
                     pos_label=pos_label+lb+": "+str(prob)+"\n"
             certainty.append("Uncertain point, other possible label(s):\n"+str(pos_label))
     adata.uns['uncertainty_text']=certainty
-    
-    
+
+
     #adata.obs['uncertain_matrix']=uncertain_matrix
     labels=np.array(adata.obs['labels'])
     uncertain_labels=labels*2+uncertain_matrix #certain labels are even numbers,
@@ -380,7 +383,7 @@ def uncertainty(
     # origin labels = uncertain labels -1 / 2
     #               = certain labels / 2
     #adata.obs['uncertain_labels']=uncertain_labels
-    
+
     ### make different subsets for certain and uncertain points
     clusters=list(adata.uns['subsets'].keys())
     uncertain_clusters={}
@@ -394,9 +397,9 @@ def uncertainty(
         else: # odd, uncertain points
             cluster=list(adata.uns['subsets'].keys())[int((uncertain_labels[i]-1)/2)] # the cluster it belongs to
             uncertain_clusters[cluster+'_uncertain']=np.append(uncertain_clusters[cluster+'_uncertain'],i)
-    
+
     adata.uns['uncertain_subsets']=uncertain_clusters
-    
+
     if not inplace:
         return adata
 

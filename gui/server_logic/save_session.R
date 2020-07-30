@@ -20,18 +20,42 @@ save_session <- function(input, output, session, adata, replot,
 
     observeEvent(input$upload_sess, {
         req(input$upload_sess)
-        adata(read_h5ad(input$upload_sess$datapath))
-        if (py_to_r(is_str(adata()))) {
-            showNotification("Incorrect file format")
-            isolate(adata(0))
-            return()
-        }
+        withProgress(message = "Loading Session", value = 0, {
+            incProgress(1 / 5)
+            adata(read_h5ad(input$upload_sess$datapath))
+            if (py_to_r(is_str(adata()))) {
+                showNotification("Incorrect file format")
+                isolate(adata(0))
+                return()
+            }
 
-        fullreset(fullreset() + 1)
-        replot(replot() + 1)
-        remark(remark() + 1)
-        resubset(resubset() + 1)
+            incProgress(1 / 5)
+            fullreset(fullreset() + 1)
+            incProgress(1 / 5)
+            replot(replot() + 1)
+            incProgress(1 / 5)
+            remark(remark() + 1)
+            incProgress(1 / 5)
+            resubset(resubset() + 1)
+        })
 
         #labelList(py_to_r(adata()$uns[['labelList']]))
+    })
+
+    observeEvent(input$load_ann_dataset, {
+        datapath = paste0('datasets/annotated/', input$annotated_datasets)
+        withProgress(message = "Loading Session", value = 0, {
+            incProgress(1 / 5)
+            adata(read_h5ad(datapath))
+
+            incProgress(1 / 5)
+            fullreset(fullreset() + 1)
+            incProgress(1 / 5)
+            replot(replot() + 1)
+            incProgress(1 / 5)
+            remark(remark() + 1)
+            incProgress(1 / 5)
+            resubset(resubset() + 1)
+        })
     })
 }
