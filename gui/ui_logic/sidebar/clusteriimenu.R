@@ -3,7 +3,7 @@ source("gui/ui_logic/sidebar/options.R")
 clusteriimenu <- function(id, label="clusteriimenu") {
 ns = NS(id)
 menuItem(
-    "Clustering II",
+    "Constrained Clustering",
     id = "clusteriibtn",
     icon = icon("cog"),
     startExpanded = FALSE,
