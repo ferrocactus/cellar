@@ -187,12 +187,16 @@ def cluster(
     If x is not AnnData, will return np.ndarray of shape
     (n_observations,) containing the labels.
     """
-    #TODO fix hack
-    if method == 'Fixed':
-        return
-
     # Validations
     is_AnnData = isinstance(x, AnnData)
+
+    #TODO fix hack
+    if method == 'Fixed':
+        if not is_AnnData:
+            raise InvalidArgument("x is not an anndata object.")
+        if 'labels' not in x.obs:
+            raise InvalidArgument("No labels found. Please Select a clustering method.")
+        return
 
     if is_AnnData:
         adata = x.copy() if not inplace else x

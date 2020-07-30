@@ -95,5 +95,6 @@ server <- shinyServer(function(input, output, session) {
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
                labelList = labelList, deGenes = deGenes, adata = adata,
                fullreset = fullreset, curPlot = curPlot,
-               plotHistory = plotHistory, resubset = resubset)
+               plotHistory = plotHistory, resubset = resubset,
+               cellNamesTb = cellNamesTb, infoTb = infoTb)
 })

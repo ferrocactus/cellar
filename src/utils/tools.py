@@ -156,7 +156,7 @@ def populate_subsets(adata):
     unq_labels = np.unique(adata.obs['labels'])
     for label in unq_labels:
         adata.uns['subsets'][f'Cluster_{label}'] = \
-            np.squeeze(np.where(adata.obs['labels'] == label))
+            np.reshape(np.where(adata.obs['labels'] == label), (-1))
 
 
 def merge_clusters(adata, clusters):
