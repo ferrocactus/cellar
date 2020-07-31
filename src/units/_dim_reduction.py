@@ -361,6 +361,7 @@ class Dim_UMAP(Unit):
         """
         self.logger.info("Initializing UMAP.")
         return UMAP(n_components=self.n_components,
+                    random_state=1,
                     **self.kwargs).fit_transform(x)
 
 
