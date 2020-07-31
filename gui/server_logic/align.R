@@ -32,7 +32,7 @@ align <- function(input, output, session, adata, selDatasetAlign,
 
                 msg <- cellar$safe(store_labels,
                     adata = adata(),
-                    labls = as.integer(pred$labels),
+                    labels = as.integer(pred$labels),
                     method = 'SingleR')
 
                 if (msg != 'good') {
