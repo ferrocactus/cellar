@@ -4,19 +4,24 @@ align <- function(input, output, session, adata, selDatasetAlign,
 
     observeEvent(input$align_btn, {
         if (is_active(adata()) == FALSE) return()
-        req(input$reference_dataset)
+        if (input$folder_align == 'user_uploaded') {
+            req(input$reference_dataset)
+            isolate(selDatasetAlign(input$reference_dataset$datapath))
+        } else {
+            path = input$server_dataset_align
+            path = paste0('datasets/annotated/', path)
+            isolate(selDatasetAlign(path))
+        }
 
         withProgress(message = "Running Label Transfer", value = 0, {
             n <- 6
             incProgress(1 / n, detail = paste("Step: Reading data"))
-            isolate(adataAlign(read_h5ad(input$reference_dataset$datapath)))
+            isolate(adataAlign(safe_load_file(selDatasetAlign())))
             if (py_to_r(is_str(adataAlign()))) {
                 showNotification("Incorrect file format.")
                 isolate(adataAlign(0))
                 return()
             }
-            #isolate(adataAlign(load_file(selDatasetAlign())))
-
             if (input$align_method == 'SingleR') {
                 # transpose rows and cols for SingleR
                 x1 = t(py_to_r(adata()$X))
@@ -26,9 +31,17 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 rownames(x2) = py_to_r(get_var_names(adataAlign()))
                 colnames(x2) = py_to_r(get_obs_names(adataAlign()))
 
-                incProgress(1 / n, detail = paste("Step: Annotating"))
+                incProgress(1 / n, detail = paste("Annotating"))
+
+                labels = py_to_r(get_labels(adataAlign()))
+                if (labels == "No labels found") {
+                    showNotification("No labels found. Please populate adata.obs['labels'] key.")
+                    return()
+                }
+
+                print("Running SingleR.")
                 pred <- SingleR(test = x1, ref = x2,
-                                labels = py_to_r(get_labels(adataAlign())))
+                                labels = labels)
 
                 msg <- cellar$safe(store_labels,
                     adata = adata(),
@@ -40,6 +53,10 @@ align <- function(input, output, session, adata, selDatasetAlign,
                     adataAlign(0)
                     return()
                 }
+
+                msg <- cellar$safe(merge_cluster_names,
+                    adata = adata(),
+                    ref = adataAlign())
             } else {
                 msg <- cellar$safe(cellar$transfer_labels,
                     x = adata(),
@@ -47,14 +64,13 @@ align <- function(input, output, session, adata, selDatasetAlign,
                     method = input$align_method,
                     inplace = TRUE
                 )
-
-                if (msg != 'good') {
-                    showNotification(py_to_r(msg))
-                    return()
-                }
             }
 
             adataAlign(0)
+            if (msg != 'good') {
+                showNotification(py_to_r(msg))
+                return()
+            }
 
             incProgress(1 / n, detail = "Converting names")
             msg <- cellar$safe(cellar$name_genes,

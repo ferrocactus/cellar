@@ -11,8 +11,8 @@ from .units import convert
 from .utils.tools import _emb_exists_in_adata
 from .utils.tools import _labels_exist_in_adata
 from .utils.tools import _2d_emb_exists_in_adata
+from .utils.tools import merge_cluster_names
 from .utils.tools import populate_subsets
-
 
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_cluster_list
@@ -190,12 +190,13 @@ def cluster(
     # Validations
     is_AnnData = isinstance(x, AnnData)
 
-    #TODO fix hack
+    # TODO fix hack
     if method == 'Fixed':
         if not is_AnnData:
             raise InvalidArgument("x is not an anndata object.")
         if 'labels' not in x.obs:
-            raise InvalidArgument("No labels found. Please Select a clustering method.")
+            raise InvalidArgument(
+                "No labels found. Please Select a clustering method.")
         return
 
     if is_AnnData:
@@ -642,7 +643,7 @@ def transfer_labels(
     adata = x.copy() if not inplace else x
 
     if 'labels' not in ref.obs:
-        raise InvalidArgument("labels not found in reference dataset.")
+        raise InvalidArgument("No labels found. Please populate adata.obs['labels'] key.")
 
     _method_exists('align', method)
 
@@ -663,7 +664,8 @@ def transfer_labels(
     adata.uns['cluster_info']['kwargs'] = kwargs
     adata.uns['cluster_names'] = bidict(
         {i: str(i) for i in unq_labels})
-
+    # Transfer old cell types if any
+    merge_cluster_names(adata, ref)
     populate_subsets(adata)
 
     if not inplace:

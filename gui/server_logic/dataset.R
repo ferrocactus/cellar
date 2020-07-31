@@ -1,7 +1,7 @@
 dataset <- function(input, output, session, adata, selDataset,
                     selDatasetAlign, fullreset) {
     ###########################################################################
-    
+
     # udpate data tissue
     observeEvent(input$data_source,{
         updateSelectInput(
@@ -10,7 +10,7 @@ dataset <- function(input, output, session, adata, selDataset,
             choices = list.files(paste0("datasets/server/",input$data_source))
         )
     })
-    
+
     # update server data
     observeEvent(input$data_tissue,{
         updateSelectInput(
@@ -19,9 +19,9 @@ dataset <- function(input, output, session, adata, selDataset,
             choices = list.files(paste0("datasets/server/",input$data_source,"/",input$data_tissue))
         )
     })
-    
-    
-    
+
+
+
     # Main Dataset
     toListen <- reactive({
         list(input$folder, input$uploaded_dataset, input$server_dataset)
@@ -59,21 +59,21 @@ dataset <- function(input, output, session, adata, selDataset,
 
     ###########################################################################
     # Dataset used for alignment
-    # toListenAlign <- reactive({
-    #     list(input$folder_align, input$uploaded_dataset_align,
-    #          input$server_dataset_align)
-    # })
+    toListenAlign <- reactive({
+        list(input$folder_align, input$uploaded_dataset_align,
+             input$server_dataset_align)
+    })
 
-    # observeEvent(toListenAlign(), {
-    #     if (input$folder_align == 'user_uploaded')
-    #         isolate(selDatasetAlign(as.character(input$uploaded_dataset_align)))
-    #     else
-    #         isolate(selDatasetAlign(as.character(input$server_dataset_align)))
+    observeEvent(toListenAlign(), {
+        if (input$folder_align == 'user_uploaded')
+            isolate(selDatasetAlign(as.character(input$uploaded_dataset_align)))
+        else
+            isolate(selDatasetAlign(as.character(input$server_dataset_align)))
 
-    #     # Include path as well
-    #     isolate(selDatasetAlign(
-    #         paste("datasets/", input$folder_align, "/",
-    #                 selDatasetAlign(), sep = "")))
-    # })
+        # Include path as well
+        isolate(selDatasetAlign(
+            paste("datasets/", input$folder_align, "/",
+                    selDatasetAlign(), sep = "")))
+    })
     ###########################################################################
 }

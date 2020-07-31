@@ -4,7 +4,6 @@ import re
 import os
 
 
-
 from typing import Optional, Union
 from anndata import AnnData
 from sklearn.neighbors import NearestNeighbors
@@ -68,7 +67,7 @@ def _labels_exist_in_adata(adata, method, n_clusters):
     if 'labels' not in adata.obs:
         return False
     # Manually labelled file, used for debugging
-    #if adata.uns['cluster_info']['method'] == 'F':
+    # if adata.uns['cluster_info']['method'] == 'F':
     #    return True
     if method != adata.uns['cluster_info']['method']:
         return False
@@ -85,6 +84,16 @@ def _2d_emb_exists_in_adata(adata, method, dim, use_emb):
     if adata.uns[f'visualization_info_{dim}d']['used_emb'] != use_emb:
         return False
     return True
+
+
+def merge_cluster_names(adata, ref):
+    # Currently used for alignment only
+    if 'cluster_names' not in ref.uns or 'cluster_names' not in adata.uns:
+        return
+
+    for i in adata.uns['cluster_names']:
+        if i in ref.uns['cluster_names']:
+            adata.uns['cluster_names'][i] = ref.uns['cluster_names'][i]
 
 
 def store_subset(adata, name, indices, from_r=False):
@@ -105,7 +114,7 @@ def store_labels(adata, labels, method):
     adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
     adata.uns['cluster_info']['method'] = method
     adata.uns['cluster_names'] = bidict(
-        {i: str(i) for i in unq_labels})
+        {int(i): str(i) for i in unq_labels})
     populate_subsets(adata)
 
 
@@ -215,7 +224,7 @@ def get_neighbors(
         n_neighbors: int = 5,
         metric: str = 'euclidean',
         inplace: Optional[bool] = True,
-        **kwargs) :
+        **kwargs):
     """
     Calculate the neighbors based on the dimension reduced data
 
@@ -246,26 +255,28 @@ def get_neighbors(
     adata = x.copy() if not inplace else x
 
     n_graph = kneighbors_graph(adata.obsm['x_emb'], n_neighbors=n_neighbors,
-                          include_self=False, metric=metric,
-                          mode='distance').toarray()
+                               include_self=False, metric=metric,
+                               mode='distance').toarray()
 
-    nn=n_graph.nonzero()
+    nn = n_graph.nonzero()
     indices = nn[1].reshape(-1, n_neighbors)
     adata.obsm['neighbor_labels'] = adata.obs['labels'][indices]
 
-    distances=[n_graph[nn[0][i],nn[1][i]] for i in range(len(x)*n_neighbors)]
-    distances=np.array(distances).reshape(-1,n_neighbors)
+    distances = [n_graph[nn[0][i], nn[1][i]]
+                 for i in range(len(x)*n_neighbors)]
+    distances = np.array(distances).reshape(-1, n_neighbors)
     adata.obsm['neighbor_dist'] = distances
 
     if not inplace:
         return adata
+
 
 def uncertainty(
         x: Union[AnnData, np.ndarray, list],
         method: str = 'conformal',
         n_neighbors: int = 5,
         inplace: Optional[bool] = True,
-        **kwargs) :
+        **kwargs):
     """
     Calculate the uncertainty for each point
 
@@ -298,7 +309,8 @@ def uncertainty(
     adata = x.copy() if not inplace else x
 
     if 'labels' not in x.obs:
-        raise InvalidArgument("Cannot calculate uncertainty for dataset without labels")
+        raise InvalidArgument(
+            "Cannot calculate uncertainty for dataset without labels")
 
     if 'neighbor_labels' not in x.obsm:
         get_neighbors(x, n_neighbors=n_neighbors)
@@ -307,49 +319,50 @@ def uncertainty(
     uncertainty = []
 
     if (method == "conformal"):
-        threshold=1 # make sure 'b' is larger than 0
-        #x.obsm['neighbor_dist'].sort()
-        dist=x.obsm['neighbor_dist']
-        n_labels=x.obsm['neighbor_labels']
-        labels=np.array(x.obs['labels'])
-        nonconformity=[]
+        threshold = 1  # make sure 'b' is larger than 0
+        # x.obsm['neighbor_dist'].sort()
+        dist = x.obsm['neighbor_dist']
+        n_labels = x.obsm['neighbor_labels']
+        labels = np.array(x.obs['labels'])
+        nonconformity = []
         for i in range(len(np.unique(labels))):
-            #same_label=(n_labels.transpose()==labels.transpose()).transpose()
-            same_label=(n_labels==i)
-            diff_label=(n_labels!=i)
-            a=(dist*same_label).sum(axis=1)
-            b=(dist*diff_label).sum(axis=1)
+            # same_label=(n_labels.transpose()==labels.transpose()).transpose()
+            same_label = (n_labels == i)
+            diff_label = (n_labels != i)
+            a = (dist*same_label).sum(axis=1)
+            b = (dist*diff_label).sum(axis=1)
             nonconformity.append(a/(b+threshold))
-        nonconformity=np.array(nonconformity).transpose()
-        order=nonconformity.argsort(axis=1) # argsort twice to get the ranking
-        ranking=order.argsort(axis=1)  ## the reversed ranking of nonconformity score
-        p=ranking/(len(np.unique(labels))+1) # p_value for each label
-        sp=p
-        sp=sp[range(len(sp)),labels] # selected p
-        uncertainty=1-sp
-        uncertainty=np.around(uncertainty,3)
-        ## calculate possible labels
-        mask=(np.ones((len(labels),len(np.unique(labels))))==1)
-        mask[range(len(labels)),labels]=False
-        p=p*mask # p value expect the selected ones
+        nonconformity = np.array(nonconformity).transpose()
+        # argsort twice to get the ranking
+        order = nonconformity.argsort(axis=1)
+        # the reversed ranking of nonconformity score
+        ranking = order.argsort(axis=1)
+        p = ranking/(len(np.unique(labels))+1)  # p_value for each label
+        sp = p
+        sp = sp[range(len(sp)), labels]  # selected p
+        uncertainty = 1-sp
+        uncertainty = np.around(uncertainty, 3)
+        # calculate possible labels
+        mask = (np.ones((len(labels), len(np.unique(labels)))) == 1)
+        mask[range(len(labels)), labels] = False
+        p = p*mask  # p value expect the selected ones
 
-        p=p*(p>(np.average(p,axis=1)+np.std(p,axis=1)).reshape(len(p),-1)) # only leave entry>ave+std
-        p=p/(p.sum(axis=1).reshape(len(p),-1)) # normalization
-        order=p.argsort(axis=1)
-        rank=order.argsort(axis=1)
-        rank=rank[:,::-1]
+        p = p*(p > (np.average(p, axis=1)+np.std(p, axis=1)
+                    ).reshape(len(p), -1))  # only leave entry>ave+std
+        p = p/(p.sum(axis=1).reshape(len(p), -1))  # normalization
+        order = p.argsort(axis=1)
+        rank = order.argsort(axis=1)
+        rank = rank[:, ::-1]
         p.sort(axis=1)
-        p=p[:,::-1]
-        p=np.around(p,3)
-        #adata.uns['pos_labels']=rank
-        #adata.uns['label_prob']=p
-
-
+        p = p[:, ::-1]
+        p = np.around(p, 3)
+        # adata.uns['pos_labels']=rank
+        # adata.uns['label_prob']=p
 
     elif (method == 'confidence'):
         for i in range(len(adata.obs.labels)):
             u, indices = np.unique(adata.obsm['neighbor_labels'][i],
-                                    return_inverse=True)
+                                   return_inverse=True)
             knn_label_freq = np.bincount(indices).max()
             confidence = knn_label_freq / n_neighbors
             uncertain_score = (1 - confidence) * 100
@@ -359,48 +372,51 @@ def uncertainty(
 
     adata.obs['uncertainty'] = uncertainty
 
-    ### make different labels for certain and uncertain points
-    t=np.average(uncertainty)+np.std(uncertainty) ## threshhold for defining uncertain points
-    uncertain_matrix=(uncertainty>t)
-    certainty=[]
-    t=np.average(uncertainty)+np.std(uncertainty)
+    # make different labels for certain and uncertain points
+    # threshhold for defining uncertain points
+    t = np.average(uncertainty)+np.std(uncertainty)
+    uncertain_matrix = (uncertainty > t)
+    certainty = []
+    t = np.average(uncertainty)+np.std(uncertainty)
     for i in range(len(labels)):
-        if (uncertainty[i]>t):
-            pos_label=""
+        if (uncertainty[i] > t):
+            pos_label = ""
             for j in range(len(np.unique(labels))):
-                prob=p[i,j]
-                if (prob>0):
-                    lb=str(rank[i,j])
-                    pos_label=pos_label+lb+": "+str(prob)+"\n"
-            certainty.append("Uncertain point, other possible label(s):\n"+str(pos_label))
-    adata.uns['uncertainty_text']=certainty
+                prob = p[i, j]
+                if (prob > 0):
+                    lb = str(rank[i, j])
+                    pos_label = pos_label+lb+": "+str(prob)+"\n"
+            certainty.append(
+                "Uncertain point, other possible label(s):\n"+str(pos_label))
+    adata.uns['uncertainty_text'] = certainty
 
-
-    #adata.obs['uncertain_matrix']=uncertain_matrix
-    labels=np.array(adata.obs['labels'])
-    uncertain_labels=labels*2+uncertain_matrix #certain labels are even numbers,
-    #uncertain labels are odd numbers
+    # adata.obs['uncertain_matrix']=uncertain_matrix
+    labels = np.array(adata.obs['labels'])
+    uncertain_labels = labels*2+uncertain_matrix  # certain labels are even numbers,
+    # uncertain labels are odd numbers
     # origin labels = uncertain labels -1 / 2
     #               = certain labels / 2
-    #adata.obs['uncertain_labels']=uncertain_labels
+    # adata.obs['uncertain_labels']=uncertain_labels
 
-    ### make different subsets for certain and uncertain points
-    clusters=list(adata.uns['subsets'].keys())
-    uncertain_clusters={}
+    # make different subsets for certain and uncertain points
+    clusters = list(adata.uns['subsets'].keys())
+    uncertain_clusters = {}
     for i in clusters:
-        uncertain_clusters[i+'_certain']=np.array([],dtype='int64')
-        uncertain_clusters[i+'_uncertain']=np.array([],dtype='int64')
+        uncertain_clusters[i+'_certain'] = np.array([], dtype='int64')
+        uncertain_clusters[i+'_uncertain'] = np.array([], dtype='int64')
     for i in range(len(labels)):  # put points into certain/uncertain clusters
-        if uncertain_labels[i]%2==0:  # even, certain points
-            cluster=list(adata.uns['subsets'].keys())[int(uncertain_labels[i]/2)] # the cluster it belongs to
-            uncertain_clusters[cluster+'_certain']=np.append(uncertain_clusters[cluster+'_certain'],i)
-        else: # odd, uncertain points
-            cluster=list(adata.uns['subsets'].keys())[int((uncertain_labels[i]-1)/2)] # the cluster it belongs to
-            uncertain_clusters[cluster+'_uncertain']=np.append(uncertain_clusters[cluster+'_uncertain'],i)
+        if uncertain_labels[i] % 2 == 0:  # even, certain points
+            cluster = list(adata.uns['subsets'].keys())[
+                int(uncertain_labels[i]/2)]  # the cluster it belongs to
+            uncertain_clusters[cluster+'_certain'] = np.append(
+                uncertain_clusters[cluster+'_certain'], i)
+        else:  # odd, uncertain points
+            cluster = list(adata.uns['subsets'].keys())[
+                int((uncertain_labels[i]-1)/2)]  # the cluster it belongs to
+            uncertain_clusters[cluster+'_uncertain'] = np.append(
+                uncertain_clusters[cluster+'_uncertain'], i)
 
-    adata.uns['uncertain_subsets']=uncertain_clusters
+    adata.uns['uncertain_subsets'] = uncertain_clusters
 
     if not inplace:
         return adata
-
-

@@ -16,48 +16,41 @@ menuItem(
                         "Select label transfer method",
                         options$ali
                     ),
-                    # radioButtons(
-                    #     ns("folder_align"),
-                    #     "Select dataset group:",
-                    #     c(
-                    #         "Uploaded Datasets" = "user_uploaded",
-                    #         "Server Datasets" = "server"
-                    #     ),
-                    #     inline = TRUE
-                    # ),
-                    # conditionalPanel(
-                    #     condition = "input.folder_align == 'user_uploaded'",
-                    #     ns = ns,
-                    #     selectInput(
-                    #         ns("uploaded_dataset_align"),
-                    #         "Choose dataset:",
-                    #         choices = list.files("datasets/user_uploaded")
-                    #     )
-                    # ),
-                    # conditionalPanel(
-                    #     condition = "input.folder_align == 'server'",
-                    #     ns = ns,
-                    #     selectInput(
-                    #         ns("server_dataset_align"),
-                    #         "Choose dataset:",
-                    #         choices = list.files("datasets/server")
-                    #     )
-                    # ),
-                    fileInput(
-                        ns("reference_dataset"),
-                        "Choose Reference Dataset (h5ad)",
-                        multiple = FALSE,
-                        accept = c(".h5ad")
-                    )%>%
-                        shinyInput_label_embed(
-                            shiny::icon("info-circle") %>%
-                                bs_embed_tooltip(
-                                    paste0("Choose the reference dataset. Should be the same ",
-                                           "as the one on the session file."),
-                                    placement= "bottom"
-                                )
+                    radioButtons(
+                        ns("folder_align"),
+                        "Select dataset group:",
+                        c(
+                            "Upload Dataset" = "user_uploaded",
+                            "Annotated Datasets" = "server"
+                        ),
+                        inline = TRUE
+                    ),
+                    conditionalPanel(
+                        condition = "input.folder_align == 'user_uploaded'",
+                        ns = ns,
+                        fileInput(
+                            ns("reference_dataset"),
+                            "Upload Reference Dataset (h5ad)",
+                            multiple = FALSE,
+                            accept = c(".h5ad")
+                        )%>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        paste0("Choose the reference dataset."),
+                                        placement= "bottom"
+                                    )
+                            )
+                    ),
+                    conditionalPanel(
+                        condition = "input.folder_align == 'server'",
+                        ns = ns,
+                        selectInput(
+                            ns("server_dataset_align"),
+                            "Choose Reference Dataset:",
+                            choices = list.files("datasets/annotated")
                         )
-                    ,
+                    ),
                     actionButton(
                         ns("align_btn"),
                         "Run Label Transfer",

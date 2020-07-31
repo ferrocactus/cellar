@@ -6,6 +6,7 @@ import shutil
 import traceback
 import sys
 from .exceptions import IncorrectFileFormat
+from bidict import bidict
 
 this_dir = os.path.dirname(__file__)
 def join_root(path):
@@ -55,6 +56,13 @@ def load_file(filepath):
         print(str(e))
         raise IncorrectFileFormat(
             "File does not exist or file format is incorrect.")
+
+    # Make sure cluster names are in proper format
+    if 'cluster_names' in adata.uns:
+        adata.uns['cluster_names'] = bidict(adata.uns['cluster_names'])
+        for key in list(adata.uns['cluster_names'].keys()):
+            adata.uns['cluster_names'][int(key)] = \
+                adata.uns['cluster_names'].pop(key, None)
 
     adata.uns['dataset'] = dataset
     return adata

@@ -12,6 +12,7 @@ from ._plotter import plot
 from .utils.tools import parse
 from .utils.tools import store_subset
 from .utils.tools import store_labels
+from .utils.tools import merge_cluster_names
 from .utils.tools import update_subset_label
 from .utils.tools import populate_subsets
 from .utils.tools import merge_clusters

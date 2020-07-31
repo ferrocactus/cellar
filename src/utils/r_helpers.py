@@ -32,6 +32,8 @@ def get_n_obs(adata):
     return int(adata.n_obs)
 
 def get_labels(adata):
+    if 'labels' not in adata.obs:
+        return "No labels found"
     return adata.obs['labels'].to_numpy()
 
 def get_subsets(adata):
