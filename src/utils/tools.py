@@ -55,7 +55,7 @@ def _emb_exists_in_adata(adata, method, n_components):
     if isinstance(n_components, str):
         n_components = 10
     if 'x_emb' in adata.obsm:
-        if n_components <= adata.uns['dim_reduction_info']['n_components']:
+        if n_components <= adata.obsm['x_emb'].shape[1]:
             return adata.obsm['x_emb'][:, :n_components]
     if 'X_pca' in adata.obsm:
         if n_components <= adata.obsm['X_pca'].shape[1]:
