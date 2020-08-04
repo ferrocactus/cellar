@@ -51,7 +51,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         else{
                             n_neighbors=as.integer(input$n_neighbors)
                         }
-                    
+
                         showNotification("calculating uncertainty")
                         withProgress(message = "Please Wait", value = 0, {
                             incProgress(1 / 3, detail = "Data processing...")
@@ -64,7 +64,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                                         n_neighbors=n_neighbors)
                         })
                         showNotification("finished")
-                        
+
                         color = as.numeric(py_to_r(adata()$obs['uncertainty']))
                         title = "Uncertainty"
                         showlegend = FALSE
@@ -75,7 +75,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         text=~paste0(replicate(length(label_names),"Label: "),
                                     label_names,replicate(length(label_names),", Uncertainty: "),
                                     as.character(py_to_r(adata()$obs['uncertainty'])),'\n',as.character(certainty))
-                    
+
                 }
                 else {
                     gene_names = py_to_r(get_all_gene_names(adata()))
@@ -128,6 +128,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
                              xaxis = xaxis,
                              yaxis = yaxis,
                              title = title, margin = list(t = 50)))
+
+                p = p %>% toWebGL()
 
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))
