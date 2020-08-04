@@ -99,10 +99,10 @@ class Dim_PCA(Unit):
             n_components = max(n_components, 10)
 
             self.logger.info("Knee found at {0}.".format(n_components))
-            x_emb = PCA(n_components=n_components,svd_solver='full',
+            x_emb = PCA(n_components=n_components,
                         **self.kwargs).fit_transform(x)
         else:
-            x_emb = PCA(n_components=self.n_components,svd_solver='full',
+            x_emb = PCA(n_components=self.n_components,
                         **self.kwargs).fit_transform(x)
 
         if return_evr == True:

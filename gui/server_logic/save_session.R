@@ -45,6 +45,11 @@ save_session <- function(input, output, session, adata, replot,
         withProgress(message = "Loading Session", value = 0, {
             incProgress(1 / 3)
             adata(read_h5ad(datapath))
+            if (py_to_r(is_str(adata()))) {
+                showNotification("Incorrect file format")
+                isolate(adata(0))
+                return()
+            }
 
             fullreset(fullreset() + 1)
             incProgress(1 / 3)

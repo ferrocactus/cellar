@@ -115,7 +115,7 @@ def write_h5ad(adata, path, compression=9, force_dense=True):
 
 def read_h5ad(path):
     try:
-        adata = anndata.read_h5ad(path)
+        adata = anndata.read_h5ad(path, backed='r+')
     except:
         return "file_error"
 
