@@ -1,6 +1,7 @@
 import anndata
 from anndata import AnnData
 import numpy as np
+import pandas as pd
 from bidict import bidict
 from .. import name_genes
 
@@ -106,7 +107,7 @@ def get_gene_logFC_de(adata):
 def get_de_table(adata):
     if 'de' not in adata.uns:
         return None
-    return adata.uns['de']
+    return pd.DataFrame(adata.uns['de'])
 
 def write_h5ad(adata, path, compression=9, force_dense=True):
     adata.var['parsed_names'] = None
@@ -115,8 +116,9 @@ def write_h5ad(adata, path, compression=9, force_dense=True):
 
 def read_h5ad(path):
     try:
-        adata = anndata.read_h5ad(path)
+        adata = anndata.read_h5ad(path, backed='r+')
     except:
+        print('Error reading file')
         return "file_error"
 
     if 'cluster_names' in adata.uns:
@@ -129,3 +131,13 @@ def read_h5ad(path):
 
 def write_key(adata, keyname, value):
     adata.uns[keyname] = np.array(value).reshape(-1)
+
+def get_col(adata, i, from_r=True):
+    if from_r:
+        i -= 1
+    return adata.X[:, i]
+
+def get_x(adata):
+    if adata.isbacked:
+        return adata.X[()]
+    return adata.X

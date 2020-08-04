@@ -86,7 +86,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
                         else
                             color = labels
                     } else {
-                        color = py_to_r(adata()$X)[, i]
+                        #color = py_to_r(adata()$X)[, i]
+                        color = py_to_r(get_col(adata(), i))
                         title = input$color
                         showlegend = FALSE
                         symbol = ~labels
@@ -114,8 +115,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                     text = text,
                     color = color,
-                    symbol = symbol,
-                    symbols = symbols,  ## 30 shapes
+                    #symbol = symbol,
+                    #symbols = symbols,  ## 30 shapes
                     key = as.character(1:length(labels)),
                     marker = list(size = input$dot_size),
                     type = 'scatter',

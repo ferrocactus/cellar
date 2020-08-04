@@ -14,7 +14,7 @@ align <- function(input, output, session, adata, selDatasetAlign,
         }
 
         withProgress(message = "Running Label Transfer", value = 0, {
-            n <- 6
+            n <- 5
             incProgress(1 / n, detail = paste("Step: Reading data"))
             isolate(adataAlign(safe_load_file(selDatasetAlign())))
             if (py_to_r(is_str(adataAlign()))) {
@@ -22,16 +22,15 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 isolate(adataAlign(0))
                 return()
             }
+            incProgress(1 / n, detail = paste("Step: Running Label Transfer"))
             if (input$align_method == 'SingleR') {
                 # transpose rows and cols for SingleR
-                x1 = t(py_to_r(adata()$X))
+                x1 = t(py_to_r(get_x(adata())))
                 rownames(x1) = py_to_r(get_var_names(adata()))
                 colnames(x1) = py_to_r(get_obs_names(adata()))
-                x2 = t(py_to_r(adataAlign()$X))
+                x2 = t(py_to_r(get_x(adataAlign())))
                 rownames(x2) = py_to_r(get_var_names(adataAlign()))
                 colnames(x2) = py_to_r(get_obs_names(adataAlign()))
-
-                incProgress(1 / n, detail = paste("Annotating"))
 
                 labels = py_to_r(get_labels(adataAlign()))
                 if (labels == "No labels found") {

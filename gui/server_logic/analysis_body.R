@@ -98,9 +98,49 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     })
 }
 
+build_heatmap <- function(adata, heatmap_var) {
+    degenes<-py_to_r(get_gene_names_de(adata()))
+
+    if (length(degenes) != 0){
+        withProgress(message='Constructing heatmap', {
+            label_names=py_to_r(get_labels(adata()))
+
+            cluster_labs=as.character(py_to_r(get_cluster_label_list(adata())))
+            incProgress(1 / 3)
+
+            #create heatmap object
+            heatmap_dat<-matrix(nrow = length(cluster_labs),ncol = length(degenes))
+            #labels for heatmap
+            rownames(heatmap_dat)<-cluster_labs
+            colnames(heatmap_dat)<-degenes
+            scdata_subset<-data.frame(label_names, py_to_r(get_x(adata())))
+
+            colnames(scdata_subset)=c("cluster", py_to_r(get_all_gene_names(adata())))
+            #populate the heatmap object
+            for (i in 1:length(cluster_labs)) {
+                #heatmap_dat[cluster_labs[i],]<-colMeans(scdata_subset[which(scdata_subset$clusters==cluster_labs[i]),degenes])
+                heatmap_dat[cluster_labs[i],]<-colMeans(scdata_subset[which(scdata_subset[,1]==as.double(cluster_labs[i])),degenes])
+            }
+            incProgress(1 / 3)
+
+            #set the color scale
+            scaleRYG <- colorRampPalette(c("blue","white","red"), space = "rgb")(30)
+            #plot the heatmap
+
+            heatmap_var(heatmap.2(heatmap_dat, density.info = "none",trace = "none",col = scaleRYG,
+                        xlab = "DE Genes",margins = c(9,7),
+                        ylab = "Cluster"))
+            incProgress(1 / 3)
+        })
+        return(heatmap_var())
+    }
+    return(NULL)
+}
+
 analysis_body <- function(input, output, session, adata, deGenes, activeDataset) {
     markers_genelists_list <- getMarkerGeneList("src/markers/cell_type_marker.json")
     uploaded_file_flag <- reactiveVal(0)
+    heatmap_var = reactiveVal(NULL)
 
     observe({
         # only run if deGenes have been stored
@@ -168,9 +208,23 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                         alpha = as.numeric(input$mark_alpha),
                         dataset = dataset, ns = session$ns)
         })
+
+        output$titleheatmap <- renderText(tabletitle)
+        output$heatmap <- renderPlot({
+            build_heatmap(adata, heatmap_var)
+        }, height=input$heat_height)
     })
 
     observeEvent(input$markjson, {
         isolate(uploaded_file_flag(uploaded_file_flag() + 1))
+    })
+
+    observeEvent(input$heat_height, {
+        if (is_active(adata()) == FALSE) return()
+        if (!py_has_attr(adata()$uns, 'de')) return()
+
+        output$heatmap <- renderPlot({
+            return(heatmap_var())
+        }, height = input$heat_height)
     })
 }

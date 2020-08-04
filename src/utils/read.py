@@ -37,7 +37,7 @@ def load_file(filepath):
 
     try:
         if filepath[-4:] == 'h5ad':
-            adata = anndata.read_h5ad(filepath)
+            adata = anndata.read_h5ad(filepath, backed='r+')
         if filepath[-3:] == 'csv':
             adata = anndata.read_csv(filepath)
             if t_flag:

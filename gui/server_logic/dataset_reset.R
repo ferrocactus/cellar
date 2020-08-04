@@ -23,6 +23,27 @@ dataset_reset <- function(input, output, session, reset, setNames,
             isolate(reset(0))
         }
 
+        output$DEtable = NULL
+        output$GOtable = NULL
+        output$KEGGtable = NULL
+        output$CellTypetable = NULL
+        output$UCellTypetable = NULL
+        output$MSIGDBtable = NULL
+        output$Diseasetable = NULL
+        output$heatmap = NULL
+
+        output$cell_names_outp = NULL
+        output$clustering_info = NULL
+
+        output$titleDE = NULL
+        output$titleONTO = NULL
+        output$titleKEGG = NULL
+        output$titleMSIG = NULL
+        output$titleCellType = NULL
+        output$titleUCellType = NULL
+        output$titleDisease = NULL
+        output$titleheatmap = NULL
+
         deGenes(c())
 
         if (is_active(adata()) == FALSE) return()
@@ -64,16 +85,5 @@ dataset_reset <- function(input, output, session, reset, setNames,
             }
         }
 
-        output$DEtable = NULL
-        output$GOtable = NULL
-        output$KEGGtable = NULL
-        output$CellTypetable = NULL
-        output$UCellTypetable = NULL
-        output$MSIGDBtable = NULL
-        output$Diseasetable = NULL
-        output$heatmap = NULL
-
-        output$cell_names_outp = NULL
-        output$clustering_info = NULL
     })
 }

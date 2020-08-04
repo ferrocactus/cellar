@@ -7,7 +7,6 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
 
-
         if (s1 == 'None' && s2 == 'None') {
             showNotification("Please select a subset to analyze.")
             return()
@@ -139,53 +138,6 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                 )
             }
         })
-
-        #################### heat map
-        ## heatmap
-
-        observeEvent(input$heat_height,{
-            if (is_active(adata()) == FALSE) return()
-            if (!py_has_attr(adata()$obs, 'labels')) return()
-            degenes<-py_to_r(get_gene_names_de(adata()))
-
-            if (length(degenes) != 0){
-                output$titleheatmap <- renderText(tabletitle)
-                #label_names = pipe()$get_label_names()
-                label_names=py_to_r(get_labels(adata()))
-
-                cluster_labs=as.character(py_to_r(get_cluster_label_list(adata())))
-                #get the cluster names
-
-
-
-                #get the de genes
-                #create heatmap object
-                heatmap_dat<-matrix(nrow = length(cluster_labs),ncol = length(degenes))
-                #labels for heatmap
-                rownames(heatmap_dat)<-cluster_labs
-                colnames(heatmap_dat)<-degenes
-                scdata_subset<-data.frame(label_names, py_to_r(adata()$X))
-
-                colnames(scdata_subset)=c("cluster", py_to_r(get_all_gene_names(adata())))
-                #populate the heatmap object
-                for (i in 1:length(cluster_labs)) {
-                    #heatmap_dat[cluster_labs[i],]<-colMeans(scdata_subset[which(scdata_subset$clusters==cluster_labs[i]),degenes])
-                    heatmap_dat[cluster_labs[i],]<-colMeans(scdata_subset[which(scdata_subset[,1]==as.double(cluster_labs[i])),degenes])
-                }
-                output$heatmap <- renderPlot({
-                    #set the color scale
-                    scaleRYG <- colorRampPalette(c("blue","white","red"), space = "rgb")(30)
-                    #plot the heatmap
-
-                    heatmap.2(heatmap_dat,density.info = "none",trace = "none",col = scaleRYG,
-                              xlab = "DE Genes",margins = c(9,7),
-                              ylab = "Cluster")
-                },height=input$heat_height
-                )
-            }
-        })
-
-        ## end of heatmap
     })
 }
 
