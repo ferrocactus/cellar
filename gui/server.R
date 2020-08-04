@@ -24,6 +24,7 @@ server <- shinyServer(function(input, output, session) {
     adata <- reactiveVal(0)
 
     selDataset <- reactiveVal("")
+    activeDataset <- reactiveVal("")
     selDatasetAlign <- reactiveVal("")
     labelList <- reactiveVal(c())
     setNames <- reactiveVal(c("None"))
@@ -49,7 +50,8 @@ server <- shinyServer(function(input, output, session) {
 
     # Dataset menu
     callModule(dataset, id = "ns", adata = adata, selDataset = selDataset,
-               selDatasetAlign = selDatasetAlign, fullreset = fullreset)
+               selDatasetAlign = selDatasetAlign, fullreset = fullreset,
+               activeDataset = activeDataset)
     callModule(upload_file, id = "ns")
 
     # Clustering menu
@@ -78,8 +80,9 @@ server <- shinyServer(function(input, output, session) {
 
     # Analysis menu
     callModule(differential_e, id = "ns", adata = adata, remark = remark,
-               deGenes = deGenes)
-    callModule(analysis_body, id = "ns", adata = adata, deGenes = deGenes)
+               deGenes = deGenes, activeDataset = activeDataset)
+    callModule(analysis_body, id = "ns", adata = adata, deGenes = deGenes,
+               activeDataset = activeDataset)
 
     # Appearance menu
     callModule(theme, id = "ns", retheme = retheme)
@@ -87,7 +90,8 @@ server <- shinyServer(function(input, output, session) {
     # Export/Import menu
     callModule(save_session, id = "ns", adata = adata, replot = replot,
                remark = remark, labelList = labelList, relabel = relabel,
-               resubset = resubset, fullreset = fullreset, reinfo = reinfo)
+               resubset = resubset, fullreset = fullreset, reinfo = reinfo,
+               activeDataset = activeDataset)
     callModule(download_cells, id = "ns", adata = adata)
 
     # # Miscellaneous

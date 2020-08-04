@@ -98,7 +98,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     })
 }
 
-analysis_body <- function(input, output, session, adata, deGenes) {
+analysis_body <- function(input, output, session, adata, deGenes, activeDataset) {
     markers_genelists_list <- getMarkerGeneList("src/markers/cell_type_marker.json")
     uploaded_file_flag <- reactiveVal(0)
 
@@ -107,7 +107,7 @@ analysis_body <- function(input, output, session, adata, deGenes) {
         if (is_active(adata()) == FALSE) return()
         if (length(deGenes()) < 1) return()
 
-        dataset = as.character(adata()$uns[['dataset']])
+        dataset = as.character(activeDataset())
 
         nc = py_to_r(adata()$n_vars)
 

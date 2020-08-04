@@ -1,5 +1,5 @@
 dataset <- function(input, output, session, adata, selDataset,
-                    selDatasetAlign, fullreset) {
+                    selDatasetAlign, fullreset, activeDataset) {
     ###########################################################################
 
     # udpate data tissue
@@ -19,8 +19,6 @@ dataset <- function(input, output, session, adata, selDataset,
             choices = list.files(paste0("datasets/server/",input$data_source,"/",input$data_tissue))
         )
     })
-
-
 
     # Main Dataset
     toListen <- reactive({
@@ -43,6 +41,7 @@ dataset <- function(input, output, session, adata, selDataset,
     # Loads the dataset into an anndata object
     observeEvent(input$load_dataset, {
         print(paste("Selected", selDataset()))
+        activeDataset(tools::file_path_sans_ext(basename(selDataset())))
 
         withProgress(message = "Please wait", value = 0, {
             incProgress(1 / 2, detail = "Reading dataset")

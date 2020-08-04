@@ -1,11 +1,11 @@
 save_session <- function(input, output, session, adata, replot,
                          remark, labelList, relabel, resubset,
-                         fullreset, reinfo) {
+                         fullreset, reinfo, activeDataset) {
     observe({
         output$download_sess <- downloadHandler(
             filename = function() {
                 if (py_to_r(is_active(adata())) == FALSE) return()
-                paste0(adata()$uns[['dataset']], "_cellar.h5ad")
+                paste0(activeDataset(), "_cellar.h5ad")
             },
             content = function(path) {
                 if (py_to_r(is_active(adata())) == FALSE) return()
@@ -20,6 +20,7 @@ save_session <- function(input, output, session, adata, replot,
 
     observeEvent(input$upload_sess, {
         req(input$upload_sess)
+        activeDataset(tools::file_path_sans_ext(basename(input$upload_sess$datapath)))
         withProgress(message = "Loading Session", value = 0, {
             incProgress(1 / 3)
             adata(read_h5ad(input$upload_sess$datapath))
@@ -41,6 +42,7 @@ save_session <- function(input, output, session, adata, replot,
     })
 
     observeEvent(input$load_ann_dataset, {
+        activeDataset(tools::file_path_sans_ext(input$annotated_datasets))
         datapath = paste0('datasets/annotated/', input$annotated_datasets)
         withProgress(message = "Loading Session", value = 0, {
             incProgress(1 / 3)

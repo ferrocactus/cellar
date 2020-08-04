@@ -1,4 +1,5 @@
-differential_e <- function(input, output, session, adata, remark, deGenes) {
+differential_e <- function(input, output, session, adata, remark, deGenes,
+                           activeDataset) {
     observeEvent(input$getdegenes, {
         if (is_active(adata()) == FALSE) return()
         if (!py_has_attr(adata()$obs, 'labels')) return()
@@ -111,7 +112,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes) {
 
             isolate(deGenes(table[, 1]))
 
-            dataset = as.character(adata()$uns[['dataset']])
+            dataset = as.character(activeDataset())
             output$downloadDE <- downloadHandler(
                 filename = function() {
                     paste0(dataset, "_DE_genes", ".csv")
