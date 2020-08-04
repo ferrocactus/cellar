@@ -129,10 +129,10 @@ plot <- function(input, output, session, replot, adata, selDataset,
                              yaxis = yaxis,
                              title = title, margin = list(t = 50)))
 
-                p = p %>% toWebGL()
-
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))
+
+                p = p %>% toWebGL()
                 return(p)
             })
         })
@@ -159,7 +159,9 @@ plot <- function(input, output, session, replot, adata, selDataset,
         if (curPlot() < 1) return()
 
         output$plot <- renderPlotly({
-            return(plotHistory()[[curPlot()]])
+            p = plotHistory()[[curPlot()]]
+            p = p %>% toWebGL()
+            return(p)
         })
         output$cell_names_outp <- renderUI({
             return(cellNamesTb()[[curPlot()]])
