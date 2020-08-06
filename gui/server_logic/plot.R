@@ -1,11 +1,4 @@
-all_symbols <- c(
-    'star-triangle-down','circle','square',"diamond",
-    "x",'triangle-up','triangle-down','hexagon','asterisk',
-    'diamond-cross',"square-cross","circle-cross","circle-x",
-    "star-square","star","star-triangle-up","star-square",
-    "star-diamond","diamond-tall","diamond-wide","hourglass",
-    'bowtie','pentagon','hexagram-dot','triangle-se','y-right',
-    'hexagon2','octagon','triangle-nw','triangle-sw')
+source("gui/server_logic/plot_options.R")
 
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, selDataset,
@@ -95,6 +88,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     }
                 }
                 resubset(1) # split each subset into certain & uncertain subset or get back to original
+
                 if (input$theme_mode == 'dark_mode') {
                     plot_bgcolor = 'rgb(44, 59, 65)'
                     paper_bgcolor = 'rgb(44, 59, 65)'
@@ -111,7 +105,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     yaxis = NULL
                 }
 
-                p <- plotly_build(plot_ly(
+                p <- plot_ly(
                     x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                     text = text,
                     color = color,
@@ -122,18 +116,27 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     type = 'scatter',
                     mode = 'markers',
                     height = input$plot_height
-                ) %>% layout(dragmode = "lasso", showlegend = showlegend,
-                             plot_bgcolor = plot_bgcolor,
-                             paper_bgcolor = paper_bgcolor,
-                             font = font,
-                             xaxis = xaxis,
-                             yaxis = yaxis,
-                             title = title, margin = list(t = 50)))
+                )
+
+                p <- p %>% config(modeBarButtonsToAdd = list(plot_options_btn))
+
+                p <- p %>% layout(
+                    dragmode = "lasso",
+                    showlegend = showlegend,
+                    plot_bgcolor = plot_bgcolor,
+                    paper_bgcolor = paper_bgcolor,
+                    font = font,
+                    xaxis = xaxis,
+                    yaxis = yaxis,
+                    title = title,
+                    margin = list(t = 50))
+
+                p <- plotly_build(p)
 
                 isolate(plotHistory(c(plotHistory(), list(p))))
                 isolate(curPlot(length(plotHistory())))
 
-                p = p %>% toWebGL()
+                p <- p %>% toWebGL()
                 return(p)
             })
         })
@@ -142,12 +145,21 @@ plot <- function(input, output, session, replot, adata, selDataset,
     # Listen to multiple events that will trigger replot
     toListenReplot <- reactive({
         list(
-            input$plot_height,
-            input$dot_size,
             input$color,
-            input$show_names,
-            input$theme_mode
+            input$show_names
         )
+    })
+
+    observeEvent(input$dot_size, {
+        runjs(js.reset_marker_size)
+    })
+
+    observeEvent(input$plot_height, {
+        runjs(js.reset_plot_height)
+    })
+
+    observeEvent(input$theme_mode, {
+        runjs(js.reset_theme)
     })
 
     observeEvent(toListenReplot(), {
