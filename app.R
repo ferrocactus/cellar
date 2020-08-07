@@ -13,6 +13,7 @@ library(shinyBS)
 library(htmltools)
 library(bsplus)
 library(htmlTable)
+library(RColorBrewer)
 
 source("gui/ui.R")
 source("gui/server.R")

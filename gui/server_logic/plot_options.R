@@ -12,7 +12,6 @@ plot_options_btn <- list(
     #icon = icon("cog"),
     click = htmlwidgets::JS(
         "function(gd, upd) {
-            console.log(gd);
             var upd = {showlegend: false};
             Plotly.restyle(gd, upd);
         }"
@@ -27,8 +26,8 @@ js.reset_marker_size = "
 "
 
 js.reset_plot_height = "
-    var plot = document.getElementById('ns-plot');
     var plot_height = document.getElementById('ns-plot_height').value;
+    var plot = document.getElementById('ns-plot');
     var upd = {height: parseInt(plot_height)};
     Plotly.relayout(plot, upd);
 "
@@ -36,10 +35,8 @@ js.reset_plot_height = "
 js.reset_theme = "
     var plot = document.getElementById('ns-plot');
     var theme_mode = $(\"input[name=ns-theme_mode]:checked\").val();
-    console.log(theme_mode);
     var upd;
     if (theme_mode === 'dark_mode') {
-        console.log(\"yes\");
         upd = {
             plot_bgcolor: 'rgb(44, 59, 65)',
             paper_bgcolor: 'rgb(44, 59, 65)',
@@ -60,6 +57,34 @@ js.reset_theme = "
             'yaxis.zerolinecolor': null
         };
     }
-    console.log(upd);
     Plotly.relayout(plot, upd);
 "
+
+theme_plot <- function(p, theme_mode) {
+    if (theme_mode == 'dark_mode') {
+        plot_bgcolor = 'rgb(44, 59, 65)'
+        paper_bgcolor = 'rgb(44, 59, 65)'
+        font = list(color = 'rgb(255, 255, 255)')
+        xaxis = list(gridcolor = 'rgb(85, 85, 85)',
+                     zerolinecolor = 'rgb(125, 125, 125)')
+        yaxis = list(gridcolor = 'rgb(85, 85, 85)',
+                     zerolinecolor = 'rgb(125, 125, 125)')
+    } else {
+        plot_bgcolor = 'rgb(255, 255, 255)'
+        paper_bgcolor = 'rgb(255, 255, 255)'
+        font = list(color = 'rgb(0, 0, 0)')
+        xaxis = list(gridcolor = '#eee',
+                     zerolinecolor = '#444')
+        yaxis = list(gridcolor = '#eee',
+                     zerolinecolor = '#444')
+    }
+
+    p <- p %>% layout(
+        plot_bgcolor = plot_bgcolor,
+        paper_bgcolor = paper_bgcolor,
+        font = font,
+        xaxis = xaxis,
+        yaxis = yaxis)
+
+    return(p)
+}
