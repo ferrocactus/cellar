@@ -70,9 +70,6 @@ RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN pip3 install -r /home/cellar/py_requirements.txt
 
 WORKDIR /home/cellar
-# Compile Cython modules
-RUN python3 src/methods/setup.py build_ext --inplace
-RUN python3 src/methods/setup.py clean
 
 RUN mkdir -p datasets/user_uploaded
 RUN mkdir -p datasets/server

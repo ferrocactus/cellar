@@ -24,7 +24,7 @@ def safe_load_file(filepath):
         return "file_error"
 
 
-def load_file(filepath):
+def load_file(filepath, backed='r+'):
     t_flag = False
     if filepath == 'default' or filepath == 'datasets/user_uploaded/default':
         filepath = join_root("../datasets/default.csv")
@@ -37,7 +37,7 @@ def load_file(filepath):
 
     try:
         if filepath[-4:] == 'h5ad':
-            adata = anndata.read_h5ad(filepath, backed='r+')
+            adata = anndata.read_h5ad(filepath, backed=backed)
         if filepath[-3:] == 'csv':
             adata = anndata.read_csv(filepath)
             if t_flag:

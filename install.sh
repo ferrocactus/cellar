@@ -63,8 +63,4 @@ Rscript -e 'install.packages("BiocManager")'
 Rscript -e 'BiocManager::install("SingleR")'
 echo "Note: If you wish to convert plots to images, first install orca by following the instructions in https://github.com/plotly/orca"
 
-echo "Compiling Cython modules..."
-python3 src/methods/setup.py build_ext --inplace
-python3 src/methods/setup.py clean
-
-echo "cellar installed successfully. Run it with $ Rscript app.R"
+echo "Cellar installed successfully. Run it with $ Rscript app.R"

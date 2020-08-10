@@ -30,7 +30,7 @@ from ._converter import convert
 from ._identificator import Ide_HyperGeom
 from ._ss_cluster import SSClu_SeededKMeans
 from ._ss_cluster import SSClu_ConstrainedKMeans
-from ._ss_cluster import SSClu_ConstrainedSeededKMeans
+#from ._ss_cluster import SSClu_ConstrainedSeededKMeans
 from ._align import Ali_Scanpy_Ingest
 
 from ..utils.exceptions import MethodNotImplementedError
@@ -78,8 +78,8 @@ translation_dict = {
     },
     "ss_cluster": {
         "SeededKMeans": SSClu_SeededKMeans,
-        "ConstrainedKMeans": SSClu_ConstrainedKMeans,
-        "ConstrainedSeededKMeans": SSClu_ConstrainedSeededKMeans
+        "ConstrainedKMeans": SSClu_ConstrainedKMeans
+        #"ConstrainedSeededKMeans": SSClu_ConstrainedSeededKMeans
     },
     "visualization": {
         "UMAP": Dim_UMAP,
@@ -160,7 +160,7 @@ __all__ = [
     'Ide_HyperGeom',
     'SSClu_SeededKMeans',
     'SSClu_ConstrainedKMeans',
-    'SSClu_ConstrainedSeededKMeans',
+    #'SSClu_ConstrainedSeededKMeans',
     'Ali_Scanpy_Ingest',
     'convert'
 ]

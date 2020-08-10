@@ -103,6 +103,8 @@ cluster <- function(input, output, session, adata, replot,
     observeEvent(input$ssclurun, {
         if (is_active(adata()) == FALSE) return()
         if (!py_has_attr(adata()$obs, 'labels')) return()
+        req(input$saved_clusters)
+        req(input$n_ss_clusters)
 
         withProgress(message = "Please Wait", value = 0, {
             n <- 2
@@ -112,13 +114,14 @@ cluster <- function(input, output, session, adata, replot,
                 method = input$ssc_method,
                 use_emb = TRUE,
                 inplace = TRUE,
+                n_clusters = input$n_ss_clusters,
                 preserved_labels = input$saved_clusters)
-
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
         })
+
+        if (msg != 'good') {
+            showNotification(py_to_r(msg))
+            return()
+        }
 
         replot(replot() + 1)
         reset(reset() + 1)
@@ -129,7 +132,7 @@ cluster <- function(input, output, session, adata, replot,
     observeEvent(input$merge_clusters, {
         if (is_active(adata()) == FALSE) return()
         if (!py_has_attr(adata()$obs, 'labels')) return()
-        if (is.null(input$clusters_to_merge)) return()
+        req(input$clusters_to_merge)
 
         msg <- cellar$safe(merge_clusters,
             adata = adata(),

@@ -34,20 +34,34 @@ menuItem(
                     conditionalPanel(
                         condition = "input.ssc_method != 'SeededKMeans'",
                         ns = ns,
-                        textInput(
-                            ns("saved_clusters"),
-                            "Clusters to preserve",
-                            placeholder = "1-5, 8"
-                        )%>%
-                            shinyInput_label_embed(
-                                shiny::icon("info-circle") %>%
-                                    bs_embed_tooltip(
-                                        paste0("Clusters whose label should not be changed by ",
-                                            "the algorithm. Can be integers ",
-                                            "or a range specified by a dash, e.g., 1-5."),
-                                        placement= "bottom"
-                                    )
-                            )
+                        splitLayout(
+                            textInput(
+                                ns("saved_clusters"),
+                                "Clusters to preserve",
+                                placeholder = "1-5, 8"
+                            )%>%
+                                shinyInput_label_embed(
+                                    shiny::icon("info-circle") %>%
+                                        bs_embed_tooltip(
+                                            paste0("Clusters whose label should not be changed by ",
+                                                "the algorithm. Can be integers ",
+                                                "or a range specified by a dash, e.g., 1-5."),
+                                            placement= "bottom"
+                                        )
+                                ),
+                            textInput(
+                                ns("n_ss_clusters"),
+                                "Number of clusters"
+                            )%>%
+                                shinyInput_label_embed(
+                                    shiny::icon("info-circle") %>%
+                                        bs_embed_tooltip(
+                                            paste0("Single integer. Must be greated than the number ",
+                                            "of preserved clusters."),
+                                            placement="bottom"
+                                        )
+                                )
+                        )
                     )
                 )
             ),

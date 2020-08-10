@@ -96,7 +96,7 @@ Cellar requires the following python packages that can be installed via `pip`:
 * plotly
 * bidict
 * pydiffmap
-* Cython
+* scipy
 * Cluster_Ensembles
 * diffxpy
 
@@ -132,14 +132,6 @@ and cd into it
 
 ```bash
 git clone https://github.com/ferrocactus/cellar
-cd cellar
-```
-
-Next, you will need to compile Cython modules. Run
-
-```bash
-python src/methods/setup.py build_ext --inplace
-python src/methods/setup.py clean
 ```
 
 (Optional) To be able to convert plots into images

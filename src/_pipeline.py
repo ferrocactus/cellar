@@ -564,24 +564,16 @@ def ss_cluster(
             raise InvalidArgument("x_emb not found in AnnData object.")
         x_to_use = adata.obsm['x_emb']
 
-    labels_cp = adata.obs['labels'].to_numpy().copy()
     cluster_names = bidict({})
-    unq_labels = np.unique(labels_cp)
-    n_clusters = len(unq_labels)
-    preserved_labels_upd = []
 
-    for i, label in enumerate(unq_labels):
-        labels_cp[adata.obs['labels'] == label] = i
-        if label in preserved_labels:
-            cluster_names[i] = adata.uns['cluster_names'][label]
-            preserved_labels_upd.append(i)
+    if preserved_labels.size > 0:
+        for i in preserved_labels:
+            cluster_names[int(i)] = adata.uns['cluster_names'][i]
 
-    preserved_labels_upd = np.array(preserved_labels_upd)
-    # Create clustering object and get labels
     labels = wrap("ss_cluster", method)(**kwargs).get(
-        x_to_use, labels_cp, preserved_labels=preserved_labels_upd)
+        x_to_use, adata.obs['labels'].to_numpy(),
+        preserved_labels=preserved_labels).astype(int)
 
-    labels = np.array(labels).astype(int)
     unq_labels = np.unique(labels)
 
     for label in unq_labels:
@@ -592,9 +584,10 @@ def ss_cluster(
     adata.obs['labels'] = labels
     adata.uns['cluster_info'] = {}
     adata.uns['cluster_info']['unique_labels'] = unq_labels
-    adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
+    adata.uns['cluster_info']['n_clusters'] = kwargs.get('n_clusters', "NA")
     adata.uns['cluster_info']['method'] = method
-    adata.uns['cluster_info']['n_clusters_used'] = n_clusters
+    adata.uns['cluster_info']['n_clusters_used'] = kwargs.get(
+        'n_clusters', "NA")
     adata.uns['cluster_info']['used_emb'] = use_emb
     adata.uns['cluster_info']['kwargs'] = kwargs
     adata.uns['cluster_names'] = cluster_names
@@ -643,7 +636,8 @@ def transfer_labels(
     adata = x.copy() if not inplace else x
 
     if 'labels' not in ref.obs:
-        raise InvalidArgument("No labels found. Please populate adata.obs['labels'] key.")
+        raise InvalidArgument(
+            "No labels found. Please populate adata.obs['labels'] key.")
 
     _method_exists('align', method)
 

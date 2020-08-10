@@ -26,8 +26,7 @@ options <- list(
                   "thyroid", "clusters", "user defined"),
     "vis" = c("UMAP", "TSNE", "Diffusion Map", "MDS", "PCA", "Kernel PCA",
               "Isomap", "Feature Agglomeration"),
-    "ssclu" = c("ConstrainedKMeans", "SeededKMeans",
-                "ConstrainedSeededKMeans"),
+    "ssclu" = c("ConstrainedKMeans", "SeededKMeans"),
     "de" = c("TTest", "Rank", "Wald"),
     "ali" = c("Scanpy Ingest", "SingleR"),
     "tissues" = c('Clusters','User defined')

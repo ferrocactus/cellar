@@ -2,8 +2,6 @@ import os
 from setuptools import setup
 from setuptools import find_packages
 from setuptools import Command
-from Cython.Build import cythonize
-from Cython.Distutils import build_ext
 from setuptools import Extension
 import numpy
 
@@ -24,15 +22,8 @@ install_requires = [
     'plotly',
     'bidict',
     'pydiffmap',
-    'Cython',
-    'diffxpy'
-]
-
-ext_modules = [
-    Extension("cellar.methods._k_means_fast", [
-              "src/methods/_k_means_fast.pyx"]),
-    Extension("cellar.methods._k_means_elkan", [
-              "src/methods/_k_means_elkan.pyx"]),
+    'diffxpy',
+    'scipy'
 ]
 
 
@@ -49,7 +40,7 @@ class CleanCommand(Command):
         os.system('rm -vrf ./build ./dist ./*.pyc ./*.tgz ./*.egg-info')
 
 
-cmdclass = {'build_ext': build_ext, 'clean': CleanCommand}
+cmdclass = {'clean': CleanCommand}
 
 setup(
     name='cellar',
@@ -58,13 +49,12 @@ setup(
     version=1.0,
     include_package_data=True,
     description='Cell Annotation Robot.',
-    author='Euxhen Hasanaj',
+    author='Systems Biology Group, Carnegie Mellon Universityj',
     author_email='ehasanaj@cs.cmu.edu',
     url='https://github.com/ferrocactus/cellar',
     install_requires=install_requires,
     python_requires='>3.7',
     license='MIT',
     cmdclass=cmdclass,
-    ext_modules=cythonize(ext_modules),
     include_dirs=[numpy.get_include()]
 )

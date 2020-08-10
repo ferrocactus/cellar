@@ -164,11 +164,9 @@ def plot(
     if not is_AnnData:
         raise ValueError("Object not in AnnData format.")
 
-    adata = x.copy()
-
     if by == 'labels' or (by is None and gene is None):
-        return _plot_labels(adata, show_title, return_fig)
+        return _plot_labels(x, show_title, return_fig)
     elif by is None or by == 'gene':
-        return _plot_gene(adata, gene, show_title, return_fig)
+        return _plot_gene(x, gene, show_title, return_fig)
     elif by == 'scores':
-        return _plot_scores(adata, show_title, return_fig)
+        return _plot_scores(x, show_title, return_fig)

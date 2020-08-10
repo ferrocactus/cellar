@@ -14,5 +14,5 @@ psutil
 plotly
 bidict
 pydiffmap
-Cython
 diffxpy
+scipy

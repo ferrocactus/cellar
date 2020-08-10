@@ -4,9 +4,14 @@ import numpy as np
 from sklearn.cluster import KMeans
 from umap import UMAP
 
-from ..methods._kmeans import KMeans as ConstrainedKMeans
+#from ..methods._kmeans import KMeans as ConstrainedKMeans
+from ..methods import ConstrainedKMeans
 from ..log import setup_logger
 from ._unit import Unit
+from ..utils.exceptions import InappropriateArgument
+from ..utils.validation import _validate_n_clusters
+from ..utils.validation import _validate_cluster_list
+
 
 class SSClu_SeededKMeans(Unit):
     """
@@ -54,48 +59,74 @@ class SSClu_SeededKMeans(Unit):
 
 
 class SSClu_ConstrainedKMeans(Unit):
-    def __init__(self, **kwargs):
-        self.logger = setup_logger('ConstrainedKMeans')
+    """
+    See documentation in src/methods/ConstrainedKMeans.py.
+    """
+
+    def __init__(self, n_clusters, **kwargs):
+        self.logger = setup_logger('Constrained KMeans')
+        self.n_clusters = int(n_clusters)
         self.kwargs = kwargs
 
     def get(self, x, labels, preserved_labels):
         unq_labels = np.unique(labels)
-        n_clusters = len(unq_labels)
+        _validate_n_clusters(self.n_clusters, x.shape[0])
+        if (self.n_clusters < len(preserved_labels)):
+            raise InappropriateArgument("Number of clusters is less ",
+                                        "than the number of preserved labels")
 
-        mask = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
-        labels = np.asarray(labels).astype(np.int32)
+        can_change = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
+        init_labels = np.asarray(labels).astype(np.int32)
 
-        constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
-                                    mask=mask, fixed_labels=labels)
-        labels = constrainedkmeans.fit_predict(x)
+        ckm = ConstrainedKMeans(n_clusters=self.n_clusters, **self.kwargs)
+        labels = ckm.fit_predict(
+            x, can_change=can_change, init_labels=init_labels)
         return labels
 
 
-class SSClu_ConstrainedSeededKMeans(Unit):
-    def __init__(self, **kwargs):
-        self.logger = setup_logger('ConstrainedSeededKMeans')
-        self.kwargs = kwargs
+# class SSClu_ConstrainedKMeans(Unit):
+#     def __init__(self, **kwargs):
+#         self.logger = setup_logger('ConstrainedKMeans')
+#         self.kwargs = kwargs
 
-    def get(self, x, labels, preserved_labels):
-        unq_labels = np.unique(labels)
-        n_clusters = len(unq_labels)
-        centroids = []
-        self.logger.info(
-            "Found {0} unique labels. Using constrained seeded KMeans.".format(n_clusters))
+#     def get(self, x, labels, preserved_labels):
+#         unq_labels = np.unique(labels)
+#         n_clusters = len(unq_labels)
 
-        for i in range(n_clusters):
-            centroid = np.mean(x[labels == unq_labels[i]], axis=0)
-            centroids.append(centroid)
+#         mask = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
+#         labels = np.asarray(labels).astype(np.int32)
 
-        centroids = np.array(centroids)
-        mask = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
-        labels = labels.astype(np.int32)
+#         constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
+#                                     mask=mask, fixed_labels=labels)
+#         labels = constrainedkmeans.fit_predict(x)
+#         return labels
 
-        constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
-                                    init=centroids, n_init=1,
-                                    mask=mask, fixed_labels=labels)
-        labels = constrainedkmeans.fit_predict(x)
-        return labels
+
+# class SSClu_ConstrainedSeededKMeans(Unit):
+#     def __init__(self, **kwargs):
+#         self.logger = setup_logger('ConstrainedSeededKMeans')
+#         self.kwargs = kwargs
+
+#     def get(self, x, labels, preserved_labels):
+#         unq_labels = np.unique(labels)
+#         n_clusters = len(unq_labels)
+#         centroids = []
+#         self.logger.info(
+#             "Found {0} unique labels. Using constrained seeded KMeans.".format(n_clusters))
+
+#         for i in range(n_clusters):
+#             centroid = np.mean(x[labels == unq_labels[i]], axis=0)
+#             centroids.append(centroid)
+
+#         centroids = np.array(centroids)
+#         mask = (1 - np.isin(labels, preserved_labels)).astype(np.int32)
+#         labels = labels.astype(np.int32)
+
+#         constrainedkmeans = ConstrainedKMeans(n_clusters=n_clusters,
+#                                               init=centroids, n_init=1,
+#                                               mask=mask, fixed_labels=labels)
+#         labels = constrainedkmeans.fit_predict(x)
+#         return labels
 
 
 class SSClu_UMAP(Unit):
