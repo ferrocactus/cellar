@@ -33,7 +33,16 @@ misc <- function(input, output, session) {
 
     runjs("document.getElementById('ns-menu').onclick = function() {
        window.open('https://github.com/ferrocactus/cellar/blob/master/doc/cellar_guide.md', '_blank'); };")
-    
+
     runjs("document.getElementById('ns-search').onclick = function() {
        window.open('https://www.genecards.org/cgi-bin/carddisp.pl?gene=' + document.getElementById('ns-searchgene').value, '_blank'); };")
+}
+
+is_error <- function(msg, notify=FALSE, from_py=TRUE) {
+    if (from_py) msg = py_to_r(msg)
+    if (msg != 'good') {
+        if (notify) showNotification(msg)
+        return(TRUE)
+    }
+    return(FALSE)
 }

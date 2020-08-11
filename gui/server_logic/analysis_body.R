@@ -144,7 +144,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
 
     observe({
         # only run if deGenes have been stored
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         if (length(deGenes()) < 1) return()
 
         dataset = as.character(activeDataset())

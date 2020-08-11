@@ -1,6 +1,15 @@
 info <- function(input, output, session, adata, relabel, reinfo) {
     info_val <- reactiveValues()
 
+    # Keep info tab active at all times
+    output$cell_names_outp <- NULL
+    output$clustering_info <- NULL
+    outputOptions(output, "cell_names_outp", suspendWhenHidden = FALSE)
+    outputOptions(output, "clustering_info", suspendWhenHidden = FALSE)
+    # Start hidden
+    shinyjs::hide("cell_names_outp")
+    shinyjs::hide("clustering_info")
+
     # Show/Hide info
     observeEvent(input$collapse_cell_names, {
         shinyjs::toggle("cell_names_outp")

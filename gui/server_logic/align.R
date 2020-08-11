@@ -4,6 +4,7 @@ align <- function(input, output, session, adata, selDatasetAlign,
 
     observeEvent(input$align_btn, {
         req(adata())
+
         if (input$folder_align == 'user_uploaded') {
             req(input$reference_dataset)
             isolate(selDatasetAlign(input$reference_dataset$datapath))
@@ -18,25 +19,25 @@ align <- function(input, output, session, adata, selDatasetAlign,
             incProgress(1 / n, detail = paste("Step: Reading data"))
             isolate(adataAlign(safe_load_file(selDatasetAlign())))
             if (py_to_r(is_str(adataAlign()))) {
-                showNotification("Incorrect file format.")
-                isolate(adataAlign(0))
+                msg <- "Incorrect file format."
                 return()
             }
+
             incProgress(1 / n, detail = paste("Step: Running Label Transfer"))
             if (input$align_method == 'SingleR') {
                 # transpose rows and cols for SingleR
+                labels = py_to_r(get_labels(adataAlign()))
+                if (labels == "No labels found") {
+                    msg <- "No labels found. Please populate adata.obs['labels'] key."
+                    return()
+                }
+
                 x1 = t(py_to_r(get_x(adata())))
                 rownames(x1) = py_to_r(get_var_names(adata()))
                 colnames(x1) = py_to_r(get_obs_names(adata()))
                 x2 = t(py_to_r(get_x(adataAlign())))
                 rownames(x2) = py_to_r(get_var_names(adataAlign()))
                 colnames(x2) = py_to_r(get_obs_names(adataAlign()))
-
-                labels = py_to_r(get_labels(adataAlign()))
-                if (labels == "No labels found") {
-                    showNotification("No labels found. Please populate adata.obs['labels'] key.")
-                    return()
-                }
 
                 print("Running SingleR.")
                 pred <- SingleR(test = x1, ref = x2,
@@ -47,15 +48,11 @@ align <- function(input, output, session, adata, selDatasetAlign,
                     labels = as.integer(pred$labels),
                     method = 'SingleR')
 
-                if (msg != 'good') {
-                    showNotification(py_to_r(msg))
-                    adataAlign(0)
-                    return()
+                if (!is_error(msg)) {
+                    msg <- cellar$safe(merge_cluster_names,
+                        adata = adata(),
+                        ref = adataAlign())
                 }
-
-                msg <- cellar$safe(merge_cluster_names,
-                    adata = adata(),
-                    ref = adataAlign())
             } else {
                 msg <- cellar$safe(cellar$transfer_labels,
                     x = adata(),
@@ -65,11 +62,8 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 )
             }
 
-            adataAlign(0)
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
+            isolate(adataAlign(0))
+            if (is_error(msg)) return()
 
             incProgress(1 / n, detail = "Converting names")
             msg <- cellar$safe(cellar$name_genes,
@@ -77,10 +71,7 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 inplace = TRUE
             )
 
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
+            if (is_error(msg)) return()
 
             incProgress(1 / n, detail = "Visualizing")
             msg <- cellar$safe(cellar$reduce_dim_vis,
@@ -91,11 +82,10 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 inplace = TRUE,
                 check_if_exists = TRUE)
 
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
+            if (is_error(msg)) return()
         })
+
+        if (is_error(msg, notify=TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)

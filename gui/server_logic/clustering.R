@@ -1,14 +1,5 @@
 cluster <- function(input, output, session, adata,
                     replot, reset, resubset) {
-    # Keep info tab active at all times
-    output$cell_names_outp <- NULL
-    output$clustering_info <- NULL
-    outputOptions(output, "cell_names_outp", suspendWhenHidden = FALSE)
-    outputOptions(output, "clustering_info", suspendWhenHidden = FALSE)
-    # Start hidden
-    shinyjs::hide("cell_names_outp")
-    shinyjs::hide("clustering_info")
-
     observeEvent(input$runconfigbtn, {
         # Return if no adata loaded
         if (py_to_r(is_active(adata())) == FALSE) {
@@ -34,10 +25,7 @@ cluster <- function(input, output, session, adata,
                 inplace = TRUE,
                 check_if_exists = TRUE)
 
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
+            if (is_error(msg)) return()
 
             incProgress(1 / n, detail = "Clustering")
             if (input$clu_method == 'Ensemble')
@@ -60,10 +48,7 @@ cluster <- function(input, output, session, adata,
                     inplace = TRUE,
                     check_if_exists = TRUE)
 
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
+            if (is_error(msg)) return()
 
             incProgress(1 / n, detail = "Visualizing")
             msg <- cellar$safe(cellar$reduce_dim_vis,
@@ -74,22 +59,18 @@ cluster <- function(input, output, session, adata,
                 inplace = TRUE,
                 check_if_exists = TRUE)
 
-            if (msg != 'good') {
-                showNotification(py_to_r(msg))
-                return()
-            }
+            if (is_error(msg)) return()
 
             incProgress(1 / n, detail = "Converting names")
             msg <- cellar$safe(cellar$name_genes,
                 x = adata(),
                 inplace = TRUE
             )
+
+            if (is_error(msg)) return()
         })
 
-        if (msg != 'good') {
-            showNotification(py_to_r(msg))
-            return()
-        }
+        if (is_error(msg, notify=TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)
@@ -98,10 +79,8 @@ cluster <- function(input, output, session, adata,
 
     # Semi-supervised clustering
     observeEvent(input$ssclurun, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         if (!py_has_attr(adata()$obs, 'labels')) return()
-        req(input$saved_clusters)
-        req(input$n_ss_clusters)
 
         withProgress(message = "Please Wait", value = 0, {
             n <- 2
@@ -115,10 +94,7 @@ cluster <- function(input, output, session, adata,
                 preserved_labels = input$saved_clusters)
         })
 
-        if (msg != 'good') {
-            showNotification(py_to_r(msg))
-            return()
-        }
+        if (is_error(msg, notify=TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)
@@ -127,18 +103,15 @@ cluster <- function(input, output, session, adata,
 
     # Merge clusters
     observeEvent(input$merge_clusters, {
-        if (is_active(adata()) == FALSE) return()
-        if (!py_has_attr(adata()$obs, 'labels')) return()
+        req(adata())
         req(input$clusters_to_merge)
+        if (!py_has_attr(adata()$obs, 'labels')) return()
 
         msg <- cellar$safe(merge_clusters,
             adata = adata(),
             clusters = input$clusters_to_merge)
 
-        if (msg != 'good') {
-            showNotification(py_to_r(msg))
-            return()
-        }
+        if (is_error(msg, notify=TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)

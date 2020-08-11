@@ -359,8 +359,7 @@ def reduce_dim_vis(
 
 def name_genes(
     x: Union[AnnData, np.ndarray, list],
-    inplace: Optional[bool] = True
-) -> Optional[Union[AnnData, np.ndarray]]:
+    inplace: Optional[bool] = True) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Find synonyms for gene IDs/names.
 
