@@ -30,7 +30,8 @@ upload_file <- function(input, output, session) {
         req(input$file1)
         showModal(modalDialog(
             textInput(ns("dataset_fname"), "Enter dataset name."),
-            footer = tagList(actionButton(ns("okdataset"), "OK"))
+            footer = tagList(actionButton(ns("okdataset"), "OK")),
+            fade = FALSE
         ))
     })
 
@@ -42,13 +43,15 @@ upload_file <- function(input, output, session) {
             showModal(modalDialog(
                 textInput(ns("dataset_fname"), "Enter dataset name."),
                 div(tags$b("Name should not be empty.", style = "color: red;")),
-                footer = tagList(actionButton(ns("okdataset"), "OK"))
+                footer = tagList(actionButton(ns("okdataset"), "OK")),
+                fade = FALSE
             ))
         } else if (datasetExists(fname, path="datasets/user_uploaded")) {
             showModal(modalDialog(
                 textInput(ns("dataset_fname"), "Enter dataset name."),
                 div(tags$b("Dataset exists.", style = "color: red;")),
-                footer = tagList(actionButton(ns("okdataset"), "OK"))
+                footer = tagList(actionButton(ns("okdataset"), "OK")),
+                fade = FALSE
             ))
         } else {
             removeModal()

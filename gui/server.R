@@ -14,6 +14,7 @@ source("gui/server_logic/plot.R")
 source("gui/server_logic/align.R")
 source("gui/server_logic/selectionLabeling.R")
 source("gui/server_logic/de.R")
+source("gui/server_logic/info.R")
 
 cellar <- import("src", convert=FALSE)
 source("gui/server_logic/aliases.R")
@@ -21,7 +22,7 @@ source("gui/server_logic/aliases.R")
 server <- shinyServer(function(input, output, session) {
     # All variables that need to be used across different modules
     # should be defined here
-    adata <- reactiveVal(0)
+    adata <- reactiveVal(NULL)
 
     selDataset <- reactiveVal("")
     activeDataset <- reactiveVal("")
@@ -39,14 +40,9 @@ server <- shinyServer(function(input, output, session) {
     resubset <- reactiveVal(0)
     retheme <- reactiveVal(0)
 
-    curPlot <- reactiveVal(0)
-    plotHistory <- reactiveVal(c())
-
-    cellNamesTb <- reactiveVal(c())
-    infoTb <- reactiveVal(c())
-
     # We are using the same namespace for everything called "ns".
-    notificationModule = callModule(notifications, id = 'ns')
+    info_val <- callModule(info, id = "ns", adata = adata,
+                           relabel = relabel, reinfo = reinfo)
 
     # Dataset menu
     callModule(dataset, id = "ns", adata = adata, selDataset = selDataset,
@@ -56,15 +52,12 @@ server <- shinyServer(function(input, output, session) {
 
     # Clustering menu
     callModule(cluster, id = "ns", adata = adata, replot = replot,
-               reset = reset, relabel = relabel, resubset = resubset,
-               reinfo = reinfo,
-               cellNamesTb = cellNamesTb, infoTb = infoTb)
-    callModule(plot, id = "ns", replot = replot, adata = adata,
+               reset = reset, resubset = resubset)
+    main_plot_val <- callModule(plot, id = "ns", replot = replot, adata = adata,
                selDataset = selDataset, setNames = setNames,
-               plotHistory = plotHistory, curPlot = curPlot,
                reset = reset, resubset = resubset,
-               cellNamesTb = cellNamesTb, infoTb = infoTb,
-               reinfo = reinfo, relabel = relabel)
+               reinfo = reinfo, relabel = relabel, retheme = retheme,
+               info_val = info_val)
 
     # Label Transfer menu
     callModule(align, id = "ns", adata = adata,
@@ -98,7 +91,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(misc, id = "ns")
     callModule(dataset_reset, id = "ns", reset = reset, setNames = setNames,
                labelList = labelList, deGenes = deGenes, adata = adata,
-               fullreset = fullreset, curPlot = curPlot,
-               plotHistory = plotHistory, resubset = resubset,
-               cellNamesTb = cellNamesTb, infoTb = infoTb)
+               fullreset = fullreset, resubset = resubset,
+               main_plot_val = main_plot_val)
+
 })

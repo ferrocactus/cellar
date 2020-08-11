@@ -247,7 +247,7 @@ input:disabled {
     border-color: transparent !important;
 }
 
-#ns-collapse_cell_names {
+.collapsebtn {
     margin-bottom: 20px;
     margin-top: 20px;
     border: none;
@@ -255,7 +255,7 @@ input:disabled {
     box-shadow: none;
 }
 
-#ns-collapse_cell_names:hover {
+.collapsebtn:hover {
     text-decoration: underline;
 }
 

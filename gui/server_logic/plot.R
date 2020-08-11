@@ -2,25 +2,23 @@ source("gui/server_logic/plot_options.R")
 
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, selDataset,
-                 setNames, setPts, plotHistory, curPlot, reset,
-                 resubset, cellNamesTb, infoTb, reinfo, relabel) {
-    no_append = reactiveVal(0)
-    navigate = reactiveVal(0)
+                 setNames, setPts, reset, resubset, reinfo, relabel,
+                 retheme, info_val) {
+    ns <- session$ns
+    plot_index <- reactiveVal(0)
+    plot_count <- reactiveVal(0)
+    main_plot_val <- reactiveVal(NULL)
 
     # triggers when replot is set to 1
     observeEvent(replot(), {
         if (replot() < 1) return()
         isolate(replot(0))
-        no_app <- isolate(no_append())
-        isolate(no_append(0))
 
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         if (!py_has_attr(adata()$obs, 'labels')) return()
 
-        if (no_app == 0) {
-            relabel(relabel() + 1)
-            reinfo(reinfo() + 1)
-        }
+        relabel(relabel() + 1)
+        reinfo(reinfo() + 1)
 
         withProgress(message = "Making plot", value = 0, {
             incProgress(1, detail = paste("Step: Rendering plot"))
@@ -34,9 +32,9 @@ plot <- function(input, output, session, replot, adata, selDataset,
             symbols = NULL
 
             text = ~paste("Label: ", label_names)
-            if (input$show_names == 'show_names' && input$color == 'Clusters')
+            if (isolate(input$show_names) == 'show_names' && isolate(input$color) == 'Clusters')
                 color = paste0(labels, ": ", label_names)
-            else if (input$color == 'Clusters')
+            else if (isolate(input$color) == 'Clusters')
                 color = labels
             else if (isolate(input$color) == 'Uncertainty'){
                 if (anyNA(as.integer(isolate(input$n_neighbors)))==TRUE){
@@ -95,7 +93,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 key = as.character(1:length(labels)),
                 marker = list(size = isolate(input$dot_size)),
                 type = 'scatter',
-                mode = 'markers'
+                mode = 'markers',
+                height = isolate(input$plot_height)
             )
 
             p <- p %>% config(modeBarButtonsToAdd = list(plot_options_btn))
@@ -107,145 +106,139 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 margin = list(t = 50))
 
             p <- theme_plot(p, theme_mode=isolate(input$theme_mode))
-
             p <- plotly_build(p)
 
-            if (no_app == 0) {
-                isolate(plotHistory(c(isolate(plotHistory()), list(p))))
-                curPlot(length(plotHistory()))
-            } else {
-                tmp <- isolate(plotHistory())
-                curPlot(length(isolate(plotHistory())))
-                tmp[isolate(curPlot())] = list(p)
-                isolate(plotHistory(tmp))
-                navigate(1)
-            }
+            isolate(main_plot_val(p))
+            p <- p %>% toWebGL()
+
+            output$plot <- renderPlotly({p})
         })
     })
 
+    observe({
+        req(info_val$cellNames)
+        output$cell_names_outp <- renderUI({info_val$cellNames})
+        req(info_val$configs)
+        output$clustering_info <- renderUI({info_val$configs})
+    })
+
     observeEvent(input$dot_size, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         runjs(js.reset_marker_size)
     })
 
     observeEvent(input$plot_height, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         runjs(js.reset_plot_height)
     })
 
     observeEvent(input$show_names, {
-        if (is_active(adata()) == FALSE) return()
-        no_append(1)
+        req(adata())
         replot(replot() + 1)
     })
 
     observeEvent(input$theme_mode, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         runjs(js.reset_theme)
     })
 
     observeEvent(input$color, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         replot(replot() + 1)
     })
 
-    ###########################################################################
-    # Plot Navigation
+    observeEvent(input$store_plot, {
+        req(main_plot_val())
 
-    toListenReplot <- reactive({
-        list(curPlot(), navigate())
-    })
+        if (plot_count() == 5) {
+            showNotification("Cannot have more than 5 stored plots.")
+            return()
+        }
 
-    observeEvent(toListenReplot(), {
-        if (curPlot() < 1) return()
+        isolate(plot_index(isolate(plot_index()) + 1))
+        isolate(plot_count(isolate(plot_count()) + 1))
 
-        output$plot <- renderPlotly({
-            isolate(navigate(0))
-            p <- isolate(plotHistory())[[curPlot()]]
+        plot_i = as.character(isolate(plot_index()))
+        title = paste0("Plot ", plot_i, " (", adata()$uns$dataset, ")")
+        plot_id = paste0("plot", plot_i)
+        collapse_btn_id = paste0("collapse_cell_names", plot_i)
+        configs_id = paste0("clustering_info", plot_i)
+        cell_names_id = paste0("cell_names_outp", plot_i)
+        observer_id = paste0("observer", plot_i)
+
+        appendTab(
+            "tabset", tabPanel(
+                title,
+                plotlyOutput(ns(plot_id), height="100%"),
+                div(
+                    class = "cell_names_div",
+                    list(
+                        actionButton(
+                            ns(collapse_btn_id),
+                            "View additional info",
+                            class = "collapsebtn"),
+                        splitLayout(
+                            htmlOutput(ns(configs_id)),
+                            htmlOutput(ns(cell_names_id)))))),
+            select = TRUE)
+
+        observeEvent(input[[collapse_btn_id]], {
+            shinyjs::toggle(cell_names_id)
+            shinyjs::toggle(configs_id)
+        })
+
+        output[[cell_names_id]] <- renderUI({isolate(info_val$cellNames)})
+
+        output[[configs_id]] <- renderUI({isolate(info_val$configs)})
+
+        output[[plot_id]] <- renderPlotly({
+            p <- isolate(main_plot_val())
             p$x$layout$height = isolate(input$plot_height)
             for (i in seq_along(p$x$data))
                p$x$data[[i]]$marker$size = isolate(input$dot_size)
-            p <- theme_plot(p, theme_mode=isolate(input$theme_mode))
+            p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
             p <- p %>% toWebGL()
-            return(p)
-        })
+            p$x$layout$title <- title
+            retheme(1)
+            return(p)})})
 
-        output$cell_names_outp <- renderUI({
-            return(isolate(cellNamesTb())[[isolate(curPlot())]])
-        })
+    observeEvent(input$delete_plot, {
+        if (isolate(input$tabset) == "Main Plot") {
+            showNotification("Cannote delete main plot.")
+            return()}
 
-        output$clustering_info <- renderUI({
-            return(isolate(infoTb())[[isolate(curPlot())]])
-        })
-    })
-
-    observeEvent(input$prevplot, {
-        if (curPlot() < 1) return()
-
-        if (curPlot() == 1) {
-            showNotification("No more plots to show")
-            return()
-        }
-        navigate(navigate() + 1)
-        curPlot(curPlot() - 1)
-    })
-
-    observeEvent(input$nextplot, {
-        if (curPlot() < 1) return()
-
-        if (curPlot() == length(plotHistory())) {
-            showNotification("This is the last plot")
-            return()
-        }
-        curPlot(curPlot() + 1)
-        navigate(navigate() + 1)
-    })
-
-    observeEvent(input$firstplot, {
-        if (curPlot() < 1) return()
-        curPlot(1)
-        navigate(navigate() + 1)
-    })
-
-    observeEvent(input$lastplot, {
-        if (curPlot() < 1) return()
-        curPlot(length(plotHistory()))
-        navigate(navigate() + 1)
-    })
+        isolate(plot_count(isolate(plot_count()) - 1))
+        removeTab("tabset", isolate(input$tabset))})
     ###########################################################################
 
     # Store selected cells
     observeEvent(input$store_lasso, {
-        if (curPlot() == 0) return()
+        req(main_plot_val())
         if (!py_has_attr(adata()$obs, 'labels')) return()
+        req(input$newsubset)
 
-        if (curPlot() != length(plotHistory())) {
-            showNotification("You can only select in the active plot.")
+        if (isolate(input$tabset) != "Main Plot") {
+            showNotification("You can only select in the main plot.")
             return()
         }
 
-        if (as.character(input$newsubset) %in% setNames()) {
+        if (as.character(isolate(input$newsubset)) %in% setNames()) {
             showNotification("Name already exists")
             return()
         }
 
-        if (substr(as.character(input$newsubset), 1, 7) == "Cluster") {
+        if (substr(as.character(isolate(input$newsubset)), 1, 7) == "Cluster") {
             showNotification("Reserved name, please choose another.")
             return()
         }
 
-        if (as.character(input$newsubset) == "") {
-            showNotification("Please enter a name for the subset.")
-            return()
-        }
-
         d <- event_data("plotly_selected")
-        if (is.null(d$key)) return()
+        req(d$key)
 
         keys <- as.numeric(d$key)
         msg <- cellar$safe(store_subset,
             adata = adata(),
-            name = input$newsubset,
+            name = isolate(input$newsubset),
             indices = keys,
             from_r = TRUE)
 
@@ -260,25 +253,26 @@ plot <- function(input, output, session, replot, adata, selDataset,
     # Download plot
     output$download_plot <- downloadHandler(
         filename = function() {
-            extension <- tolower(input$plot_download_format)
+            extension <- tolower(isolate(input$plot_download_format))
             paste0(tools::file_path_sans_ext(basename(selDataset())),
                    "_plot.", extension)
         },
         content = function(fname) {
-            if (curPlot() == 0) return(NULL)
-            extension <- tolower(input$plot_download_format)
+            req(main_plot_val())
+            extension <- tolower(isolate(input$plot_download_format))
             if (extension == 'html') {
                 htmlwidgets::saveWidget(
-                    as_widget(plotHistory()[[curPlot()]]), fname,
+                    as_widget(main_plot_val()), fname,
                     selfcontained = TRUE)
             } else {
-                withProgress(message = "Saving plot", value = 0, {
-                    incProgress(1/2, detail = paste("Step: Rendering"))
+                withProgress(message = "Rendering plot", value = 0, {
+                    incProgress(1/2)
                     withr::with_dir(dirname(fname),
-                                    orca(plotHistory()[[curPlot()]],
-                                         basename(fname), format = extension))
+                                    orca(main_plot_val(), basename(fname),
+                                    format = extension))
                 })
             }
         }
     )
+    return(main_plot_val)
 }

@@ -3,7 +3,7 @@ align <- function(input, output, session, adata, selDatasetAlign,
     adataAlign <- reactiveVal(0)
 
     observeEvent(input$align_btn, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         if (input$folder_align == 'user_uploaded') {
             req(input$reference_dataset)
             isolate(selDatasetAlign(input$reference_dataset$datapath))

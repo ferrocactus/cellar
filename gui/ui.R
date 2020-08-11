@@ -13,7 +13,6 @@ source("gui/ui_logic/sidebar/downloadmenu.R")
 source("gui/ui_logic/sidebar/links.R")
 
 source("gui/ui_logic/body/plots.R")
-source("gui/ui_logic/body/cell_names.R")
 source("gui/ui_logic/body/analysis.R")
 
 source("gui/ui_logic/tooltips.R")
@@ -56,7 +55,6 @@ body <- dashboardBody(
     tags$head(includeCSS("gui/ui_logic/styles/_all-skins.min.css")),
     history(id='ns'),
     plots(id="ns"),
-    cell_names(id="ns"),
     analysis(id="ns"),
     tooltips(id="ns"),
     div(class = "footer",

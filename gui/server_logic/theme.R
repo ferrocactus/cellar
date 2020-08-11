@@ -16,10 +16,6 @@ theme <- function(input, output, session, retheme) {
             )
             addCssClass(
                 class = "body_dark_mode",
-                selector = 'switcher'
-            )
-            addCssClass(
-                class = "body_dark_mode",
                 selector = '.content-wrapper'
             )
             addCssClass(
@@ -59,10 +55,6 @@ theme <- function(input, output, session, retheme) {
             removeCssClass(
                 class = "nav_tabs_dark_mode",
                 selector = '.nav-tabs'
-            )
-            removeCssClass(
-                class = "body_dark_mode",
-                selector = 'switcher'
             )
             removeCssClass(
                 class = "body_dark_mode",

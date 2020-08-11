@@ -23,6 +23,13 @@ js.reset_marker_size = "
     var marker_size = document.getElementById('ns-dot_size').value;
     var upd = {'marker.size': marker_size};
     Plotly.restyle(plot, upd);
+
+    var plots = document.getElementById('ns-tabset').children;
+    for (var i = 1; i < plots.length; ++i) {
+        var plot_num = plots[i].childNodes[1].innerText.split(' ')[1];
+        plot = document.getElementById('ns-plot' + plot_num);
+        Plotly.restyle(plot, upd);
+    }
 "
 
 js.reset_plot_height = "
@@ -30,10 +37,16 @@ js.reset_plot_height = "
     var plot = document.getElementById('ns-plot');
     var upd = {height: parseInt(plot_height)};
     Plotly.relayout(plot, upd);
+
+    var plots = document.getElementById('ns-tabset').children;
+    for (var i = 1; i < plots.length; ++i) {
+        var plot_num = plots[i].childNodes[1].innerText.split(' ')[1];
+        plot = document.getElementById('ns-plot' + plot_num);
+        Plotly.relayout(plot, upd);
+    }
 "
 
 js.reset_theme = "
-    var plot = document.getElementById('ns-plot');
     var theme_mode = $(\"input[name=ns-theme_mode]:checked\").val();
     var upd;
     if (theme_mode === 'dark_mode') {
@@ -57,7 +70,15 @@ js.reset_theme = "
             'yaxis.zerolinecolor': null
         };
     }
+    var plot = document.getElementById('ns-plot');
     Plotly.relayout(plot, upd);
+
+    var plots = document.getElementById('ns-tabset').children;
+    for (var i = 1; i < plots.length; ++i) {
+        var plot_num = plots[i].childNodes[1].innerText.split(' ')[1];
+        plot = document.getElementById('ns-plot' + plot_num);
+        Plotly.relayout(plot, upd);
+    }
 "
 
 theme_plot <- function(p, theme_mode) {

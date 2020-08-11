@@ -2,10 +2,23 @@ plots <- function(id, label='plots') {
 ns = NS(id)
 tabsetPanel(
     type = "tabs",
-    id = "tabset",
+    id = ns("tabset"),
     tabPanel(
         "Main Plot",
-        h3(textOutput("caption")),
         plotlyOutput(ns("plot"), height="100%"),
+        div(
+            class = "cell_names_div",
+            list(
+                actionButton(
+                    ns("collapse_cell_names"),
+                    "View additional info",
+                    class = "collapsebtn"
+                ),
+                splitLayout(
+                    htmlOutput(ns("clustering_info")),
+                    htmlOutput(ns("cell_names_outp"))
+                )
+            )
+        )
     )
 )}

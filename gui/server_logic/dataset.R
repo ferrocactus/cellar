@@ -49,7 +49,7 @@ dataset <- function(input, output, session, adata, selDataset,
         })
         if (py_to_r(is_str(adata()))) {
             showNotification("Incorrect file format.")
-            isolate(adata(0))
+            isolate(adata(NULL))
         } else {
             fullreset(fullreset() + 1)
             showNotification("Dataset loaded")

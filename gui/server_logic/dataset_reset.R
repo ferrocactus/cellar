@@ -1,7 +1,6 @@
 dataset_reset <- function(input, output, session, reset, setNames,
                           labelList, adata, fullreset, deGenes,
-                          curPlot, plotHistory, resubset,
-                          cellNamesTb, infoTb) {
+                          resubset, main_plot_val) {
     toListenReset <- reactive({
         list(reset(), fullreset())
     })
@@ -14,11 +13,8 @@ dataset_reset <- function(input, output, session, reset, setNames,
             isolate(reset(0))
             setNames(c("None"))
             labelList(c())
-            curPlot(0)
-            plotHistory(c())
-            cellNamesTb(c())
-            infoTb(c())
             output$plot <- NULL
+            main_plot_val(NULL)
         } else {
             isolate(reset(0))
         }
@@ -46,7 +42,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
 
         deGenes(c())
 
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
 
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {
             updateSelectInput(

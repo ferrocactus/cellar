@@ -3,20 +3,12 @@ history <- function(id, label = "history") {
     fluidRow(
         div(class = "hist",
             actionButton(
-                ns("firstplot"), icon("angle-double-left"),
-                class = "histbtn prevbtn"
+                ns("store_plot"), "Store Plot",
+                class = "histbtn"
             ),
             actionButton(
-                ns("prevplot"), icon("angle-left"),
-                class = "histbtn prevbtn"
-            ),
-            actionButton(
-                ns("nextplot"), icon("angle-right"),
-                class = "histbtn nextbtn"
-            ),
-            actionButton(
-                ns("lastplot"), icon("angle-double-right"),
-                class = "histbtn nextbtn"
+                ns("delete_plot"), "Delete Plot",
+                class = "histbtn"
             )
         )
     )
