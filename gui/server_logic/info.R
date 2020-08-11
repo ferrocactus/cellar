@@ -27,7 +27,7 @@ info <- function(input, output, session, adata, relabel, reinfo) {
 
         tb <- df %>% addHtmlTableStyle(
             align='l', css.cell = "padding-right: 10em;") %>%
-            htmlTable(caption = "Cluster Labels (Main Plot)", rnames = FALSE)
+            htmlTable(caption = "Cluster Labels", rnames = FALSE)
 
         info_val$cellNames <- list(tb)
         isolate(relabel(0))
@@ -75,7 +75,7 @@ info <- function(input, output, session, adata, relabel, reinfo) {
             css.cell = "padding-right: 10em;"
             ) %>%
             htmlTable(
-                caption = "General Info (Main Plot)",
+                caption = "General Info",
                 rgroup = c("Dimensionality Reduction", "Clustering", "Visualization"),
                 n.rgroup = c(3, 4, 1)
             )

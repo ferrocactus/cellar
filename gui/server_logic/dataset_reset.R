@@ -19,6 +19,8 @@ dataset_reset <- function(input, output, session, reset, setNames,
             isolate(reset(0))
         }
 
+        updateTabsetPanel(session, "tabset", "Main Plot")
+
         output$DEtable = NULL
         output$GOtable = NULL
         output$KEGGtable = NULL

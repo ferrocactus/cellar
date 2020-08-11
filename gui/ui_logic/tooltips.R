@@ -3,7 +3,7 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
 
     # Clustering Menu
     bsTooltip(ns("runconfigbtn"),
-              paste0("Do clustering with current configuration")),
+              paste0("Run clustering with current configuration")),
 
 
     # Label Transfer
