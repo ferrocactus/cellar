@@ -160,7 +160,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         isolate(plot_count(isolate(plot_count()) + 1))
 
         plot_i = as.character(isolate(plot_index()))
-        title = paste0("Plot ", plot_i, " (", adata()$uns$dataset, ")")
+        title = paste0("Plot ", plot_i, " (", activeDataset(), ")")
         plot_id = paste0("plot", plot_i)
         collapse_btn_id = paste0("collapse_cell_names", plot_i)
         configs_id = paste0("clustering_info", plot_i)
