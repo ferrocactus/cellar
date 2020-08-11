@@ -3,20 +3,20 @@ dataset <- function(input, output, session, adata, selDataset,
     ###########################################################################
 
     # udpate data tissue
-    observeEvent(input$data_source,{
+    observeEvent(input$data_source, {
         updateSelectInput(
             session,
             "data_tissue",
-            choices = list.files(paste0("datasets/server/",input$data_source))
+            choices = list.files(paste0("datasets/server/", input$data_source))
         )
     })
 
     # update server data
-    observeEvent(input$data_tissue,{
+    observeEvent(input$data_tissue, {
         updateSelectInput(
             session,
             "server_dataset",
-            choices = list.files(paste0("datasets/server/",input$data_source,"/",input$data_tissue))
+            choices = list.files(paste0("datasets/server/", input$data_source, "/", input$data_tissue))
         )
     })
 
@@ -30,7 +30,7 @@ dataset <- function(input, output, session, adata, selDataset,
         if (input$folder == 'user_uploaded')
             isolate(selDataset(as.character(input$uploaded_dataset)))
         else
-            isolate(selDataset(as.character(paste0(input$data_source,"/",input$data_tissue,"/",input$server_dataset))))
+            isolate(selDataset(as.character(paste0(input$data_source, "/", input$data_tissue, "/", input$server_dataset))))
 
         # Include path as well
         isolate(selDataset(

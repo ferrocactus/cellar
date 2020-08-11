@@ -36,25 +36,25 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 color = paste0(labels, ": ", label_names)
             else if (isolate(input$color) == 'Clusters')
                 color = labels
-            else if (isolate(input$color) == 'Uncertainty'){
-                if (anyNA(as.integer(isolate(input$n_neighbors)))==TRUE){
-                    n_neighbors=as.integer(sqrt(length(labels)))
-                } else if (as.integer(isolate(input$n_neighbors)) > as.integer(length(labels)/2)){
-                    n_neighbors=as.integer(sqrt(length(labels)))
-                } else{
-                    n_neighbors=as.integer(isolate(input$n_neighbors))
+            else if (isolate(input$color) == 'Uncertainty') {
+                if (anyNA(as.integer(isolate(input$n_neighbors))) == TRUE) {
+                    n_neighbors = as.integer(sqrt(length(labels)))
+                } else if (as.integer(isolate(input$n_neighbors)) > as.integer(length(labels) / 2)) {
+                    n_neighbors = as.integer(sqrt(length(labels)))
+                } else {
+                    n_neighbors = as.integer(isolate(input$n_neighbors))
                 }
 
                 showNotification("Calculating Uncertainty")
                 withProgress(message = "Please Wait", value = 0, {
                     incProgress(1 / 3, detail = "Data processing...")
                     cellar$safe(cellar$get_neighbors,
-                                x=adata(),
-                                n_neighbors=n_neighbors)
+                                x = adata(),
+                                n_neighbors = n_neighbors)
                     incProgress(1 / 3, detail = "Calculating uncertainty...")
                     cellar$safe(cellar$uncertainty,
-                                x=adata(),
-                                n_neighbors=n_neighbors)
+                                x = adata(),
+                                n_neighbors = n_neighbors)
                 })
                 showNotification("Finished")
 
@@ -65,9 +65,9 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 symbols = all_symbols
                 cell_ids = as.character(py_to_r(adata()$obs$index$to_numpy()))
                 certainty = py_to_r(adata()$uns['uncertainty_text'])
-                text = ~paste0(replicate(length(label_names),"Label: "),
-                            label_names,replicate(length(label_names),", Uncertainty: "),
-                            as.character(py_to_r(adata()$obs['uncertainty'])),'\n',as.character(certainty))
+                text = ~paste0(replicate(length(label_names), "Label: "),
+                            label_names, replicate(length(label_names), ", Uncertainty: "),
+                            as.character(py_to_r(adata()$obs['uncertainty'])), '\n', as.character(certainty))
             } else {
                 gene_names = py_to_r(get_all_gene_names(adata()))
                 i = which(gene_names == isolate(input$color))[1]
@@ -94,7 +94,8 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 marker = list(size = isolate(input$dot_size)),
                 type = 'scatter',
                 mode = 'markers',
-                height = isolate(input$plot_height)
+                height = isolate(input$plot_height),
+                source = 'M'
             )
 
             p <- p %>% config(modeBarButtonsToAdd = list(plot_options_btn))
@@ -105,21 +106,21 @@ plot <- function(input, output, session, replot, adata, selDataset,
                 title = title,
                 margin = list(t = 50))
 
-            p <- theme_plot(p, theme_mode=isolate(input$theme_mode))
+            p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
             p <- plotly_build(p)
 
             isolate(main_plot_val(p))
             p <- p %>% toWebGL()
 
-            output$plot <- renderPlotly({p})
+            output$plot <- renderPlotly({ p })
         })
     })
 
     observe({
         req(info_val$cellNames)
-        output$cell_names_outp <- renderUI({info_val$cellNames})
+        output$cell_names_outp <- renderUI({ info_val$cellNames })
         req(info_val$configs)
-        output$clustering_info <- renderUI({info_val$configs})
+        output$clustering_info <- renderUI({ info_val$configs })
     })
 
     observeEvent(input$dot_size, {
@@ -169,7 +170,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
         appendTab(
             "tabset", tabPanel(
                 title,
-                plotlyOutput(ns(plot_id), height="100%"),
+                plotlyOutput(ns(plot_id), height = "100%"),
                 div(
                     class = "cell_names_div",
                     list(
@@ -187,28 +188,33 @@ plot <- function(input, output, session, replot, adata, selDataset,
             shinyjs::toggle(configs_id)
         })
 
-        output[[cell_names_id]] <- renderUI({isolate(info_val$cellNames)})
+        output[[cell_names_id]] <- renderUI({ isolate(info_val$cellNames) })
 
-        output[[configs_id]] <- renderUI({isolate(info_val$configs)})
+        output[[configs_id]] <- renderUI({ isolate(info_val$configs) })
 
         output[[plot_id]] <- renderPlotly({
             p <- isolate(main_plot_val())
             p$x$layout$height = isolate(input$plot_height)
             for (i in seq_along(p$x$data))
-               p$x$data[[i]]$marker$size = isolate(input$dot_size)
+                p$x$data[[i]]$marker$size = isolate(input$dot_size)
             p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
             p <- p %>% toWebGL()
             p$x$layout$title <- title
+            p$x$source <- 'P'
             retheme(1)
-            return(p)})})
+            return(p)
+        })
+    })
 
     observeEvent(input$delete_plot, {
         if (isolate(input$tabset) == "Main Plot") {
             showNotification("Cannote delete main plot.")
-            return()}
+            return()
+        }
 
         isolate(plot_count(isolate(plot_count()) - 1))
-        removeTab("tabset", isolate(input$tabset))})
+        removeTab("tabset", isolate(input$tabset))
+    })
     ###########################################################################
 
     # Store selected cells
@@ -232,7 +238,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
             return()
         }
 
-        d <- event_data("plotly_selected")
+        d <- event_data("plotly_selected", source='M')
         req(d$key)
 
         keys <- as.numeric(d$key)
@@ -266,7 +272,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
                     selfcontained = TRUE)
             } else {
                 withProgress(message = "Rendering plot", value = 0, {
-                    incProgress(1/2)
+                    incProgress(1 / 2)
                     withr::with_dir(dirname(fname),
                                     orca(main_plot_val(), basename(fname),
                                     format = extension))

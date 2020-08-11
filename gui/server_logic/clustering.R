@@ -70,7 +70,7 @@ cluster <- function(input, output, session, adata,
             if (is_error(msg)) return()
         })
 
-        if (is_error(msg, notify=TRUE)) return()
+        if (is_error(msg, notify = TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)
@@ -94,7 +94,7 @@ cluster <- function(input, output, session, adata,
                 preserved_labels = input$saved_clusters)
         })
 
-        if (is_error(msg, notify=TRUE)) return()
+        if (is_error(msg, notify = TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)
@@ -111,7 +111,7 @@ cluster <- function(input, output, session, adata,
             adata = adata(),
             clusters = input$clusters_to_merge)
 
-        if (is_error(msg, notify=TRUE)) return()
+        if (is_error(msg, notify = TRUE)) return()
 
         replot(replot() + 1)
         reset(reset() + 1)
