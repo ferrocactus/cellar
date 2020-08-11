@@ -54,7 +54,7 @@ server <- shinyServer(function(input, output, session) {
     callModule(cluster, id = "ns", adata = adata, replot = replot,
                reset = reset, resubset = resubset)
     main_plot_val <- callModule(plot, id = "ns", replot = replot, adata = adata,
-               selDataset = selDataset, setNames = setNames,
+               activeDataset = activeDataset, setNames = setNames,
                reset = reset, resubset = resubset,
                reinfo = reinfo, relabel = relabel, retheme = retheme,
                info_val = info_val)

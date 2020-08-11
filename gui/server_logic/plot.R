@@ -1,7 +1,7 @@
 source("gui/server_logic/plot_options.R")
 
 # Define the number of colors you want
-plot <- function(input, output, session, replot, adata, selDataset,
+plot <- function(input, output, session, replot, adata, activeDataset,
                  setNames, setPts, reset, resubset, reinfo, relabel,
                  retheme, info_val) {
     ns <- session$ns
@@ -260,7 +260,7 @@ plot <- function(input, output, session, replot, adata, selDataset,
     output$download_plot <- downloadHandler(
         filename = function() {
             extension <- tolower(isolate(input$plot_download_format))
-            paste0(tools::file_path_sans_ext(basename(selDataset())),
+            paste0(tools::file_path_sans_ext(basename(activeDataset())),
                    "_plot.", extension)
         },
         content = function(fname) {
