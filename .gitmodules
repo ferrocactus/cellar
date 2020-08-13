@@ -1,3 +1,0 @@
-[submodule "src/methods/ConstrainedKMeans"]
-	path = src/methods/ConstrainedKMeans
-	url = https://github.com/ferrocactus/ConstrainedKMeans

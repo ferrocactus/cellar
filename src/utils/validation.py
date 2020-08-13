@@ -27,12 +27,10 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
             except:
                 raise InvalidArgument(
                     "Incorrect number of components specified.")
-        elif method != 'PCA' and method != 'Precomputed PCA':
+        elif method != 'PCA' and method != 'Truncated SVD':
             raise InvalidArgument(
                 "Incorrect number of components specified.")
         else:
-            if method == 'Precomputed PCA':
-                return 10  # default 10 components
             return dim_n_components  # return 'knee'
 
     if isinstance(dim_n_components, int):

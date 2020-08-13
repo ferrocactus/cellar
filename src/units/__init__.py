@@ -11,6 +11,7 @@ from ._cluster import Clu_Scanpy
 from ._cluster_ensemble import Ens_HyperGraph
 from ._dim_reduction import Dim_PCA
 from ._dim_reduction import Dim_KernelPCA
+from ._dim_reduction import Dim_TruncatedSVD
 from ._dim_reduction import Dim_UMAP
 from ._dim_reduction import Dim_TSNE
 from ._dim_reduction import Dim_MDS
@@ -51,6 +52,7 @@ translation_dict = {
     "dim_reduction": {
         "PCA": Dim_PCA,
         "Kernel PCA": Dim_KernelPCA,
+        "Truncated SVD": Dim_TruncatedSVD,
         "UMAP": Dim_UMAP,
         "MDS": Dim_MDS,
         "Feature Agglomeration": Dim_FeatureAgglomeration,
@@ -143,6 +145,7 @@ __all__ = [
     'Ens_HyperGraph',
     'Dim_PCA',
     'Dim_KernelPCA',
+    'Dim_TruncatedSVD',
     'Dim_UMAP',
     'Dim_TSNE',
     'Dim_MDS',

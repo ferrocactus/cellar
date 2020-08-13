@@ -6,7 +6,7 @@ defaults <- list(
 )
 
 options <- list(
-    "dim" = c("PCA", "Kernel PCA", "Diffusion Map", "MDS", "UMAP", "Isomap",
+    "dim" = c("PCA", "Kernel PCA", "Truncated SVD", "Diffusion Map", "MDS", "UMAP", "Isomap",
               "Feature Agglomeration"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
               "GaussianMixture", "Scanpy", "Ensemble", "Fixed"),

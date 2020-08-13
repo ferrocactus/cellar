@@ -3,6 +3,7 @@ from typing import Optional, Union
 import numpy as np
 from anndata import AnnData
 from bidict import bidict
+from scipy.sparse import issparse
 
 from .units import wrap
 from .units import _method_exists
@@ -87,6 +88,14 @@ def reduce_dim(
     else:
         adata = _validate_x(x)
     _method_exists('dim_reduction', method)
+
+    if issparse(adata.X):
+        if method != 'Truncated SVD':
+            raise InappropriateArgument(
+                "Sparse matrix detected. "
+                "Please select Truncated SVD for dimensionality "
+                "reduction.")
+
     n_components_used = n_components
     n_components = _validate_dim_n_components(n_components,
                                               method, *adata.X.shape)
@@ -358,8 +367,8 @@ def reduce_dim_vis(
 
 
 def name_genes(
-    x: Union[AnnData, np.ndarray, list],
-    inplace: Optional[bool] = True) -> Optional[Union[AnnData, np.ndarray]]:
+        x: Union[AnnData, np.ndarray, list],
+        inplace: Optional[bool] = True) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Find synonyms for gene IDs/names.
 

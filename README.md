@@ -7,8 +7,8 @@ composition. As the number of samples increases, there is a
 growing need to correctly and automatically identify cell
 types by examining the gene expression profiles of individual
 cells. Several methods have been proposed by the Computational
-Biology and Machine Learning community for each step of the
-pipeline. Cellar is an attempt to put many of these methods
+Biology and Machine Learning community for each step of the data
+analysis pipeline. Cellar is an attempt to put many of these methods
 into a single and easy-to-use interface, while providing the user
 with maximum flexibility when choosing each step of the pipeline.
 

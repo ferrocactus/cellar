@@ -40,6 +40,8 @@ class SSClu_SeededKMeans(Unit):
         Returns:
             (np.ndarray): New labels after clustering (n_points x 1)
         """
+        self.logger.info("Initializing SeededKMeans.")
+
         unq_labels = np.unique(labels[labels >= 0])
         n_clusters = len(unq_labels)
         centroids = []
@@ -68,6 +70,8 @@ class SSClu_ConstrainedKMeans(Unit):
         self.kwargs = kwargs
 
     def get(self, x, labels, preserved_labels):
+        self.logger.info("Initializing Constrained KMeans.")
+
         unq_labels = np.unique(labels)
         _validate_n_clusters(self.n_clusters, x.shape[0])
         if (self.n_clusters < len(preserved_labels)):
