@@ -102,10 +102,14 @@ def get_obs_names(adata):
 
 
 def get_all_gene_ids(adata):
+    if issparse(adata.X):
+        return []
     return adata.var['parsed_ids'].to_numpy().astype('U')
 
 
 def get_all_gene_names(adata):
+    if issparse(adata.X):
+        return []
     return adata.var['parsed_names'].to_numpy().astype('U')
 
 
