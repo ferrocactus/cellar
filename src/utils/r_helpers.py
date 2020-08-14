@@ -142,8 +142,9 @@ def get_de_table(adata):
 
 
 def write_h5ad(adata, path, compression=9):
-    adata.var['parsed_names'] = None
-    adata.var['parsed_ids'] = None
+    adata = adata.copy()
+    #adata.var.pop('parsed_names')
+    adata.var.pop('parsed_ids')
     adata.write_h5ad(path, compression=compression)
 
 
