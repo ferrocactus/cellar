@@ -69,10 +69,16 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                             label_names, replicate(length(label_names), ", Uncertainty: "),
                             as.character(py_to_r(adata()$obs['uncertainty'])), '\n', as.character(certainty))
             } else {
+                # show gene expression level:
                 gene_names = py_to_r(get_all_gene_names(adata()))
                 i = which(gene_names == isolate(input$color))[1]
                 if (!is.null(i)) {
                     color = py_to_r(get_col(adata(), i))
+                    #print(class(color))  ##array
+                    color=color-min(color)+1 # make min=1
+                    
+                    color = log(color)
+                    text = ~paste("Label: ", label_names,'\nColor value:',as.character(color))
                     title = isolate(input$color)
                     showlegend = FALSE
                     symbol = ~labels
