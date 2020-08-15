@@ -118,6 +118,15 @@ def store_labels(adata, labels, method):
     populate_subsets(adata)
 
 
+def store_x_emb(adata, x_emb, method):
+    adata.obsm['x_emb'] = np.array(x_emb).astype(float)
+    adata.uns['dim_reduction_info'] = {}
+    adata.uns['dim_reduction_info']['method'] = method
+    adata.uns['dim_reduction_info']['n_components'] = x_emb.shape[1]
+    adata.uns['dim_reduction_info']['n_components_used'] = x_emb.shape[1]
+    adata.uns['dim_reduction_info']['kwargs'] = {}
+
+
 def update_subset_label(adata, subset_name, name):
     subset_name = str(subset_name)
     name = str(name)

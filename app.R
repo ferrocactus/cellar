@@ -14,6 +14,7 @@ library(htmltools)
 library(bsplus)
 library(htmlTable)
 library(RColorBrewer)
+library(SnapATAC)
 
 source("gui/ui.R")
 source("gui/server.R")

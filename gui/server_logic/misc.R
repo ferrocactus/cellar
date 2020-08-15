@@ -1,7 +1,8 @@
 # Logic for graying out buttons when not applicable
 misc <- function(input, output, session) {
     observeEvent(input$dim_method, {
-        if(input$dim_method == "PCA" || input$dim_method == "Truncated SVD"){
+        if(input$dim_method == "PCA" || input$dim_method == "Truncated SVD"
+            || input$dim_method == "Diffusion Map"){
             shinyjs::enable(selector = "[type=radio][value=pca_auto]")
         } else {
             shinyjs::disable(selector = "[type=radio][value=pca_auto]")

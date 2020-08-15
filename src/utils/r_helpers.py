@@ -143,7 +143,7 @@ def get_de_table(adata):
 
 def write_h5ad(adata, path, compression=9):
     adata = adata.copy()
-    #adata.var.pop('parsed_names')
+    # adata.var.pop('parsed_names')
     adata.var.pop('parsed_ids')
     adata.write_h5ad(path, compression=compression)
 
@@ -183,3 +183,25 @@ def get_x(adata):
     if adata.isbacked:
         return adata.X[()]
     return adata.X
+
+
+def is_sparse(adata):
+    return issparse(adata.X)
+
+
+def has_x_emb_sparse(adata, method, n_components):
+    if n_components == 'knee':
+        n_components = 50
+
+    n_components = int(n_components)
+
+    if 'dim_reduction_info' not in adata.uns:
+        return False
+
+    if adata.uns['dim_reduction_info']['method'] != method:
+        return False
+
+    if adata.uns['dim_reduction_info']['n_components'] != n_components:
+        return False
+
+    return True

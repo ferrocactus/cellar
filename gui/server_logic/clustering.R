@@ -1,3 +1,5 @@
+scipy <- import('scipy')
+
 cluster <- function(input, output, session, adata,
                     replot, reset, resubset) {
     observeEvent(input$runconfigbtn, {
@@ -18,14 +20,22 @@ cluster <- function(input, output, session, adata,
         withProgress(message = "Please Wait", value = 0, {
             n <- 5
             incProgress(1 / n, detail = "Reducing Dimensionality")
-            msg <- cellar$safe(cellar$reduce_dim,
-                x = adata(),
-                method = input$dim_method,
-                n_components = n_components,
-                inplace = TRUE,
-                check_if_exists = TRUE)
 
-            if (is_error(msg)) return()
+            if (py_to_r(is_sparse(adata()))) {
+                if (!py_to_r(has_x_emb_sparse(adata(), input$dim_method, n_components))) {
+                    x_emb = diff_map_sparse(adata(), n_components)
+                    store_x_emb(adata(), x_emb=x_emb, method=input$dim_method)
+                }
+            } else {
+                msg <- cellar$safe(cellar$reduce_dim,
+                    x = adata(),
+                    method = input$dim_method,
+                    n_components = n_components,
+                    inplace = TRUE,
+                    check_if_exists = TRUE)
+
+                if (is_error(msg)) return()
+            }
 
             incProgress(1 / n, detail = "Clustering")
             if (input$clu_method == 'Ensemble')
@@ -117,4 +127,20 @@ cluster <- function(input, output, session, adata,
         reset(reset() + 1)
         resubset(resubset() + 1)
     })
+}
+
+diff_map_sparse <- function(adata, num.eigs) {
+    if (num.eigs == 'knee') num.eigs = 50
+    x = scipy$sparse$csc_matrix(adata$X)
+    barcodes = as.character(py_to_r(adata$obs_names$to_numpy()))
+    # Random bins, we won't be needing them
+    bins <- GRanges(seqnames = "chr1",
+                  strand = c("+"),
+                  ranges = IRanges(start = c(1:dim(x)[2]), width = 3))
+
+    x.sp = createSnapFromBmat(x, barcodes=barcodes, bins=bins)
+    x.sp = runDiffusionMaps(x.sp, num.eigs=as.numeric(num.eigs))
+    x_emb = as.matrix(x.sp@smat@dmat)
+
+    return(x_emb)
 }
