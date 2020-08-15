@@ -43,6 +43,7 @@ class Pre_Scanpy(Unit):
 
     def __init__(self, filter_cells=DEFAULTS_SCANPY['filter_cells'],
                  filter_genes=DEFAULTS_SCANPY['filter_genes'],
+                 pct_counts_mt=40,
                  normalize_total=DEFAULTS_SCANPY['normalize_total'],
                  apply_log1p=True,
                  highly_variable_genes=DEFAULTS_SCANPY['highly_variable_genes'],
@@ -76,6 +77,7 @@ class Pre_Scanpy(Unit):
         self.logger = setup_logger('Scanpy')
         self.filter_cells = filter_cells
         self.filter_genes = filter_genes
+        self.pct_counts_mt = pct_counts_mt
         self.normalize_total = normalize_total
         self.apply_log1p = apply_log1p
         self.highly_variable_genes = highly_variable_genes
@@ -108,6 +110,12 @@ class Pre_Scanpy(Unit):
         for key in self.filter_genes:
             sc.pp.filter_genes(
                 adata, **self.filter_genes[key], inplace=True)
+
+        adata.var['mt'] = adata.var_names.str.startswith('MT-')
+        sc.pp.calculate_qc_metrics(
+            adata, qc_vars=['mt'], percent_top=None, inplace=True)
+
+        adata = adata[adata.obs.pct_counts_mt < self.pct_counts_mt, :]
 
         sc.pp.normalize_total(
             adata, **self.normalize_total, inplace=True)
