@@ -7,7 +7,7 @@ defaults <- list(
 
 options <- list(
     "dim" = c("PCA", "Kernel PCA", "Truncated SVD", "Diffusion Map", "MDS", "UMAP", "Isomap",
-              "Feature Agglomeration"),
+              "Spectral Embedding", "Feature Agglomeration"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
               "GaussianMixture", "Scanpy", "Ensemble", "Fixed"),
     "clu_ensemble" = c("All"="All", "KMeans"="KMeans", "KMedoids"="KMedoids",
@@ -25,7 +25,7 @@ options <- list(
                   "placenta", "small intestine", "spleen", "stomach", "thymus",
                   "thyroid", "clusters", "user defined"),
     "vis" = c("UMAP", "TSNE", "Diffusion Map", "MDS", "PCA", "Kernel PCA",
-              "Isomap", "Feature Agglomeration"),
+              "Isomap", "Spectral Embedding", "Feature Agglomeration"),
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans"),
     "de" = c("TTest", "Rank", "Wald"),
     "ali" = c("Scanpy Ingest", "SingleR"),

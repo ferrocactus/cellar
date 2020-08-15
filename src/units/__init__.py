@@ -18,6 +18,7 @@ from ._dim_reduction import Dim_MDS
 from ._dim_reduction import Dim_FeatureAgglomeration
 from ._dim_reduction import Dim_DiffusionMap
 from ._dim_reduction import Dim_Isomap
+from ._dim_reduction import Dim_SpectralEmbedding
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
@@ -57,7 +58,8 @@ translation_dict = {
         "MDS": Dim_MDS,
         "Feature Agglomeration": Dim_FeatureAgglomeration,
         "Diffusion Map": Dim_DiffusionMap,
-        "Isomap": Dim_Isomap
+        "Isomap": Dim_Isomap,
+        "Spectral Embedding": Dim_SpectralEmbedding
         # "Autoencoder": Dim_AE
     },
     "cluster_eval": {
@@ -91,7 +93,8 @@ translation_dict = {
         "Feature Agglomeration": Dim_FeatureAgglomeration,
         "MDS": Dim_MDS,
         "Diffusion Map": Dim_DiffusionMap,
-        "Isomap": Dim_Isomap
+        "Isomap": Dim_Isomap,
+        "Spectral Embedding": Dim_SpectralEmbedding
     },
     "align": {
         "Scanpy Ingest": Ali_Scanpy_Ingest
@@ -152,6 +155,7 @@ __all__ = [
     'Dim_Isomap',
     'Dim_FeatureAgglomeration',
     'Dim_DiffusionMap',
+    'Dim_SpectralEmbedding',
     'Eval_Silhouette',
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',

@@ -9,6 +9,7 @@ from sklearn.decomposition import KernelPCA
 from sklearn.manifold import TSNE
 from sklearn.manifold import MDS
 from sklearn.manifold import Isomap
+from sklearn.manifold import SpectralEmbedding
 from sklearn.cluster import FeatureAgglomeration
 from pydiffmap import diffusion_map as dm
 from umap import UMAP
@@ -476,6 +477,46 @@ class Dim_TSNE(Unit):
         self.logger.info("Initializing TSNE.")
         return TSNE(**self.kwargs).fit_transform(x)
 
+
+class Dim_SpectralEmbedding(Unit):
+    def __init__(self, n_components=10, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int
+            Number of components to use.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
+        self.logger = setup_logger("Spectral Embedding")
+        self.n_components = n_components
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Reduces the dimensionality of the data.
+        See https://scikit-learn.org/stable/modules/generated/sklearn.manifold.Isomap.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
+        self.logger.info("Initializing Spectral Embedding.")
+        return SpectralEmbedding(n_components=self.n_components,
+                                 **self.kwargs).fit_transform(x)
 
 
 #from src.methods import Autoencoder

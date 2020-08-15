@@ -18,9 +18,14 @@ from ..methods import KMedoids
 from ..utils.validation import _validate_clu_n_clusters
 from ._cluster_multiple import cluster_multiple
 from ._unit import Unit
+from ._evaluation import Eval_Silhouette
 
 
-def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
+default_eval_obj = Eval_Silhouette()
+
+
+def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]),
+                 eval_obj=default_eval_obj,
                  n_jobs=None, attribute_name='n_clusters', **kwargs):
     """
     Wrapper function for those classes which specify the number of clusters
@@ -72,13 +77,12 @@ def _get_wrapper(x, obj_def, n_clusters=np.array([2, 4, 8, 16]), eval_obj=None,
         logger = setup_logger('Cluster.Single')
         kwargs[attribute_name] = k
         y = obj_def(**kwargs).fit_predict(x)
-        if eval_obj is not None:
-            score = eval_obj.get(x, y)
-            logger.info(
-                "Finished clustering with k={0}. Score={1:.2f}.".format(k,
-                                                                        score))
-        else:
-            logger.info("Finished clustering with k={0}.".format(k))
+        if eval_obj is None:
+            eval_obj = default_eval_obj
+        score = eval_obj.get(x, y)
+        logger.info(
+            "Finished clustering with k={0}. Score={1:.2f}.".format(k,
+                                                                    score))
         return y, score
     # If n_clusters determined to be a list of integers
     elif isinstance(k, (list, np.ndarray)):
@@ -94,7 +98,7 @@ class Clu_KMedoids(Unit):
     """
 
     def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -149,7 +153,7 @@ class Clu_KMeans(Unit):
     """
 
     def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -204,7 +208,7 @@ class Clu_SpectralClustering(Unit):
     """
 
     def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -261,7 +265,7 @@ class Clu_Agglomerative(Unit):
     """
 
     def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -316,7 +320,7 @@ class Clu_Birch(Unit):
     """
 
     def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -370,7 +374,7 @@ class Clu_DBSCAN(Unit):
     See https://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html
     """
 
-    def __init__(self, eval_obj=None, n_jobs=None, **kwargs):
+    def __init__(self, eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -425,7 +429,7 @@ class Clu_GaussianMixture(Unit):
     """
 
     def __init__(self, n_clusters=np.array([2, 4, 8, 16]),
-                 eval_obj=None, n_jobs=None, **kwargs):
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
@@ -479,7 +483,7 @@ class Clu_Leiden(Unit):
     See https://github.com/vtraag/leidenalg
     """
 
-    def __init__(self, n_neighbors=10, **kwargs):
+    def __init__(self, n_neighbors=10, eval_obj=default_eval_obj, **kwargs):
         """
         Parameters
         __________
@@ -490,6 +494,7 @@ class Clu_Leiden(Unit):
         """
         self.logger = setup_logger('Leiden')
         self.n_neighbors = n_neighbors
+        self.eval_obj = eval_obj
         self.kwargs = kwargs
 
     def get(self, x):
@@ -512,8 +517,8 @@ class Clu_Leiden(Unit):
         part = leidenalg.find_partition(
             ig, leidenalg.ModularityVertexPartition)
         self.logger.info(f"Found {len(np.unique(part.membership))} clusters.")
-        # TODO fix score
-        return np.array(part.membership), 0
+        labels = np.array(part.membership)
+        return labels, self.eval_obj.get(x, labels)
 
 
 class Clu_Scanpy(Unit):
@@ -550,13 +555,7 @@ class Clu_Scanpy(Unit):
 
         self.logger.info("Initializing Scanpy.")
         ann = anndata.AnnData(X=x)
-        #sc.pp.filter_cells(adata, min_genes=200)
-        #sc.pp.filter_genes(adata, min_cells=3)
-        #sc.pp.normalize_total(adata, target_sum=1e4)
-        #sc.pp.log1p(adata)
-        #scanpy.tl.pca(adata, svd_solver='arpack')
         scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
-        #sc.tl.umap(adata)
         scanpy.tl.leiden(ann)
-        # TODO fix score
-        return np.squeeze(np.array(ann.obs)).astype(np.int), 0
+        labels = np.squeeze(np.array(ann.obs)).astype(np.int)
+        return labels, self.eval_obj.get(x, labels)

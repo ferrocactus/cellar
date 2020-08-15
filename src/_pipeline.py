@@ -37,6 +37,7 @@ def reduce_dim(
         n_components: Union[str, int, float] = 'knee',
         inplace: Optional[bool] = True,
         check_if_exists: Optional[bool] = False,
+        clear_labels: Optional[bool] = True,
         clear_2d_emb: Optional[bool] = True,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
@@ -67,6 +68,9 @@ def reduce_dim(
         will be returned. No computation takes place.
 
     clear_2d_emb: If set to true and x_emb changes, then will also
+        clear obs['labels'] if any exist.
+
+    clear_2d_emb: If set to true and x_emb changes, then will also
         clear f'x_emb_{dim}d' if any exist.
 
     **kwargs: Additional parameters that will get passed to the
@@ -90,11 +94,14 @@ def reduce_dim(
     _method_exists('dim_reduction', method)
 
     if issparse(adata.X):
-        if method != 'Truncated SVD':
+        allowed = ['Truncated SVD', 'Spectral Embedding',
+                   'UMAP', 'Diffusion Map']
+        if method not in allowed:
             raise InappropriateArgument(
                 "Sparse matrix detected. "
-                "Please select Truncated SVD for dimensionality "
-                "reduction.")
+                "Please select one of",
+                str(allowed),
+                "for dimensionality reduction.")
 
     n_components_used = n_components
     n_components = _validate_dim_n_components(n_components,
@@ -110,6 +117,11 @@ def reduce_dim(
     if x_emb is None:
         x_emb = wrap('dim_reduction', method)(
             n_components=n_components, **kwargs).get(adata.X)
+
+        # Clear labels that used old x_emb
+        if 'labels' in adata.obs:
+            adata.obs.pop('labels')
+            print('Clearing labels...')
         # Clear visualization if it used previous embeddings
         for dim in [2, 3]:
             if f'x_emb_{dim}d' in adata.obsm and clear_2d_emb:

@@ -45,18 +45,22 @@ def _plot_labels(
     """
     Helper function for plot.
     """
+    has_labels = True
     if 'labels' not in adata.obs:
-        raise ValueError("Labels not found in object.")
+        has_labels = False
+        print("Labels not found. Plotting 2d embeddings.")
+        #raise ValueError("Labels not found in object.")
     if 'x_emb_2d' not in adata.obsm:
         print("2d embeddings not found.")
         print("Running default visualization method.")
         reduce_dim_vis(adata)
-    color = adata.obs['labels'].to_numpy().astype(str)
+    if has_labels:
+        color = adata.obs['labels'].to_numpy().astype(str)
     method = adata.uns['visualization_info_2d']['method']
     fig = px.scatter(
         x=adata.obsm['x_emb_2d'][:, 0],
         y=adata.obsm['x_emb_2d'][:, 1],
-        color=color,
+        color=color if has_labels else None,
         hover_data={'Cell': adata.obs.index.to_numpy()},
         labels={
             'x': f'{method}1',
