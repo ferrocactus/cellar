@@ -1,14 +1,5 @@
 from ._unit import Unit
-from ._cluster import Clu_KMeans
-from ._cluster import Clu_KMedoids
-from ._cluster import Clu_SpectralClustering
-from ._cluster import Clu_Agglomerative
-from ._cluster import Clu_DBSCAN
-from ._cluster import Clu_Birch
-from ._cluster import Clu_GaussianMixture
-from ._cluster import Clu_Leiden
-from ._cluster import Clu_Scanpy
-from ._cluster_ensemble import Ens_HyperGraph
+from ._preprocess import Pre_Scanpy
 from ._dim_reduction import Dim_PCA
 from ._dim_reduction import Dim_KernelPCA
 from ._dim_reduction import Dim_TruncatedSVD
@@ -19,6 +10,16 @@ from ._dim_reduction import Dim_FeatureAgglomeration
 from ._dim_reduction import Dim_DiffusionMap
 from ._dim_reduction import Dim_Isomap
 from ._dim_reduction import Dim_SpectralEmbedding
+from ._cluster import Clu_KMeans
+from ._cluster import Clu_KMedoids
+from ._cluster import Clu_SpectralClustering
+from ._cluster import Clu_Agglomerative
+from ._cluster import Clu_DBSCAN
+from ._cluster import Clu_Birch
+from ._cluster import Clu_GaussianMixture
+from ._cluster import Clu_Leiden
+from ._cluster import Clu_Scanpy
+from ._cluster_ensemble import Ens_HyperGraph
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
 from ._evaluation import Eval_CalinskiHarabasz
@@ -32,23 +33,13 @@ from ._converter import convert
 from ._identificator import Ide_HyperGeom
 from ._ss_cluster import SSClu_SeededKMeans
 from ._ss_cluster import SSClu_ConstrainedKMeans
-#from ._ss_cluster import SSClu_ConstrainedSeededKMeans
 from ._align import Ali_Scanpy_Ingest
 
 from ..utils.exceptions import MethodNotImplementedError
 
 translation_dict = {
-    "cluster": {
-        "KMeans": Clu_KMeans,
-        "KMedoids": Clu_KMedoids,
-        "Spectral": Clu_SpectralClustering,
-        "Agglomerative": Clu_Agglomerative,
-        # "DBSCAN": Clu_DBSCAN,
-        # "Birch": Clu_Birch,
-        "GaussianMixture": Clu_GaussianMixture,
-        "Leiden": Clu_Leiden,
-        "Scanpy": Clu_Scanpy,
-        "Ensemble": Ens_HyperGraph
+    "preprocess": {
+        "Scanpy (Defaults)": Pre_Scanpy
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
@@ -61,6 +52,18 @@ translation_dict = {
         "Isomap": Dim_Isomap,
         "Spectral Embedding": Dim_SpectralEmbedding
         # "Autoencoder": Dim_AE
+    },
+    "cluster": {
+        "KMeans": Clu_KMeans,
+        "KMedoids": Clu_KMedoids,
+        "Spectral": Clu_SpectralClustering,
+        "Agglomerative": Clu_Agglomerative,
+        # "DBSCAN": Clu_DBSCAN,
+        # "Birch": Clu_Birch,
+        "GaussianMixture": Clu_GaussianMixture,
+        "Leiden": Clu_Leiden,
+        "Scanpy": Clu_Scanpy,
+        "Ensemble": Ens_HyperGraph
     },
     "cluster_eval": {
         "Silhouette": Eval_Silhouette,
@@ -83,7 +86,6 @@ translation_dict = {
     "ss_cluster": {
         "SeededKMeans": SSClu_SeededKMeans,
         "ConstrainedKMeans": SSClu_ConstrainedKMeans
-        #"ConstrainedSeededKMeans": SSClu_ConstrainedSeededKMeans
     },
     "visualization": {
         "UMAP": Dim_UMAP,
@@ -136,16 +138,7 @@ __all__ = [
     'translation_dict',
     '_method_exists',
     'wrap',
-    'Clu_KMeans',
-    'Clu_KMedoids',
-    'Clu_SpectralClustering',
-    'Clu_Agglomerative',
-    # 'Clu_DBSCAN',
-    # 'Clu_Birch',
-    'Clu_GaussianMixture',
-    'Clu_Leiden',
-    'Clu_Scanpy',
-    'Ens_HyperGraph',
+    'Pre_Scanpy',
     'Dim_PCA',
     'Dim_KernelPCA',
     'Dim_TruncatedSVD',
@@ -156,6 +149,16 @@ __all__ = [
     'Dim_FeatureAgglomeration',
     'Dim_DiffusionMap',
     'Dim_SpectralEmbedding',
+    'Clu_KMeans',
+    'Clu_KMedoids',
+    'Clu_SpectralClustering',
+    'Clu_Agglomerative',
+    # 'Clu_DBSCAN',
+    # 'Clu_Birch',
+    'Clu_GaussianMixture',
+    'Clu_Leiden',
+    'Clu_Scanpy',
+    'Ens_HyperGraph',
     'Eval_Silhouette',
     'Eval_DaviesBouldin',
     'Eval_CalinskiHarabasz',
@@ -167,7 +170,6 @@ __all__ = [
     'Ide_HyperGeom',
     'SSClu_SeededKMeans',
     'SSClu_ConstrainedKMeans',
-    #'SSClu_ConstrainedSeededKMeans',
     'Ali_Scanpy_Ingest',
     'convert'
 ]

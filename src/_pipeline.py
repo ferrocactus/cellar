@@ -31,6 +31,47 @@ from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import InvalidArgument
 
 
+def preprocess(
+        x: Union[AnnData, np.ndarray, list],
+        method: str = 'Scanpy (Defaults)',
+        discard_extras: bool = False,
+        **kwargs) -> Union[AnnData, np.ndarray]:
+    """
+    Preprocess data.
+
+    Parameters:
+    ___________
+    x: AnnData object or np arary containing the data matrix.
+
+    method: Proprocessing pipeline to use.
+
+    discard_extras: Only used when x is AnnData. If True, will
+        keep only the preprocessed data matrix in the AnnData object.
+
+    **kwargs: Additional arguments.
+
+    Returns:
+    ________
+    adata: AnnData object containing the proprocessed data.
+    """
+    # Validations
+    is_AnnData = isinstance(x, AnnData)
+
+    adata = x if is_AnnData else _validate_x(x)
+
+    _method_exists('preprocess', method)
+
+    adata = wrap('preprocess', method)(**kwargs).get(adata)
+
+    if not is_AnnData:
+        return adata.X
+
+    if discard_extras:
+        adata = AnnData(adata.X)
+
+    return adata
+
+
 def reduce_dim(
         x: Union[AnnData, np.ndarray, list],
         method: str = 'PCA',

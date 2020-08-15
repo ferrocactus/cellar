@@ -1,3 +1,4 @@
+from ._pipeline import preprocess
 from ._pipeline import reduce_dim
 from ._pipeline import cluster
 from ._pipeline import reduce_dim_vis
