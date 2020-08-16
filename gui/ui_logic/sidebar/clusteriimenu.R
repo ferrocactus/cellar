@@ -5,7 +5,7 @@ ns = NS(id)
 menuItem(
     "Constrained Clustering",
     id = "clusteriibtn",
-    icon = icon("cog"),
+    icon = icon("shapes"),
     startExpanded = FALSE,
     menuSubItem(
         icon = NULL,

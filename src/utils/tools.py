@@ -190,6 +190,20 @@ def merge_clusters(adata, clusters):
         update_subset_label(adata, f'Cluster_{cluster}', c0_name)
 
 
+def _clear_x_emb_dependents(adata):
+    # Clear labels that used old x_emb
+    if 'labels' in adata.obs:
+        adata.obs.pop('labels')
+        print('Clearing labels...')
+    # Clear visualization if it used previous embeddings
+    for dim in [2, 3]:
+        if f'x_emb_{dim}d' in adata.obsm:
+            if adata.uns[f'visualization_info_{dim}d']['used_emb'] == True:
+                print('Clearing 2d embeddings...')
+                adata.obsm.pop(f'x_emb_{dim}d', None)
+                adata.uns.pop(f'visualization_info_{dim}d', None)
+
+
 def get_dic():
     f = open(join_root("../markers/cl-simple.json"), "rb")
     onto_data = json.load(f)

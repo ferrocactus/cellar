@@ -14,6 +14,7 @@ from .utils.tools import _labels_exist_in_adata
 from .utils.tools import _2d_emb_exists_in_adata
 from .utils.tools import merge_cluster_names
 from .utils.tools import populate_subsets
+from .utils.tools import _clear_x_emb_dependents
 
 from .utils.validation import _validate_clu_n_clusters
 from .utils.validation import _validate_cluster_list
@@ -69,6 +70,8 @@ def preprocess(
     if discard_extras:
         adata = AnnData(adata.X)
 
+    print("New dimensions are", adata.shape)
+
     return adata
 
 
@@ -78,8 +81,7 @@ def reduce_dim(
         n_components: Union[str, int, float] = 'knee',
         inplace: Optional[bool] = True,
         check_if_exists: Optional[bool] = False,
-        clear_labels: Optional[bool] = True,
-        clear_2d_emb: Optional[bool] = True,
+        clear_dependents: Optional[bool] = True,
         **kwargs) -> Optional[Union[AnnData, np.ndarray]]:
     """
     Reduce dimensionality of the data.
@@ -108,11 +110,8 @@ def reduce_dim(
         then the first n_components columns of x.obsm['x_emb']
         will be returned. No computation takes place.
 
-    clear_2d_emb: If set to true and x_emb changes, then will also
-        clear obs['labels'] if any exist.
-
-    clear_2d_emb: If set to true and x_emb changes, then will also
-        clear f'x_emb_{dim}d' if any exist.
+    clear_dependents: If set to true and x_emb changes, then will also
+        clear labels and 2d embeddings if any exist.
 
     **kwargs: Additional parameters that will get passed to the
         clustering object as specified in method. For a full list
@@ -154,22 +153,16 @@ def reduce_dim(
         x_emb = _emb_exists_in_adata(adata, method, n_components)
 
     # If x_emb was not found in adata, it is None
+    if x_emb is not None:
+        if n_components != adata.obsm['x_emb'].shape[1]:
+            if clear_dependents:
+                _clear_x_emb_dependents(adata)
     # Create dimensionality reduction object and find embedding
     if x_emb is None:
         x_emb = wrap('dim_reduction', method)(
             n_components=n_components, **kwargs).get(adata.X)
-
-        # Clear labels that used old x_emb
-        if 'labels' in adata.obs:
-            adata.obs.pop('labels')
-            print('Clearing labels...')
-        # Clear visualization if it used previous embeddings
-        for dim in [2, 3]:
-            if f'x_emb_{dim}d' in adata.obsm and clear_2d_emb:
-                if adata.uns[f'visualization_info_{dim}d']['used_emb'] == True:
-                    print('Clearing 2d embeddings...')
-                    adata.obsm.pop(f'x_emb_{dim}d', None)
-                    adata.uns.pop(f'visualization_info_{dim}d', None)
+        if clear_dependents:
+            _clear_x_emb_dependents(adata)
 
     if not is_AnnData:
         return x_emb
@@ -267,7 +260,7 @@ def cluster(
         adata = _validate_x(x)
     _method_exists('cluster', method)
     _method_exists('cluster_eval', eval_method)
-    if method not in ['Leiden', 'Scanpy']:
+    if method != 'Leiden':
         n_clusters = _validate_clu_n_clusters(n_clusters, adata.X.shape[0])
     else:
         n_clusters = 'NA'
@@ -284,7 +277,10 @@ def cluster(
     if is_AnnData and use_emb:
         if 'x_emb' not in adata.obsm:
             raise InvalidArgument("x_emb not found in AnnData object.")
-        x_to_use = adata.obsm['x_emb']
+        if method == 'Leiden': # Need to store connectivities
+            x_to_use = adata
+        else:
+            x_to_use = adata.obsm['x_emb']
     else:
         x_to_use = adata.X
 
@@ -397,7 +393,15 @@ def reduce_dim_vis(
             print("x_emb not found. Running PCA with default parameters.")
             print("If you don't want to use embeddings, pass use_emb=False.")
             reduce_dim(adata, inplace=True)
-        x_to_use = adata.obsm['x_emb']
+
+        if method == 'UMAP + Paga':
+            if not is_AnnData:
+                raise InvalidArgument("Object is not AnnData.")
+            if 'labels' not in adata.obs:
+                raise InvalidArgument("Labels not found. Cannot run Paga.")
+            x_to_use = adata
+        else:
+            x_to_use = adata.obsm['x_emb']
     else:
         x_to_use = adata.X
 

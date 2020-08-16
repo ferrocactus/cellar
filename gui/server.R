@@ -9,6 +9,7 @@ source("gui/server_logic/dataset_reset.R")
 source("gui/server_logic/download_cells.R")
 
 source("gui/server_logic/dataset.R")
+source("gui/server_logic/preprocess.R")
 source("gui/server_logic/clustering.R")
 source("gui/server_logic/plot.R")
 source("gui/server_logic/align.R")
@@ -49,6 +50,9 @@ server <- shinyServer(function(input, output, session) {
                selDatasetAlign = selDatasetAlign, fullreset = fullreset,
                activeDataset = activeDataset)
     callModule(upload_file, id = "ns")
+
+    # Preprocessing menu
+    callModule(preprocess, id = "ns", adata = adata)
 
     # Clustering menu
     callModule(cluster, id = "ns", adata = adata, replot = replot,

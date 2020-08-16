@@ -13,9 +13,12 @@ from sklearn.manifold import SpectralEmbedding
 from sklearn.cluster import FeatureAgglomeration
 from pydiffmap import diffusion_map as dm
 from umap import UMAP
+from anndata import AnnData
+import scanpy as sc
 
 from ..log import setup_logger
 from ._unit import Unit
+from ..utils.exceptions import InvalidArgument
 
 
 class Dim_PCA(Unit):
@@ -440,6 +443,68 @@ class Dim_UMAP(Unit):
         return UMAP(n_components=self.n_components,
                     random_state=1,
                     **self.kwargs).fit_transform(x)
+
+
+class Dim_UMAP_Paga(Unit):
+    def __init__(self, n_components=2, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int
+            Number of components to use.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+
+        """
+        try:
+            import warnings
+            from numba.errors import NumbaPerformanceWarning
+            warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
+        except:
+            pass
+
+        self.logger = setup_logger('UMAP + Paga')
+        self.n_components = n_components
+        self.kwargs = kwargs
+
+    def get(self, x):
+        """
+        Reduces the dimensionality of the data.
+        See https://scanpy.readthedocs.io/en/stable/api/scanpy.tl.paga.html
+        and https://scanpy.readthedocs.io/en/stable/api/scanpy.tl.umap.html
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        """
+        if not isinstance(x, AnnData):
+            raise ValueError("x not in AnnData format.")
+
+        if 'leiden' not in x.obs:
+            raise InvalidArgument("Can only run Paga with Leiden clustering.")
+
+        self.logger.info("Initializing UMAP + Paga.")
+
+        # Renaming keys for scanpy compability
+        x.obsm['X_pca'] = x.obsm['x_emb'].copy()
+        sc.tl.paga(x)
+        sc.pl.paga(x, show=False) # Need to add 'pos' key
+        sc.tl.umap(x, init_pos='paga')
+
+        x.obsm.pop('X_pca')
+        return x.obsm.pop('X_umap')
 
 
 class Dim_TSNE(Unit):

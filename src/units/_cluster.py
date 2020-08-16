@@ -1,6 +1,7 @@
 import logging
 
 import anndata
+from anndata import AnnData
 import leidenalg
 import igraph
 import numpy as np
@@ -512,50 +513,68 @@ class Clu_Leiden(Unit):
 
         """
         self.logger.info("Initializing Leiden Clustering.")
-        kn = kneighbors_graph(x, n_neighbors=self.n_neighbors)
-        ig = igraph.Graph.Adjacency(kn.toarray().tolist())
-        part = leidenalg.find_partition(
-            ig, leidenalg.ModularityVertexPartition)
-        self.logger.info(f"Found {len(np.unique(part.membership))} clusters.")
-        labels = np.array(part.membership)
-        return labels, self.eval_obj.get(x, labels)
+        try:
+            import warnings
+            from numba.errors import NumbaPerformanceWarning
+            warnings.filterwarnings("ignore", category=NumbaPerformanceWarning)
+        except:
+            pass
+
+        is_anndata = isinstance(x, AnnData)
+
+        if not is_anndata:
+            adata = anndata.AnnData(X=x)
+            # Use 0 pcs since x is supposed to be an embedding already
+            n_pcs = 0
+        else:
+            adata = x # reference
+            adata.obsm['X_pca'] = adata.obsm['x_emb'].copy()
+            n_pcs = None
+
+        scanpy.pp.neighbors(adata, n_neighbors=15, n_pcs=n_pcs)
+        scanpy.tl.leiden(adata)
+        labels = np.squeeze(np.array(adata.obs['leiden'])).astype(np.int)
+
+        if is_anndata:
+            adata.obsm.pop('X_pca')
+        return labels, 0
 
 
-class Clu_Scanpy(Unit):
-    """
-    See https://scanpy.readthedocs.io
-    """
+# class Clu_Scanpy(Unit):
+#     """
+#     See https://scanpy.readthedocs.io
+#     """
 
-    def __init__(self, **kwargs):
-        """
-        Parameters
-        __________
-        **kwargs: dictionary
-            Dictionary of parameters that will get passed to obj_def
-            when instantiating it.
+#     def __init__(self, **kwargs):
+#         """
+#         Parameters
+#         __________
+#         **kwargs: dictionary
+#             Dictionary of parameters that will get passed to obj_def
+#             when instantiating it.
 
-        """
-        self.logger = setup_logger('Scanpy')
-        self.kwargs = kwargs
+#         """
+#         self.logger = setup_logger('Scanpy')
+#         self.kwargs = kwargs
 
-    def get(self, x):
-        """
-        Parameters
-        __________
-        x: array, shape (n_samples, n_features)
-            The data array.
+#     def get(self, x):
+#         """
+#         Parameters
+#         __________
+#         x: array, shape (n_samples, n_features)
+#             The data array.
 
-        Returns
-        _______
-        y: array, shape (n_samples,)
-            List of labels that correspond to the best clustering k, as
-            evaluated by eval_obj.
+#         Returns
+#         _______
+#         y: array, shape (n_samples,)
+#             List of labels that correspond to the best clustering k, as
+#             evaluated by eval_obj.
 
-        """
+#         """
 
-        self.logger.info("Initializing Scanpy.")
-        ann = anndata.AnnData(X=x)
-        scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
-        scanpy.tl.leiden(ann)
-        labels = np.squeeze(np.array(ann.obs)).astype(np.int)
-        return labels, self.eval_obj.get(x, labels)
+#         self.logger.info("Initializing Scanpy.")
+#         ann = anndata.AnnData(X=x)
+#         scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
+#         scanpy.tl.leiden(ann)
+#         labels = np.squeeze(np.array(ann.obs)).astype(np.int)
+#         return labels, self.eval_obj.get(x, labels)

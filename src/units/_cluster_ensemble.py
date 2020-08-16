@@ -9,7 +9,6 @@ from ._cluster import Clu_DBSCAN
 from ._cluster import Clu_Birch
 from ._cluster import Clu_GaussianMixture
 from ._cluster import Clu_Leiden
-from ._cluster import Clu_Scanpy
 from ..utils.validation import _validate_ensemble_methods
 
 
@@ -21,8 +20,7 @@ cluster_dict = {
     "DBSCAN": Clu_DBSCAN,
     "Birch": Clu_Birch,
     "GaussianMixture": Clu_GaussianMixture,
-    "Leiden": Clu_Leiden,
-    "Scanpy": Clu_Scanpy
+    "Leiden": Clu_Leiden
 }
 
 

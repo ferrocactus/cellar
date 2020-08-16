@@ -3,6 +3,7 @@ source("gui/ui_logic/header/title.R")
 source("gui/ui_logic/header/info.R")
 
 source("gui/ui_logic/sidebar/datasetmenu.R")
+source("gui/ui_logic/sidebar/preprocess.R")
 source("gui/ui_logic/sidebar/appearancemenu.R")
 source("gui/ui_logic/sidebar/clusterimenu.R")
 source("gui/ui_logic/sidebar/clusteriimenu.R")
@@ -30,6 +31,7 @@ sidebar <- dashboardSidebar(
     width = 400,
     sidebarMenu(
         datasetmenu(id='ns'),
+        preprocessmenu(id='ns'),
         clusterimenu(id='ns'),
         clusteriimenu(id='ns'),
         alignmenu(id='ns'),

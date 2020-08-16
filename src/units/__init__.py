@@ -10,6 +10,7 @@ from ._dim_reduction import Dim_FeatureAgglomeration
 from ._dim_reduction import Dim_DiffusionMap
 from ._dim_reduction import Dim_Isomap
 from ._dim_reduction import Dim_SpectralEmbedding
+from ._dim_reduction import Dim_UMAP_Paga
 from ._cluster import Clu_KMeans
 from ._cluster import Clu_KMedoids
 from ._cluster import Clu_SpectralClustering
@@ -18,7 +19,6 @@ from ._cluster import Clu_DBSCAN
 from ._cluster import Clu_Birch
 from ._cluster import Clu_GaussianMixture
 from ._cluster import Clu_Leiden
-from ._cluster import Clu_Scanpy
 from ._cluster_ensemble import Ens_HyperGraph
 from ._evaluation import Eval_Silhouette
 from ._evaluation import Eval_DaviesBouldin
@@ -46,6 +46,7 @@ translation_dict = {
         "Kernel PCA": Dim_KernelPCA,
         "Truncated SVD": Dim_TruncatedSVD,
         "UMAP": Dim_UMAP,
+        "UMAP + Paga": Dim_UMAP_Paga,
         "MDS": Dim_MDS,
         "Feature Agglomeration": Dim_FeatureAgglomeration,
         "Diffusion Map": Dim_DiffusionMap,
@@ -62,7 +63,6 @@ translation_dict = {
         # "Birch": Clu_Birch,
         "GaussianMixture": Clu_GaussianMixture,
         "Leiden": Clu_Leiden,
-        "Scanpy": Clu_Scanpy,
         "Ensemble": Ens_HyperGraph
     },
     "cluster_eval": {
@@ -89,6 +89,7 @@ translation_dict = {
     },
     "visualization": {
         "UMAP": Dim_UMAP,
+        "UMAP + Paga": Dim_UMAP_Paga,
         "TSNE": Dim_TSNE,
         "PCA": Dim_PCA,
         "Kernel PCA": Dim_KernelPCA,
@@ -143,6 +144,7 @@ __all__ = [
     'Dim_KernelPCA',
     'Dim_TruncatedSVD',
     'Dim_UMAP',
+    'Dim_UMAP_Paga',
     'Dim_TSNE',
     'Dim_MDS',
     'Dim_Isomap',
@@ -157,7 +159,6 @@ __all__ = [
     # 'Clu_Birch',
     'Clu_GaussianMixture',
     'Clu_Leiden',
-    'Clu_Scanpy',
     'Ens_HyperGraph',
     'Eval_Silhouette',
     'Eval_DaviesBouldin',

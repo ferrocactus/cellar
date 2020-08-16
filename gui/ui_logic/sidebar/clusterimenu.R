@@ -5,7 +5,7 @@ ns = NS(id)
 menuItem(
     "Clustering",
     id = "clusteribtn",
-    icon = icon("cog"),
+    icon = icon("shapes"),
     startExpanded = FALSE,
     menuSubItem(
         icon = NULL,
