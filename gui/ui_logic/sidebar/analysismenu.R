@@ -13,8 +13,7 @@ menuItem(
             div(
                 class = "div_step div_color",
                 list(
-                    splitLayout(
-                        cellWidths = c("50%", "50%"),
+                    
                         selectInput(
                             ns("color"),
                             "View gene expression:",
@@ -28,19 +27,9 @@ menuItem(
                                     )
                             )
                         ,
-                        textInput(
-                            ns("value_t"),
-                            label="Value threshold(log)",
-                            value=0
-                        ) 
-                        %>%
-                            shinyInput_label_embed(
-                                shiny::icon("info-circle") %>%
-                                    bs_embed_tooltip(paste0("Value above this will be shown"), placement="bottom",position="right")
-                            )
-                    #tags$b(" "),
-                        )
-
+                        uiOutput(ns("threshold_slider"))
+                        
+                        
                 ),
             ),
 

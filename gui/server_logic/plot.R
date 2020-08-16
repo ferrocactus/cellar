@@ -7,6 +7,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     ns <- session$ns
     plot_index <- reactiveVal(0)
     plot_count <- reactiveVal(0)
+    #lider_update <- reactiveVal(0)
     main_plot_val <- reactiveVal(NULL)
 
     # triggers when replot is set to 1
@@ -74,20 +75,32 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 i = which(gene_names == isolate(input$color))[1]
                 if (!is.null(i)) {
                     color = py_to_r(get_col(adata(), i))
-                    #print(class(color))  ##array
                     
-                    color=color-min(color)+1 # make min=1
-                    color = log(color)  # min=0
-                    text = ~paste("Label: ", label_names,'\nColor value:',as.character(round(color,5))) # text shows expression value 
-                    t=as.numeric(input$value_t)  # threshold
-                    if (t>0){
+                    color=color-min(color) # make min=1
+                    #color = log(color)  # min=0
+                    
+                     
+                    if (identical(NULL,input$value_t)==FALSE){
+                        t=as.numeric(input$value_t)  # threshold
+                        if (t>0){
+                            for (i in 1:length(color)){
+                                if (color[i]<t){
+                                    color[i]=0  #
+                                }
+                            }
+                        }
+                    }
+                   
+                    if (is.na(min(color[color > 0]))==FALSE){
+                        mini=min(color[color > 0])
                         for (i in 1:length(color)){
-                            if (color[i]<t){
-                                color[i]=0  #
+                            if (color[i]==0){
+                                color[i]=mini  #
                             }
                         }
                     }
                     
+                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color))) # text shows expression value
                     
                     title = isolate(input$color)
                     showlegend = FALSE
@@ -99,7 +112,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 }
             }
             resubset(1) # split each subset into certain & uncertain subset or get back to original
-
+            
             p <- plot_ly(
                 x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                 text = text,
@@ -132,7 +145,31 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             output$plot <- renderPlotly({ p })
         })
     })
-
+    
+    observeEvent(input$color,{
+        if (input$color!='Uncertainty' && input$color != 'Clusters'){
+            gene_names = py_to_r(get_all_gene_names(adata()))
+            i = which(gene_names == isolate(input$color))[1]
+            color = py_to_r(get_col(adata(), i))
+            color=color-min(color)
+           
+            output$threshold_slider <- renderUI({
+                sliderInput(
+                    ns("value_t"),
+                    label="Value threshold",
+                    min=0,max=signif(max(color),digits=3),
+                    step=(max(color)/30),
+                    value=0
+                )
+            })
+        }
+        else{
+            output$threshold_slider <- renderUI({
+               
+            })
+        }
+    })
+    
     observe({
         req(info_val$cellNames)
         output$cell_names_outp <- renderUI({ info_val$cellNames })
