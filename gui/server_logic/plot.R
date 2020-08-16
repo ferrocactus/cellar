@@ -102,7 +102,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                             return(c_func(vals))
                         }
                     }
-
                     title = isolate(input$color)
                     showlegend = FALSE
                     symbol = ~labels
