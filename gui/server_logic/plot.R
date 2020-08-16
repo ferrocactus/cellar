@@ -76,8 +76,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 if (!is.null(i)) {
                     color = py_to_r(get_col(adata(), i))
                     
-                    color=color-min(color) # make min=1
-                    #color = log(color)  # min=0
+                    color=color-min(color)+1 # make min=1
+                    color = log(color)  # min=0
                     
                      
                     if (identical(NULL,input$value_t)==FALSE){
@@ -151,7 +151,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             gene_names = py_to_r(get_all_gene_names(adata()))
             i = which(gene_names == isolate(input$color))[1]
             color = py_to_r(get_col(adata(), i))
-            color=color-min(color)
+            color=color-min(color)+1 # make min=1
+            color = log(color)  # min=0
            
             output$threshold_slider <- renderUI({
                 sliderInput(
