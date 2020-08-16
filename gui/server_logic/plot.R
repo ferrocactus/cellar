@@ -75,9 +75,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 i = which(gene_names == isolate(input$color))[1]
                 if (!is.null(i)) {
                     
-                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color))) # text shows expression value
-                    color = py_to_r(get_col(adata(), i))
                     
+                    color = py_to_r(get_col(adata(), i))
+                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color))) # text shows expression value
                     color=color-min(color)+1 # make min=1
                     color = log(color)  # min=0
                     
@@ -93,6 +93,15 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                         }
                     }
                    
+                    c=sort(color)
+                    upper_threshold=c[as.integer(0.95*length(color))]
+                    for (i in 1:length(color)){
+                        if (color[i]>upper_threshold){
+                            color[i]=upper_threshold  # 'black?'
+                        }
+                    }
+                    
+                    
                     # if (is.na(min(color[color > 0]))==FALSE){
                     #     mini=min(color[color > 0])
                     #     for (i in 1:length(color)){
