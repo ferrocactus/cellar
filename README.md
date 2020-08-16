@@ -80,25 +80,24 @@ Cellar requires `python (>=3.7)` and `R (>=4.0)`.
 
 Cellar requires the following python packages that can be installed via `pip`:
 
-* matplotlib
-* numpy
-* pandas
-* scikit-learn
-* sklearn
-* umap-learn
-* kneed
-* statsmodels
-* joblib
-* anndata
-* leidenalg
-* scanpy
-* psutil
-* plotly
-* bidict
-* pydiffmap
-* scipy
-* Cluster_Ensembles
-* diffxpy
+* matplotlib (>=3.1.2)
+* numpy (>=1.18.2)
+* pandas (>=0.25.3)
+* scikit-learn (>=0.22)
+* umap-learn (>=0.3.10)
+* kneed (>=0.5.1)
+* statsmodels (>=0.11)
+* joblib (>=0.14.1)
+* anndata (>=0.7.1)
+* leidenalg (>=0.8.0)
+* scanpy (>=1.5.1)
+* psutil (>=5.7.0)
+* plotly (>=4.8.1)
+* bidict (>=0.19.0)
+* pydiffmap (>=0.2.0.1)
+* scipy (>=1.4.0)
+* Cluster_Ensembles (>=1.16)
+* diffxpy (>=0.7.4)
 
 NOTE: Cluster_Ensembles package is only available for linux systems.
 If using the latest version of sklearn, you can install via
@@ -124,8 +123,12 @@ You will also need the following R packages
 * gplots
 * htmltools
 * bsplus
-* SingleR (installed via BiocManager, follow instructions in https://bioconductor.org/packages/release/bioc/html/SingleR.html)
+* SingleR (installed via BiocManager)
 * htmlTable
+* doSNOW
+* GenomicRanges (installed via BiocManager)
+* plot3D
+* SnapATAC (installed via devtools)
 
 Assuming all dependencies have been met, clone the github repo
 and cd into it

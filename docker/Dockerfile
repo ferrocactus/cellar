@@ -46,6 +46,11 @@ RUN Rscript -e 'install.packages("bsplus")'
 RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install("SingleR")'
 RUN Rscript -e 'install.packages("htmlTable")'
+RUN Rscript -e 'install.packages("devtools")'
+RUN Rscript -e 'install.packages("doSNOW")'
+RUN Rscript -e 'BiocManager::install("GenomicRanges")'
+RUN Rscript -e 'install.packages("plot3D")'
+RUN Rscript -e 'devtools::install_github("r3fang/SnapATAC")'
 
 # Install orca dependency for plotly
 RUN apt-get install -y libasound2
@@ -74,7 +79,6 @@ WORKDIR /home/cellar
 RUN mkdir -p datasets/user_uploaded
 RUN mkdir -p datasets/server
 
-RUN pip3 install diffxpy
 ADD https://api.github.com/repos/ferrocactus/cellar/git/refs/heads/master version.json
 RUN git pull
 

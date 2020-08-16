@@ -154,7 +154,11 @@ def reduce_dim(
 
     # If x_emb was not found in adata, it is None
     if x_emb is not None:
-        if n_components != adata.obsm['x_emb'].shape[1]:
+        if 'x_emb' in adata.obsm:
+            key_to_use = 'x_emb'
+        elif 'X_pca' in adata.obsm:
+            key_to_use = 'X_pca'
+        if n_components != adata.obsm[key_to_use].shape[1]:
             if clear_dependents:
                 _clear_x_emb_dependents(adata)
     # Create dimensionality reduction object and find embedding

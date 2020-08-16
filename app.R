@@ -15,6 +15,7 @@ library(bsplus)
 library(htmlTable)
 library(RColorBrewer)
 library(SnapATAC)
+library(GenomicRanges)
 
 source("gui/ui.R")
 source("gui/server.R")
