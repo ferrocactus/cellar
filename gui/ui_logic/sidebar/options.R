@@ -24,7 +24,7 @@ options <- list(
                   "large intestine", "liver", "lymph", "muscle", "other",
                   "placenta", "small intestine", "spleen", "stomach", "thymus",
                   "thyroid", "clusters", "user defined"),
-    "vis" = c("UMAP", "UMAP + Paga", "TSNE", "Diffusion Map", "MDS", "PCA", "Kernel PCA",
+    "vis" = c("UMAP", "TSNE", "Diffusion Map", "MDS", "PCA", "Kernel PCA",
               "Isomap", "Spectral Embedding", "Feature Agglomeration"),
     "ssclu" = c("ConstrainedKMeans", "SeededKMeans"),
     "de" = c("TTest", "Rank", "Wald"),

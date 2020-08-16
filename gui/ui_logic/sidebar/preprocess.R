@@ -13,7 +13,7 @@ menuItem(
                 list(
                     selectInput(
                         ns("preprocess_method"),
-                        "Select preprocessing method (use only if data is raw)",
+                        "Preprocessing (do not use with Server Datasets)",
                         c("Defaults", "Manual")
                     ),
                     conditionalPanel(
