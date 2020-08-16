@@ -13,26 +13,20 @@ menuItem(
             div(
                 class = "div_step div_color",
                 list(
-                    
-                        selectInput(
-                            ns("color"),
-                            "View gene expression:",
-                            "Clusters"
-                        ) %>%
-                            shinyInput_label_embed(
-                                shiny::icon("info-circle") %>%
-                                    bs_embed_tooltip(
-                                        "View the expression level of the selected gene in the plot. ",
-                                        placement= "bottom"
-                                    )
-                            )
-                        ,
-                        uiOutput(ns("threshold_slider"))
-                        
-                        
+                    selectInput(
+                        ns("color"),
+                        "View gene expression:",
+                        "Clusters"
+                    ) %>%
+                        shinyInput_label_embed(
+                            shiny::icon("info-circle") %>%
+                                bs_embed_tooltip(
+                                    "View the expression level of the selected gene in the plot. ",
+                                    placement= "bottom"
+                                )
+                        )
                 ),
             ),
-
             div(
                 class = "div_step div_n_genes",
                 list(

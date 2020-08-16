@@ -43,23 +43,25 @@ def parse(x):
 
 
 def _emb_exists_in_adata(adata, method, n_components):
-    if 'x_emb' not in adata.obsm and 'X_pca' not in adata.obsm:
-        return None
+    if 'x_emb' not in adata.obsm:
+        if 'X_pca' in adata.obsm: # Scanpy compatibility
+            adata.obsm['x_emb'] = adata.obsm.pop('X_pca')
+        else:
+            return None
+
     if 'dim_reduction_info' in adata.uns:
         if adata.uns['dim_reduction_info']['method'] != method:
             return None
         elif adata.obsm['x_emb'].shape[1] == n_components:
             return adata.obsm['x_emb']
+
     if method != 'PCA':
         return None
-    if isinstance(n_components, str):
+
+    if isinstance(n_components, str): # knee
         n_components = 10
-    if 'x_emb' in adata.obsm:
-        if n_components <= adata.obsm['x_emb'].shape[1]:
-            return adata.obsm['x_emb'][:, :n_components]
-    if 'X_pca' in adata.obsm:
-        if n_components <= adata.obsm['X_pca'].shape[1]:
-            return adata.obsm['X_pca'][:, :n_components]
+    if n_components <= adata.obsm['x_emb'].shape[1]:
+        return adata.obsm['x_emb'][:, :n_components]
     return None
 
 

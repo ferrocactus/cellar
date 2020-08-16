@@ -396,7 +396,7 @@ def reduce_dim_vis(
         if 'x_emb' not in adata.obsm:
             print("x_emb not found. Running PCA with default parameters.")
             print("If you don't want to use embeddings, pass use_emb=False.")
-            reduce_dim(adata, inplace=True)
+            reduce_dim(adata, inplace=True, clear_dependents=False)
 
         if method == 'UMAP + Paga':
             if not is_AnnData:

@@ -18,6 +18,12 @@ def get_key(adata, attr, key):
     return adata[attr][key]
 
 
+def has_labels(adata):
+    if 'labels' in adata.obs:
+        return True
+    return False
+
+
 def has_key_tri(adata, key1, key2, key3):
     if key2 not in getattr(adata, key1):
         return False

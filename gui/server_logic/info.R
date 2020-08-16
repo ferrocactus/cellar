@@ -19,9 +19,12 @@ info <- function(input, output, session, adata, relabel, reinfo) {
     # Observe change of cluster names
     observe({
         if (relabel() < 1) return()
+        isolate(relabel(0))
 
-        labels <- py_to_r(get_cluster_label_list(adata()))
-        names <- py_to_r(get_cluster_name_list(adata()))
+        req(adata())
+
+        labels <- py_to_r(get_cluster_label_list(isolate(adata())))
+        names <- py_to_r(get_cluster_name_list(isolate(adata())))
         df <- data.frame(as.character(labels), as.character(names))
         colnames(df) <- c("Cluster ID", "Label")
 
@@ -30,11 +33,13 @@ info <- function(input, output, session, adata, relabel, reinfo) {
             htmlTable(caption = "Cluster Labels", rnames = FALSE)
 
         info_val$cellNames <- list(tb)
-        isolate(relabel(0))
     })
 
     observe({
         if (reinfo() < 1) return()
+        isolate(reinfo(0))
+
+        req(adata())
 
         mx <- matrix(ncol = 1, nrow = 8)
         i <- 1
@@ -48,9 +53,9 @@ info <- function(input, output, session, adata, relabel, reinfo) {
 
         for (cat in names(cats)) {
             for (tag in get(cat, cats)) {
-                if (py_to_r(has_key_tri(adata(), 'uns', cat, tag)))
+                if (py_to_r(has_key_tri(isolate(adata()), 'uns', cat, tag)))
                     mx[i, 1] = paste(as.character(py_to_r(get_key_tri(
-                        adata(), 'uns', cat, tag))), collapse=', ')
+                        isolate(adata()), 'uns', cat, tag))), collapse=', ')
                 else
                     mx[i, 1] = "NA"
                 i = i+1
@@ -80,7 +85,6 @@ info <- function(input, output, session, adata, relabel, reinfo) {
                 n.rgroup = c(3, 4, 1)
             )
         info_val$configs <- list(tb)
-        isolate(reinfo(0))
     })
 
     return(info_val)

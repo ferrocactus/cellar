@@ -7,8 +7,11 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     ns <- session$ns
     plot_index <- reactiveVal(0)
     plot_count <- reactiveVal(0)
+    GRAY <- c(220, 220, 220)
     #lider_update <- reactiveVal(0)
     main_plot_val <- reactiveVal(NULL)
+    output$threshold_slider <- NULL
+    outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
 
     # triggers when replot is set to 1
     observeEvent(replot(), {
@@ -31,7 +34,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             showlegend = TRUE
             symbol = NULL
             symbols = NULL
-     
+            colors = NULL
+
             text = ~paste("Label: ", label_names)
             if (isolate(input$show_names) == 'show_names' && isolate(input$color) == 'Clusters')
                 color = paste0(labels, ": ", label_names)
@@ -74,36 +78,31 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 gene_names = py_to_r(get_all_gene_names(adata()))
                 i = which(gene_names == isolate(input$color))[1]
                 if (!is.null(i)) {
-                    
-                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color))) # text shows expression value
+
                     color = py_to_r(get_col(adata(), i))
-                    
-                    color=color-min(color)+1 # make min=1
-                    color = log(color)  # min=0
-                    
-                     
-                    if (identical(NULL,input$value_t)==FALSE){
-                        t=as.numeric(input$value_t)  # threshold
-                        if (t>0){
-                            for (i in 1:length(color)){
-                                if (color[i]<t){
-                                    color[i]=0  # 'gray'
-                                }
+                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color)))
+
+                    colors <- function(vals) {
+                        c_func = colorRamp(c("darkblue", "yellow"))
+                        max_val = max(color)
+
+                        if (!is.null(input$value_t[1])) { # New gene
+                            # Need to be in [0, 1] range so divide by max
+                            min_t = as.numeric(isolate(input$value_t)[1]) / max_val
+                            max_t = as.numeric(isolate(input$value_t)[2]) / max_val
+                            color_matrix = matrix(0, length(vals), 3)
+                            for (i in 1:length(vals)) {
+                                if (vals[i] < min_t) color_matrix[i, 1:3] = GRAY
+                                else if (vals[i] >= max_t) color_matrix[i, 1:3] = GRAY
+                                # Otherwise map [min_t, max_t] to [0, 1]
+                                else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
                             }
+                            return(color_matrix)
+                        } else { # default
+                            return(c_func(vals))
                         }
                     }
-                   
-                    # if (is.na(min(color[color > 0]))==FALSE){
-                    #     mini=min(color[color > 0])
-                    #     for (i in 1:length(color)){
-                    #         if (color[i]==0){
-                    #             color[i]=mini  #
-                    #         }
-                    #     }
-                    # }
-                    
-                    
-                    
+
                     title = isolate(input$color)
                     showlegend = FALSE
                     symbol = ~labels
@@ -114,11 +113,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 }
             }
             resubset(1) # split each subset into certain & uncertain subset or get back to original
-            
+
             p <- plot_ly(
                 x = x_emb_2d[, 1], y = x_emb_2d[, 2],
                 text = text,
                 color = color,
+                colors = colors,
                 #symbol = symbol,
                 #symbols = symbols,  ## 30 shapes
                 key = as.character(1:length(labels)),
@@ -128,7 +128,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 height = isolate(input$plot_height),
                 source = 'M'
             )
-
 
             p <- p %>% config(modeBarButtonsToAdd = list(plot_options_btn))
 
@@ -147,32 +146,27 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             output$plot <- renderPlotly({ p })
         })
     })
-    
+
     observeEvent(input$color,{
         if (input$color!='Uncertainty' && input$color != 'Clusters'){
             gene_names = py_to_r(get_all_gene_names(adata()))
             i = which(gene_names == isolate(input$color))[1]
             color = py_to_r(get_col(adata(), i))
-            color=color-min(color)+1 # make min=1
-            color = log(color)  # min=0
-           
+
             output$threshold_slider <- renderUI({
                 sliderInput(
                     ns("value_t"),
                     label="Value threshold",
-                    min=0,max=signif(max(color),digits=3),
-                    step=(max(color)/30),
-                    value=0
+                    min=min(color),max=max(color),
+                    value=c(signif(min(color)-1, digits=3), signif(max(color)+1), digits=3),
+                    step=(max(color) - min(color)) / 30
                 )
             })
-        }
-        else{
-            output$threshold_slider <- renderUI({
-               
-            })
+        } else{
+            output$threshold_slider <- renderUI({NULL})
         }
     })
-    
+
     observe({
         req(info_val$cellNames)
         output$cell_names_outp <- renderUI({ info_val$cellNames })
@@ -182,13 +176,13 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
     observeEvent(input$value_t, {
         req(adata())
-        if (is.na(as.numeric(input$value_t))==FALSE){
+        if (!is.null(input$value_t[0])){
             if ((input$color != 'Clusters') && (input$color != 'Uncertainty')){
                 replot(replot() + 1)
             }
         }
     })
-    
+
     observeEvent(input$dot_size, {
         req(adata())
         runjs(js.reset_marker_size)

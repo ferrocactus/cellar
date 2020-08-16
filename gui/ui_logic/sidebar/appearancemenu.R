@@ -9,7 +9,7 @@ appearancemenu <- function(id, label='appearancemenu') {
       icon = NULL,
       list(
 
-        
+
         radioButtons(
           ns("theme_mode"),
           "Select theme:",
@@ -24,8 +24,8 @@ appearancemenu <- function(id, label='appearancemenu') {
         #     shiny::icon("info-circle") %>%
         #       bs_embed_tooltip("Choose a theme of the app", placement="bottom",position="right",aligh="right")
         #   ),
-        
-        
+
+
         radioButtons(
           ns("show_names"),
           "Show names in plot:",
@@ -40,7 +40,7 @@ appearancemenu <- function(id, label='appearancemenu') {
         #     shiny::icon("info-circle") %>%
         #       bs_embed_tooltip(paste0("show/hide cluster names in the plot"), placement="bottom",position="right")
         #   ),
-        
+
         sliderInput(
           ns("dot_size"),
           "Select dot size",
@@ -51,18 +51,20 @@ appearancemenu <- function(id, label='appearancemenu') {
         #     shiny::icon("info-circle") %>%
         #       bs_embed_tooltip(paste0("Select the size of the dots in the plot"), placement="bottom",position="right")
         #   ),
-        
+
         sliderInput(
           ns("plot_height"),
           "Select plot height",
           min = 400, max = 800, value = 600
-        ) 
+        ) ,
         # %>%
         #   shinyInput_label_embed(
         #     shiny::icon("info-circle") %>%
         #       bs_embed_tooltip(paste0("Adjust the height of the main plot"), placement="bottom",position="right")
         #   )
-        
+
+        uiOutput(ns("threshold_slider"))
+
       )
     )
   )}

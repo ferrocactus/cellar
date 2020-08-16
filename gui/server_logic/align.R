@@ -3,7 +3,10 @@ align <- function(input, output, session, adata, selDatasetAlign,
     adataAlign <- reactiveVal(0)
 
     observeEvent(input$align_btn, {
-        req(adata())
+        if (py_to_r(is_active(adata())) == FALSE) {
+            showNotification("Please load the data first.")
+            return()
+        }
 
         if (input$folder_align == 'user_uploaded') {
             req(input$reference_dataset)

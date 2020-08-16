@@ -8,18 +8,15 @@ tooltips <- function(id, label='tooltips') {ns = NS(id); list(
 
     # Label Transfer
     bsTooltip(ns("uploaded_dataset_align"),
-              paste0("Choose the reference dataset. Should be the same ",
-                     "as the one on the session file.")),
+              paste0("Choose the reference dataset.")),
     bsTooltip(ns("server_dataset_align"),
-              paste0("Choose the reference dataset. Should be the same ",
-                     "as the one on the session file.")),
+              paste0("Choose the reference dataset.")),
 
     # Selection & Labeling
     bsTooltip(ns("subset1_upd"),
               paste0("Select the subset you want to update")),
 
     # Analysis
-
     bsTooltip(ns("subset1"),
                 "If None, will consider all cells not in Subset 1.",
                 placement= "bottom"

@@ -38,3 +38,4 @@ get_x <- cellar$utils$r_helpers$get_x
 is_sparse <- cellar$utils$r_helpers$is_sparse
 store_x_emb <- cellar$utils$tools$store_x_emb
 has_x_emb_sparse <- cellar$utils$r_helpers$has_x_emb_sparse
+has_labels <- cellar$utils$r_helpers$has_labels
