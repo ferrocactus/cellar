@@ -13,18 +13,32 @@ menuItem(
             div(
                 class = "div_step div_color",
                 list(
-                    tags$b(" "),
-                    selectInput(
-                        ns("color"),
-                        "View gene expression:",
-                        "Clusters"
-                    ) %>%
-                        shinyInput_label_embed(
-                            shiny::icon("info-circle") %>%
-                                bs_embed_tooltip(
-                                    "View the expression level of the selected gene in the plot. ",
-                                    placement= "bottom"
-                                )
+                    splitLayout(
+                        cellWidths = c("50%", "50%"),
+                        selectInput(
+                            ns("color"),
+                            "View gene expression:",
+                            "Clusters"
+                        ) %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        "View the expression level of the selected gene in the plot. ",
+                                        placement= "bottom"
+                                    )
+                            )
+                        ,
+                        textInput(
+                            ns("value_t"),
+                            label="Value threshold(log)",
+                            value=0
+                        ) 
+                        %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(paste0("Value above this will be shown"), placement="bottom",position="right")
+                            )
+                    #tags$b(" "),
                         )
 
                 ),

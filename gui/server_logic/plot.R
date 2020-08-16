@@ -30,7 +30,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             showlegend = TRUE
             symbol = NULL
             symbols = NULL
-
+     
             text = ~paste("Label: ", label_names)
             if (isolate(input$show_names) == 'show_names' && isolate(input$color) == 'Clusters')
                 color = paste0(labels, ": ", label_names)
@@ -75,10 +75,20 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 if (!is.null(i)) {
                     color = py_to_r(get_col(adata(), i))
                     #print(class(color))  ##array
-                    color=color-min(color)+1 # make min=1
                     
-                    color = log(color)
-                    text = ~paste("Label: ", label_names,'\nColor value:',as.character(color))
+                    color=color-min(color)+1 # make min=1
+                    color = log(color)  # min=0
+                    text = ~paste("Label: ", label_names,'\nColor value:',as.character(round(color,5))) # text shows expression value 
+                    t=as.numeric(input$value_t)  # threshold
+                    if (t>0){
+                        for (i in 1:length(color)){
+                            if (color[i]<t){
+                                color[i]=0  #
+                            }
+                        }
+                    }
+                    
+                    
                     title = isolate(input$color)
                     showlegend = FALSE
                     symbol = ~labels
@@ -103,6 +113,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 height = isolate(input$plot_height),
                 source = 'M'
             )
+
 
             p <- p %>% config(modeBarButtonsToAdd = list(plot_options_btn))
 
@@ -129,6 +140,15 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         output$clustering_info <- renderUI({ info_val$configs })
     })
 
+    observeEvent(input$value_t, {
+        req(adata())
+        if (is.na(as.numeric(input$value_t))==FALSE){
+            if ((input$color != 'Clusters') && (input$color != 'Uncertainty')){
+                replot(replot() + 1)
+            }
+        }
+    })
+    
     observeEvent(input$dot_size, {
         req(adata())
         runjs(js.reset_marker_size)

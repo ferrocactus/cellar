@@ -8,6 +8,7 @@ appearancemenu <- function(id, label='appearancemenu') {
     menuSubItem(
       icon = NULL,
       list(
+
         
         radioButtons(
           ns("theme_mode"),
