@@ -74,6 +74,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 gene_names = py_to_r(get_all_gene_names(adata()))
                 i = which(gene_names == isolate(input$color))[1]
                 if (!is.null(i)) {
+                    
+                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color))) # text shows expression value
                     color = py_to_r(get_col(adata(), i))
                     
                     color=color-min(color)+1 # make min=1
@@ -85,22 +87,22 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                         if (t>0){
                             for (i in 1:length(color)){
                                 if (color[i]<t){
-                                    color[i]=0  #
+                                    color[i]=0  # 'gray'
                                 }
                             }
                         }
                     }
                    
-                    if (is.na(min(color[color > 0]))==FALSE){
-                        mini=min(color[color > 0])
-                        for (i in 1:length(color)){
-                            if (color[i]==0){
-                                color[i]=mini  #
-                            }
-                        }
-                    }
+                    # if (is.na(min(color[color > 0]))==FALSE){
+                    #     mini=min(color[color > 0])
+                    #     for (i in 1:length(color)){
+                    #         if (color[i]==0){
+                    #             color[i]=mini  #
+                    #         }
+                    #     }
+                    # }
                     
-                    text = ~paste("Label: ", label_names,'\nColor value:',as.character((color))) # text shows expression value
+                    
                     
                     title = isolate(input$color)
                     showlegend = FALSE
