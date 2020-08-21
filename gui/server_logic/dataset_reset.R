@@ -42,6 +42,12 @@ dataset_reset <- function(input, output, session, reset, setNames,
         output$titleDisease = NULL
         output$titleheatmap = NULL
 
+        updateSelectInput(
+            session = session,
+            inputId = "color",
+            choices = c("Clusters"),
+            selected = "Clusters")
+
         deGenes(c())
 
         req(adata())

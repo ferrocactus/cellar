@@ -44,7 +44,7 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
     else:
         raise InvalidArgument("Incorrect number of components specified.")
 
-    if dim_n_components > 70:
+    if dim_n_components > 100:
         raise InappropriateArgument("Number of components is too high.")
 
     return dim_n_components

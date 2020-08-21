@@ -48,6 +48,15 @@ cluster <- function(input, output, session, adata,
                     inplace = TRUE,
                     check_if_exists = TRUE,
                     ensemble_methods = input$ensemble_checkbox)
+            else if (input$clu_method == 'Leiden')
+                msg <- cellar$safe(cellar$cluster,
+                    x = adata(),
+                    method = input$clu_method,
+                    use_emb = TRUE,
+                    inplace = TRUE,
+                    check_if_exists = FALSE,
+                    resolution = input$leiden_resolution,
+                    n_neighbors = input$leiden_neighbors)
             else
                 msg <- cellar$safe(cellar$cluster,
                     x = adata(),

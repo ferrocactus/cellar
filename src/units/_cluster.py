@@ -20,6 +20,7 @@ from ..utils.validation import _validate_clu_n_clusters
 from ._cluster_multiple import cluster_multiple
 from ._unit import Unit
 from ._evaluation import Eval_Silhouette
+from ..utils.exceptions import InvalidArgument
 
 
 default_eval_obj = Eval_Silhouette()
@@ -484,18 +485,33 @@ class Clu_Leiden(Unit):
     See https://github.com/vtraag/leidenalg
     """
 
-    def __init__(self, n_neighbors=10, eval_obj=default_eval_obj, **kwargs):
+    def __init__(self, n_neighbors=15, n_clusters=None, resolution=1,
+                 eval_obj=default_eval_obj, n_jobs=None, **kwargs):
         """
         Parameters
         __________
+        n_neighbors: int
+            Number of neighbors to use when constructing neighbors graph.
+
+        n_clusters: Ignored. Present for consistency.
+
+        eval_obj: Ignored. Present for consistency.
+
+        n_jobs: Ignored. Present for consistency.
+
         **kwargs: dictionary
             Dictionary of parameters that will get passed to obj_def
             when instantiating it.
 
         """
         self.logger = setup_logger('Leiden')
-        self.n_neighbors = n_neighbors
+        self.n_neighbors = int(n_neighbors)
+        if self.n_neighbors < 1:
+            raise InvalidArgument("Invalid number of neighbors.")
         self.eval_obj = eval_obj
+        self.resolution = float(resolution)
+        if self.resolution <= 0:
+            raise InvalidArgument("Invalid resolution.")
         self.kwargs = kwargs
 
     def get(self, x):
@@ -527,54 +543,17 @@ class Clu_Leiden(Unit):
             # Use 0 pcs since x is supposed to be an embedding already
             n_pcs = 0
         else:
-            adata = x # reference
+            adata = x  # reference
             adata.obsm['X_pca'] = adata.obsm['x_emb'].copy()
             n_pcs = None
 
-        scanpy.pp.neighbors(adata, n_neighbors=15, n_pcs=n_pcs)
-        scanpy.tl.leiden(adata)
+        self.logger.info(
+            f'Constructing neighbors graph with {self.n_neighbors} neighbors.')
+
+        scanpy.pp.neighbors(adata, n_neighbors=self.n_neighbors, n_pcs=n_pcs)
+        scanpy.tl.leiden(adata, resolution=self.resolution, **self.kwargs)
         labels = np.squeeze(np.array(adata.obs['leiden'])).astype(np.int)
 
         if is_anndata:
             adata.obsm.pop('X_pca')
         return labels, 0
-
-
-# class Clu_Scanpy(Unit):
-#     """
-#     See https://scanpy.readthedocs.io
-#     """
-
-#     def __init__(self, **kwargs):
-#         """
-#         Parameters
-#         __________
-#         **kwargs: dictionary
-#             Dictionary of parameters that will get passed to obj_def
-#             when instantiating it.
-
-#         """
-#         self.logger = setup_logger('Scanpy')
-#         self.kwargs = kwargs
-
-#     def get(self, x):
-#         """
-#         Parameters
-#         __________
-#         x: array, shape (n_samples, n_features)
-#             The data array.
-
-#         Returns
-#         _______
-#         y: array, shape (n_samples,)
-#             List of labels that correspond to the best clustering k, as
-#             evaluated by eval_obj.
-
-#         """
-
-#         self.logger.info("Initializing Scanpy.")
-#         ann = anndata.AnnData(X=x)
-#         scanpy.pp.neighbors(ann, n_neighbors=10, n_pcs=40)
-#         scanpy.tl.leiden(ann)
-#         labels = np.squeeze(np.array(ann.obs)).astype(np.int)
-#         return labels, self.eval_obj.get(x, labels)
