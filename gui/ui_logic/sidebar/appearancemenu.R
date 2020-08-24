@@ -18,7 +18,7 @@ appearancemenu <- function(id, label='appearancemenu') {
             "Dark Mode" = "dark_mode"
           ),
           inline = TRUE
-        ) ,
+        ),
         # %>%
         #   shinyInput_label_embed(
         #     shiny::icon("info-circle") %>%
@@ -34,7 +34,7 @@ appearancemenu <- function(id, label='appearancemenu') {
             "Show names" = "show_names"
           ),
           inline = TRUE
-        ) ,
+        ),
         # %>%
         #   shinyInput_label_embed(
         #     shiny::icon("info-circle") %>%
@@ -45,7 +45,7 @@ appearancemenu <- function(id, label='appearancemenu') {
           ns("dot_size"),
           "Select dot size",
           min = 1, max = 30, value = 5
-        ) ,
+        ),
         # %>%
         #   shinyInput_label_embed(
         #     shiny::icon("info-circle") %>%
@@ -56,15 +56,19 @@ appearancemenu <- function(id, label='appearancemenu') {
           ns("plot_height"),
           "Select plot height",
           min = 400, max = 800, value = 600
-        ) ,
+        ),
         # %>%
         #   shinyInput_label_embed(
         #     shiny::icon("info-circle") %>%
         #       bs_embed_tooltip(paste0("Adjust the height of the main plot"), placement="bottom",position="right")
         #   )
-
-        uiOutput(ns("threshold_slider"))
-
+        sliderInput(
+          ns("value_t"),
+          label="Value threshold",
+          min=0,max=10,
+          value=c(0, 10),
+          step=1
+        )
       )
     )
   )}

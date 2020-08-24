@@ -1,13 +1,16 @@
 differential_e <- function(input, output, session, adata, remark, deGenes,
                            activeDataset) {
     observeEvent(input$getdegenes, {
-        if (is_active(adata()) == FALSE) return()
+        req(adata())
         if (!py_has_attr(adata()$obs, 'labels')) return()
+
+        req(input$subset1)
+        req(input$subset2)
 
         s1 = as.character(input$subset1)
         s2 = as.character(input$subset2)
 
-        if (s1 == 'None' && s2 == 'None') {
+        if (s1 == 'All \\ Subset 2' && s2 == 'All \\ Subset 1') {
             showNotification("Please select a subset to analyze.")
             return()
         }
@@ -16,10 +19,10 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
             return()
         }
 
-        if (s1 == 'None') {
+        if (s1 == 'All \\ Subset 2') {
             s1 = s2
             s2 = NULL
-        } else if (s2 == 'None') {
+        } else if (s2 == 'All \\ Subset 1') {
             s2 = NULL
         }
 

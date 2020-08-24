@@ -11,14 +11,14 @@ selectionLabeling <- function(input, output, session, adata,
         if (tissue == "") return()
 
         if (tissue == 'clusters') {
-            if (is_active(adata()) == FALSE) return()
+            req(adata())
             if (!py_has_attr(adata()$obs, 'labels')) return()
 
-            clusters = py_to_r(get_unique_labels(adata()))
+            label_names = py_to_r(get_label_names(adata()))
             updateSelectInput(
                 session,
                 "newlabels",
-                choices = clusters
+                choices = label_names
             )
         } else if (tissue == 'user defined') {
             updateSelectInput(
@@ -75,14 +75,14 @@ selectionLabeling <- function(input, output, session, adata,
         if (input$color=="Uncertainty"){
             subsets <- py_to_r(get_uncertain_subsets(adata()))
             for (subset in subsets)
-                setNames(c(setNames(), as.character(subset))) 
+                setNames(c(setNames(), as.character(subset)))
         }
         else{
             subsets <- py_to_r(get_subsets(adata()))
             for (subset in subsets)
-                setNames(c(setNames(), as.character(subset)))    
+                setNames(c(setNames(), as.character(subset)))
         }
-        
+
     })
 
     # Update the label of a subset
@@ -111,7 +111,7 @@ selectionLabeling <- function(input, output, session, adata,
             session,
             "subset1",
             "Choose Subset 1",
-            choices = c("None", setNames())
+            choices = c("All \\ Subset 2", setNames())
     )})
 
     observe({
@@ -119,7 +119,7 @@ selectionLabeling <- function(input, output, session, adata,
             session,
             "subset2",
             "Choose Subset 2",
-            choices = c("None", setNames())
+            choices = c("All \\ Subset 1", setNames())
     )})
 
     observe({

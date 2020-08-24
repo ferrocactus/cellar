@@ -11,7 +11,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
         if (fullreset() > 0) {
             isolate(fullreset(0))
             isolate(reset(0))
-            setNames(c("None"))
+            setNames(c())
             labelList(c())
             output$plot <- NULL
             main_plot_val(NULL)
@@ -51,6 +51,12 @@ dataset_reset <- function(input, output, session, reset, setNames,
         deGenes(c())
 
         req(adata())
+
+        updateSliderInput(
+            session = session,
+            inputId = "mark_markers_n",
+            min = 5, max = max(py_to_r(adata()$shape[1]), 10), value = 50
+        )
 
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {
             updateSelectInput(

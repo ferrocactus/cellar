@@ -13,6 +13,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     output$threshold_slider <- NULL
     outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
 
+    trigger_threshold <- reactiveVal(FALSE)
+
     # triggers when replot is set to 1
     observeEvent(replot(), {
         if (replot() < 1) return()
@@ -82,14 +84,25 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                     color = py_to_r(get_col(adata(), i))
                     text = ~paste("Label: ", label_names,'\nColor value:',as.character((color)))
 
+                    eps = 0.1
+                    m = signif(min(color) - eps, digits=3)
+                    M = signif(max(color) + eps, digits=3)
+
+                    if (isolate(trigger_threshold()) == TRUE) {
+                        v1 = isolate(input$value_t)[1]
+                        v2 = isolate(input$value_t)[2]
+                    } else {
+                        v1 = m
+                        v2 = M
+                    }
+
                     colors <- function(vals) {
                         c_func = colorRamp(c("darkblue", "yellow"))
-                        max_val = max(color)
 
-                        if (!is.null(input$value_t[1])) { # New gene
+                        if (!is.null(v1)) { # New gene
                             # Need to be in [0, 1] range so divide by max
-                            min_t = as.numeric(isolate(input$value_t)[1]) / max_val
-                            max_t = as.numeric(isolate(input$value_t)[2]) / max_val
+                            min_t = as.numeric(v1) / M
+                            max_t = as.numeric(v2) / M
                             color_matrix = matrix(0, length(vals), 3)
                             for (i in 1:length(vals)) {
                                 if (vals[i] < min_t) color_matrix[i, 1:3] = GRAY
@@ -146,23 +159,34 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         })
     })
 
-    observeEvent(input$color,{
+    observeEvent(input$color, {
         if (input$color!='Uncertainty' && input$color != 'Clusters'){
             gene_names = py_to_r(get_all_gene_names(adata()))
             i = which(gene_names == isolate(input$color))[1]
             color = py_to_r(get_col(adata(), i))
 
-            output$threshold_slider <- renderUI({
-                sliderInput(
-                    ns("value_t"),
-                    label="Value threshold",
-                    min=min(color),max=max(color),
-                    value=c(signif(min(color)-1, digits=3), signif(max(color)+1), digits=3),
-                    step=(max(color) - min(color)) / 30
-                )
-            })
-        } else{
-            output$threshold_slider <- renderUI({NULL})
+            eps = 0.1
+            m = signif(min(color) - eps, digits=3)
+            M = signif(max(color) + eps, digits=3)
+            step = signif((M - m) / 30, digits=3)
+
+            isolate(trigger_threshold(FALSE))
+            updateSliderInput(
+                session = session,
+                inputId = "value_t",
+                min = m, max = M,
+                value = c(m, M),
+                step = step
+            )
+        } else {
+            isolate(trigger_threshold(FALSE))
+            updateSliderInput(
+                session = session,
+                inputId = "value_t",
+                min = 0, max = 1,
+                value = c(0, 1),
+                step = 1
+            )
         }
     })
 
@@ -174,6 +198,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     })
 
     observeEvent(input$value_t, {
+        if (trigger_threshold() == FALSE) {
+            isolate(trigger_threshold(TRUE))
+            return()
+        }
         req(adata())
         if (!is.null(input$value_t[0])){
             if ((input$color != 'Clusters') && (input$color != 'Uncertainty')){

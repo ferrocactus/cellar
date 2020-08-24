@@ -86,6 +86,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
         showNotification(paste(mode, "analysis finished"))
 
         downloadid = paste0("download", mode)
+
         output[[downloadid]] <- downloadHandler(
             filename = function() {
                 paste0(dataset, "_", mode, "_analysis", ".csv")

@@ -65,7 +65,7 @@ menuItem(
                         selectInput(
                             ns("subset1"),
                             "Choose Subset 1",
-                            choices = c("None")
+                            choices = c("All \\ Subset 2")
                         ) ,
                         # shiny::icon("info-circle") %>%
                         #     bs_embed_tooltip(
@@ -75,7 +75,7 @@ menuItem(
                         selectInput(
                             ns("subset2"),
                             "Choose Subset 2",
-                            choices = c("None")
+                            choices = c("All \\ Subset 1")
                         )
                         # shiny::icon("info-circle") %>%
                         #     bs_embed_tooltip(

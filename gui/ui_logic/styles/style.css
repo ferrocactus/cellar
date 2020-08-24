@@ -329,3 +329,13 @@ input:disabled {
     margin-top: -30px;
     margin-bottom: 30px;
 }
+
+#ns-titleDE, #ns-titleheatmap, #ns-titleONTO, #ns-titleKEGG, #ns-titleMSIG, #ns-titleDisease, #ns-titleCellType, #ns-titleUCellType {
+    text-align: center;
+    font-family: ubuntu;
+    font-weight: bold;
+}
+
+.download_btn_analysis {
+    margin-top: 20px;
+}

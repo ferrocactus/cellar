@@ -29,7 +29,7 @@ server <- shinyServer(function(input, output, session) {
     activeDataset <- reactiveVal("")
     selDatasetAlign <- reactiveVal("")
     labelList <- reactiveVal(c())
-    setNames <- reactiveVal(c("None"))
+    setNames <- reactiveVal(c())
     deGenes <- reactiveVal(0)
 
     reset <- reactiveVal(0)

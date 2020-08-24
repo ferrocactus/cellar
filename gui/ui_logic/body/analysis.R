@@ -4,53 +4,92 @@ tabsetPanel(
     id = ns("switcher"),
     tabPanel(
         "DE",
-        downloadButton(ns("downloadDE"), "Download DE genes"),
+        conditionalPanel(
+            'output.DEtable',
+            ns = ns,
+            downloadButton(ns("downloadDE"),
+                "Export DE genes", class="download_btn_analysis"),
+        ),
         uiOutput(ns("titleDE")),
         DT::dataTableOutput(ns("DEtable")),
     ),
     tabPanel(
       "Heat Map",
       uiOutput(ns("titleheatmap")),
-      sliderInput(
-        ns("heat_height"),
-        "Select heat map height",
-        min = 400, max = 800, value = 600
+      conditionalPanel(
+            'output.heatmap',
+            ns = ns,
+            sliderInput(
+                ns("heat_height"),
+                "Select heat map height",
+                min = 400, max = 800, value = 600
+            )
       ),
       plotOutput(ns("heatmap"), height="100%")
     ),
     tabPanel(
         "Gene Ontology",
-        downloadButton(ns("downloadGO"), "Download GO table"),
+        conditionalPanel(
+            'output.GOtable',
+            ns = ns,
+            downloadButton(ns("downloadGO"),
+                "Export GO table", class="download_btn_analysis")
+        ),
         uiOutput(ns("titleONTO")),
         DT::dataTableOutput(ns("GOtable"))
     ),
     tabPanel(
         "KEGG",
-        downloadButton(ns("downloadKEGG"), "Download KEGG table"),
+        conditionalPanel(
+            'output.KEGGtable',
+            ns = ns,
+            downloadButton(ns("downloadKEGG"),
+                "Export KEGG table", class="download_btn_analysis")
+        ),
         uiOutput(ns("titleKEGG")),
         DT::dataTableOutput(ns("KEGGtable"))
     ),
     tabPanel(
         "MSigDB C2",
-        downloadButton(ns("downloadMSIGDB"), "Download MSIGDB table"),
+        conditionalPanel(
+            'output.MSIGDBtable',
+            ns = ns,
+            downloadButton(ns("downloadMSIGDB"),
+                "Export MSIGDB table", class="download_btn_analysis")
+        ),
         uiOutput(ns("titleMSIG")),
         DT::dataTableOutput(ns("MSIGDBtable"))
     ),
     tabPanel(
-        "Cell Type",
-        uiOutput(ns("titleCellType")),
-        downloadButton(ns("downloadCellType"), "Download Cell Type table"),
-        DT::dataTableOutput(ns("CellTypetable"))
-    ),
-    tabPanel(
         "Disease",
+        conditionalPanel(
+            'output.Diseasetable',
+            ns = ns,
+            downloadButton(ns("downloadDisease"),
+                "Export Disease table", class="download_btn_analysis")
+        ),
         uiOutput(ns("titleDisease")),
-        downloadButton(ns("downloadDisease"), "Download Disease table"),
         DT::dataTableOutput(ns("Diseasetable"))
     ),
     tabPanel(
-        "User Cell Type",
-        downloadButton(ns("downloadUCellType"), "Download Cell Type table"),
+        "Cell Type",
+        conditionalPanel(
+            'output.CellTypetable',
+            ns = ns,
+            downloadButton(ns("downloadCellType"),
+                "Export Cell Type table", class="download_btn_analysis")
+        ),
+        uiOutput(ns("titleCellType")),
+        DT::dataTableOutput(ns("CellTypetable"))
+    ),
+    tabPanel(
+        "External Cell Type",
+        conditionalPanel(
+            'output.UCellTypetable',
+            ns = ns,
+            downloadButton(ns("downloadUCellType"),
+                "Export Cell Type table", class="download_btn_analysis")
+        ),
         uiOutput(ns("titleUCellType")),
         fileInput(ns("markjson"), "Choose markers JSON",
                   multiple = FALSE, accept = c(".json")),
