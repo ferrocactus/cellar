@@ -19,6 +19,14 @@ theme <- function(input, output, session, retheme) {
                 selector = '.content-wrapper'
             )
             addCssClass(
+                class = "body_dark_mode",
+                selector = '.dropdown-menu'
+            )
+            addCssClass(
+                class = "white-font",
+                selector = '.irs-min, .irs-max'
+            )
+            addCssClass(
                 class = "btn_dark",
                 selector = '#ns-DEbuttons .btn.btn-default'
             )
@@ -59,6 +67,14 @@ theme <- function(input, output, session, retheme) {
             removeCssClass(
                 class = "body_dark_mode",
                 selector = '.content-wrapper'
+            )
+            removeCssClass(
+                class = "body_dark_mode",
+                selector = '.dropdown-menu'
+            )
+            removeCssClass(
+                class = "white-font",
+                selector = '.irs-min, .irs-max'
             )
             removeCssClass(
                 class = "btn_dark",

@@ -33,12 +33,6 @@ downloadmenu <- function(id, label="downloadmenu") {
                                 shiny::icon("info-circle") %>%
                                     bs_embed_tooltip( title = paste0("Load a local session"), placement = "bottom")
                             ),
-                        # fileInput(
-                        #     ns("upload_sess"),
-                        #     "Import Session",
-                        #     multiple = FALSE,
-                        #     accept = c(".h5ad")
-                        # )
                         div(
                             class = "annotated_div",
                             list(
@@ -52,28 +46,6 @@ downloadmenu <- function(id, label="downloadmenu") {
                                     "Load Annotated Dataset",
                                     class = "sidebtn longbtn"
                                 )
-                            )
-                        )
-                    )
-                ),
-                div(
-                    class = "div_step div_download_plot",
-                    list(
-                        splitLayout(
-                            selectInput(
-                                ns("plot_download_format"),
-                                "Select format",
-                                choices=c("PNG", "JPEG", "SVG", "HTML", "PDF", "WEBP")
-                            ) %>%
-                                shinyInput_label_embed(
-                                    shiny::icon("info-circle") %>%
-                                        bs_embed_tooltip( title = paste0("Select the format of the plot to be downloaded"), placement = "bottom")
-                                ),
-
-                            downloadButton(
-                                ns("download_plot"),
-                                "Download Plot",
-                                class = "secondcol downloadbtn"
                             )
                         )
                     )

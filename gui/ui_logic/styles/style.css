@@ -183,21 +183,64 @@ input:disabled {
     margin-bottom: -40px !important;
 }
 
+.dropdown {
+    display:inline;
+}
+
+.store-plot {
+    background-color: #6da06f;
+    border: none;
+    margin-bottom: 20px;
+    color: white;
+}
+
+.store-plot:hover {
+    background-color: #a6c64c;
+}
+
+.delete-plot {
+    background-color: #c13525;
+    border: none;
+    color: white;
+}
+
+.delete-plot:hover {
+    background-color: #ff8652;
+}
+
+.secondcol-dropdown {
+    width: calc(100% - 3px);
+    margin-top: 24px;
+    background-color: var(--btncolor) !important;
+    color: white !important;
+    border-color: var(--btncolor) !important;
+}
+
+.secondcol-dropdown:hover {
+    background-color: var(--btncolorhover) !important;
+}
+
 .histbtn {
     text-decoration: none;
-    display: inline-block;
     font-size: 15px;
     text-align: center;
 }
 
 .histbtn:hover {
     background-color: #ddd;
-    color: black;
 }
 
 .body_dark_mode {
     background-color: var(--bluegray) !important;
     color: white;
+}
+
+.white-font {
+    color: white;
+}
+
+.black-font {
+    color: black;
 }
 
 .tab_dark_mode {

@@ -16,6 +16,7 @@ library(htmlTable)
 library(RColorBrewer)
 library(SnapATAC)
 library(GenomicRanges)
+library(shinyWidgets)
 
 source("gui/ui.R")
 source("gui/server.R")

@@ -1,17 +1,92 @@
 history <- function(id, label = "history") {
     ns = NS(id)
     fluidRow(
-        div(class = "hist",
+        span(class = "hist",
             conditionalPanel(
-                'output.plot',
+                'true',
                 ns = ns,
-                actionButton(
-                    ns("store_plot"), "Store Plot",
-                    class = "histbtn"
+                dropdownButton(
+                    tags$h4("Plot Options"),
+                    splitLayout(
+                        radioButtons(
+                            ns("show_names"),
+                            "Show cluster names in plot?",
+                            c(
+                                "Yes" = "dont_show_names",
+                                "No" = "show_names"
+                            ),
+                            inline = TRUE
+                        ),
+                        radioButtons(
+                            ns("theme_mode"),
+                            "Select theme:",
+                            c(
+                                "Light Mode" = "light_mode",
+                                "Dark Mode" = "dark_mode"
+                            ),
+                            inline = TRUE
+                        )
+                    ),
+                    sliderInput(
+                        ns("dot_size"),
+                        "Select marker size",
+                        min = 1, max = 30, value = 5
+                    ),
+                    sliderInput(
+                        ns("plot_height"),
+                        "Select plot height",
+                        min = 400, max = 800, value = 600
+                    ),
+                    sliderInput(
+                        ns("value_t"),
+                        label="Gene expression thresholds",
+                        min=0,max=10,
+                        value=c(0, 10),
+                        step=1
+                    ),
+                    size = 'sm',
+                    circle = TRUE,
+                    inputId = ns("appearance_dropdown"),
+                    #status = "danger",
+                    icon = icon("gear"),
+                    width = "500px",
+                    right = TRUE,
+                    margin = '40px',
+                    tooltip = tooltipOptions(title = "Configure Plot")
                 ),
-                actionButton(
-                    ns("delete_plot"), "Delete Plot",
-                    class = "histbtn"
+                dropdownButton(
+                    tags$h4("Export plot or store in a new tab"),
+                    splitLayout(
+                        selectInput(
+                            ns("plot_download_format"),
+                            "Select format",
+                            choices=c("PNG", "JPEG", "SVG", "HTML", "PDF", "WEBP")
+                        ),
+                        downloadButton(
+                            ns("download_plot"),
+                            "Download Plot",
+                            class = "secondcol-dropdown"
+                        )
+                    ),
+                    splitLayout(
+                        actionButton(
+                            ns("store_plot"), "Store plot in a new tab",
+                            class = "store-plot"
+                        ),
+                        actionButton(
+                            ns("delete_plot"), "Delete current plot tab",
+                            class = "delete-plot"
+                        )
+                    ),
+                    size = 'sm',
+                    circle = TRUE,
+                    inputId = ns("store_plot_dropdown"),
+                    #status = "danger",
+                    icon = icon("save"),
+                    width = "400px",
+                    right = TRUE,
+                    margin = '40px',
+                    tooltip = tooltipOptions(title = "Store Plot")
                 )
             )
         )

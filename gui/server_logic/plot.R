@@ -141,7 +141,15 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 source = 'M'
             )
 
-            p <- p %>% config(modeBarButtonsToAdd = list(plot_options_btn))
+            p <- p %>% config(
+                displaylogo = FALSE,
+                modeBarButtonsToAdd = list(plot_options_btn),
+                displayModeBar = TRUE,
+                modeBarButtonsToRemove = list(
+                    'select2d', 'zoom2d', 'zoomIn2d',
+                    'zoomOut2d', 'autoScale2d', 'resetScale2d',
+                    'hoverCompareCartesian', 'toggleSpikelines',
+                    'hoverClosestCartesian'))
 
             p <- p %>% layout(
                 dragmode = "lasso",
@@ -208,6 +216,21 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 replot(replot() + 1)
             }
         }
+    })
+
+    observeEvent(input$plot_options, {
+        req(adata())
+        showModal(
+            modalDialog(
+                title = 'Plot Options',
+                actionButton(
+                    "jh",
+                    "jhjgjh"
+                ),
+                easyClose = TRUE,
+                fade = FALSE
+            )
+        )
     })
 
     observeEvent(input$dot_size, {

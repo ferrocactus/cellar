@@ -4,7 +4,6 @@ source("gui/ui_logic/header/info.R")
 
 source("gui/ui_logic/sidebar/datasetmenu.R")
 source("gui/ui_logic/sidebar/preprocess.R")
-source("gui/ui_logic/sidebar/appearancemenu.R")
 source("gui/ui_logic/sidebar/clusterimenu.R")
 source("gui/ui_logic/sidebar/clusteriimenu.R")
 source("gui/ui_logic/sidebar/alignmenu.R")
@@ -37,7 +36,6 @@ sidebar <- dashboardSidebar(
         alignmenu(id='ns'),
         selectionmenu(id='ns'),
         analysismenu(id='ns'),
-        appearancemenu(id='ns'),
         downloadmenu(id='ns')
     )
 )
