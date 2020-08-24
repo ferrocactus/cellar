@@ -12,8 +12,8 @@ history <- function(id, label = "history") {
                             ns("show_names"),
                             "Show cluster names in plot?",
                             c(
-                                "Yes" = "dont_show_names",
-                                "No" = "show_names"
+                                "No" = "dont_show_names",
+                                "Yes" = "show_names"
                             ),
                             inline = TRUE
                         ),

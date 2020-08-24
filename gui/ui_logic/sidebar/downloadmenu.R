@@ -36,15 +36,15 @@ downloadmenu <- function(id, label="downloadmenu") {
                         div(
                             class = "annotated_div",
                             list(
-                                selectInput(
-                                    ns("annotated_datasets"),
-                                    "Choose Annotated Dataset",
-                                    choices = c(list.files("datasets/annotated"))
-                                ),
                                 actionButton(
                                     ns("load_ann_dataset"),
                                     "Load Annotated Dataset",
                                     class = "sidebtn longbtn"
+                                ),
+                                selectInput(
+                                    ns("annotated_datasets"),
+                                    "Load Session (Annotated Datasets)",
+                                    choices = c(list.files("datasets/annotated"))
                                 )
                             )
                         )
