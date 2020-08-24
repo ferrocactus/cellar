@@ -129,6 +129,7 @@ You will also need the following R packages
 * GenomicRanges (installed via BiocManager)
 * plot3D
 * SnapATAC (installed via devtools)
+* shinyWidgets
 
 Assuming all dependencies have been met, clone the github repo
 and cd into it

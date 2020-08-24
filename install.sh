@@ -66,6 +66,7 @@ Rscript -e 'install.packages("doSNOW")'
 Rscript -e 'BiocManager::install("GenomicRanges")'
 Rscript -e 'install.packages("plot3D")'
 Rscript -e 'devtools::install_github("r3fang/SnapATAC")'
+Rscript -e 'install.packages("shinyWidgets")'
 echo "Note: If you wish to convert plots to images, first install orca by following the instructions in https://github.com/plotly/orca"
 
 echo "Cellar installed successfully. Run it with $ Rscript app.R"

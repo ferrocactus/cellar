@@ -18,3 +18,4 @@ doSNOW
 GenomicRanges
 plot3D
 SnapATAC
+shinyWidgets

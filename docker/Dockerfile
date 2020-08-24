@@ -51,6 +51,7 @@ RUN Rscript -e 'install.packages("doSNOW")'
 RUN Rscript -e 'BiocManager::install("GenomicRanges")'
 RUN Rscript -e 'install.packages("plot3D")'
 RUN Rscript -e 'devtools::install_github("r3fang/SnapATAC")'
+RUN Rscript -e 'install.packages("shinyWidgets")'
 
 # Install orca dependency for plotly
 RUN apt-get install -y libasound2
