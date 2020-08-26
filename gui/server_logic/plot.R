@@ -1,5 +1,7 @@
 source("gui/server_logic/plot_options.R")
 
+EPS = 0.01
+
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, activeDataset,
                  setNames, setPts, reset, resubset, reinfo, relabel,
@@ -75,18 +77,16 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 text = ~paste0(replicate(length(label_names), "Label: "),
                             label_names, replicate(length(label_names), ", Uncertainty: "),
                             as.character(py_to_r(adata()$obs['uncertainty'])), '\n', as.character(certainty))
-            } else {
+            } else if (isolate(input$color2) == "None") {
                 # show gene expression level:
                 gene_names = py_to_r(get_all_gene_names(adata()))
                 i = which(gene_names == isolate(input$color))[1]
                 if (!is.null(i)) {
-
                     color = py_to_r(get_col(adata(), i))
                     text = ~paste("Label: ", label_names,'\nColor value:',as.character((color)))
 
-                    eps = 0.1
-                    m = signif(min(color) - eps, digits=3)
-                    M = signif(max(color) + eps, digits=3)
+                    m = signif(min(color) - EPS, digits=3)
+                    M = signif(max(color) + EPS, digits=3)
 
                     if (isolate(trigger_threshold()) == TRUE) {
                         v1 = isolate(input$value_t)[1]
@@ -97,7 +97,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                     }
 
                     colors <- function(vals) {
-                        c_func = colorRamp(c("darkblue", "yellow"))
+                        c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
 
                         if (!is.null(v1)) { # New gene
                             # Need to be in [0, 1] range so divide by max
@@ -117,12 +117,70 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                     }
                     title = isolate(input$color)
                     showlegend = FALSE
-                    symbol = ~labels
-                    symbols = all_symbols
                 } else {
                     showNotification("Gene not found")
                     color = labels
                 }
+            } else {
+                # Co-expression level
+                gene_names = py_to_r(get_all_gene_names(adata()))
+                gene1 = which(gene_names == isolate(input$color))[1]
+                gene2 = which(gene_names == isolate(input$color2))[1]
+                color1 = py_to_r(get_col(adata(), gene1)) # true expression
+                color2 = py_to_r(get_col(adata(), gene2)) # true expression
+                text = ~paste0("Label: ", label_names,
+                              '\n', input$color, ': ', as.character((signif(color1, digits=3))),
+                              '\n', input$color2, ': ', as.character((signif(color2, digits=3))))
+
+                m1 = signif(min(color1) - EPS, digits=3)
+                M1 = signif(max(color1) + EPS, digits=3)
+                m2 = signif(min(color2) - EPS, digits=3)
+                M2 = signif(max(color2) + EPS, digits=3)
+
+                # Map color1 to [0, 1]
+                color1 = (color1 - m1) / (M1 - m1)
+                # Map color2 to [0, 1]
+                color2 = (color2 - m2) / (M2 - m2)
+
+                if (isolate(trigger_threshold()) == TRUE) {
+                    # slider bar thresholds mapped to [0, 1]
+                    v11 = (isolate(input$value_t)[1] - m1) / (M1 - m1)
+                    v12 = (isolate(input$value_t)[2] - m1) / (M1 - m1)
+                    v21 = (isolate(input$value_t_2)[1] - m2) / (M2 - m2)
+                    v22 = (isolate(input$value_t_2)[2] - m2) / (M2 - m2)
+                } else {
+                    v11 = 0 - EPS
+                    v12 = 1 + EPS
+                    v21 = 0 - EPS
+                    v22 = 1 + EPS
+                }
+
+                for (i in 1:length(color1)) {
+                    if (color1[i] < v11 || color1[i] > v12) color1[i] = 0
+                    # color1 should have the same length as color2
+                    if (color2[i] < v21 || color2[i] > v22) color2[i] = 0
+                }
+
+                color = pmin(color1, color2)
+
+                colors <- function(vals) {
+                    c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
+
+                    color_matrix = matrix(0, length(vals), 3)
+                    for (i in 1:length(vals)) {
+                        if (vals[i] < EPS) color_matrix[i, 1:3] = GRAY
+                        else {
+                            # all non-outlier vals are in [0.5, 1]
+                            #v = (vals[i] - 0.5) * 2
+                            #v = max(min(1, v), 0) # ensure v is in [0, 1]
+                            color_matrix[i, 1:3] = c_func(vals[i])
+                        }
+                    }
+                    return(color_matrix)
+                }
+
+                title = paste(isolate(input$color), 'co.', isolate(input$color2))
+                showlegend = FALSE
             }
             resubset(1) # split each subset into certain & uncertain subset or get back to original
 
@@ -173,9 +231,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             i = which(gene_names == isolate(input$color))[1]
             color = py_to_r(get_col(adata(), i))
 
-            eps = 0.1
-            m = signif(min(color) - eps, digits=3)
-            M = signif(max(color) + eps, digits=3)
+            m = signif(min(color) - EPS, digits=3)
+            M = signif(max(color) + EPS, digits=3)
             step = signif((M - m) / 30, digits=3)
 
             isolate(trigger_threshold(FALSE))
@@ -198,6 +255,38 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         }
     })
 
+    observeEvent(input$color2, {
+        if (input$color!='Uncertainty' && input$color != 'Clusters' && input$color2 != 'None') {
+            gene_names = py_to_r(get_all_gene_names(adata()))
+            i = which(gene_names == isolate(input$color2))[1]
+            color = py_to_r(get_col(adata(), i))
+
+            m = signif(min(color) - EPS, digits=3)
+            M = signif(max(color) + EPS, digits=3)
+            step = signif((M - m) / 30, digits=3)
+
+            if (input$color2 != 'None')
+                isolate(trigger_threshold(FALSE))
+            updateSliderInput(
+                session = session,
+                inputId = "value_t_2",
+                min = m, max = M,
+                value = c(m, M),
+                step = step
+            )
+        } else {
+            if (input$color2 != 'None')
+                isolate(trigger_threshold(FALSE))
+            updateSliderInput(
+                session = session,
+                inputId = "value_t_2",
+                min = 0, max = 1,
+                value = c(0, 1),
+                step = 1
+            )
+        }
+    })
+
     observe({
         req(info_val$cellNames)
         output$cell_names_outp <- renderUI({ info_val$cellNames })
@@ -210,6 +299,20 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             isolate(trigger_threshold(TRUE))
             return()
         }
+        req(adata())
+        if (!is.null(input$value_t[0])){
+            if ((input$color != 'Clusters') && (input$color != 'Uncertainty')){
+                replot(replot() + 1)
+            }
+        }
+    })
+
+    observeEvent(input$value_t_2, {
+        if (trigger_threshold() == FALSE) {
+            isolate(trigger_threshold(TRUE))
+            return()
+        }
+        if (isolate(input$color2) == 'None') return()
         req(adata())
         if (!is.null(input$value_t[0])){
             if ((input$color != 'Clusters') && (input$color != 'Uncertainty')){
@@ -255,6 +358,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
     observeEvent(input$color, {
         req(adata())
+        replot(replot() + 1)
+    })
+
+    observeEvent(input$color2, {
+        req(adata())
+        if (isolate(input$color) == 'Clusters' || isolate(input$color) == 'Uncertainty') return()
         replot(replot() + 1)
     })
 

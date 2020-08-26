@@ -13,18 +13,32 @@ menuItem(
             div(
                 class = "div_step div_color",
                 list(
-                    selectInput(
-                        ns("color"),
-                        "View gene expression:",
-                        "Clusters"
-                    ) %>%
-                        shinyInput_label_embed(
-                            shiny::icon("info-circle") %>%
-                                bs_embed_tooltip(
-                                    "View the expression level of the selected gene in the plot. ",
-                                    placement= "bottom"
-                                )
-                        )
+                    splitLayout(
+                        selectInput(
+                            ns("color"),
+                            "View gene expression:",
+                            "Clusters"
+                        ) %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        "View the expression level of the selected gene. ",
+                                        placement= "bottom"
+                                    )
+                            ),
+                        selectInput(
+                            ns("color2"),
+                            "Gene co-expression:",
+                            "None"
+                        ) %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        "View co-expression levels of the two selected genes. ",
+                                        placement= "bottom"
+                                    )
+                            )
+                    )
                 ),
             ),
             div(

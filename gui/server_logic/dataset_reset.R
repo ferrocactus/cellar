@@ -63,6 +63,10 @@ dataset_reset <- function(input, output, session, reset, setNames,
                 session = session,
                 inputId = "color",
                 choices = c())
+            updateSelectInput(
+                session = session,
+                inputId = "color2",
+                choices = c())
         } else {
             names = py_to_r(get_all_gene_names(adata()))
             updateSelectInput(
@@ -70,6 +74,11 @@ dataset_reset <- function(input, output, session, reset, setNames,
                 inputId = "color",
                 choices = c("Clusters","Uncertainty", names),
                 selected = "Clusters")
+            updateSelectInput(
+                session = session,
+                inputId = "color2",
+                choices = c("None", names),
+                selected = "None")
         }
 
         # Update sets
