@@ -184,7 +184,9 @@ def reduce_dim(
             key_to_use = 'x_emb'
         elif 'X_pca' in adata.obsm:
             key_to_use = 'X_pca'
-        if n_components != adata.obsm[key_to_use].shape[1]:
+        if (adata.uns['dim_reduction_info']['n_components_used'] != 'Automatic' \
+            and n_components == 'knee') or (n_components != 'knee' \
+            and adata.uns['dim_reduction_info']['n_components_used'] == 'Automatic'):
             if clear_dependents:
                 _clear_x_emb_dependents(adata)
     # Create dimensionality reduction object and find embedding

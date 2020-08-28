@@ -21,9 +21,9 @@ cluster <- function(input, output, session, adata,
             n <- 5
             incProgress(1 / n, detail = "Reducing Dimensionality")
 
-            if (py_to_r(is_sparse(adata()))) {
+            if (py_to_r(is_sparse(adata())) && input$dim_method == 'Diffusion Map') {
                 if (!py_to_r(has_x_emb_sparse(adata(), input$dim_method, n_components))) {
-                    x_emb = diff_map_sparse(adata(), n_components)
+                    x_emb = diff_map_sparse(adata, n_components)
                     store_x_emb(adata(), x_emb=x_emb, method=input$dim_method)
                 }
             } else {
@@ -140,8 +140,8 @@ cluster <- function(input, output, session, adata,
 
 diff_map_sparse <- function(adata, num.eigs) {
     if (num.eigs == 'knee') num.eigs = 50
-    x = scipy$sparse$csc_matrix(adata$X)
-    barcodes = as.character(py_to_r(adata$obs_names$to_numpy()))
+    x = scipy$sparse$csc_matrix(adata()$X)
+    barcodes = as.character(py_to_r(adata()$obs_names$to_numpy()))
     # Random bins, we won't be needing them
     bins <- GRanges(seqnames = "chr1",
                   strand = c("+"),
@@ -149,6 +149,35 @@ diff_map_sparse <- function(adata, num.eigs) {
 
     x.sp = createSnapFromBmat(x, barcodes=barcodes, bins=bins)
     x.sp = runDiffusionMaps(x.sp, num.eigs=as.numeric(num.eigs))
+
+    plotDimReductPW(
+      obj=x.sp,
+      eigs.dims=1:50,
+      point.size=0.3,
+      point.color="grey",
+      point.shape=19,
+      point.alpha=0.6,
+      down.sample=5000,
+      pdf.file.name='EigenPlots.pdf',
+      pdf.height=7,
+      pdf.width=7
+    )
+
+    message(sprintf("Graph-based clustering\n"))
+    x.sp = runKNN(
+      obj=x.sp,
+      eigs.dims=1:20,
+      k=15
+    )
+    x.sp=runCluster(
+      obj=x.sp,
+      tmp.folder='.',
+      louvain.lib="R-igraph",
+      seed.use=10
+    )
+
+    cellar$store_labels(adata(), x.sp@cluster, method='snapATAC')
+
     x_emb = as.matrix(x.sp@smat@dmat)
 
     return(x_emb)
