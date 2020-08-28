@@ -57,6 +57,14 @@ def _emb_exists_in_adata(adata, method, n_components):
         elif adata.uns['dim_reduction_info']['n_components_used'] == 'Automatic' and n_components == 'knee':
             return adata.obsm['x_emb']
 
+    if method != 'PCA':
+        return None
+
+    if isinstance(n_components, str): # knee
+        n_components = 10
+    if n_components <= adata.obsm['x_emb'].shape[1]:
+        return adata.obsm['x_emb'][:, :n_components]
+
     return None
 
 
