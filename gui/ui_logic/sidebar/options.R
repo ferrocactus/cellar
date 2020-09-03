@@ -7,7 +7,7 @@ defaults <- list(
 
 options <- list(
     "dim" = c("PCA", "Kernel PCA", "Truncated SVD", "Diffusion Map", "MDS", "UMAP", "Isomap",
-              "Spectral Embedding", "Feature Agglomeration", "Monocle3"),
+              "Spectral Embedding", "Feature Agglomeration", "Monocle3", "ATAC"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
               "GaussianMixture", "Ensemble", "Fixed"),
     "clu_ensemble" = c("All"="All", "KMeans"="KMeans", "KMedoids"="KMedoids",

@@ -45,4 +45,4 @@ def safe(f, **kwargs):
         return str(e)
     except Exception as e:
         traceback.print_exc(file=sys.stdout)
-        return "An error occurred."
+        return "Something went wrong."

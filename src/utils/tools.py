@@ -132,6 +132,15 @@ def store_x_emb(adata, x_emb, method):
     adata.uns['dim_reduction_info']['kwargs'] = {}
 
 
+def store_x_emb_d(adata, x_emb_d, method):
+    dim = x_emb_d.shape[1]
+    adata.obsm[f'x_emb_{dim}d'] = np.array(x_emb_d).astype(float)
+    adata.uns[f'visualization_info_{dim}d'] = {}
+    adata.uns[f'visualization_info_{dim}d']['method'] = method
+    adata.uns[f'visualization_info_{dim}d']['used_emb'] = "NA"
+    adata.uns[f'visualization_info_{dim}d']['kwargs'] = "NA"
+
+
 def update_subset_label(adata, subset_name, name):
     subset_name = str(subset_name)
     name = str(name)

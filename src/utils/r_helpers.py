@@ -211,3 +211,10 @@ def has_x_emb_sparse(adata, method, n_components):
         return False
 
     return True
+
+
+def set_adata(x, transpose=False):
+    a = AnnData(x)
+    if transpose:
+        a = a.T
+    return a
