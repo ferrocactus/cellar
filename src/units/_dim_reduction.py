@@ -112,7 +112,7 @@ class Dim_TruncatedSVD(Unit):
     See https://scikit-learn.org/stable/modules/generated/sklearn.decomposition.TruncatedSVD.html
     """
 
-    def __init__(self, n_components='knee', n_components_max=100, **kwargs):
+    def __init__(self, n_components='knee', n_components_max=30, **kwargs):
         """
         Parameters
         __________

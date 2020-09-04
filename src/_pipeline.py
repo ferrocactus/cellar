@@ -77,7 +77,7 @@ def preprocess(
 
 def reduce_dim(
         x: Union[AnnData, np.ndarray, list],
-        method: str = 'PCA',
+        method: str = "Truncated SVD",
         n_components: Union[str, int, float] = 'knee',
         inplace: Optional[bool] = True,
         check_if_exists: Optional[bool] = False,
