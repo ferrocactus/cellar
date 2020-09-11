@@ -1,3 +1,4 @@
+
 dataset <- function(input, output, session, adata, selDataset,
                     selDatasetAlign, fullreset, activeDataset) {
     ###########################################################################
@@ -43,16 +44,27 @@ dataset <- function(input, output, session, adata, selDataset,
         print(paste("Selected", selDataset()))
         activeDataset(tools::file_path_sans_ext(basename(selDataset())))
 
+        
         withProgress(message = "Please wait", value = 0, {
             incProgress(1 / 2, detail = "Reading dataset")
-            isolate(adata(safe_load_file(selDataset())))
+            s=as.character(selDataset())
+            if (substr(s,nchar(s)-3,nchar(s))=='_10x'){
+                isolate(adata(read_10x(as.character(selDataset()))))
+  
+            }
+            else{
+                isolate(adata(safe_load_file(selDataset())))
+            }
         })
         if (py_to_r(is_str(adata()))) {
             showNotification("Incorrect file format.")
             isolate(adata(NULL))
         } else {
+         
             fullreset(fullreset() + 1)
+            
             showNotification("Dataset loaded")
+     
         }
     })
 

@@ -149,8 +149,8 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
         if (length(deGenes()) < 1) return()
 
         dataset = as.character(activeDataset())
-
-        nc = py_to_r(adata()$n_vars)
+        nc = py_to_r(adata()$shape[1])
+        #nc = py_to_r(adata()$n_vars)
 
         s1 = as.character(isolate(input$subset1))
         s2 = as.character(isolate(input$subset2))

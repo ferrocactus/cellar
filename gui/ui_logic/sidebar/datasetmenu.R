@@ -38,13 +38,13 @@ menuItem(
                 ,
                 fileInput(
                     ns("file1"),
-                    "Choose CSV/h5ad File",
+                    "Choose CSV/h5ad/gz File",
                     multiple = FALSE,
-                    accept = c(
-                        "text/csv",
-                        "text/comma-separated-values",
-                        ".csv", ".h5ad"
-                    )
+                     accept = c(
+                         "text/csv/gz",
+                         "text/comma-separated-values",
+                         ".csv", ".h5ad", ".gz"
+                     )
                 )
                 %>%
                     shinyInput_label_embed(

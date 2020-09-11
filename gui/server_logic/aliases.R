@@ -41,3 +41,4 @@ has_x_emb_sparse <- cellar$utils$r_helpers$has_x_emb_sparse
 has_labels <- cellar$utils$r_helpers$has_labels
 store_x_emb_d <- cellar$utils$tools$store_x_emb_d
 set_adata <- cellar$utils$r_helpers$set_adata
+read_10x <- cellar$utils$r_helpers$read_10x

@@ -65,5 +65,7 @@ upload_file <- function(input, output, session) {
             )
             showNotification("Dataset uploaded")
         }
+        
+        
     })
 }
