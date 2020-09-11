@@ -1,5 +1,5 @@
 defaults <- list(
-    "dim" = '10',
+    "dim" = '40',
     "clu" = '(3, 5, 1)',
     "mark_alpha" = 0.05,
     "mark_no" = 200

@@ -44,7 +44,7 @@ menuItem(
                                     "Manual" = "pca_manual"
                                 ),
                                 inline = TRUE,
-                                selected = 'pca_auto',
+                                selected = 'pca_manual',
                             )%>%
                                 shinyInput_label_embed(
                                     shiny::icon("info-circle") %>%
