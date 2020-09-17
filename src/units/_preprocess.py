@@ -26,9 +26,9 @@ DEFAULTS_SCANPY = {
         'target_sum': 1e4
     },
     'highly_variable_genes': {
-        'min_mean': 0.001,
-        'max_mean': 5,
-        'min_disp': 0.05
+        'min_mean': 0.0125,
+        'max_mean': 3,
+        'min_disp': 0.5
     },
     'scale': {
         'max_value': 10
@@ -104,18 +104,18 @@ class Pre_Scanpy(Unit):
         else:
             adata = x.copy()
 
-        for key in self.filter_cells:
-            sc.pp.filter_cells(
-                adata, **self.filter_cells[key], inplace=True)
+        #for key in self.filter_cells:
+        #    sc.pp.filter_cells(
+        #        adata, **self.filter_cells[key], inplace=True)
         for key in self.filter_genes:
             sc.pp.filter_genes(
                 adata, **self.filter_genes[key], inplace=True)
 
-        adata.var['mt'] = adata.var_names.str.startswith('MT-')
-        sc.pp.calculate_qc_metrics(
-            adata, qc_vars=['mt'], percent_top=None, inplace=True)
+        #adata.var['mt'] = adata.var_names.str.startswith('MT-')
+        #sc.pp.calculate_qc_metrics(
+        #    adata, qc_vars=['mt'], percent_top=None, inplace=True)
 
-        adata = adata[adata.obs.pct_counts_mt < self.pct_counts_mt, :]
+        #adata = adata[adata.obs.pct_counts_mt < self.pct_counts_mt, :]
 
         sc.pp.normalize_total(
             adata, **self.normalize_total, inplace=True)
