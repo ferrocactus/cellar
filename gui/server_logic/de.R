@@ -139,6 +139,16 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                     'color',
                     selected = selected_gene
                 )
+                
+                ## violin
+                gene_names = py_to_r(get_all_gene_names(adata()))
+                i = which(gene_names == (selected_gene))[1]
+                gene = py_to_r(get_col(adata(), i))
+                violin_dat = data.frame(as.factor(py_to_r(get_labels(adata()))),gene)
+                colnames(violin_dat)=c("cluster","expression")
+                p <- ggplot(violin_dat, aes(x=cluster, y=expression, fill=cluster)) + geom_violin()
+                output$violin <- renderPlot(p)
+                ## violin
             }
         })
     })
