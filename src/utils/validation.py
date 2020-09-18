@@ -33,6 +33,8 @@ def _validate_dim_n_components(dim_n_components, method, h, w):
         else:
             return dim_n_components  # return 'knee'
 
+    dim_n_components = int(dim_n_components)
+
     if isinstance(dim_n_components, int):
         if dim_n_components >= h or dim_n_components >= w:
             raise InappropriateArgument(
