@@ -26,7 +26,7 @@ tabsetPanel(
           min = 400, max = 800, value = 600
         )
       ),
-      plotOutput(ns("violin"), height="100%")
+      plotOutput(ns("violin"))
     ),
     
     tabPanel(
