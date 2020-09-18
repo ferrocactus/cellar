@@ -4,6 +4,7 @@ import logging
 import numpy as np
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
+from sklearn.decomposition import IncrementalPCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import KernelPCA
 from sklearn.manifold import TSNE
@@ -99,6 +100,100 @@ class Dim_PCA(Unit):
         else:
             x_emb = PCA(n_components=self.n_components,
                         **self.kwargs).fit_transform(x)
+
+        if return_evr == True:
+            return x_emb, y_axis
+        else:
+            return x_emb
+
+
+class Dim_IncrementalPCA(Unit):
+    """
+    Reduces the dimensionality of the data.
+    See https://scikit-learn.org/stable/auto_examples/decomposition/plot_incremental_pca.html
+    """
+
+    def __init__(self, n_components='knee', n_components_max=100,
+                 batch_size=128, **kwargs):
+        """
+        Parameters
+        __________
+
+        n_components: int, float or string, default 'knee'
+            Number of components to use for PCA. If int, use that exact
+            number of components. If float between 0 and 1, use that fraction
+            of n_features of x. If 'knee', use Knee Detector algorithm to
+            automatically figure out the n_components based on the curvature
+            of the explained variance ratio graph.
+
+        n_components_max: int, default 100
+            If is ignored if n_components is different than 'knee'.
+            Specifies the number of components to use for constructing the
+            initial graph of explained variance ratio.
+
+        batch_size: int, default 128
+            The number of samples to use for each batch.
+
+        **kwargs: dictionary
+            Dictionary of parameters that will get passed to obj
+            when instantiating it.
+        """
+        self.logger = setup_logger('IncrementalPCA')
+        self.n_components = n_components
+        self.n_components_max = n_components_max
+        self.batch_size = batch_size
+        self.kwargs = kwargs
+
+    def get(self, x, return_evr=False):
+        """
+        Runs clustering for multiple n_clusters.
+
+        Parameters
+        __________
+
+        x: array, shape (n_samples, n_features)
+            The data array.
+
+        return_evr: Bool
+            If set, function will also return an array of
+            explained variance ratios for every component.
+
+        Returns
+        _______
+
+        x_emb: array, shape (n_samples, n_components)
+            Data in the reduced dimensionality.
+
+        [y_axis]: array, if return_evr==True, shape (n_components_max,)
+            Explained Variance Ratio array.
+
+        """
+        self.logger.info("Initializing Incremental PCA.")
+
+        if self.n_components == 'knee':
+            n_components = min(self.n_components_max, np.min(x.shape))
+            obj = IncrementalPCA(n_components=n_components,
+                                 batch_size=self.batch_size,
+                                 **self.kwargs).fit(x)
+
+            # Construct axis for KneeLocator
+            x_axis = list(range(1, obj.n_components_ + 1))
+            y_axis = obj.explained_variance_ratio_
+            # Find knee
+            n_components = KneeLocator(x_axis, y_axis,
+                                       curve='convex',  # Approximately
+                                       direction='decreasing'
+                                       ).knee
+            n_components = max(n_components, 10)
+
+            self.logger.info("Knee found at {0}.".format(n_components))
+            x_emb = IncrementalPCA(n_components=n_components,
+                                   batch_size=self.batch_size,
+                                   **self.kwargs).fit_transform(x)
+        else:
+            x_emb = IncrementalPCA(n_components=self.n_components,
+                                   batch_size=self.batch_size,
+                                   **self.kwargs).fit_transform(x)
 
         if return_evr == True:
             return x_emb, y_axis
@@ -500,7 +595,7 @@ class Dim_UMAP_Paga(Unit):
         # Renaming keys for scanpy compability
         x.obsm['X_pca'] = x.obsm['x_emb'].copy()
         sc.tl.paga(x)
-        sc.pl.paga(x, show=False) # Need to add 'pos' key
+        sc.pl.paga(x, show=False)  # Need to add 'pos' key
         sc.tl.umap(x, init_pos='paga')
 
         x.obsm.pop('X_pca')

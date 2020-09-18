@@ -1,6 +1,7 @@
 from ._unit import Unit
 from ._preprocess import Pre_Scanpy
 from ._dim_reduction import Dim_PCA
+from ._dim_reduction import Dim_IncrementalPCA
 from ._dim_reduction import Dim_KernelPCA
 from ._dim_reduction import Dim_TruncatedSVD
 from ._dim_reduction import Dim_UMAP
@@ -43,6 +44,7 @@ translation_dict = {
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
+        "Incremental PCA": Dim_IncrementalPCA,
         "Kernel PCA": Dim_KernelPCA,
         "Truncated SVD": Dim_TruncatedSVD,
         "UMAP": Dim_UMAP,
@@ -141,6 +143,7 @@ __all__ = [
     'wrap',
     'Pre_Scanpy',
     'Dim_PCA',
+    'Dim_IncrementalPCA',
     'Dim_KernelPCA',
     'Dim_TruncatedSVD',
     'Dim_UMAP',
