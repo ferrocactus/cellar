@@ -4,7 +4,7 @@ import logging
 import numpy as np
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
-from fbpca import pca
+#from fbpca import pca
 from sklearn.decomposition import IncrementalPCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import KernelPCA
