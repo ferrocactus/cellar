@@ -60,7 +60,7 @@ def _emb_exists_in_adata(adata, method, n_components):
     if method != 'PCA':
         return None
 
-    if isinstance(n_components, str): # knee
+    if isinstance(n_components, str):  # knee
         n_components = 10
     if n_components <= adata.obsm['x_emb'].shape[1]:
         return adata.obsm['x_emb'][:, :n_components]
@@ -120,6 +120,55 @@ def store_labels(adata, labels, method):
     adata.uns['cluster_info']['method'] = method
     adata.uns['cluster_names'] = bidict(
         {int(i): str(i) for i in unq_labels})
+    populate_subsets(adata)
+
+
+def match_labels(adata, ids, labels):
+    ids = np.array(ids).astype(str)
+    labels = np.array(labels).astype(str)
+
+    if ids.shape[0] != labels.shape[0]:
+        raise InvalidArgument("Found IDs and labels of different length.")
+
+    # indices allow to reconstruct the original array given unq_labels
+    unq_labels, indices = np.unique(labels, return_inverse=True)
+
+    # Get common cell ids and their indices for each array
+    common_ids, adata_ind, ids_ind = np.intersect1d(
+        adata.obs_names.to_numpy().astype(str), ids, return_indices=True)
+
+    # Subtract 1 (will be used as indicator of cells which had no matching id)
+    new_labels = np.zeros((adata.shape[0])) - 1
+
+    # Fill adata matched indices with correct label
+    new_labels[adata_ind] = indices[ids_ind]
+
+    # Fill the next cluster with unknown cells
+    free_cluster = np.max(indices) + 1
+    new_labels[new_labels == -1] = free_cluster
+
+    new_labels = new_labels.astype(int)
+
+    # Replace labels
+    adata.obs['labels'] = new_labels
+
+    unq = np.unique(new_labels)
+
+    # Construct label - cell type dict
+    b = bidict({})
+    for i in unq:
+        if i != free_cluster:
+            b[int(i)] = str(unq_labels[i])
+        else:
+            b[int(i)] = "No matching ID"
+
+    # Update entries
+    adata.uns['cluster_info'] = {}
+    unq_labels = np.unique(adata.obs['labels'])
+    adata.uns['cluster_info']['unique_labels'] = unq
+    adata.uns['cluster_info']['n_clusters'] = len(unq)
+    adata.uns['cluster_info']['method'] = 'Uploaded Labels'
+    adata.uns['cluster_names'] = b
     populate_subsets(adata)
 
 

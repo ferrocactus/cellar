@@ -130,4 +130,15 @@ selectionLabeling <- function(input, output, session, adata,
             choices = c("None", setNames())
         )
     })
+
+    observeEvent(input$store_uploaded_labels, {
+        req(input$upload_labels)
+        lbs <- read.csv(input$upload_labels$datapath)
+
+        match_labels(adata(), lbs[,1], lbs[,2])
+
+        replot(replot() + 1)
+        reset(reset() + 1)
+        resubset(resubset() + 1)
+    })
 }

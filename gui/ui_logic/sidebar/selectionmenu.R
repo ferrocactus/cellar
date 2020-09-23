@@ -3,7 +3,7 @@ source("gui/ui_logic/sidebar/options.R")
 selectionmenu <- function(id, label="selectionmenu") {
 ns = NS(id)
 menuItem(
-    "Selection & Labeling",
+    "Tools",
     id = "selectionbtn",
     icon = icon("object-group"),
     startExpanded = FALSE,
@@ -15,7 +15,7 @@ menuItem(
                 list(
                     splitLayout(
                         #cellWidths = c("50%", "50%"),
-                        
+
                         textInput(
                             ns("newsubset"),
                             "New Subset",
@@ -28,7 +28,7 @@ menuItem(
                                         placement= "bottom"
                                     )
                             ),
-                        
+
                         actionButton(
                             ns("store_lasso"),
                             "Add Subset",
@@ -54,7 +54,7 @@ menuItem(
                                         placement= "bottom"
                                     )
                             ),
-                        
+
                         actionButton(
                             ns("labeladd"),
                             "Add Label",
@@ -74,7 +74,7 @@ menuItem(
                                     placement= "bottom"
                                 )
                         ),
-                    
+
                     selectInput(
                         ns("newlabels"),
                         "Select cell type",
@@ -87,14 +87,14 @@ menuItem(
                                     placement= "bottom"
                                 )
                         ),
-                    
+
                     splitLayout(
                         #cellWidths = c("49%", "1%","50%"),
-                        
-                        
+
+
                         #uiOutput("subset1_upd")
-                        
-                    #uiOutput("subset1_upd"),                        
+
+                    #uiOutput("subset1_upd"),
                     selectInput(
                         ns("subset1_upd"),
                         "Choose Subset",
@@ -110,11 +110,35 @@ menuItem(
                         #             )
                         #     ),
 
-                        
+
 
                         actionButton(
                             ns("labelupd"),
                             "Update Subset Labels",
+                            class = "secondcol"
+                        )
+                    )
+                )
+            ),
+
+            div(
+                class = "div_step div_upload_labels",
+                list(
+                    splitLayout(
+                        fileInput(
+                            ns("upload_labels"),
+                            "Upload Labels",
+                            multiple = FALSE,
+                            accept = c(".csv")
+                        ) %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip( title = paste0("Upload a csv containing labels"), placement = "bottom")
+                            ),
+
+                        actionButton(
+                            ns("store_uploaded_labels"),
+                            "Store Labels",
                             class = "secondcol"
                         )
                     )

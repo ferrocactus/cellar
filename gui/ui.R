@@ -34,8 +34,8 @@ sidebar <- dashboardSidebar(
         clusterimenu(id='ns'),
         clusteriimenu(id='ns'),
         alignmenu(id='ns'),
-        selectionmenu(id='ns'),
         analysismenu(id='ns'),
+        selectionmenu(id='ns'),
         downloadmenu(id='ns')
     )
 )
