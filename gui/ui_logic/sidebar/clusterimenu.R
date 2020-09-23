@@ -22,7 +22,7 @@ menuItem(
                         ns("dim_method"),
                         "Dimensionality reduction",
                         choices = options$dim,
-                        selected='Truncated SVD'
+                        selected='PCA'
                     )%>%
                         shinyInput_label_embed(
                             shiny::icon("info-circle") %>%
