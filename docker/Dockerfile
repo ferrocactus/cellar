@@ -71,8 +71,9 @@ RUN apt-get clean
 
 EXPOSE 23123
 
-RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 ### Install python3 dependencies
+
+RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN pip3 install -r /home/cellar/py_requirements.txt
 
 WORKDIR /home/cellar

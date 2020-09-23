@@ -11,7 +11,7 @@ from ..utils.exceptions import InvalidArgument
 DEFAULTS_SCANPY = {
     'filter_cells': {
         'run1': {
-            'min_genes': 50,
+            'min_genes': 200,
         },
         'run2': {
             'max_genes': 3000

@@ -159,6 +159,9 @@ def reduce_dim(
 
     _method_exists('dim_reduction', method)
 
+    if clear_dependents:
+        _clear_x_emb_dependents(adata)
+
     if issparse(adata.X):
         allowed = ['Truncated SVD', 'Spectral Embedding',
                    'UMAP', 'Diffusion Map']
@@ -184,18 +187,11 @@ def reduce_dim(
             key_to_use = 'x_emb'
         elif 'X_pca' in adata.obsm:
             key_to_use = 'X_pca'
-        if 'dim_reduction_info' in adata.uns:
-            if (adata.uns['dim_reduction_info']['n_components_used'] != 'Automatic' \
-                and n_components == 'knee') or (n_components != 'knee' \
-                and adata.uns['dim_reduction_info']['n_components_used'] == 'Automatic'):
-                if clear_dependents:
-                    _clear_x_emb_dependents(adata)
+
     # Create dimensionality reduction object and find embedding
     if x_emb is None:
         x_emb = wrap('dim_reduction', method)(
             n_components=n_components, **kwargs).get(adata.X)
-        if clear_dependents:
-            _clear_x_emb_dependents(adata)
 
     if not is_AnnData:
         return x_emb
