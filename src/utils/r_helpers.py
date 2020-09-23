@@ -231,10 +231,21 @@ def read_10x(file):
     results_file = 'write/pbmc3k.h5ad'  # the file that will store the analysis results
 
     #os.chdir(file)
+    dir_name=''
+    path10x=file
+    for i in os.listdir(file):
+        if (i[:6]=='filter'):
+            dir_name=i
+            if (os.listdir(file+'/'+dir_name)[0]=='hg19'):
+                path10x=file+'/'+dir_name+'/hg19/'  # the directory with the `.mtx` file
+            else:
+                path10x=file+'/'+dir_name+'/'  # the directory with the `.mtx` file
+        
     adata = sc.read_10x_mtx(
-        file+'/filtered_gene_bc_matrices/hg19/',  # the directory with the `.mtx` file
-        var_names='gene_symbols',                # use gene symbols for the variable names (variables-axis index)
+        path10x,
+        var_names='gene_symbols',     # use gene symbols for the variable names (variables-axis index)
         cache=True) 
+    adata.var_names_make_unique()
     #os.chdir('../../..')
     adata.uns['dataset']='data10x'
     return AnnData(adata)
