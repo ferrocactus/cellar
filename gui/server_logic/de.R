@@ -147,8 +147,25 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                     gene_data = py_to_r(get_col(adata(), i))
                     violin_dat = data.frame(as.factor(py_to_r(get_labels(adata()))),gene_data)
                     colnames(violin_dat)=c("cluster","expression")
-                    p <- ggplot(violin_dat, aes(x=cluster, y=expression, fill=cluster)) + geom_violin()
-                    output$violin <- renderPlot(p)
+                    #p <- ggplot(violin_dat, aes(x=cluster, y=expression, fill=cluster)) + geom_violin(show.legend = TRUE)
+                    #cluster_name=get_cluster_name_list(adata())
+                    setname <- py_to_r(get_label_names(adata()))
+                    #print(subsets)
+                    #print(setNames())
+                    
+                    # setname=c()
+                    # for (i in 1:length(gene_data)){
+                    #     label=violin_dat$cluster[i]
+                    #     setname=c(setname,subsets[as.integer(label)])
+                    # }
+                    #print(length(setname))
+                    #print(setname[1:10])
+                    output$violin <- renderPlotly({
+                        ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname)) + # fill=name allow to automatically dedicate a color for each group
+                            geom_violin()
+                    })
+                    
+                    
                     viotitle=paste0("Violin Plot of ",as.character(selected_gene))
                     output$titleviolin <- renderText(viotitle)                    
                 }

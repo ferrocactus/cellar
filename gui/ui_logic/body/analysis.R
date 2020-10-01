@@ -17,16 +17,7 @@ tabsetPanel(
     tabPanel(
       "Violin Plot",
       uiOutput(ns("titleviolin")),
-      # conditionalPanel(
-      #   'output.violin',
-      #   ns = ns,
-      #   sliderInput(
-      #     ns("violin_height"),
-      #     "Select violin plot height",
-      #     min = 400, max = 800, value = 600
-      #   )
-      # ),
-      plotOutput(ns("violin"))
+      plotlyOutput(ns("violin"))
     ),
     
     tabPanel(
