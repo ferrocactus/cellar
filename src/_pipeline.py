@@ -132,31 +132,6 @@ def reduce_dim(
     else:
         adata = _validate_x(x)
 
-    # TODO fix monocle hack
-    if method == 'Monocle3':
-        if not is_AnnData:
-            raise InappropriateArgument("Non anndata object passed.")
-        if 'x_emb_monocle3' not in adata.obsm:
-            raise InappropriateArgument("No monocle3 embeddings found.")
-        adata.obsm['x_emb'] = adata.obsm['x_emb_monocle3'].copy()
-        adata.uns['dim_reduction_info'] = {}
-        adata.uns['dim_reduction_info']['method'] = method
-        adata.uns['dim_reduction_info']['n_components'] = adata.obsm['x_emb'].shape[1]
-        adata.uns['dim_reduction_info']['n_components_used'] = "NA"
-
-        if clear_dependents:
-            _clear_x_emb_dependents(adata)
-
-        adata.obsm[f'x_emb_2d'] = adata.obsm['x_emb'].copy()
-        adata.uns[f'visualization_info_2d'] = {}
-        adata.uns[f'visualization_info_2d']['method'] = 'UMAP'
-        adata.uns[f'visualization_info_2d']['used_emb'] = True
-        adata.uns[f'visualization_info_2d']['kwargs'] = {}
-
-        if not inplace:
-            return adata
-        return
-
     _method_exists('dim_reduction', method)
 
     if clear_dependents:
