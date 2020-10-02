@@ -201,8 +201,7 @@ def _validate_ensemble_methods(ensemble_methods):
         # "DBSCAN",
         # "Birch",
         "GaussianMixture",
-        "Leiden",
-        "Scanpy"
+        "Leiden"
     ]
 
     if isinstance(ensemble_methods, (list, np.ndarray)):

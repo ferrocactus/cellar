@@ -4,7 +4,6 @@ import logging
 import numpy as np
 from kneed import KneeLocator
 from sklearn.decomposition import PCA
-#from fbpca import pca
 from sklearn.decomposition import IncrementalPCA
 from sklearn.decomposition import TruncatedSVD
 from sklearn.decomposition import KernelPCA
@@ -101,7 +100,6 @@ class Dim_PCA(Unit):
         else:
             x_emb = PCA(n_components=self.n_components,
                         **self.kwargs).fit_transform(x)
-            #x_emb = pca(x, self.n_components)[0]
 
         if return_evr == True:
             return x_emb, y_axis

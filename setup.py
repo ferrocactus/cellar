@@ -23,8 +23,7 @@ install_requires = [
     'bidict',
     'pydiffmap',
     'diffxpy',
-    'scipy',
-    'fbpca'
+    'scipy'
 ]
 
 

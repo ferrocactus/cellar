@@ -16,4 +16,3 @@ bidict
 pydiffmap
 diffxpy
 scipy
-fbpca

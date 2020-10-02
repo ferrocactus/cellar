@@ -1,37 +1,45 @@
-FROM library/ubuntu:latest
+FROM library/archlinux:latest
 MAINTAINER Euxhen Hasanaj ehasanaj@cs.cmu.edu
 
 ### Install apps
-RUN apt-get update
+RUN pacman -Syyu --noconfirm
 
-# Install tzdata
-RUN export DEBIAN_FRONTEND=noninteractive
-RUN apt-get install -y tzdata
-RUN ln -fs /usr/share/zoneinfo/America/New_York /etc/localtime
-RUN dpkg-reconfigure --frontend noninteractive tzdata
+RUN pacman -S --noconfirm\
+        base-devel\
+        python3\
+        python-pip\
+        r\
+        git\
+        wget\
+        xorg-server-xvfb\
+        gtk2\
+        metis\
+        lib32-glibc\
+        gcc-fortran\
+        libxtst\
+        libxss\
+        nss\
+        alsa-lib
 
-RUN apt-get install -y\
-    python3\
-    python3-pip\
-    git\
-    libcurl4-openssl-dev\
-    libssl-dev\
-    wget\
-    libxml2-dev\
-    xvfb\
-    libgtk2.0\
-    libgconf-2-4\
-    libnss3
+#### Install orca
+RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
+RUN chmod 777 /opt/orca-1.1.1-x86_64.AppImage
+RUN cd /opt && /opt/orca-1.1.1-x86_64.AppImage --appimage-extract
+RUN printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640x480x24" /opt/squashfs-root/app/orca "$@"' > /usr/bin/orca
+RUN chmod 777 /usr/bin/orca
+RUN cd /opt
+RUN wget https://archive.archlinux.org/packages/g/gconf/gconf-3.2.6%2B11%2Bg07808097-5-x86_64.pkg.tar.xz
+RUN pacman -U gconf-3.2.6+11+g07808097-5-x86_64.pkg.tar.xz
 
-RUN apt-get install -y software-properties-common
+#### Install Cluster Ensembles
+RUN pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
+RUN echo "export PATH=$PATH:/usr/lib/python3.8/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/" >> /root/.bashrc
 
-### Install R
-RUN apt-key adv --keyserver keyserver.ubuntu.com\
-                --recv-keys E298A3A825C0D65DFD57CBB651716619E084DAB9
-RUN add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu focal-cran40/'
-RUN apt install -y r-base r-base-core r-recommended r-base-dev
+EXPOSE 23123
 
-### Install R libraries
+COPY .Rprofile /root/.Rprofile
+
+#### Install R libraries
 RUN Rscript -e 'install.packages("shiny")'
 RUN Rscript -e 'install.packages("shinydashboard")'
 RUN Rscript -e 'install.packages("shinyjs")'
@@ -47,33 +55,12 @@ RUN Rscript -e 'install.packages("BiocManager")'
 RUN Rscript -e 'BiocManager::install("SingleR")'
 RUN Rscript -e 'install.packages("htmlTable")'
 RUN Rscript -e 'install.packages("devtools")'
-RUN Rscript -e 'install.packages("doSNOW")'
-RUN Rscript -e 'BiocManager::install("GenomicRanges")'
-RUN Rscript -e 'install.packages("plot3D")'
-RUN Rscript -e 'devtools::install_github("r3fang/SnapATAC")'
 RUN Rscript -e 'install.packages("shinyWidgets")'
 
-# Install orca dependency for plotly
-RUN apt-get install -y libasound2
-RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
-RUN chmod 777 /opt/orca-1.1.1-x86_64.AppImage
-RUN cd /opt && /opt/orca-1.1.1-x86_64.AppImage --appimage-extract
-RUN printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640x480x24" /opt/squashfs-root/app/orca "$@"' > /usr/bin/orca
-RUN chmod 777 /usr/bin/orca
-
-### Install Cluster Ensembles
-RUN dpkg --add-architecture i386
-RUN apt-get install -y metis libc6-i386
-RUN pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
-RUN echo "export PATH=$PATH:/usr/local/lib/python3.8/dist-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/" >> /root/.bashrc
-
-RUN apt-get clean
-
-EXPOSE 23123
-
-### Install python3 dependencies
+#### Install python3 dependencies
 
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
+RUN git config pull.rebase false
 RUN pip3 install -r /home/cellar/py_requirements.txt
 
 WORKDIR /home/cellar

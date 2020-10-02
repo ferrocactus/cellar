@@ -61,10 +61,6 @@ Rscript -e 'install.packages("htmlTable")'
 Rscript -e 'install.packages("BiocManager")'
 Rscript -e 'BiocManager::install("SingleR")'
 Rscript -e 'install.packages("devtools")'
-Rscript -e 'install.packages("doSNOW")'
-Rscript -e 'BiocManager::install("GenomicRanges")'
-Rscript -e 'install.packages("plot3D")'
-Rscript -e 'devtools::install_github("r3fang/SnapATAC")'
 Rscript -e 'install.packages("shinyWidgets")'
 echo "Note: If you wish to use Cluster_Ensembles please follow the installation instructions in https://pypi.org/project/Cluster_Ensembles/"
 echo "Note: If you wish to convert plots to images, first install orca by following the instructions in https://github.com/plotly/orca"

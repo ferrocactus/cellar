@@ -14,8 +14,4 @@ BiocManager
 SingleR
 htmlTable
 devtools
-doSNOW
-GenomicRanges
-plot3D
-SnapATAC
 shinyWidgets

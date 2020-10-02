@@ -111,11 +111,11 @@ class Pre_Scanpy(Unit):
             sc.pp.filter_genes(
                 adata, **self.filter_genes[key], inplace=True)
 
-        #adata.var['mt'] = adata.var_names.str.startswith('MT-')
-        #sc.pp.calculate_qc_metrics(
-        #    adata, qc_vars=['mt'], percent_top=None, inplace=True)
+        adata.var['mt'] = adata.var_names.str.startswith('MT-')
+        sc.pp.calculate_qc_metrics(
+            adata, qc_vars=['mt'], percent_top=None, inplace=True)
 
-        #adata = adata[adata.obs.pct_counts_mt < self.pct_counts_mt, :]
+        adata = adata[adata.obs.pct_counts_mt < self.pct_counts_mt, :]
 
         sc.pp.normalize_total(
             adata, **self.normalize_total, inplace=True)
