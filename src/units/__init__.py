@@ -1,5 +1,6 @@
 from ._unit import Unit
 from ._preprocess import Pre_Scanpy
+from ._preprocess import Pre_ATAC
 from ._dim_reduction import Dim_PCA
 from ._dim_reduction import Dim_IncrementalPCA
 from ._dim_reduction import Dim_KernelPCA
@@ -40,7 +41,8 @@ from ..utils.exceptions import MethodNotImplementedError
 
 translation_dict = {
     "preprocess": {
-        "Scanpy (Defaults)": Pre_Scanpy
+        "Scanpy (Defaults)": Pre_Scanpy,
+        "sc-ATAC-seq": Pre_ATAC
     },
     "dim_reduction": {
         "PCA": Dim_PCA,
@@ -142,6 +144,7 @@ __all__ = [
     '_method_exists',
     'wrap',
     'Pre_Scanpy',
+    'Pre_ATAC',
     'Dim_PCA',
     'Dim_IncrementalPCA',
     'Dim_KernelPCA',

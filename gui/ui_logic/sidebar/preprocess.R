@@ -14,7 +14,7 @@ menuItem(
                     selectInput(
                         ns("preprocess_method"),
                         "Preprocessing (do not use with Server Datasets)",
-                        c("Defaults", "Manual")
+                        c("Defaults", "sc-ATAC-seq", "Manual")
                     ),
                     conditionalPanel(
                         condition = "input.preprocess_method == 'Manual'",
