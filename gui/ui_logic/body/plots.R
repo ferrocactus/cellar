@@ -6,6 +6,7 @@ tabsetPanel(
     tabPanel(
         "Main Plot",
         plotlyOutput(ns("plot"), height="100%"),
+
         conditionalPanel(
             "output.plot",
             ns = ns,

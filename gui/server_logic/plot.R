@@ -9,6 +9,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     ns <- session$ns
     plot_index <- reactiveVal(0)
     plot_count <- reactiveVal(0)
+    plot_cell_labels <- list()
     GRAY <- c(220, 220, 220)
     #lider_update <- reactiveVal(0)
     main_plot_val <- reactiveVal(NULL)
@@ -206,13 +207,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
             p <- p %>% config(
                 displaylogo = FALSE,
-                modeBarButtonsToAdd = list(plot_options_btn),
-                displayModeBar = TRUE,
-                modeBarButtonsToRemove = list(
-                    'select2d', 'zoom2d', 'zoomIn2d',
-                    'zoomOut2d', 'autoScale2d', 'resetScale2d',
-                    'hoverCompareCartesian', 'toggleSpikelines',
-                    'hoverClosestCartesian'))
+                #modeBarButtonsToAdd = list(plot_options_btn),
+                displayModeBar = TRUE)
 
             p <- p %>% layout(
                 dragmode = "lasso",
@@ -390,6 +386,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         configs_id = paste0("clustering_info", plot_i)
         cell_names_id = paste0("cell_names_outp", plot_i)
         observer_id = paste0("observer", plot_i)
+        transfer_labels_id = paste0("transfer_labels", plot_i)
+
+        # Store cell ids and labels
+        cell_names = py_to_r(get_obs_names(adata()))
+        labels = py_to_r(get_label_names(adata()))
+        plot_cell_labels[[transfer_labels_id]] = list(cell_names, labels)
 
         appendTab(
             "tabset", tabPanel(
@@ -398,6 +400,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 div(
                     class = "cell_names_div",
                     list(
+                        actionButton(
+                            ns(transfer_labels_id),
+                            "Move labels to Main Plot"),
                         actionButton(
                             ns(collapse_btn_id),
                             "View additional info",
@@ -410,6 +415,16 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         observeEvent(input[[collapse_btn_id]], {
             shinyjs::toggle(cell_names_id)
             shinyjs::toggle(configs_id)
+        })
+
+        observeEvent(input[[transfer_labels_id]], {
+            lbs = plot_cell_labels[[transfer_labels_id]]
+
+            match_labels(adata(), lbs[[1]], lbs[[2]])
+
+            replot(replot() + 1)
+            reset(reset() + 1)
+            resubset(resubset() + 1)
         })
 
         output[[cell_names_id]] <- renderUI({ isolate(info_val$cellNames) })
