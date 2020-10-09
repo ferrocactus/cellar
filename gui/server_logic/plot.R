@@ -202,13 +202,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
             p <- p %>% config(
                 displaylogo = FALSE,
-                modeBarButtonsToAdd = list(plot_options_btn),
-                displayModeBar = TRUE,
-                modeBarButtonsToRemove = list(
-                    'select2d', 'zoom2d', 'zoomIn2d',
-                    'zoomOut2d', 'autoScale2d', 'resetScale2d',
-                    'hoverCompareCartesian', 'toggleSpikelines',
-                    'hoverClosestCartesian'))
+                #modeBarButtonsToAdd = list(plot_options_btn),
+                displayModeBar = TRUE)
 
             p <- p %>% layout(
                 dragmode = "lasso",
