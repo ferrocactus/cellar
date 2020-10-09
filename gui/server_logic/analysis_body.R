@@ -228,4 +228,85 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             return(heatmap_var())
         }, height = input$heat_height)
     })
+    
+    observeEvent(input$markjson, {
+        isolate(uploaded_file_flag(uploaded_file_flag() + 1))
+    })
+    trigger_threshold <- reactiveVal(FALSE)
+    listen_violin <- reactive({
+        list(input$color, input$value_t)
+    })
+    
+    observeEvent(input$color,{
+        trigger_threshold(FALSE)
+    })
+    observeEvent(input$value_t,{
+        trigger_threshold(TRUE)
+    })
+    
+    observeEvent(listen_violin() ,{
+        if (input$color!='Uncertainty' && input$color != 'Clusters'){
+            gene_names = py_to_r(get_all_gene_names(adata()))
+            selected_gene=input$color
+            i = which(gene_names == (selected_gene))[1]
+            
+            if (i>0){
+                
+                gene_data = py_to_r((adata()$X$T[i]))
+                
+                m = signif(min(gene_data) - EPS, digits=3)
+                M = signif(max(gene_data) + EPS, digits=3)
+                
+                if (isolate(trigger_threshold()) == TRUE) {
+                    v1 = isolate(input$value_t)[1]
+                    v2 = isolate(input$value_t)[2]
+                } else {
+                    v1 = m
+                    v2 = M
+                }
+                v1=as.numeric(v1)
+                v2=as.numeric(v2)
+
+                index1=which(gene_data %in% gene_data[gene_data>v1])
+                index2=which(gene_data %in% gene_data[gene_data<v2])
+                index=c()
+                for (i in 1:length(gene_data)){
+                    if (i %in% index1 && i %in% index2){
+                        index=c(index,i)
+                    }
+                }
+                
+                
+                
+
+                violin_dat = data.frame(as.factor(py_to_r(get_labels(adata())))[index],gene_data[index])
+                colnames(violin_dat)=c("cluster","expression")
+
+                
+                setname <- py_to_r(get_label_names(adata()))
+                setname=setname[index]
+ 
+                if (length(index)==0){
+                    showNotification("No cell in the thresholds")
+                    return
+                }
+                else{
+                    output$violin <- renderPlotly({
+                        ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname))+   geom_violin( )
+                    })
+                }
+                
+
+                viotitle=paste0("Violin Plot of ",as.character(selected_gene))
+                output$titleviolin <- renderText(viotitle)
+            }
+            else{
+                showNotification("An error occur")
+            }
+        }
+        ## violin
+    })
+    
 }
+
+

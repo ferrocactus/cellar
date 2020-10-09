@@ -140,56 +140,6 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                     selected = selected_gene
                 )
                 
-                ## violin
-                gene_names = py_to_r(get_all_gene_names(adata()))
-                i = which(gene_names == (selected_gene))[1]
-                
-                if (i>0){ 
-                    #&& i<length(get_labels(adata())))  { #&& (121!=length(get_labels(adata()))) ){   ### not default one
-                    gene_data = py_to_r((adata()$X$T[i]))
-                    #gene_data = py_to_r(get_col(adata(), i))
-                    violin_dat = data.frame(as.factor(py_to_r(get_labels(adata()))),gene_data)
-                    colnames(violin_dat)=c("cluster","expression")
-
-                    setname <- py_to_r(get_label_names(adata()))
-                    #print(subsets)
-                    #print(setNames())
-                    
-                    # setname=c()
-                    # for (i in 1:length(gene_data)){
-                    #     label=violin_dat$cluster[i]
-                    #     setname=c(setname,subsets[as.integer(label)])
-                    # }
-                    #print(length(setname))
-                    #print(setname[1:10])
-                    output$violin <- renderPlotly({
-                        ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname),show.legend = FALSE) + # fill=name allow to automatically dedicate a color for each group
-                            geom_violin( )
-                    }) 
-                    
-                    viotitle=paste0("Violin Plot of ",as.character(selected_gene))
-                    output$titleviolin <- renderText(viotitle)                    
-                }
-                # else if (121==length(get_labels(adata()))){  ## default dataset
-                #     
-                #     gene_data = py_to_r((adata()$X$T[i]))
-                #     violin_dat = data.frame(as.factor(py_to_r(get_labels(adata()))),gene_data)
-                #     colnames(violin_dat)=c("cluster","expression")
-                #     setname <- py_to_r(get_label_names(adata()))
-                #     
-                #     output$violin <- renderPlotly({
-                #         ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname),show.legend = FALSE) + # fill=name allow to automatically dedicate a color for each group
-                #             geom_violin( )
-                #     }) 
-                #     
-                #     viotitle=paste0("Violin Plot of ",as.character(selected_gene))
-                #     output$titleviolin <- renderText(viotitle)  
-                # }
-                else{
-                    showNotification("An error occur")
-                }
-
-                ## violin
             }
         })
     })

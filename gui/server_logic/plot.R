@@ -55,19 +55,24 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 }
 
                 showNotification("Calculating Uncertainty")
+                print(n_neighbors)
+                
                 withProgress(message = "Please Wait", value = 0, {
                     incProgress(1 / 3, detail = "Data processing...")
                     cellar$safe(cellar$get_neighbors,
                                 x = adata(),
                                 n_neighbors = n_neighbors)
                     incProgress(1 / 3, detail = "Calculating uncertainty...")
+                   
                     cellar$safe(cellar$uncertainty,
                                 x = adata(),
                                 n_neighbors = n_neighbors)
+                    
                 })
                 showNotification("Finished")
-
+          
                 color = as.numeric(py_to_r(adata()$obs['uncertainty']))
+                
                 title = "Uncertainty"
                 showlegend = FALSE
                 symbol = ~labels
