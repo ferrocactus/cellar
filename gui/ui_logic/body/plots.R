@@ -5,7 +5,7 @@ tabsetPanel(
     id = ns("tabset"),
     tabPanel(
         "Main Plot",
-        plotlyOutput(ns("plot"), height="100%"),
+        uiOutput(ns("plots")),
 
         conditionalPanel(
             "output.plot",
@@ -14,6 +14,10 @@ tabsetPanel(
                 class = "cell_names_div",
                 list(
                     actionButton(
+                        ns("split_plot"),
+                        "Split"
+                    ),
+                    actionButton(
                         ns("collapse_cell_names"),
                         "View additional info",
                         class = "collapsebtn"
@@ -21,9 +25,7 @@ tabsetPanel(
                     splitLayout(
                         htmlOutput(ns("clustering_info")),
                         htmlOutput(ns("cell_names_outp"))
-                    )
-                )
-            )
+            )))
         )
     )
 )}

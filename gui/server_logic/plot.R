@@ -9,6 +9,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     ns <- session$ns
     plot_index <- reactiveVal(0)
     plot_count <- reactiveVal(0)
+    double_plot <- reactiveVal(FALSE)
     plot_cell_labels <- list()
     GRAY <- c(220, 220, 220)
     #lider_update <- reactiveVal(0)
@@ -57,23 +58,23 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
                 showNotification("Calculating Uncertainty")
                 print(n_neighbors)
-                
+
                 withProgress(message = "Please Wait", value = 0, {
                     incProgress(1 / 3, detail = "Data processing...")
                     cellar$safe(cellar$get_neighbors,
                                 x = adata(),
                                 n_neighbors = n_neighbors)
                     incProgress(1 / 3, detail = "Calculating uncertainty...")
-                   
+
                     cellar$safe(cellar$uncertainty,
                                 x = adata(),
                                 n_neighbors = n_neighbors)
-                    
+
                 })
                 showNotification("Finished")
-          
+
                 color = as.numeric(py_to_r(adata()$obs['uncertainty']))
-                
+
                 title = "Uncertainty"
                 showlegend = FALSE
                 symbol = ~labels
@@ -322,21 +323,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         }
     })
 
-    observeEvent(input$plot_options, {
-        req(adata())
-        showModal(
-            modalDialog(
-                title = 'Plot Options',
-                actionButton(
-                    "jh",
-                    "jhjgjh"
-                ),
-                easyClose = TRUE,
-                fade = FALSE
-            )
-        )
-    })
-
     observeEvent(input$dot_size, {
         req(adata())
         runjs(js.reset_marker_size)
@@ -445,6 +431,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         })
     })
 
+    insertUI(
+        selector="#ns-plots",
+        where="afterEnd",
+        ui=plotlyOutput(ns("plot"), height="100%")
+    )
+
     observeEvent(input$delete_plot, {
         if (isolate(input$tabset) == "Main Plot") {
             showNotification("Cannote delete main plot.")
@@ -453,6 +445,54 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
         isolate(plot_count(isolate(plot_count()) - 1))
         removeTab("tabset", isolate(input$tabset))
+    })
+
+    observeEvent(input$split_plot, {
+        req(main_plot_val())
+
+        if (double_plot() == TRUE) {
+            removeUI(selector="#ns-plot")
+            removeUI(selector="#ns-plot2")
+            removeUI(selector="#ns-double_split")
+            insertUI(
+                selector="#ns-plots",
+                where="beforeBegin",
+                ui=plotlyOutput(ns("plot"), height="100%")
+            )
+            output$plot <- renderPlotly({
+                isolate(main_plot_val())
+            })
+            isolate(double_plot(FALSE))
+        } else {
+            removeUI(selector="#ns-plot")
+            insertUI(
+                selector="#ns-plots",
+                where="beforeBegin",
+                ui=splitLayout(
+                    id=ns("double_split"),
+                    plotlyOutput(ns("plot"), height="100%"),
+                    plotlyOutput(ns("plot2"), height="100%")
+                )
+            )
+
+            output$plot <- renderPlotly({
+                isolate(main_plot_val())
+            })
+
+            output$plot2 <- renderPlotly({
+                p <- isolate(main_plot_val())
+                p$x$layout$height = isolate(input$plot_height)
+                for (i in seq_along(p$x$data))
+                    p$x$data[[i]]$marker$size = isolate(input$dot_size)
+                p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
+                p <- p %>% toWebGL()
+                p$x$layout$title <- title
+                p$x$source <- 'P'
+                retheme(1)
+                return(p)
+            })
+            isolate(double_plot(TRUE))
+        }
     })
     ###########################################################################
 
@@ -520,4 +560,11 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         }
     )
     return(main_plot_val)
+}
+
+print_app <- function(widget) {
+  temp <- paste(tempfile('plotly'), 'html', sep = '.')
+  htmlwidgets::saveWidget(widget, temp, selfcontained = TRUE)
+
+  system(paste0("firefox ", temp))
 }
