@@ -10,8 +10,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     plot_index <- reactiveVal(0)
     plot_count <- reactiveVal(0)
     double_plot <- reactiveVal(FALSE)
+    double_plot2 <- reactiveVal(FALSE)
     plot_cell_labels <- list()
-    plot_cell_labels_split <- NULL
     GRAY <- c(220, 220, 220)
     #lider_update <- reactiveVal(0)
     main_plot_val <- reactiveVal(NULL)
@@ -225,6 +225,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             p <- p %>% toWebGL()
 
             output$plot <- renderPlotly({ p })
+            output$plotg <- renderPlotly({ p })#,height=input$plot_height)
+            output$plotg2 <- NULL#renderPlotly({ p })#,height=input$plot_height)
         })
     })
 
@@ -293,8 +295,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     observe({
         req(info_val$cellNames)
         output$cell_names_outp <- renderUI({ info_val$cellNames })
+        output$cell_names_outp2 <- renderUI({ info_val$cellNames })
         req(info_val$configs)
         output$clustering_info <- renderUI({ info_val$configs })
+        output$clustering_info2 <- renderUI({ info_val$configs })
     })
 
     observeEvent(input$value_t, {
@@ -403,7 +407,13 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             shinyjs::toggle(cell_names_id)
             shinyjs::toggle(configs_id)
         })
-
+        
+        observeEvent(input[['collapse_cell_names2']], {
+          shinyjs::toggle('clustering_info2')
+          shinyjs::toggle('cell_names_outp2')
+        })
+        
+        
         observeEvent(input[[transfer_labels_id]], {
             lbs = plot_cell_labels[[transfer_labels_id]]
 
@@ -448,78 +458,96 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         removeTab("tabset", isolate(input$tabset))
     })
 
-    observeEvent(input$split_plot, {
+    observeEvent(input$split_plot2, {
         req(main_plot_val())
 
-        if (double_plot() == TRUE) {
-            removeUI(selector="#ns-plot")
-            removeUI(selector="#ns-plot2")
-            removeUI(selector="#ns-double_split")
-            removeUI(selector="#ns-move_labels_split")
-            insertUI(
-                selector="#ns-plots",
-                where="beforeBegin",
-                ui=plotlyOutput(ns("plot"), height="100%")
-            )
-            output$plot <- renderPlotly({
-                isolate(main_plot_val())
-            })
-            plot_cell_labels_split <- NULL
-            isolate(double_plot(FALSE))
+        if (double_plot2() == TRUE) {
+            output$plotg2=NULL
+            # output$plot <- renderPlotly({
+            #     isolate(main_plot_val())
+            # })
+            isolate(double_plot2(FALSE))
         } else {
-            # Store cell ids and labels
-            cell_names = py_to_r(get_obs_names(adata()))
-            labels = py_to_r(get_label_names(adata()))
-            plot_cell_labels_split = list(cell_names, labels)
-
-            removeUI(selector="#ns-plot")
-            insertUI(
-                selector="#ns-plots",
-                where="beforeBegin",
-                ui=splitLayout(
-                    id=ns("double_split"),
-                    plotlyOutput(ns("plot"), height="100%"),
-                    plotlyOutput(ns("plot2"), height="100%")
-                )
-            )
-            insertUI(
-                selector="#ns-split_plot",
-                where="afterEnd",
-                ui=actionButton(
-                    ns("move_labels_split"),
-                    "Move labels"
-                )
-            )
-
-            observeEvent(input$move_labels_split, {
-                lbs = plot_cell_labels_split
-
-                match_labels(adata(), lbs[[1]], lbs[[2]])
-
-                replot(replot() + 1)
-                reset(reset() + 1)
-                resubset(resubset() + 1)
+            #removeUI(selector="#ns-plot")
+            # insertUI(
+            #     selector="#ns-plots",
+            #     where="beforeBegin",
+            #     ui=splitLayout(
+            #         id=ns("double_split"),
+            #         plotlyOutput(ns("plot"), height="100%"),
+            #         plotlyOutput(ns("plot2"), height="100%")
+            #     )
+            # )
+            output$plotg2 <-renderPlotly({
+              isolate(main_plot_val())
             })
+            # output$plot <- renderPlotly({
+            #     isolate(main_plot_val())
+            # })
 
-            output$plot <- renderPlotly({
-                isolate(main_plot_val())
-            })
-
-            output$plot2 <- renderPlotly({
-                p <- isolate(main_plot_val())
-                p$x$layout$height = isolate(input$plot_height)
-                for (i in seq_along(p$x$data))
-                    p$x$data[[i]]$marker$size = isolate(input$dot_size)
-                p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
-                p <- p %>% toWebGL()
-                p$x$layout$title <- title
-                p$x$source <- 'P'
-                retheme(1)
-                return(p)
-            })
-            isolate(double_plot(TRUE))
+            # output$plot2 <- renderPlotly({
+            #     p <- isolate(main_plot_val())
+            #     p$x$layout$height = isolate(input$plot_height)
+            #     for (i in seq_along(p$x$data))
+            #         p$x$data[[i]]$marker$size = isolate(input$dot_size)
+            #     p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
+            #     p <- p %>% toWebGL()
+            #     p$x$layout$title <- title
+            #     p$x$source <- 'P'
+            #     retheme(1)
+            #     return(p)
+            # })
+            isolate(double_plot2(TRUE))
         }
     })
+    observeEvent(input$split_plot, {
+      req(main_plot_val())
+      
+      if (double_plot() == TRUE) {
+        removeUI(selector="#ns-plot")
+        removeUI(selector="#ns-plot2")
+        removeUI(selector="#ns-double_split")
+        insertUI(
+          selector="#ns-plots",
+          where="beforeBegin",
+          ui=plotlyOutput(ns("plot"), height="100%")
+        )
+        output$plot <- renderPlotly({
+          isolate(main_plot_val())
+        })
+        isolate(double_plot(FALSE))
+      } else {
+        removeUI(selector="#ns-plot")
+        insertUI(
+          selector="#ns-plots",
+          where="beforeBegin",
+          ui=splitLayout(
+            id=ns("double_split"),
+            plotlyOutput(ns("plot"), height="100%"),
+            plotlyOutput(ns("plot2"), height="100%")
+          )
+        )
+        
+        output$plot <- renderPlotly({
+          isolate(main_plot_val())
+        })
+        
+        output$plot2 <- renderPlotly({
+          p <- isolate(main_plot_val())
+          p$x$layout$height = isolate(input$plot_height)
+          for (i in seq_along(p$x$data))
+            p$x$data[[i]]$marker$size = isolate(input$dot_size)
+          p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
+          p <- p %>% toWebGL()
+          p$x$layout$title <- title
+          p$x$source <- 'P'
+          retheme(1)
+          return(p)
+        })
+        isolate(double_plot(TRUE))
+      }
+    })
+    
     ###########################################################################
 
     # Store selected cells
