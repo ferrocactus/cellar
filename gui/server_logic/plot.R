@@ -462,7 +462,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                 ui=plotlyOutput(ns("plot"), height="100%")
             )
             output$plot <- renderPlotly({
-                isolate(main_plot_val())
+                p = isolate(main_plot_val())
+                p <- p %>% toWebGL()
+                return(p)
             })
             plot_cell_labels_split <- NULL
             isolate(double_plot(FALSE))
@@ -502,7 +504,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             })
 
             output$plot <- renderPlotly({
-                isolate(main_plot_val())
+                p = isolate(main_plot_val())
+                p <- p %>% toWebGL()
+                return(p)
             })
 
             output$plot2 <- renderPlotly({

@@ -8,6 +8,8 @@ from anndata import AnnData
 from ..log import setup_logger
 from ._unit import Unit
 from ..utils.exceptions import InvalidArgument
+from ..utils.validation import _validate_atac_operation
+from ..utils.validation import _validate_interval_extension
 from ..methods import BinToGene
 
 
@@ -196,12 +198,12 @@ class Pre_ATAC(Unit):
         self.logger = setup_logger('BinToGene')
 
         self.gencode_path = gencode_path
-        self.operation = operation
-        self.extend = extend
-        self.max_extend = max_extend
+        self.operation = _validate_atac_operation(operation)
+        self.extend = _validate_interval_extension(extend)
+        self.max_extend = _validate_interval_extension(max_extend)
         self.stream_direction = stream_direction
-        self.op_extend = op_extend
-        self.max_op_extend = max_op_extend
+        self.op_extend = _validate_interval_extension(op_extend)
+        self.max_op_extend = _validate_interval_extension(max_op_extend)
         self.n_jobs = n_jobs
         self.normalize_total = normalize_total
         self.apply_log1p = apply_log1p
@@ -232,6 +234,8 @@ class Pre_ATAC(Unit):
         cbg = AnnData(counts)
         cbg.var_names = ids
         cbg.obs_names = adata.obs_names.copy()
+
+        self.logger.info(f"Bin to gene matrix has shape {adata.shape}.")
 
         sc.pp.normalize_total(cbg, **self.normalize_total, inplace=True)
         if self.apply_log1p:
