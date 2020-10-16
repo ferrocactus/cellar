@@ -10,14 +10,14 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   plot_index <- reactiveVal(0)
   plot_count <- reactiveVal(0)
   double_plot <- reactiveVal(FALSE)
-  double_plot2 <- reactiveVal(FALSE)
+  #double_plot2 <- reactiveVal(FALSE)
   plot_cell_labels <- list()
   plot_cell_labels_split <- NULL
-  plot_cell_labels_split2 <- NULL
+  #plot_cell_labels_split2 <- NULL
   GRAY <- c(220, 220, 220)
   #lider_update <- reactiveVal(0)
   main_plot_val <- reactiveVal(NULL)
-  main_plot_val2 <- reactiveVal(NULL)
+  #main_plot_val2 <- reactiveVal(NULL)
   output$threshold_slider <- NULL
   outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
   
@@ -230,10 +230,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         #modeBarButtonsToAdd = list(plot_options_btn),
         displayModeBar = TRUE)
       
-      p2 <- p2 %>% config(
-        displaylogo = FALSE,
-        #modeBarButtonsToAdd = list(plot_options_btn),
-        displayModeBar = TRUE)
+      # p2 <- p2 %>% config(
+      #   displaylogo = FALSE,
+      #   #modeBarButtonsToAdd = list(plot_options_btn),
+      #   displayModeBar = TRUE)
       
       p <- p %>% layout(
         dragmode = "lasso",
@@ -247,22 +247,22 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       isolate(main_plot_val(p))
       p <- p %>% toWebGL()
       
-      p2 <- p2 %>% layout(
-        dragmode = "lasso",
-        showlegend = showlegend,
-        title = title,
-        margin = list(t = 50))
+      # p2 <- p2 %>% layout(
+      #   dragmode = "lasso",
+      #   showlegend = showlegend,
+      #   title = title,
+      #   margin = list(t = 50))
       
       p2 <- theme_plot(p2, theme_mode = isolate(input$theme_mode))
-      p2 <- plotly_build(p2)
+      #p2 <- plotly_build(p2)
       
       isolate(main_plot_val(p))
-      isolate(main_plot_val2(p2))
-      p2 <- p2 %>% toWebGL()
+      #isolate(main_plot_val2(p2))
+      #p2 <- p2 %>% toWebGL()
       
       output$plot <- renderPlotly({ p })
-      output$plotg <- renderPlotly({ p2 })#,height=input$plot_height)
-      output$plotg2 <- NULL#
+      #output$plotg <- renderPlotly({ p2 })#,height=input$plot_height)
+      #output$plotg2 <- NULL#
     })
   })
   
@@ -331,10 +331,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   observe({
     req(info_val$cellNames)
     output$cell_names_outp <- renderUI({ info_val$cellNames })
-    output$cell_names_outp2 <- renderUI({ info_val$cellNames })
+    #output$cell_names_outp2 <- renderUI({ info_val$cellNames })
     req(info_val$configs)
     output$clustering_info <- renderUI({ info_val$configs })
-    output$clustering_info2 <- renderUI({ info_val$configs })
+    #output$clustering_info2 <- renderUI({ info_val$configs })
   })
   
   
@@ -445,10 +445,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       shinyjs::toggle(configs_id)
     })
     
-    observeEvent(input[['collapse_cell_names2']], {
-      shinyjs::toggle('clustering_info2')
-      shinyjs::toggle('cell_names_outp2')
-    })
+    # observeEvent(input[['collapse_cell_names2']], {
+    #   shinyjs::toggle('clustering_info2')
+    #   shinyjs::toggle('cell_names_outp2')
+    # })
     
     observeEvent(input[[transfer_labels_id]], {
       lbs = plot_cell_labels[[transfer_labels_id]]
@@ -498,25 +498,25 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     removeTab("tabset", isolate(input$tabset))
   })
   
-  observeEvent(input$split_plot2, {
-    req(main_plot_val2())
-    if (double_plot2() == TRUE) {
-      output$plotg2=NULL
-      isolate(double_plot2(FALSE))
-      plot_cell_labels_split2 <- NULL
-    } 
-    else {
-            output$plotg2 <- renderPlotly({
-              p = isolate(main_plot_val2())
-              return(p)
-            })
-            
-            isolate(double_plot2(TRUE))
-          }
-      })
+  # observeEvent(input$split_plot2, {
+  #   req(main_plot_val2())
+  #   if (double_plot2() == TRUE) {
+  #     output$plotg2=NULL
+  #     isolate(double_plot2(FALSE))
+  #     plot_cell_labels_split2 <- NULL
+  #   } 
+  #   else {
+  #           output$plotg2 <- renderPlotly({
+  #             p = isolate(main_plot_val2())
+  #             return(p)
+  #           })
+  #           
+  #           isolate(double_plot2(TRUE))
+  #         }
+  #     })
   
   observeEvent(input$split_plot, {
-    req(main_plot_val2())
+    req(main_plot_val())
     
     if (double_plot() == TRUE) {
       removeUI(selector="#ns-plot")
