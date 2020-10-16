@@ -303,3 +303,42 @@ def _validate_cluster_list(labels, saved_clusters):
         return saved_clusters
     else:
         raise InvalidArgument("Invalid list of clusters encountered.")
+
+
+def _validate_atac_operation(operation):
+    sum_aliases = ['sum', 'add', 'addition']
+    mean_aliases = ['mean', 'average', 'ave']
+
+    operation = operation.lower()
+
+    if operation in sum_aliases:
+        return 'sum'
+    if operation in mean_aliases:
+        return 'mean'
+    else:
+        raise InappropriateArgument("Invalid operation provided.")
+
+
+def _validate_interval_extension(extend):
+    if isinstance(extend, str):
+        if extend[-1] == 'x':
+            multiplier = extend[:-1]
+            try:
+                multiplier = literal_eval(multiplier)
+                multiplier = int(multiplier)
+            except:
+                raise InvalidArgument("Invalid extension parameter.")
+            return str(multiplier) + 'x'
+        else:
+            try:
+                multiplier = literal_eval(multiplier)
+                multiplier = int(multiplier)
+            except:
+                raise InvalidArgument("Invalid extension parameter.")
+            return multiplier
+    else:
+        try:
+            multiplier = int(multiplier)
+        except:
+            raise InvalidArgument("Invalid extension parameter.")
+    return multiplier

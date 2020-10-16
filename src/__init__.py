@@ -37,8 +37,12 @@ OK = 'good'
 
 def safe(f, **kwargs):
     try:
-        f(**kwargs)
-        return OK
+        if f == preprocess:
+            adata = f(**kwargs)
+            return adata
+        else:
+            f(**kwargs)
+            return OK
     except (InappropriateArgument,
             InvalidArgument,
             MethodNotImplementedError) as e:
