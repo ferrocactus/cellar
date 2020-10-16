@@ -55,6 +55,7 @@ RUN Rscript -e 'BiocManager::install("SingleR")'
 RUN Rscript -e 'install.packages("htmlTable")'
 RUN Rscript -e 'install.packages("devtools")'
 RUN Rscript -e 'install.packages("shinyWidgets")'
+RUN Rscript -e 'install.packages("shinyjqui")'
 
 #### Install python3 dependencies
 
