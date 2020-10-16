@@ -8,6 +8,10 @@
     --btncolorhover: #2386B0;
 }
 
+.main-sidebar, .left-side {
+    min-height: 1500px;
+}
+
 .content-wrapper, .right-side {
     background-color: var(--mainbg);
 }
