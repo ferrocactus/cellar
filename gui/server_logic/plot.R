@@ -11,6 +11,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     plot_count <- reactiveVal(0)
     double_plot <- reactiveVal(FALSE)
     plot_cell_labels <- list()
+    plot_cell_labels_split <- NULL
     GRAY <- c(220, 220, 220)
     #lider_update <- reactiveVal(0)
     main_plot_val <- reactiveVal(NULL)
@@ -454,6 +455,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             removeUI(selector="#ns-plot")
             removeUI(selector="#ns-plot2")
             removeUI(selector="#ns-double_split")
+            removeUI(selector="#ns-move_labels_split")
             insertUI(
                 selector="#ns-plots",
                 where="beforeBegin",
@@ -462,8 +464,14 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             output$plot <- renderPlotly({
                 isolate(main_plot_val())
             })
+            plot_cell_labels_split <- NULL
             isolate(double_plot(FALSE))
         } else {
+            # Store cell ids and labels
+            cell_names = py_to_r(get_obs_names(adata()))
+            labels = py_to_r(get_label_names(adata()))
+            plot_cell_labels_split = list(cell_names, labels)
+
             removeUI(selector="#ns-plot")
             insertUI(
                 selector="#ns-plots",
@@ -474,6 +482,24 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                     plotlyOutput(ns("plot2"), height="100%")
                 )
             )
+            insertUI(
+                selector="#ns-split_plot",
+                where="afterEnd",
+                ui=actionButton(
+                    ns("move_labels_split"),
+                    "Move labels"
+                )
+            )
+
+            observeEvent(input$move_labels_split, {
+                lbs = plot_cell_labels_split
+
+                match_labels(adata(), lbs[[1]], lbs[[2]])
+
+                replot(replot() + 1)
+                reset(reset() + 1)
+                resubset(resubset() + 1)
+            })
 
             output$plot <- renderPlotly({
                 isolate(main_plot_val())
