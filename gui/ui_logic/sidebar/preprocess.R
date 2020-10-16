@@ -14,13 +14,89 @@ menuItem(
                     selectInput(
                         ns("preprocess_method"),
                         "Preprocessing (do not use with Server Datasets)",
-                        c("Defaults", "sc-ATAC-seq", "Manual")
+                        c("Preprocess", "sc-ATAC-seq")
                     ),
+
                     conditionalPanel(
-                        condition = "input.preprocess_method == 'Manual'",
+                        condition = "input.preprocess_method == 'Preprocess'",
                         ns = ns,
-                        tags$p("Coming soon...")
+                        actionButton(
+                            ns("scanpy"),
+                            "See Scanpy's Documentation for more info",
+                            class = "longbtn"
+                        ),
+                        splitLayout(
+                            textInput(
+                                ns("filter_cells_min"),
+                                "Filter cells (min genes)",
+                                value = 200
+                            ),
+                            textInput(
+                                ns("filter_cells_max"),
+                                "Filter cells (max genes)",
+                                value = 3000
+                            )
+                        ),
+                        splitLayout(
+                            textInput(
+                                ns("filter_genes_min"),
+                                "Filter genes (min cells)",
+                                value = 3
+                            ),
+                            textInput(
+                                ns("filter_genes_max"),
+                                "Filter genes (max cells)",
+                                value = -1
+                            )
+                        ),
+                        splitLayout(
+                            textInput(
+                                ns("normalize_total"),
+                                "Normalize total sum",
+                                value = 1000
+                            ),
+                            selectInput(
+                                ns("exclude_highly_expressed"),
+                                "Exclude highly expressed",
+                                c("No", "Yes")
+                            )
+                        ),
+                        div(
+                            class = "div_var_genes",
+                            tags$p("Highly variable genes (min mean | max mean | min disp)")
+                        ),
+                        splitLayout(
+                            id = "split_layout_var_genes",
+                            textInput(
+                                ns("high_min_mean"),
+                                "",
+                                value = 0.0125
+                            ),
+                            textInput(
+                                ns("high_max_mean"),
+                                "",
+                                value = 3
+                            ),
+                            textInput(
+                                ns("high_min_disp"),
+                                "",
+                                value = 0.5
+                            )
+                        ),
+                        splitLayout(
+                            selectInput(
+                                ns("apply_log"),
+                                "Logarithmize data",
+                                c("Yes", "No")
+                            ),
+                            textInput(
+                                ns("scale"),
+                                "Scale max value",
+                                value = 10
+                            )
+                        )
                     ),
+
                     conditionalPanel(
                         condition = "input.preprocess_method == 'sc-ATAC-seq'",
                         ns = ns,
@@ -105,6 +181,7 @@ menuItem(
                             )
                         )
                     ),
+
                     actionButton(
                         ns("runpreprocessbtn"),
                         "Run",
