@@ -41,7 +41,7 @@ from ..utils.exceptions import MethodNotImplementedError
 
 translation_dict = {
     "preprocess": {
-        "Scanpy (Defaults)": Pre_Scanpy,
+        "Scanpy": Pre_Scanpy,
         "sc-ATAC-seq": Pre_ATAC
     },
     "dim_reduction": {

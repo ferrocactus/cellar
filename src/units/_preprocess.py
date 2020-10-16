@@ -8,6 +8,7 @@ from anndata import AnnData
 from ..log import setup_logger
 from ._unit import Unit
 from ..utils.exceptions import InvalidArgument
+from ..utils.validation import _validate_unprocessed_x
 from ..utils.validation import _validate_atac_operation
 from ..utils.validation import _validate_interval_extension
 from ..methods import BinToGene
@@ -109,6 +110,8 @@ class Pre_Scanpy(Unit):
         else:
             adata = x.copy()
 
+        _validate_unprocessed_x(adata.X)
+
         for key in self.filter_cells:
             sc.pp.filter_cells(
                 adata, **self.filter_cells[key], inplace=True)
@@ -141,20 +144,21 @@ class Pre_ATAC(Unit):
 
     See https://github.com/ferrocactus/BinToGene
     """
+
     def __init__(self,
-            gencode_path='src/methods/BinToGene/resources/' +\
-                        'gencode_v34_genes_protein_coding.csv',
-            operation: str = 'sum',
-            extend: Optional[Union[str, int]] = '5x',
-            max_extend: Optional[Union[str, int]] = 50000,
-            stream_direction: bool = True,
-            op_extend: Optional[Union[str, int]] = '1x',
-            max_op_extend: Optional[Union[str, int]] = 10000,
-            n_jobs: Optional[int] = 4,
-            normalize_total=DEFAULTS_SCANPY['normalize_total'],
-            apply_log1p=True,
-            highly_variable_genes=DEFAULTS_SCANPY['highly_variable_genes'],
-            scale=DEFAULTS_SCANPY['scale'], **kwargs):
+                 gencode_path='src/methods/BinToGene/resources/' +
+                 'gencode_v34_genes_protein_coding.csv',
+                 operation: str = 'sum',
+                 extend: Optional[Union[str, int]] = '5x',
+                 max_extend: Optional[Union[str, int]] = 50000,
+                 stream_direction: bool = True,
+                 op_extend: Optional[Union[str, int]] = '1x',
+                 max_op_extend: Optional[Union[str, int]] = 10000,
+                 n_jobs: Optional[int] = 4,
+                 normalize_total=DEFAULTS_SCANPY['normalize_total'],
+                 apply_log1p=True,
+                 highly_variable_genes=DEFAULTS_SCANPY['highly_variable_genes'],
+                 scale=DEFAULTS_SCANPY['scale'], **kwargs):
         """
         Parameters:
         ___________
@@ -220,14 +224,14 @@ class Pre_ATAC(Unit):
             raise InvalidArgument("Object passed is not AnnData.")
 
         btg = BinToGene(
-                gencode_path=self.gencode_path,
-                operation=self.operation,
-                extend=self.extend,
-                max_extend=self.max_extend,
-                stream_direction=self.stream_direction,
-                op_extend=self.op_extend,
-                max_op_extend=self.max_op_extend,
-                n_jobs=self.n_jobs)
+            gencode_path=self.gencode_path,
+            operation=self.operation,
+            extend=self.extend,
+            max_extend=self.max_extend,
+            stream_direction=self.stream_direction,
+            op_extend=self.op_extend,
+            max_op_extend=self.max_op_extend,
+            n_jobs=self.n_jobs)
 
         counts, ids = btg.convert(adata.X, adata.var_names)
 

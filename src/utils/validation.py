@@ -247,7 +247,9 @@ def _validate_subset(subset, adata):
     else:
         raise InvalidArgument("Invalid subset encountered.")
 
-def _validate_uncertain_subset(subset, adata): # the version for adata.uns['uncertain_subsets']
+
+# the version for adata.uns['uncertain_subsets']
+def _validate_uncertain_subset(subset, adata):
     if subset is None:
         return None
 
@@ -303,6 +305,13 @@ def _validate_cluster_list(labels, saved_clusters):
         return saved_clusters
     else:
         raise InvalidArgument("Invalid list of clusters encountered.")
+
+
+def _validate_unprocessed_x(x):
+    min_val = np.min(x)
+    if min_val < 0:
+        raise InvalidArgument("Negative values found in data matrix." +
+                              "Is the data preprocessed already?")
 
 
 def _validate_atac_operation(operation):

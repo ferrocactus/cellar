@@ -34,7 +34,7 @@ from .utils.exceptions import InvalidArgument
 
 def preprocess(
         x: Union[AnnData, np.ndarray, list],
-        method: str = 'Scanpy (Defaults)',
+        method: str = 'Scanpy',
         discard_extras: bool = False,
         **kwargs) -> Union[AnnData, np.ndarray]:
     """
