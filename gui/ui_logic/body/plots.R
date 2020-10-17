@@ -1,12 +1,23 @@
 plots <- function(id, label='plots') {
 ns = NS(id)
+
 tabsetPanel(
     type = "tabs",
     id = ns("tabset"),
+   
+    
     tabPanel(
         "Main Plot",
-        uiOutput(ns("plots")),
-        
+        #uiOutput(ns("plots")),
+        #splitLayout(
+        #cellWidths = c('50%','50%'),
+            jqui_resizable(plotlyOutput(ns('plot'),height = '800px',width = '1200px')),
+            jqui_draggable(jqui_resizable(plotlyOutput(ns('plot2'),height='300px',width='500px')))    
+        #)
+        ,
+        #tags$style(HTML(".tabbable > .nav > li > a  {background-color: aqua;  color:black}  ")),
+        jqui_draggable(
+            #tags$style(HTML(".tabbable > .nav > li > a  {background-color: aqua;  color:black}  ")),
         conditionalPanel(
             "output.plot",
             ns = ns,
@@ -26,8 +37,11 @@ tabsetPanel(
                         htmlOutput(ns("clustering_info")),
                         htmlOutput(ns("cell_names_outp"))
             )))
-        )
-     )#,
+        ),options = list(axis = 'y'))
+     )
+
+    
+    #,
     # tabPanel(
     #     "Another Main Plot",
     # 
@@ -59,4 +73,8 @@ tabsetPanel(
     #             )
     #     )
     # ))
-)}
+
+    
+    )
+
+}
