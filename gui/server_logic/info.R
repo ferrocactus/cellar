@@ -1,6 +1,5 @@
-info <- function(input, output, session, adata, relabel, reinfo) {
-    info_val <- reactiveValues()
-
+info <- function(input, output, session, adata, relabel, reinfo,
+                 info_val_cellNames, info_val_configs) {
     # Keep info tab active at all times
     output$cell_names_outp <- NULL
     output$clustering_info <- NULL
@@ -32,7 +31,8 @@ info <- function(input, output, session, adata, relabel, reinfo) {
             align='l', css.cell = "padding-right: 10em;") %>%
             htmlTable(caption = "Cluster Labels", rnames = FALSE)
 
-        info_val$cellNames <- list(tb)
+        info_val_cellNames(0)
+        info_val_cellNames(list(tb))
     })
 
     observe({
@@ -84,8 +84,7 @@ info <- function(input, output, session, adata, relabel, reinfo) {
                 rgroup = c("Dimensionality Reduction", "Clustering", "Visualization"),
                 n.rgroup = c(3, 4, 1)
             )
-        info_val$configs <- list(tb)
+        info_val_configs(0)
+        info_val_configs(list(tb))
     })
-
-    return(info_val)
 }

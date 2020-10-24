@@ -32,7 +32,9 @@ server <- shinyServer(function(input, output, session) {
     setNames <- reactiveVal(c())
     #deGenes <- reactiveVal(0)
     deGenes <- reactiveVal(c())
-    
+    info_val_cellNames <- reactiveVal()
+    info_val_configs <- reactiveVal()
+
     reset <- reactiveVal(0)
     fullreset <- reactiveVal(0)
     replot <- reactiveVal(0)
@@ -43,8 +45,10 @@ server <- shinyServer(function(input, output, session) {
     retheme <- reactiveVal(0)
 
     # We are using the same namespace for everything called "ns".
-    info_val <- callModule(info, id = "ns", adata = adata,
-                           relabel = relabel, reinfo = reinfo)
+    callModule(info, id = "ns", adata = adata,
+                relabel = relabel, reinfo = reinfo,
+                info_val_cellNames = info_val_cellNames,
+                info_val_configs = info_val_configs)
 
     # Dataset menu
     callModule(dataset, id = "ns", adata = adata, selDataset = selDataset,
@@ -62,7 +66,8 @@ server <- shinyServer(function(input, output, session) {
                activeDataset = activeDataset, setNames = setNames,
                reset = reset, resubset = resubset,
                reinfo = reinfo, relabel = relabel, retheme = retheme,
-               info_val = info_val)
+               info_val_cellNames = info_val_cellNames,
+               info_val_configs = info_val_configs)
 
     # Label Transfer menu
     callModule(align, id = "ns", adata = adata,
