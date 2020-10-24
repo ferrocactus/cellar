@@ -206,7 +206,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         marker = list(size = isolate(input$dot_size)),
         type = 'scatter',
         mode = 'markers',
-        #height = isolate(input$plot_height),
+        height = isolate(input$plot_height),
         source = 'M'
       )
       
@@ -464,9 +464,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     
     output[[configs_id]] <- renderUI({ isolate(info_val$configs) })
     
-    #output[['cell_names_outp2']] <- renderUI({ isolate(info_val$cellNames) })
+    output[['cell_names_outp2']] <- renderUI({ isolate(info_val$cellNames) })
     
-    #output[['clustering_info2']] <- renderUI({ isolate(info_val$configs) })
+    output[['clustering_info2']] <- renderUI({ isolate(info_val$configs) })
     
     output[[plot_id]] <- renderPlotly({
       p <- isolate(main_plot_val())
@@ -519,22 +519,20 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     req(main_plot_val())
     
     if (double_plot() == TRUE) {
-      # removeUI(selector="#ns-plot")
-      # removeUI(selector="#ns-plot2")
-      # removeUI(selector="#ns-double_split")
-      # removeUI(selector="#ns-move_labels_split")
-      # insertUI(
-      #   selector="#ns-plots",
-      #   where="beforeBegin",
-      #   ui=plotlyOutput(ns("plot"), height="100%")
-      # )
-      output$plot2<-NULL
+      removeUI(selector="#ns-plot")
+      removeUI(selector="#ns-plot2")
+      removeUI(selector="#ns-double_split")
+      removeUI(selector="#ns-move_labels_split")
+      insertUI(
+        selector="#ns-plots",
+        where="beforeBegin",
+        ui=plotlyOutput(ns("plot"), height="100%")
+      )
       output$plot <- renderPlotly({
         p = isolate(main_plot_val())
         p <- p %>% toWebGL()
         return(p)
       })
-      removeUI(selector="#ns-move_labels_split")
       plot_cell_labels_split <- NULL
       isolate(double_plot(FALSE))
     } else {
@@ -543,16 +541,16 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       labels = py_to_r(get_label_names(adata()))
       plot_cell_labels_split = list(cell_names, labels)
       
-      #removeUI(selector="#ns-plot")
-      # insertUI(
-      #   selector="#ns-plots",
-      #   where="beforeBegin",
-      #   ui=splitLayout(
-      #     id=ns("double_split"),
-      #     plotlyOutput(ns("plot"), height="100%"),
-      #     plotlyOutput(ns("plot2"), height="100%")
-      #   )
-      # )
+      removeUI(selector="#ns-plot")
+      insertUI(
+        selector="#ns-plots",
+        where="beforeBegin",
+        ui=splitLayout(
+          id=ns("double_split"),
+          plotlyOutput(ns("plot"), height="100%"),
+          plotlyOutput(ns("plot2"), height="100%")
+        )
+      )
       insertUI(
         selector="#ns-split_plot",
         where="afterEnd",
@@ -561,8 +559,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
           "Move labels"
         )
       )
-      
-      #output$plot2<-renderPlot()
       
       observeEvent(input$move_labels_split, {
         lbs = plot_cell_labels_split
@@ -582,7 +578,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       
       output$plot2 <- renderPlotly({
         p <- isolate(main_plot_val())
-        #p$x$layout$height = isolate(input$plot_height)
+        p$x$layout$height = isolate(input$plot_height)
         for (i in seq_along(p$x$data))
           p$x$data[[i]]$marker$size = isolate(input$dot_size)
         p <- theme_plot(p, theme_mode = isolate(input$theme_mode))

@@ -55,10 +55,7 @@ body <- dashboardBody(
     tags$head(includeCSS("gui/ui_logic/styles/_all-skins.min.css")),
     history(id='ns'),
     plots(id="ns"),
-    jqui_draggable(
-        analysis(id="ns"),
-        options = list(axis = 'y')
-    ),
+    analysis(id="ns"),
     tooltips(id="ns"),
     div(class = "footer",
         includeHTML("gui/ui_logic/body/copyright.html")
