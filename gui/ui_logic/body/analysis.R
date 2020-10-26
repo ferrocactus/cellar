@@ -16,6 +16,13 @@ tabsetPanel(
     
     tabPanel(
       "Violin Plot",
+      sliderInput(
+        ns("violin_t"),
+        label="Violin plot gene expression thresholds",
+        min=0,max=10,
+        value=c(0, 10),
+        step=0.01
+      ),
       uiOutput(ns("titleviolin")),
       plotlyOutput(ns("violin"))
     ),

@@ -234,13 +234,13 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     })
     trigger_threshold <- reactiveVal(FALSE)
     listen_violin <- reactive({
-        list(input$color, input$value_t)
+        list(input$color, input$violin_t)
     })
     
     observeEvent(input$color,{
         trigger_threshold(FALSE)
     })
-    observeEvent(input$value_t,{
+    observeEvent(input$violin_t,{
         trigger_threshold(TRUE)
     })
     
@@ -254,20 +254,29 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 
                 gene_data = py_to_r((adata()$X$T[i]))
                 
-                m = signif(min(gene_data) - EPS, digits=3)
-                M = signif(max(gene_data) + EPS, digits=3)
+                # index=as.integer(length(gene_data)/10)
+                # print(index)
+                # tenp=sort(gene_data)[index]
+                # print(tenp)
+                # gene_data=gene_data/tenp
                 
-                if (isolate(trigger_threshold()) == TRUE) {
-                    v1 = isolate(input$value_t)[1]
-                    v2 = isolate(input$value_t)[2]
-                } else {
-                    v1 = m
-                    v2 = M
-                }
+                #EPS=0.01
+                # m = signif(min(gene_data) - EPS, digits=3)
+                # M = signif(max(gene_data) + EPS, digits=3)
+                # 
+                # if (isolate(trigger_threshold()) == TRUE) {
+                #     v1 = isolate(input$violin_t)[1]
+                #     v2 = isolate(input$violin_t)[2]
+                # } else {
+                #     v1 = m
+                #     v2 = M
+                # }
+                v1 = isolate(input$violin_t)[1]
+                v2 = isolate(input$violin_t)[2]
                 v1=as.numeric(v1)
                 v2=as.numeric(v2)
-
-                index1=which(gene_data %in% gene_data[gene_data>v1])
+                #index1=which(gene_data %in% gene_data[gene_data>v1])
+                index1=which(gene_data %in% gene_data[gene_data>v1])# && gene_data %in% gene_data[gene_data>0])
                 index2=which(gene_data %in% gene_data[gene_data<v2])
                 index=c()
                 for (i in 1:length(gene_data)){
@@ -275,6 +284,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                         index=c(index,i)
                     }
                 }
+                
                 
                 
                 
@@ -292,12 +302,17 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 }
                 else{
                     output$violin <- renderPlotly({
+                        #ylim1 = boxplot.stats(gene_data)$stats[c(1, 5)]# scale y limits based on ylim1
                         ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname))+   geom_violin( )
+                        #p1 = p0 + coord_cartesian(ylim = ylim1*1.05)
+                        
                     })
                 }
                 
 
-                viotitle=paste0("Violin Plot of ",as.character(selected_gene))
+                viotitle=paste0("Violin Plot for ",as.character(selected_gene))
+                
+                
                 output$titleviolin <- renderText(viotitle)
             }
             else{

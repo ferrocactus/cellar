@@ -15,6 +15,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   plot_cell_labels_split <- NULL
   #plot_cell_labels_split2 <- NULL
   GRAY <- c(220, 220, 220)
+  BRIGHT <- c(135,206,250)
   #lider_update <- reactiveVal(0)
   main_plot_val <- reactiveVal(NULL)
   #main_plot_val2 <- reactiveVal(NULL)
@@ -117,7 +118,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               color_matrix = matrix(0, length(vals), 3)
               for (i in 1:length(vals)) {
                 if (vals[i] < min_t) color_matrix[i, 1:3] = GRAY
-                else if (vals[i] >= max_t) color_matrix[i, 1:3] = GRAY
+                else if (vals[i] >= max_t) color_matrix[i, 1:3] = BRIGHT
                 # Otherwise map [min_t, max_t] to [0, 1]
                 else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
               }
@@ -284,6 +285,17 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         value = c(m, M),
         step = step
       )
+      
+      # for default violin threshold
+      updateSliderInput(
+        session = session,
+        inputId='violin_t',
+        label="Violin plot gene expression thresholds",
+        min=0,max=10,
+        value=c(0.05, 10),
+        step=0.01
+      )
+      
     } else {
       isolate(trigger_threshold(FALSE))
       updateSliderInput(
