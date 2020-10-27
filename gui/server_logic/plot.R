@@ -117,8 +117,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               max_t = as.numeric(v2) / M
               color_matrix = matrix(0, length(vals), 3)
               for (i in 1:length(vals)) {
-                if (vals[i] < min_t) color_matrix[i, 1:3] = GRAY
-                else if (vals[i] >= max_t) color_matrix[i, 1:3] = BRIGHT
+                if (vals[i] < min_t) color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
+                else if (vals[i] >= max_t) color_matrix[i, 1:3] = c_func(1)  #yellow    #BRIGHT
                 # Otherwise map [min_t, max_t] to [0, 1]
                 else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
               }
