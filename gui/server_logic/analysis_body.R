@@ -250,6 +250,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             selected_gene=input$color
             i = which(gene_names == (selected_gene))[1]
             
+            
             if (i>0){
                 
                 gene_data = py_to_r((adata()$X$T[i]))
@@ -275,6 +276,8 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 v2 = isolate(input$violin_t)[2]
                 v1=as.numeric(v1)
                 v2=as.numeric(v2)
+                if (v1==4.99 && v2==5.11)
+                    return()
                 #index1=which(gene_data %in% gene_data[gene_data>v1])
                 index1=which(gene_data %in% gene_data[gene_data>v1])# && gene_data %in% gene_data[gene_data>0])
                 index2=which(gene_data %in% gene_data[gene_data<v2])
@@ -284,31 +287,33 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                         index=c(index,i)
                     }
                 }
-                
-                
-                
-                
-
+     
                 violin_dat = data.frame(as.factor(py_to_r(get_labels(adata())))[index],gene_data[index])
+         
                 colnames(violin_dat)=c("cluster","expression")
-
+                
                 
                 setname <- py_to_r(get_label_names(adata()))
+           
                 setname=setname[index]
- 
-                if (length(index)==0){
+                lvls=length(levels(as.factor(setname)))
+                if (length(index)==0 || lvls==length(setname)){
                     showNotification("No cell in the thresholds")
+                    output$violin<-NULL
                     return
                 }
-                else{
-                    output$violin <- renderPlotly({
-                        #ylim1 = boxplot.stats(gene_data)$stats[c(1, 5)]# scale y limits based on ylim1
-                        ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname))+   geom_violin( )
-                        #p1 = p0 + coord_cartesian(ylim = ylim1*1.05)
-                        
-                    })
-                }
                 
+                else{
+                    
+                        output$violin <- renderPlotly({
+                            #ylim1 = boxplot.stats(gene_data)$stats[c(1, 5)]# scale y limits based on ylim1
+                            ggplot(violin_dat, aes(x=cluster, y=expression, fill=setname))+   geom_violin( ) 
+                            #p1 = p0 + coord_cartesian(ylim = ylim1*1.05)
+                        
+                        })
+                    
+                }
+              
 
                 viotitle=paste0("Violin Plot for ",as.character(selected_gene))
                 
@@ -316,7 +321,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 output$titleviolin <- renderText(viotitle)
             }
             else{
-                showNotification("An error occur")
+                showNotification("Gene name not found")
             }
         }
         ## violin

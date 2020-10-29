@@ -1,7 +1,7 @@
 source("gui/server_logic/plot_options.R")
 
 EPS = 0.01
-
+eps = 1e-8
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, activeDataset,
                  setNames, setPts, reset, resubset, reinfo, relabel,
@@ -286,13 +286,33 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         step = step
       )
       
+      
+      min_v=min(color)
+      s_color=sort(color,decreasing=TRUE)
+      idx=as.integer(length(s_color)/10)
+      top_ten=s_color[idx]
+      no_zero=0.05
+      min_v=min_v-3*EPS
+      top_ten=top_ten+3*EPS
+      if (length(color)<200)
+      {
+        no_zero=0
+        # updateSliderInput(
+        #   session = session,
+        #   inputId='violin_t',
+        #   label="Violin plot gene expression thresholds",
+        #   min=-1,max=10,
+        #   value=c(no_zero, 10),
+        #   step=0.01
+        #)
+      }
       # for default violin threshold
       updateSliderInput(
         session = session,
         inputId='violin_t',
         label="Violin plot gene expression thresholds",
-        min=0,max=10,
-        value=c(0.05, 10),
+        min=-1,max=10,
+        value=c(no_zero, 10),
         step=0.01
       )
       
