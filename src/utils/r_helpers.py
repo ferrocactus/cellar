@@ -153,6 +153,8 @@ def write_h5ad(adata, path, compression=9):
     adata = adata.copy()
     # adata.var.pop('parsed_names')
     adata.var.pop('parsed_ids')
+    if compression == "None":
+        compression = None
     adata.write_h5ad(path, compression=compression)
 
 
@@ -240,11 +242,11 @@ def read_10x(file):
                 path10x=file+'/'+dir_name+'/hg19/'  # the directory with the `.mtx` file
             else:
                 path10x=file+'/'+dir_name+'/'  # the directory with the `.mtx` file
-        
+
     adata = sc.read_10x_mtx(
         path10x,
         var_names='gene_symbols',     # use gene symbols for the variable names (variables-axis index)
-        cache=True) 
+        cache=True)
     adata.var_names_make_unique()
     #os.chdir('../../..')
     adata.uns['dataset']='data10x'

@@ -21,9 +21,10 @@ menuItem(
                         "Select dataset group:",
                         c(
                             "Upload Dataset" = "user_uploaded",
-                            "Annotated Datasets" = "server"
+                            "Annotated Datasets" = "server",
+                            "Side Plot" = "side_plot"
                         ),
-                        inline = TRUE
+                        inline = FALSE
                     ),
                     conditionalPanel(
                         condition = "input.folder_align == 'user_uploaded'",

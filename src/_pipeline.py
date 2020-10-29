@@ -699,23 +699,22 @@ def transfer_labels(
     or None depending on the value of inplace.
     """
     # Validations
-    is_AnnData = isinstance(x, AnnData) and isinstance(ref, AnnData)
-    if not is_AnnData:
+    is_AnnData_main = isinstance(x, AnnData)
+    is_str_ref = isinstance(ref, str)
+
+    if not is_AnnData_main:
         raise InvalidArgument("x is not in AnnData format.")
     adata = x.copy() if not inplace else x
 
-    if 'labels' not in ref.obs:
-        raise InvalidArgument(
-            "No labels found. Please populate adata.obs['labels'] key.")
+    if not is_str_ref:
+        if 'labels' not in ref.obs:
+            raise InvalidArgument(
+                "No labels found. Please populate adata.obs['labels'] key.")
 
     _method_exists('align', method)
 
     # Create alignment object and get labels
-    labels = wrap("align", method)().get(
-        adata.X, adata.var.index.to_numpy().astype('U'),
-        ref.X, ref.var.index.to_numpy().astype('U'),
-        ref.obs['labels'].to_numpy().astype(np.int)
-    ).astype(np.int)
+    labels, c_names = wrap("align", method)().get(adata, ref)
 
     # Populate entries
     adata.obs['labels'] = labels
@@ -725,10 +724,7 @@ def transfer_labels(
     adata.uns['cluster_info']['n_clusters'] = len(unq_labels)
     adata.uns['cluster_info']['method'] = method
     adata.uns['cluster_info']['kwargs'] = kwargs
-    adata.uns['cluster_names'] = bidict(
-        {i: str(i) for i in unq_labels})
-    # Transfer old cell types if any
-    merge_cluster_names(adata, ref)
+    adata.uns['cluster_names'] = c_names
     populate_subsets(adata)
 
     if not inplace:

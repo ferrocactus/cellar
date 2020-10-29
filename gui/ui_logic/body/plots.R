@@ -6,7 +6,7 @@ tabsetPanel(
     tabPanel(
         "Main Plot",
         uiOutput(ns("plots")),
-        
+
         conditionalPanel(
             "output.plot",
             ns = ns,
@@ -15,7 +15,7 @@ tabsetPanel(
                 list(
                     actionButton(
                         ns("split_plot"),
-                        "Split"
+                        "Side-by-side Mode"
                     ),
                     actionButton(
                         ns("collapse_cell_names"),
@@ -30,10 +30,10 @@ tabsetPanel(
      )#,
     # tabPanel(
     #     "Another Main Plot",
-    # 
+    #
     #     jqui_resizable(plotlyOutput(ns("plotg"))),
-    #     jqui_resizable(jqui_draggable(plotlyOutput(ns("plotg2"))))    
-    #     
+    #     jqui_resizable(jqui_draggable(plotlyOutput(ns("plotg2"))))
+    #
     #     ,
     #     conditionalPanel(
     #         "output.plotg",

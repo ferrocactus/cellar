@@ -93,8 +93,17 @@ def _2d_emb_exists_in_adata(adata, method, dim, use_emb):
 
 def merge_cluster_names(adata, ref):
     # Currently used for alignment only
-    if 'cluster_names' not in ref.uns or 'cluster_names' not in adata.uns:
-        return
+    if 'cluster_names' not in ref.uns:
+        raise InvalidArgument('Cluster Names not found.')
+
+    unq_labels = np.unique(adata.obs['labels'])
+    adata.uns['cluster_names'] = bidict({i: str(i) for i in unq_labels})
+
+    # In case the loaded keys are strings
+    temp_dict = bidict({})
+    for i in ref.uns['cluster_names']:
+        temp_dict[int(i)] = ref.uns['cluster_names'][i]
+    ref.uns['cluster_names'] = temp_dict
 
     for i in adata.uns['cluster_names']:
         if i in ref.uns['cluster_names']:
@@ -207,7 +216,9 @@ def update_subset_label(adata, subset_name, name):
         label = np.max(adata.obs['labels']) + 1
         adata.uns['cluster_names'][label] = name
 
-    adata.obs['labels'][indices] = label
+    temp_labels = adata.obs['labels'].copy()
+    temp_labels[indices] = label
+    adata.obs['labels'] = temp_labels.copy()
     unq_new_labels = np.unique(adata.obs['labels'])
 
     for old_label in list(adata.uns['cluster_names'].keys()):

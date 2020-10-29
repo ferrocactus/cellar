@@ -5,11 +5,11 @@ eps = 1e-8
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, activeDataset,
                  setNames, setPts, reset, resubset, reinfo, relabel,
-                 retheme, info_val_cellNames, info_val_configs) {
+                 retheme, info_val_cellNames, info_val_configs,
+                 second_plot_path, double_plot) {
   ns <- session$ns
   plot_index <- reactiveVal(0)
   plot_count <- reactiveVal(0)
-  double_plot <- reactiveVal(FALSE)
   #double_plot2 <- reactiveVal(FALSE)
   plot_cell_labels <- list()
   plot_cell_labels_split <- NULL
@@ -211,20 +211,20 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         source = 'M'
       )
 
-      p2 <- plot_ly(
-        x = x_emb_2d[, 1], y = x_emb_2d[, 2],
-        text = text,
-        color = color,
-        colors = colors,
-        #symbol = symbol,
-        #symbols = symbols,  ## 30 shapes
-        key = as.character(1:length(labels)),
-        marker = list(size = isolate(input$dot_size)),
-        type = 'scatter',
-        mode = 'markers',
-        #height = isolate(input$plot_height),
-        source = 'M'
-      )
+      # p2 <- plot_ly(
+      #   x = x_emb_2d[, 1], y = x_emb_2d[, 2],
+      #   text = text,
+      #   color = color,
+      #   colors = colors,
+      #   #symbol = symbol,
+      #   #symbols = symbols,  ## 30 shapes
+      #   key = as.character(1:length(labels)),
+      #   marker = list(size = isolate(input$dot_size)),
+      #   type = 'scatter',
+      #   mode = 'markers',
+      #   #height = isolate(input$plot_height),
+      #   source = 'M'
+      # )
 
       p <- p %>% config(
         displaylogo = FALSE,
@@ -242,6 +242,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         title = title,
         margin = list(t = 50))
 
+
       p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
       p <- plotly_build(p)
 
@@ -254,7 +255,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       #   title = title,
       #   margin = list(t = 50))
 
-      p2 <- theme_plot(p2, theme_mode = isolate(input$theme_mode))
+      # p2 <- theme_plot(p2, theme_mode = isolate(input$theme_mode))
       #p2 <- plotly_build(p2)
 
       isolate(main_plot_val(p))
@@ -285,8 +286,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         value = c(m, M),
         step = step
       )
-      
-      
+
+
       min_v=min(color)
       s_color=sort(color,decreasing=TRUE)
       idx=as.integer(length(s_color)/10)
@@ -315,7 +316,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         value=c(no_zero, 10),
         step=0.01
       )
-      
+
     } else {
       isolate(trigger_threshold(FALSE))
       updateSliderInput(
@@ -564,6 +565,11 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         where="beforeBegin",
         ui=plotlyOutput(ns("plot"), height="100%")
       )
+      updateActionButton(
+        session,
+        inputId='split_plot',
+        label='Side-by-side Mode'
+      )
       output$plot <- renderPlotly({
         p = isolate(main_plot_val())
         p <- p %>% toWebGL()
@@ -573,6 +579,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       isolate(double_plot(FALSE))
     } else {
       # Store cell ids and labels
+
+      write_h5ad(adata(), path="datasets/tmp/temp_second_plot.h5ad", compression="None")
+      second_plot_path("datasets/tmp/temp_second_plot.h5ad")
+
       cell_names = py_to_r(get_obs_names(adata()))
       labels = py_to_r(get_label_names(adata()))
       plot_cell_labels_split = list(cell_names, labels)
@@ -587,12 +597,18 @@ plot <- function(input, output, session, replot, adata, activeDataset,
           plotlyOutput(ns("plot2"), height="100%")
         )
       )
+      updateActionButton(
+        session,
+        inputId='split_plot',
+        label='Single Plot Mode'
+      )
+
       insertUI(
         selector="#ns-split_plot",
         where="afterEnd",
         ui=actionButton(
           ns("move_labels_split"),
-          "Move labels"
+          "Match Cell IDs"
         )
       )
 

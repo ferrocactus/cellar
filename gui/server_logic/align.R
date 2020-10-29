@@ -1,5 +1,6 @@
 align <- function(input, output, session, adata, selDatasetAlign,
-                  replot, reset, relabel, resubset, reinfo) {
+                  replot, reset, relabel, resubset, reinfo,
+                  second_plot_path, double_plot) {
     adataAlign <- reactiveVal(0)
 
     observeEvent(input$align_btn, {
@@ -11,23 +12,33 @@ align <- function(input, output, session, adata, selDatasetAlign,
         if (input$folder_align == 'user_uploaded') {
             req(input$reference_dataset)
             isolate(selDatasetAlign(input$reference_dataset$datapath))
-        } else {
+        } else if (input$folder_align == 'server') {
             path = input$server_dataset_align
             path = paste0('datasets/annotated/', path)
             isolate(selDatasetAlign(path))
+        } else if (input$folder_align == 'side_plot') {
+            if (double_plot() == FALSE) {
+                showNotification("No Side Plot found.")
+                return()
+            }
+            path = isolate(second_plot_path())
+            isolate(selDatasetAlign(path))
+        } else {
+            showNotification("Dataset Group not found.")
+            return()
         }
 
         withProgress(message = "Running Label Transfer", value = 0, {
             n <- 5
-            incProgress(1 / n, detail = paste("Step: Reading data"))
-            isolate(adataAlign(safe_load_file(selDatasetAlign())))
-            if (py_to_r(is_str(adataAlign()))) {
-                msg <- "Incorrect file format."
-                return()
-            }
-
-            incProgress(1 / n, detail = paste("Step: Running Label Transfer"))
             if (input$align_method == 'SingleR') {
+                incProgress(1 / n, detail = paste("Step: Reading data"))
+                isolate(adataAlign(safe_load_file(selDatasetAlign())))
+                if (py_to_r(is_str(adataAlign()))) {
+                    msg <- "Incorrect file format."
+                    return()
+                }
+
+                incProgress(1 / n, detail = paste("Step: Running SingleR"))
                 # transpose rows and cols for SingleR
                 labels = py_to_r(get_labels(adataAlign()))
                 if (labels == "No labels found") {
@@ -57,9 +68,10 @@ align <- function(input, output, session, adata, selDatasetAlign,
                         ref = adataAlign())
                 }
             } else {
+                incProgress(1 / n, detail = paste("Step: Running Ingest. This may take a while."))
                 msg <- cellar$safe(cellar$transfer_labels,
                     x = adata(),
-                    ref = adataAlign(),
+                    ref = selDatasetAlign(),
                     method = input$align_method,
                     inplace = TRUE
                 )

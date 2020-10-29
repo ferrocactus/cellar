@@ -34,6 +34,8 @@ server <- shinyServer(function(input, output, session) {
     deGenes <- reactiveVal(c())
     info_val_cellNames <- reactiveVal()
     info_val_configs <- reactiveVal()
+    second_plot_path <- reactiveVal()
+    double_plot <- reactiveVal(FALSE)
 
     reset <- reactiveVal(0)
     fullreset <- reactiveVal(0)
@@ -67,13 +69,16 @@ server <- shinyServer(function(input, output, session) {
                reset = reset, resubset = resubset,
                reinfo = reinfo, relabel = relabel, retheme = retheme,
                info_val_cellNames = info_val_cellNames,
-               info_val_configs = info_val_configs)
+               info_val_configs = info_val_configs,
+               second_plot_path = second_plot_path,
+               double_plot = double_plot)
 
     # Label Transfer menu
     callModule(align, id = "ns", adata = adata,
                selDatasetAlign = selDatasetAlign, replot = replot,
                reset = reset, relabel = relabel, resubset = resubset,
-               reinfo = reinfo)
+               reinfo = reinfo, second_plot_path = second_plot_path,
+               double_plot = double_plot)
 
     # Selection & Labeling menu
     callModule(selectionLabeling, id = "ns", adata = adata,
