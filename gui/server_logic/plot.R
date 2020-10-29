@@ -211,30 +211,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         source = 'M'
       )
 
-      # p2 <- plot_ly(
-      #   x = x_emb_2d[, 1], y = x_emb_2d[, 2],
-      #   text = text,
-      #   color = color,
-      #   colors = colors,
-      #   #symbol = symbol,
-      #   #symbols = symbols,  ## 30 shapes
-      #   key = as.character(1:length(labels)),
-      #   marker = list(size = isolate(input$dot_size)),
-      #   type = 'scatter',
-      #   mode = 'markers',
-      #   #height = isolate(input$plot_height),
-      #   source = 'M'
-      # )
-
       p <- p %>% config(
         displaylogo = FALSE,
         #modeBarButtonsToAdd = list(plot_options_btn),
         displayModeBar = TRUE)
-
-      # p2 <- p2 %>% config(
-      #   displaylogo = FALSE,
-      #   #modeBarButtonsToAdd = list(plot_options_btn),
-      #   displayModeBar = TRUE)
 
       p <- p %>% layout(
         dragmode = "lasso",
@@ -249,22 +229,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       isolate(main_plot_val(p))
       p <- p %>% toWebGL()
 
-      # p2 <- p2 %>% layout(
-      #   dragmode = "lasso",
-      #   showlegend = showlegend,
-      #   title = title,
-      #   margin = list(t = 50))
-
-      # p2 <- theme_plot(p2, theme_mode = isolate(input$theme_mode))
-      #p2 <- plotly_build(p2)
-
       isolate(main_plot_val(p))
-      #isolate(main_plot_val2(p2))
-      #p2 <- p2 %>% toWebGL()
 
       output$plot <- renderPlotly({ p })
-      #output$plotg <- renderPlotly({ p2 })#,height=input$plot_height)
-      #output$plotg2 <- NULL#
     })
   })
 
