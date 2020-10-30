@@ -24,7 +24,8 @@ tabsetPanel(
         step=0.01
       ),
       uiOutput(ns("titleviolin")),
-      plotlyOutput(ns("violin"))
+      plotlyOutput(ns("violin")),
+      plotlyOutput(ns("zeros"))
     ),
 
     tabPanel(
