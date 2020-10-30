@@ -13,7 +13,7 @@ tabsetPanel(
         uiOutput(ns("titleDE")),
         DT::dataTableOutput(ns("DEtable")),
     ),
-    
+
     tabPanel(
       "Violin Plot",
       sliderInput(
@@ -26,7 +26,7 @@ tabsetPanel(
       uiOutput(ns("titleviolin")),
       plotlyOutput(ns("violin"))
     ),
-    
+
     tabPanel(
       "Heat Map",
       uiOutput(ns("titleheatmap")),
@@ -97,7 +97,7 @@ tabsetPanel(
         DT::dataTableOutput(ns("CellTypetable"))
     ),
     tabPanel(
-        "External Cell Type",
+        "User Defined",
         conditionalPanel(
             'output.UCellTypetable',
             ns = ns,

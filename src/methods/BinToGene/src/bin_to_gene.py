@@ -171,15 +171,15 @@ class BinToGene:
         first = self.binary_search(bin_dict[seqname], start, end, True)
         last = self.binary_search(bin_dict[seqname], start, end, False)
 
-        assert first <= last, "First bin greater index than last."
-
         # Add up all the intersecting bins
         if first != -1 and last != -1:  # intersection found
-            true_start_bin = bin_dict[seqname][first].index
-            true_end_bin = bin_dict[seqname][last].index
-            gene_counts = self.op(x[:, true_start_bin:true_end_bin + 1], axis=1)
+            assert first <= last, "First bin greater index than last."
 
-            return gene_counts
+            indices = np.zeros((last - first + 1))
+            for i in range(first, last+1):
+                indices[i-first] = bin_dict[seqname][i].index
+
+            return self.op(x[:, indices], axis=1)
 
         return None  # if no intersection found
 
