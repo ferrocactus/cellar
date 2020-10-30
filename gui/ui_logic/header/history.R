@@ -44,14 +44,21 @@ history <- function(id, label = "history") {
                         value=c(0, 10),
                         step=1
                     ),
-                    sliderInput(
-                        ns("value_t_2"),
-                        label="Gene 2 expression thresholds",
-                        min=0,max=10,
-                        value=c(0, 10),
-                        step=1
+                    conditionalPanel(
+                        "input.color2 != 'None'",
+                        ns = ns,
+                        sliderInput(
+                            ns("value_t_2"),
+                            label="Gene 2 expression thresholds",
+                            min=0,max=10,
+                            value=c(0, 10),
+                            step=1
+                        )
                     ),
-                    actionButton(ns("gray_cells"),'Grayout cells out of the range'),
+                    actionButton(
+                        ns("gray_cells"),'Grayout cells out of range',
+                        class = "longbtn-dropdown"
+                    ),
                     size = 'sm',
                     circle = TRUE,
                     inputId = ns("appearance_dropdown"),
