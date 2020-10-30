@@ -326,21 +326,12 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                             ggplot(data=num_less_zero, aes(x=cluster, y=percentage)) +
                                 geom_bar(stat="identity", fill="steelblue")+
                                 geom_text(aes(label=percentage), vjust=1.6, color="black", size=3.5)+
-                                theme_minimal()+
+                                #theme_minimal()+
+                                scale_x_continuous(breaks = seq(0, max(num_less_zero$cluster), 1))+
                                 ggtitle("0 expression cells")
                             
                             
 
-                            
-                            
-                            # ggplot(violin_dat0, aes(expression,fill='cluster')) +
-                            #     stat_bin(aes(y=..density..), breaks = seq(min(violin_dat0$expression), max(violin_dat0$expression), by = .1), color="white",position ='dodge') +
-                            #     scale_y_continuous(labels = percent, name = "percent") +
-                            #     theme_classic()
-                            
-                            # hist(x, breaks = bins, col = "#75AADB", border = "white",
-                            #      xlab = "CLusters",
-                            #      main = "Histogram of waiting times")
                             
                         })
                 }
