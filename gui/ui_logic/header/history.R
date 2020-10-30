@@ -51,6 +51,7 @@ history <- function(id, label = "history") {
                         value=c(0, 10),
                         step=1
                     ),
+                    actionButton(ns("gray_cells"),'Grayout cells out of the range'),
                     size = 'sm',
                     circle = TRUE,
                     inputId = ns("appearance_dropdown"),

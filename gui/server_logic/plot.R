@@ -1,7 +1,7 @@
 source("gui/server_logic/plot_options.R")
 
 EPS = 0.01
-eps = 1e-8
+
 # Define the number of colors you want
 plot <- function(input, output, session, replot, adata, activeDataset,
                  setNames, setPts, reset, resubset, reinfo, relabel,
@@ -21,9 +21,21 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   #main_plot_val2 <- reactiveVal(NULL)
   output$threshold_slider <- NULL
   outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
-
+  color_opt <- reactiveVal(0)
+  
   trigger_threshold <- reactiveVal(FALSE)
-
+  
+  observeEvent(input$gray_cells,{
+    if (color_opt()==0){
+      color_opt(1)
+    }
+    else{
+      color_opt(0)
+    }
+    replot(1)
+  })
+  
+  
   # triggers when replot is set to 1
   observeEvent(replot(), {
     if (replot() < 1) return()
@@ -117,8 +129,22 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               max_t = as.numeric(v2) / M
               color_matrix = matrix(0, length(vals), 3)
               for (i in 1:length(vals)) {
-                if (vals[i] < min_t) color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
-                else if (vals[i] >= max_t) color_matrix[i, 1:3] = c_func(1)  #yellow    #BRIGHT
+                if (vals[i] < min_t) {
+                  if (color_opt()==0){
+                    color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY  
+                  }  
+                  else{
+                    color_matrix[i, 1:3] = GRAY  
+                  }
+                }
+                else if (vals[i] >= max_t){
+                  if (color_opt()==0){
+                    color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY  
+                  }  
+                  else{
+                    color_matrix[i, 1:3] = GRAY  
+                  }
+                } 
                 # Otherwise map [min_t, max_t] to [0, 1]
                 else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
               }
@@ -246,6 +272,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       step = signif((M - m) / 30, digits=3)
 
       isolate(trigger_threshold(FALSE))
+      
+      # for default violin threshold
       updateSliderInput(
         session = session,
         inputId = "value_t",
@@ -253,8 +281,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         value = c(m, M),
         step = step
       )
-
-
       min_v=min(color)
       s_color=sort(color,decreasing=TRUE)
       idx=as.integer(length(s_color)/10)
@@ -274,7 +300,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         #   step=0.01
         #)
       }
-      # for default violin threshold
       updateSliderInput(
         session = session,
         inputId='violin_t',
@@ -283,7 +308,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         value=c(no_zero, 10),
         step=0.01
       )
-
+      # end of default violin threshold
+      
+      
     } else {
       isolate(trigger_threshold(FALSE))
       updateSliderInput(
@@ -449,10 +476,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       shinyjs::toggle(configs_id)
     })
 
-    # observeEvent(input[['collapse_cell_names2']], {
-    #   shinyjs::toggle('clustering_info2')
-    #   shinyjs::toggle('cell_names_outp2')
-    # })
+
 
     observeEvent(input[[transfer_labels_id]], {
       lbs = plot_cell_labels[[transfer_labels_id]]
@@ -502,22 +526,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     removeTab("tabset", isolate(input$tabset))
   })
 
-  # observeEvent(input$split_plot2, {
-  #   req(main_plot_val2())
-  #   if (double_plot2() == TRUE) {
-  #     output$plotg2=NULL
-  #     isolate(double_plot2(FALSE))
-  #     plot_cell_labels_split2 <- NULL
-  #   }
-  #   else {
-  #           output$plotg2 <- renderPlotly({
-  #             p = isolate(main_plot_val2())
-  #             return(p)
-  #           })
-  #
-  #           isolate(double_plot2(TRUE))
-  #         }
-  #     })
+
 
   observeEvent(input$split_plot, {
     req(main_plot_val())
