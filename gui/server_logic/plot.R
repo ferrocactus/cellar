@@ -539,6 +539,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       )
       output$plot <- renderPlotly({
         p = isolate(main_plot_val())
+        p$x$layout$height = isolate(input$plot_height)
+        for (i in seq_along(p$x$data))
+          p$x$data[[i]]$marker$size = isolate(input$dot_size)
+        p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
         p <- p %>% toWebGL()
         return(p)
       })
@@ -591,6 +595,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
       output$plot <- renderPlotly({
         p = isolate(main_plot_val())
+        p$x$layout$height = isolate(input$plot_height)
+        for (i in seq_along(p$x$data))
+          p$x$data[[i]]$marker$size = isolate(input$dot_size)
+        p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
         p <- p %>% toWebGL()
         return(p)
       })

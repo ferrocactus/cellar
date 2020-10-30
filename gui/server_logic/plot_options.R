@@ -24,6 +24,11 @@ js.reset_marker_size = "
     var upd = {'marker.size': marker_size};
     Plotly.restyle(plot, upd);
 
+    var plot2 = document.getElementById('ns-plot2');
+    if (plot2 != null) {
+        Plotly.restyle(plot2, upd);
+    }
+
     var plots = document.getElementById('ns-tabset').children;
     for (var i = 1; i < plots.length; ++i) {
         var plot_num = plots[i].childNodes[1].innerText.split(' ')[1];
@@ -37,6 +42,11 @@ js.reset_plot_height = "
     var plot = document.getElementById('ns-plot');
     var upd = {height: parseInt(plot_height)};
     Plotly.relayout(plot, upd);
+
+    var plot2 = document.getElementById('ns-plot2');
+    if (plot2 != null) {
+        Plotly.relayout(plot2, upd);
+    }
 
     var plots = document.getElementById('ns-tabset').children;
     for (var i = 1; i < plots.length; ++i) {
@@ -72,6 +82,11 @@ js.reset_theme = "
     }
     var plot = document.getElementById('ns-plot');
     Plotly.relayout(plot, upd);
+
+    var plot2 = document.getElementById('ns-plot2');
+    if (plot2 != null) {
+        Plotly.relayout(plot2, upd);
+    }
 
     var plots = document.getElementById('ns-tabset').children;
     for (var i = 1; i < plots.length; ++i) {

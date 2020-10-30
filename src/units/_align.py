@@ -13,37 +13,6 @@ from ._converter import convert
 from ._unit import Unit
 
 
-class Ali_Scanpy_Ingest2(Unit):
-    """
-    See https://scanpy-tutorials.readthedocs.io/en/latest/integrating-data-using-ingest.html
-    """
-
-    def __init__(self, **kwargs):
-        self.logger = setup_logger("Scanpy")
-
-    def get(self, x, col_ids, x_ref, col_ids_ref, labels_ref):
-        self.logger.info("Initializing Scanpy ingest method.")
-        # Consider only genes in common
-        common_col_ids = np.intersect1d(col_ids, col_ids_ref)
-        self.logger.info(f"Found {len(common_col_ids)} genes in common.")
-
-        x = x[:, np.isin(col_ids, common_col_ids)]
-        x_ref = x_ref[:, np.isin(col_ids_ref, common_col_ids)]
-
-        a1 = AnnData(x)
-        a2 = AnnData(x_ref)
-        sc.pp.pca(a1)
-        sc.pp.pca(a2)
-        sc.pp.neighbors(a1)
-        sc.pp.neighbors(a2)
-        sc.tl.umap(a1)
-        sc.tl.umap(a2)
-        a2.obs['labels'] = labels_ref
-
-        sc.tl.ingest(a1, a2, obs='labels')
-        return np.array(a1.obs['labels']).astype(np.int).reshape(-1)
-
-
 class Ali_Scanpy_Ingest(Unit):
     """
     See https://scanpy-tutorials.readthedocs.io/en/latest/integrating-data-using-ingest.html
@@ -79,7 +48,8 @@ class Ali_Scanpy_Ingest(Unit):
         adata_ref.var_names = d_ref['names']
         adata_ref.var_names_make_unique()
 
-        common_genes, comm1, comm2 = np.intersect1d(d_main['names'], d_ref['names'], return_indices=True)
+        common_genes, comm1, comm2 = np.intersect1d(
+            d_main['names'], d_ref['names'], return_indices=True)
 
         adata_main = adata_main[:, common_genes]
         adata_ref = adata_ref[:, common_genes]
@@ -132,3 +102,34 @@ class Ali_Scanpy_Ingest(Unit):
         merge_cluster_names(adata_main, adata_ref)
 
         return np.array(adata_main.obs['labels']).astype(np.int).reshape(-1), adata_main.uns['cluster_names']
+
+
+# class Ali_Scanpy_Ingest2(Unit):
+#     """
+#     See https://scanpy-tutorials.readthedocs.io/en/latest/integrating-data-using-ingest.html
+#     """
+
+#     def __init__(self, **kwargs):
+#         self.logger = setup_logger("Scanpy")
+
+#     def get(self, x, col_ids, x_ref, col_ids_ref, labels_ref):
+#         self.logger.info("Initializing Scanpy ingest method.")
+#         # Consider only genes in common
+#         common_col_ids = np.intersect1d(col_ids, col_ids_ref)
+#         self.logger.info(f"Found {len(common_col_ids)} genes in common.")
+
+#         x = x[:, np.isin(col_ids, common_col_ids)]
+#         x_ref = x_ref[:, np.isin(col_ids_ref, common_col_ids)]
+
+#         a1 = AnnData(x)
+#         a2 = AnnData(x_ref)
+#         sc.pp.pca(a1)
+#         sc.pp.pca(a2)
+#         sc.pp.neighbors(a1)
+#         sc.pp.neighbors(a2)
+#         sc.tl.umap(a1)
+#         sc.tl.umap(a2)
+#         a2.obs['labels'] = labels_ref
+
+#         sc.tl.ingest(a1, a2, obs='labels')
+#         return np.array(a1.obs['labels']).astype(np.int).reshape(-1)
