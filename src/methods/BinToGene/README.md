@@ -30,4 +30,4 @@ counts, ids = btg.convert(x, bin_names, prefix='chr', delim1=':', delim2='-')
 ```
 
 Example of a cell-by-gene matrix obtained via UMAP after running some basic preprocessing
-<img src="https://github.com/ferrocactus/BinToGene/blob/master/images/example.png" style="zoom:82%;" />
+<img src="https://github.com/ferrocactus/BinToGene/blob/master/src/images/example.png" style="zoom:82%;" />

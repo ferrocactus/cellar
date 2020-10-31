@@ -9,6 +9,7 @@ def load_gene_file(gencode_path, logger=None):
     paths = [gencode_path,
              path.join("resources", gencode_path),
              path.join("src/resources", gencode_path),
+             path.join(dir_path, 'resources', gencode_path),
              path.join(dir_path, '../resources', gencode_path)]
 
     for g_path in paths:

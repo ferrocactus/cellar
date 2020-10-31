@@ -76,11 +76,7 @@ class BinToGene:
         self.op_extend = op_extend
         self.max_op_extend = max_op_extend
         self.n_jobs = validate_n_jobs(n_jobs)
-
-        if operation == 'sum':
-            self.op = np.sum
-        else:
-            self.op = np.mean
+        self.operation = operation
 
     def binary_search(
             self,
@@ -175,11 +171,11 @@ class BinToGene:
         if first != -1 and last != -1:  # intersection found
             assert first <= last, "First bin greater index than last."
 
-            indices = np.zeros((last - first + 1))
+            indices = np.zeros((last - first + 1), dtype=int)
             for i in range(first, last+1):
                 indices[i-first] = bin_dict[seqname][i].index
 
-            return self.op(x[:, indices], axis=1)
+            return getattr(x[:, indices], self.operation)(axis=1)
 
         return None  # if no intersection found
 
@@ -253,7 +249,7 @@ class BinToGene:
                 gene_counts = self.get_gene_counts(gene, bin_dict, x)
                 if gene_counts is not None: # Gene has no intersection w bins
                     ids.append(gene['gene_id'])
-                    counts.append(gene_counts)
+                    counts.append(gene_counts.reshape(-1, 1))
         else: # Run bin to gene conversion in parallel
             try:
                 from joblib import Parallel, delayed
@@ -282,7 +278,10 @@ class BinToGene:
                     counts.append(r[0])
                     ids.append(r[1])
 
-        return np.asarray(np.hstack(counts)), np.hstack(ids)
+        if len(counts) > 0:
+            counts = np.hstack(counts)
+            ids = np.hstack(ids)
+        return counts, ids
 
     def multithread_wrapper(self, indices):
         ids = []
@@ -292,7 +291,7 @@ class BinToGene:
             gene_counts = self.get_gene_counts(gene, self.bin_dict, self.x)
             if gene_counts is not None:
                 ids.append(gene['gene_id'])
-                counts.append(gene_counts)
+                counts.append(gene_counts.reshape(-1, 1))
         if len(counts) > 0:
             return np.hstack(counts), np.hstack(ids)
         return ids, counts
