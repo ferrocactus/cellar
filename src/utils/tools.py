@@ -132,6 +132,16 @@ def store_labels(adata, labels, method):
     populate_subsets(adata)
 
 
+def store_empty_labels(adata):
+    adata.obs['labels'] = np.zeros(adata.shape[0]).astype(int)
+    adata.uns['cluster_info'] = {}
+    adata.uns['cluster_info']['unique_labels'] = np.array([0])
+    adata.uns['cluster_info']['n_clusters'] = 1
+    adata.uns['cluster_info']['method'] = 'N/A'
+    adata.uns['cluster_names'] = bidict({0: '0'})
+    populate_subsets(adata)
+
+
 def match_labels(adata, ids, labels):
     ids = np.array(ids).astype(str)
     labels = np.array(labels).astype(str)

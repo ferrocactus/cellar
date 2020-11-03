@@ -26,6 +26,11 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
             s2 = NULL
         }
 
+        if (py_to_r(more_than_one_subset(adata())) == FALSE) {
+            showNotification("Only 1 cluster found.")
+            return()
+        }
+
         withProgress(message = "Please Wait", value = 0, {
             n <- 2
 
@@ -139,7 +144,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                     'color',
                     selected = selected_gene
                 )
-                
+
             }
         })
     })

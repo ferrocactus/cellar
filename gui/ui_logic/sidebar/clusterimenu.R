@@ -13,11 +13,6 @@ menuItem(
             div(
                 class = "div_step div_dim",
                 list(
-                    actionButton(
-                        ns("runconfigbtn"),
-                        "Run",
-                        class="sidebtn longbtn runconfig"
-                    ),
                     selectInput(
                         ns("dim_method"),
                         "Dimensionality reduction",
@@ -73,6 +68,23 @@ menuItem(
                         )
                     )
                 )
+            ),
+
+            div(
+                class = "div_step div_vis",
+                list(
+                    selectInput(
+                        ns("vis_method"),
+                        "Visualization method:",
+                        choices = options$vis
+                    )
+                )
+            ),
+
+            actionButton(
+                ns("reduce_dim_and_vis"),
+                "Reduce Dimensions and Visualize",
+                class="sidebtn longbtn runconfig"
             ),
 
             div(
@@ -155,18 +167,13 @@ menuItem(
                             )
                         )
                     )
-                )
-            ),
+                ),
 
-            div(
-                class = "div_step div_vis",
-                list(
-                    selectInput(
-                        ns("vis_method"),
-                        "Visualization method:",
-                        choices = options$vis
-                    )
-                )
+                actionButton(
+                    ns("run_clustering"),
+                    "Cluster",
+                    class="sidebtn longbtn runconfig"
+                ),
             )
         )
     )

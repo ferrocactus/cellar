@@ -26,6 +26,12 @@ def has_labels(adata):
     return False
 
 
+def has_emb(adata):
+    if 'x_emb' in adata.obsm:
+        return True
+    return False
+
+
 def has_key_tri(adata, key1, key2, key3):
     if key2 not in getattr(adata, key1):
         return False
@@ -36,6 +42,10 @@ def has_key_tri(adata, key1, key2, key3):
 
 def get_key_tri(adata, key1, key2, key3):
     return getattr(adata, key1)[key2][key3]
+
+
+def more_than_one_subset(adata):
+    return len(adata.uns['cluster_names']) > 1
 
 
 def is_active(adata):
@@ -225,29 +235,32 @@ def set_adata(x, transpose=False):
 
 
 def read_10x(file):
-    #read 10x data
-    sc.settings.verbosity = 3             # verbosity: errors (0), warnings (1), info (2), hints (3)
+    # read 10x data
+    # verbosity: errors (0), warnings (1), info (2), hints (3)
+    sc.settings.verbosity = 3
     sc.logging.print_header()
     sc.settings.set_figure_params(dpi=80, facecolor='white')
 
-    results_file = 'write/pbmc3k.h5ad'  # the file that will store the analysis results
+    # the file that will store the analysis results
+    results_file = 'write/pbmc3k.h5ad'
 
-    #os.chdir(file)
-    dir_name=''
-    path10x=file
+    # os.chdir(file)
+    dir_name = ''
+    path10x = file
     for i in os.listdir(file):
-        if (i[:6]=='filter'):
-            dir_name=i
-            if (os.listdir(file+'/'+dir_name)[0]=='hg19'):
-                path10x=file+'/'+dir_name+'/hg19/'  # the directory with the `.mtx` file
+        if (i[:6] == 'filter'):
+            dir_name = i
+            if (os.listdir(file+'/'+dir_name)[0] == 'hg19'):
+                path10x = file+'/'+dir_name+'/hg19/'  # the directory with the `.mtx` file
             else:
-                path10x=file+'/'+dir_name+'/'  # the directory with the `.mtx` file
+                path10x = file+'/'+dir_name+'/'  # the directory with the `.mtx` file
 
     adata = sc.read_10x_mtx(
         path10x,
-        var_names='gene_symbols',     # use gene symbols for the variable names (variables-axis index)
+        # use gene symbols for the variable names (variables-axis index)
+        var_names='gene_symbols',
         cache=True)
     adata.var_names_make_unique()
-    #os.chdir('../../..')
-    adata.uns['dataset']='data10x'
+    # os.chdir('../../..')
+    adata.uns['dataset'] = 'data10x'
     return AnnData(adata)
