@@ -9,7 +9,7 @@ statsmodels
 joblib
 anndata == 0.7.1
 leidenalg
-scanpy
+scanpy == 1.5.1
 psutil
 plotly
 bidict
