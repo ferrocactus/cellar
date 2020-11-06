@@ -22,9 +22,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   output$threshold_slider <- NULL
   outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
   color_opt <- reactiveVal(0)
-  
+
   trigger_threshold <- reactiveVal(FALSE)
-  
+
   observeEvent(input$gray_cells,{
     if (color_opt()==0){
       color_opt(1)
@@ -34,8 +34,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     }
     replot(1)
   })
-  
-  
+
+
   # triggers when replot is set to 1
   observeEvent(replot(), {
     if (replot() < 1) return()
@@ -49,22 +49,39 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
     withProgress(message = "Making plot", value = 0, {
       incProgress(1, detail = paste("Step: Rendering plot"))
-      labels <- as.factor(py_to_r(adata()$obs$labels$to_numpy()))
-      label_names <- as.factor(py_to_r(get_label_names(adata())))
+      labels <- py_to_r(adata()$obs$labels$to_numpy())
+      label_names <- py_to_r(get_label_names(adata()))
+
+      ord = order(labels)
+      labels_ord = labels[ord]
+      label_names_ord = label_names[ord]
+      joined = paste0(labels, ": ", label_names)
+      joined_ord = paste0(labels_ord, ": ", label_names_ord)
+      color_if_show_names = factor(joined, levels=unique(joined_ord), ordered=TRUE)
+
+      mypal <- brewer.pal(8, "Dark2")
+      mypal <- colorRampPalette(mypal)(30)
+
+      colors = mypal[sort(unique(labels)) + 1]
+
+      labels <- as.factor(labels)
+      label_names <- as.factor(label_names)
       x_emb_2d <- py_to_r(adata()$obsm[['x_emb_2d']])
 
       title = "Clusters"
       showlegend = TRUE
       symbol = NULL
       symbols = NULL
-      colors = NULL
+      legend = NULL
 
       text = ~paste("Label: ", label_names)
-      if (isolate(input$show_names) == 'show_names' && isolate(input$color) == 'Clusters')
-        color = paste0(labels, ": ", label_names)
-      else if (isolate(input$color) == 'Clusters')
+      if (isolate(input$show_names) == 'show_names' && isolate(input$color) == 'Clusters') {
+        color = color_if_show_names
+        legend = list(traceorder = 'reversed')
+      } else if (isolate(input$color) == 'Clusters') {
         color = labels
-      else if (isolate(input$color) == 'Uncertainty') {
+        #colors <- generate_colors(color)
+      } else if (isolate(input$color) == 'Uncertainty') {
         if (anyNA(as.integer(isolate(input$n_neighbors))) == TRUE) {
           n_neighbors = as.integer(sqrt(length(labels)))
         } else if (as.integer(isolate(input$n_neighbors)) > as.integer(length(labels) / 2)) {
@@ -131,20 +148,20 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               for (i in 1:length(vals)) {
                 if (vals[i] < min_t) {
                   if (color_opt()==0){
-                    color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY  
-                  }  
+                    color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
+                  }
                   else{
-                    color_matrix[i, 1:3] = GRAY  
+                    color_matrix[i, 1:3] = GRAY
                   }
                 }
                 else if (vals[i] >= max_t){
                   if (color_opt()==0){
-                    color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY  
-                  }  
-                  else{
-                    color_matrix[i, 1:3] = GRAY  
+                    color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
                   }
-                } 
+                  else{
+                    color_matrix[i, 1:3] = GRAY
+                  }
+                }
                 # Otherwise map [min_t, max_t] to [0, 1]
                 else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
               }
@@ -227,6 +244,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         text = text,
         color = color,
         colors = colors,
+        alpha = 0.8,
         #symbol = symbol,
         #symbols = symbols,  ## 30 shapes
         key = as.character(1:length(labels)),
@@ -246,7 +264,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         dragmode = "lasso",
         showlegend = showlegend,
         title = title,
-        margin = list(t = 50))
+        margin = list(t = 50),
+        legend = legend)
+        #xaxis = list(categoryarray = sort(labels), categoryorder = "array"))
 
 
       p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
@@ -272,7 +292,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       step = signif((M - m) / 30, digits=3)
 
       isolate(trigger_threshold(FALSE))
-      
+
       # for default violin threshold
       updateSliderInput(
         session = session,
@@ -309,8 +329,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         step=0.01
       )
       # end of default violin threshold
-      
-      
+
+
     } else {
       isolate(trigger_threshold(FALSE))
       updateSliderInput(
@@ -700,4 +720,31 @@ print_app <- function(widget) {
   htmlwidgets::saveWidget(widget, temp, selfcontained = TRUE)
 
   system(paste0("firefox ", temp))
+}
+
+generate_colors <- function(color) {
+    unq = unique(color)
+    print(color)
+    colors = c(
+        "#1ba3c6",
+        "#f8b620",
+        "#e03426",
+        "#57a337",
+        "#eb73b3",
+        "#4f7cba",
+        "#f89217",
+        "#f64971",
+        "#d5bb21",
+        "#30bcad",
+        "#f06719",
+        "#a26dc2",
+        "#33a65c",
+        "#fc719e",
+        "#2cb5c0",
+        "#ce69be",
+        "#21b087",
+        "#7873c0",
+        "#a2b627"
+    )
+    return(colors)
 }

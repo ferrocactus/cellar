@@ -61,12 +61,13 @@ RUN Rscript -e 'install.packages("shinyjqui")'
 
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN cd /home/cellar && git config pull.rebase false
+
+RUN mkdir -p /home/cellar/datasets/user_uploaded
+RUN mkdir -p /home/cellar/datasets/server
+
 RUN pip3 install -r /home/cellar/py_requirements.txt
 
 WORKDIR /home/cellar
-
-RUN mkdir -p datasets/user_uploaded
-RUN mkdir -p datasets/server
 
 ADD https://api.github.com/repos/ferrocactus/cellar/git/refs/heads/master version.json
 RUN git pull
