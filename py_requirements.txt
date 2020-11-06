@@ -7,7 +7,7 @@ umap-learn
 kneed
 statsmodels
 joblib
-anndata
+anndata==0.7.1
 leidenalg
 scanpy
 psutil
