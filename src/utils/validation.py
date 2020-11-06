@@ -329,25 +329,19 @@ def _validate_atac_operation(operation):
 
 
 def _validate_interval_extension(extend):
-    if isinstance(extend, str):
-        if extend[-1] == 'x':
-            multiplier = extend[:-1]
-            try:
-                multiplier = literal_eval(multiplier)
-                multiplier = int(multiplier)
-            except:
-                raise InvalidArgument("Invalid extension parameter.")
-            return str(multiplier) + 'x'
-        else:
-            try:
-                multiplier = literal_eval(multiplier)
-                multiplier = int(multiplier)
-            except:
-                raise InvalidArgument("Invalid extension parameter.")
-            return multiplier
-    else:
+    extend = str(extend)
+    if extend[-1] == 'x':
+        multiplier = extend[:-1]
         try:
-            multiplier = int(multiplier)
+            multiplier = literal_eval(multiplier)
+            multiplier = float(multiplier)
         except:
             raise InvalidArgument("Invalid extension parameter.")
-    return multiplier
+        return str(multiplier) + 'x'
+    else:
+        try:
+            multiplier = literal_eval(extend)
+            multiplier = float(multiplier)
+        except:
+            raise InvalidArgument("Invalid extension parameter.")
+        return multiplier

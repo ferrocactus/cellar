@@ -146,8 +146,7 @@ class Pre_ATAC(Unit):
     """
 
     def __init__(self,
-                 gencode_path='src/methods/BinToGene/resources/' +
-                 'gencode_v34_genes_protein_coding.csv',
+                 gencode_path='gencode_v34_genes_protein_coding.csv',
                  operation: str = 'sum',
                  extend: Optional[Union[str, int]] = '5x',
                  max_extend: Optional[Union[str, int]] = 50000,
