@@ -16,3 +16,4 @@ bidict
 pydiffmap
 diffxpy
 scipy
+BinToGene
