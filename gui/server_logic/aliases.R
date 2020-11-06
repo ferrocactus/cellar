@@ -14,6 +14,7 @@ get_emb_2d <- cellar$utils$r_helpers$get_emb_2d
 get_label_names <- cellar$utils$r_helpers$get_label_names
 get_cluster_label_list <- cellar$utils$r_helpers$get_cluster_label_list
 get_cluster_name_list <- cellar$utils$r_helpers$get_cluster_name_list
+get_cluster_names <- cellar$utils$r_helpers$get_cluster_names
 get_unique_labels <- cellar$utils$r_helpers$get_unique_labels
 get_subsets <- cellar$utils$r_helpers$get_subsets
 get_uncertain_subsets <- cellar$utils$r_helpers$get_uncertain_subsets

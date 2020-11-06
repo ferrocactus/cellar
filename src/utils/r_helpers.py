@@ -96,15 +96,19 @@ def get_emb_2d(adata):
 def get_cluster_label_list(adata):
     if 'cluster_names' in adata.uns:
         return list(adata.uns['cluster_names'].keys())
-    else:
-        return []
+    return []
 
 
 def get_cluster_name_list(adata):
     if 'cluster_names' in adata.uns:
         return list(adata.uns['cluster_names'].values())
-    else:
-        return []
+    return []
+
+
+def get_cluster_names(adata):
+    if 'cluster_names' in adata.uns:
+        return adata.uns['cluster_names']
+    return []
 
 
 def get_unique_labels(adata):
@@ -164,7 +168,7 @@ def write_h5ad(adata, path, compression=9):
     # adata.var.pop('parsed_names')
     if 'parsed_ids' in adata.var:
         adata.var.pop('parsed_ids')
-        #adata.var.pop('parsed_names')
+        # adata.var.pop('parsed_names')
     if compression == "None":
         compression = None
     adata.write_h5ad(path, compression=compression)

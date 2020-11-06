@@ -469,7 +469,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     # Store cell ids and labels
     cell_names = py_to_r(get_obs_names(adata()))
     labels = py_to_r(get_label_names(adata()))
-    plot_cell_labels[[transfer_labels_id]] = list(cell_names, labels)
+    maps = get_cluster_names(adata())
+    plot_cell_labels[[transfer_labels_id]] = list(cell_names, labels, maps)
 
     appendTab(
       "tabset", tabPanel(
@@ -500,7 +501,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     observeEvent(input[[transfer_labels_id]], {
       lbs = plot_cell_labels[[transfer_labels_id]]
 
-      match_labels(adata(), lbs[[1]], lbs[[2]])
+      match_labels(adata(), lbs[[1]], lbs[[2]], lbs[[3]])
 
       replot(replot() + 1)
       reset(reset() + 1)
@@ -584,7 +585,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
       cell_names = py_to_r(get_obs_names(adata()))
       labels = py_to_r(get_label_names(adata()))
-      plot_cell_labels_split = list(cell_names, labels)
+      maps = get_cluster_names(adata())
+      plot_cell_labels_split = list(cell_names, labels, maps)
 
       removeUI(selector="#ns-plot")
       insertUI(
@@ -614,7 +616,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       observeEvent(input$move_labels_split, {
         lbs = plot_cell_labels_split
 
-        match_labels(adata(), lbs[[1]], lbs[[2]])
+        match_labels(adata(), lbs[[1]], lbs[[2]], lbs[[3]])
 
         replot(replot() + 1)
         reset(reset() + 1)

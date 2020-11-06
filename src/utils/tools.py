@@ -142,7 +142,7 @@ def store_empty_labels(adata):
     populate_subsets(adata)
 
 
-def match_labels(adata, ids, labels):
+def match_labels(adata, ids, labels, maps=None):
     ids = np.array(ids).astype(str)
     labels = np.array(labels).astype(str)
 
@@ -150,7 +150,14 @@ def match_labels(adata, ids, labels):
         raise InvalidArgument("Found IDs and labels of different length.")
 
     # indices allow to reconstruct the original array given unq_labels
-    unq_labels, indices = np.unique(labels, return_inverse=True)
+    if maps is None:
+        unq_labels, indices = np.unique(labels, return_inverse=True)
+    else:
+        maps = maps.copy()
+        unq_labels = np.unique(labels)
+        indices = np.zeros((len(labels)))
+        for i in maps:
+            indices[labels==str(maps[i])] = int(i)
 
     # Get common cell ids and their indices for each array
     common_ids, adata_ind, ids_ind = np.intersect1d(
@@ -173,17 +180,24 @@ def match_labels(adata, ids, labels):
 
     unq = np.unique(new_labels)
 
-    # Construct label - cell type dict
     b = bidict({})
-    for i in unq:
-        if i != free_cluster:
-            b[int(i)] = str(unq_labels[i])
-        else:
-            b[int(i)] = "No matching ID"
+    if maps is None:
+        # Construct label - cell type dict
+        for i in unq:
+            if i != free_cluster:
+                b[int(i)] = str(unq_labels[i])
+            else:
+                b[int(i)] = "No matching ID"
+    else:
+        for i in unq:
+            if i in maps:
+                b[int(i)] = str(maps[i])
+            else:
+                b[int(i)] = "No matching ID"
 
     # Update entries
     adata.uns['cluster_info'] = {}
-    unq_labels = np.unique(adata.obs['labels'])
+    unq_labels = unq
     adata.uns['cluster_info']['unique_labels'] = unq
     adata.uns['cluster_info']['n_clusters'] = len(unq)
     adata.uns['cluster_info']['method'] = 'Uploaded Labels'
