@@ -80,7 +80,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         legend = list(traceorder = 'reversed')
       } else if (isolate(input$color) == 'Clusters') {
         color = labels
-        #colors <- generate_colors(color)
       } else if (isolate(input$color) == 'Uncertainty') {
         if (anyNA(as.integer(isolate(input$n_neighbors))) == TRUE) {
           n_neighbors = as.integer(sqrt(length(labels)))
@@ -720,31 +719,4 @@ print_app <- function(widget) {
   htmlwidgets::saveWidget(widget, temp, selfcontained = TRUE)
 
   system(paste0("firefox ", temp))
-}
-
-generate_colors <- function(color) {
-    unq = unique(color)
-    print(color)
-    colors = c(
-        "#1ba3c6",
-        "#f8b620",
-        "#e03426",
-        "#57a337",
-        "#eb73b3",
-        "#4f7cba",
-        "#f89217",
-        "#f64971",
-        "#d5bb21",
-        "#30bcad",
-        "#f06719",
-        "#a26dc2",
-        "#33a65c",
-        "#fc719e",
-        "#2cb5c0",
-        "#ce69be",
-        "#21b087",
-        "#7873c0",
-        "#a2b627"
-    )
-    return(colors)
 }
