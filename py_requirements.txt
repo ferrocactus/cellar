@@ -7,9 +7,10 @@ umap-learn
 kneed
 statsmodels
 joblib
+h5py == 2.10.0
 anndata == 0.7.1
-leidenalg
 scanpy == 1.5.1
+leidenalg
 psutil
 plotly
 bidict

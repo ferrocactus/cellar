@@ -59,7 +59,9 @@ RUN Rscript -e 'install.packages("shinyjqui")'
 
 #### Install python3 dependencies
 
-ADD https://api.github.com/repos/ferrocactus/cellar/git/refs/heads/master version.json
+# Breakpoint 1
+ARG VER=unknown
+
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN cd /home/cellar && git config pull.rebase false
 
@@ -69,7 +71,8 @@ WORKDIR /home/cellar
 
 RUN pip3 install -r /home/cellar/py_requirements.txt
 
-ADD https://api.github.com/repos/ferrocactus/cellar/git/refs/heads/master version.json
+# Breakpoint 2
+ARG VER2=unknown
 RUN git pull
 
 ENTRYPOINT ["Rscript", "app.R"]

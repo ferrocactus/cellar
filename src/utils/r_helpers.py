@@ -164,6 +164,7 @@ def write_h5ad(adata, path, compression=9):
     # adata.var.pop('parsed_names')
     if 'parsed_ids' in adata.var:
         adata.var.pop('parsed_ids')
+        #adata.var.pop('parsed_names')
     if compression == "None":
         compression = None
     adata.write_h5ad(path, compression=compression)
