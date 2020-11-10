@@ -60,7 +60,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       color_if_show_names = factor(joined, levels=unique(joined_ord), ordered=TRUE)
 
       mypal <- brewer.pal(8, "Set2")
-      mypal <- colorRampPalette(mypal)(30)
+      mypal <- colorRampPalette(mypal)(40)
 
       colors = mypal[sort(unique(labels)) + 1]
 
