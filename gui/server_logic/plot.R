@@ -61,6 +61,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
       mypal <- brewer.pal(8, "Set2")
       mypal <- colorRampPalette(mypal)(40)
+      fixed_shuffle = c(9, 22,  7, 20, 17, 31, 28,  2, 23, 15,  1,  8, 35, 10, 11, 14, 37,
+       33, 21, 25, 19, 26, 16, 39, 13,  4, 27, 34, 12,  3, 29,  0,  5, 32,
+       36, 18,  6, 24, 30, 38)
+      mypal = mypal[fixed_shuffle]
 
       colors = mypal[sort(unique(labels)) + 1]
 
