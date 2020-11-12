@@ -329,7 +329,14 @@ def _validate_atac_operation(operation):
 
 
 def _validate_interval_extension(extend):
+    if extend is None:
+        return None
+
     extend = str(extend)
+
+    if extend in ["0", "null", "None", "none", "-1", "0x"]:
+        return None
+
     if extend[-1] == 'x':
         multiplier = extend[:-1]
         try:

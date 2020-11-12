@@ -61,9 +61,14 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
       mypal <- brewer.pal(8, "Set2")
       mypal <- colorRampPalette(mypal)(40)
-      fixed_shuffle = c(9, 22,  7, 20, 17, 31, 28,  2, 23, 15,  1,  8, 35, 10, 11, 14, 37,
-       33, 21, 25, 19, 26, 16, 39, 13,  4, 27, 34, 12,  3, 29,  0,  5, 32,
-       36, 18,  6, 24, 30, 38)
+      fixed_shuffle = c(1)
+      mover = 1
+      for (i in 2:50) {
+        mover = (mover + 7) %% 50
+        if (mover == 0)
+          mover = 50
+        fixed_shuffle = c(fixed_shuffle, mover)
+      }
       mypal = mypal[fixed_shuffle]
 
       colors = mypal[sort(unique(labels)) + 1]
@@ -260,7 +265,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
       p <- p %>% config(
         displaylogo = FALSE,
-        #modeBarButtonsToAdd = list(plot_options_btn),
         displayModeBar = TRUE)
 
       p <- p %>% layout(
@@ -268,9 +272,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         showlegend = showlegend,
         title = title,
         margin = list(t = 50),
-        legend = legend)
-        #xaxis = list(categoryarray = sort(labels), categoryorder = "array"))
-
+        legend = legend,
+        xaxis = list(showgrid = F, zeroline = FALSE),
+        yaxis = list(showgrid = F, zeroline = FALSE))
 
       p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
       p <- plotly_build(p)
@@ -499,8 +503,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       shinyjs::toggle(cell_names_id)
       shinyjs::toggle(configs_id)
     })
-
-
 
     observeEvent(input[[transfer_labels_id]], {
       lbs = plot_cell_labels[[transfer_labels_id]]

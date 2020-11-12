@@ -53,7 +53,7 @@ menuItem(
                             textInput(
                                 ns("normalize_total"),
                                 "Normalize total sum",
-                                value = 1000
+                                value = 10000
                             ),
                             selectInput(
                                 ns("exclude_highly_expressed"),

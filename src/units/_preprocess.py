@@ -4,6 +4,7 @@ from typing import Optional, Union
 import scanpy as sc
 import numpy as np
 from anndata import AnnData
+from BinToGene import BinToGene
 
 from ..log import setup_logger
 from ._unit import Unit
@@ -11,7 +12,7 @@ from ..utils.exceptions import InvalidArgument
 from ..utils.validation import _validate_unprocessed_x
 from ..utils.validation import _validate_atac_operation
 from ..utils.validation import _validate_interval_extension
-from ..methods import BinToGene
+from ..utils.misc import _infer_bin_prefix
 
 
 DEFAULTS_SCANPY = {
@@ -232,7 +233,9 @@ class Pre_ATAC(Unit):
             max_op_extend=self.max_op_extend,
             n_jobs=self.n_jobs)
 
-        counts, ids = btg.convert(adata.X, adata.var_names)
+        prefix = _infer_bin_prefix(adata.var_names.to_numpy()[0])
+
+        counts, ids = btg.convert(adata.X, adata.var_names, prefix=prefix)
 
         cbg = AnnData(counts)
         cbg.var_names = ids
