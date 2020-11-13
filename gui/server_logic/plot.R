@@ -69,7 +69,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
           mover = 50
           fixed_shuffle = c(fixed_shuffle, mover)
       }
-      print(fixed_shuffle)
       mypal = mypal[fixed_shuffle]
 
       colors = mypal[sort(unique(labels)) + 1]
