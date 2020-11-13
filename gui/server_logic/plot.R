@@ -60,15 +60,16 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       color_if_show_names = factor(joined, levels=unique(joined_ord), ordered=TRUE)
 
       mypal <- brewer.pal(8, "Set2")
-      mypal <- colorRampPalette(mypal)(40)
+      mypal <- colorRampPalette(mypal)(50)
       fixed_shuffle = c(1)
       mover = 1
       for (i in 2:50) {
         mover = (mover + 7) %% 50
         if (mover == 0)
           mover = 50
-        fixed_shuffle = c(fixed_shuffle, mover)
+          fixed_shuffle = c(fixed_shuffle, mover)
       }
+      print(fixed_shuffle)
       mypal = mypal[fixed_shuffle]
 
       colors = mypal[sort(unique(labels)) + 1]
