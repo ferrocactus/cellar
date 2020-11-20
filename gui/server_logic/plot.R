@@ -310,7 +310,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       # )
       # min_v=min(color)
       s_color=sort(color,decreasing=TRUE)
-      idx=as.integer(length(s_color)/10)
+      idx=as.integer(length(s_color)/20)
       top_ten=s_color[idx]
       if (top_ten==min(s_color))
         top_ten=10

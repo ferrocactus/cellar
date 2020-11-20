@@ -31,6 +31,14 @@ tabsetPanel(
       br(),
       br(),
       br(),
+      br(),
+      br(),
+      br(),
+      br(),
+      br(),
+      br(),
+      br(),
+      br(),
        plotlyOutput(ns("zeros"))
     ),
 
