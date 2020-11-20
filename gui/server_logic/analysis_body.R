@@ -249,16 +249,15 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             # gene_names = py_to_r(get_all_gene_names(adata()))
             # selected_gene=input$color
             # i = which(gene_names == (selected_gene))[1]
-            # 
-            # 
             # gene_data = py_to_r((adata()$X$T[i]))
-# 
-#             v1 = isolate(input$violin_t)[1]
-#             v2 = isolate(input$violin_t)[2]
-#             v1=as.numeric(v1)
-#             v2=as.numeric(v2)
-            # if (v1==4.99 && v2==5.11)
-            #     return()
+            
+            v1 = isolate(input$violin_t)[1]
+            v2 = isolate(input$violin_t)[2]
+            v1=as.numeric(v1)
+            v2=as.numeric(v2)
+            
+            if (v1==4.99 && v2==5.11)
+                return()
             # index1=which(gene_data %in% gene_data[gene_data>v1])# && gene_data %in% gene_data[gene_data>0])
             # index2=which(gene_data %in% gene_data[gene_data<v2])
             # index=c()
@@ -273,15 +272,26 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             # colnames(violin_dat0)=c("cluster","expression")
             # colnames(violin_dat)=c("cluster","expression")
             
-            generate_violin(r_to_py(adata()),as.character(input$color))
+
             
-            output$violin <- renderImage({
-                list(src = paste0('violin',as.character(input$color),'.png'),
-                     contentType = 'image/png',
-                     width = 800,
-                     height = 600,
-                     alt = "This is alternate text")
-            }, deleteFile = TRUE)
+            status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
+
+            if (status==-1){
+                showNotification("Not enough cells in the thresholds")
+                output$violin<-NULL
+            }
+            else{
+                output$violin <- renderImage({
+                    list(src = paste0('violin',as.character(input$color),'.png'),
+                         contentType = 'image/png',
+                         width = 800,
+                         height = 600,
+                         alt = "This is alternate text")
+                }, deleteFile = TRUE)
+            }
+            print(class(status))
+            print(status)
+            
             
             
             

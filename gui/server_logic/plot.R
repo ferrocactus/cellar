@@ -309,23 +309,25 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       #   step = step
       # )
       # min_v=min(color)
-      # s_color=sort(color,decreasing=TRUE)
-      # idx=as.integer(length(s_color)/10)
-      # top_ten=s_color[idx]
+      s_color=sort(color,decreasing=TRUE)
+      idx=as.integer(length(s_color)/10)
+      top_ten=s_color[idx]
+      if (top_ten==min(s_color))
+        top_ten=10
       # no_zero=0.05
       # min_v=min_v-3*EPS
       # top_ten=top_ten+3*EPS
       # if (length(color)<200)
       # {
       #   no_zero=0
-        # updateSliderInput(
-        #   session = session,
-        #   inputId='violin_t',
-        #   label="Violin plot gene expression thresholds",
-        #   min=-1,max=10,
-        #   value=c(no_zero, 10),
-        #   step=0.01
-        #)
+      updateSliderInput(
+          session = session,
+          inputId='violin_t',
+          label="Violin plot gene expression thresholds",
+          #min=-1,max=10,
+          value=c(-1, top_ten)
+          #step=0.01
+      )
       # }
       # updateSliderInput(
       #   session = session,
