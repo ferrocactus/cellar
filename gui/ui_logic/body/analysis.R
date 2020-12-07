@@ -14,19 +14,19 @@ tabsetPanel(
         DT::dataTableOutput(ns("DEtable")),
     ),
 
-    tabPanel(
-      "Violin Plot",
-      sliderInput(
-        ns("violin_t"),
-        label="Violin plot gene expression thresholds",
-        min=-1,max=10,
-        value=c(4.99, 5.11),
-        step=0.01
-      ),
-      uiOutput(ns("titleviolin")),
-      plotlyOutput(ns("violin")),
-      plotlyOutput(ns("zeros"))
-    ),
+    # tabPanel(
+    #   "Violin Plot",
+    #   sliderInput(
+    #     ns("violin_t"),
+    #     label="Violin plot gene expression thresholds",
+    #     min=-1,max=10,
+    #     value=c(4.99, 5.11),
+    #     step=0.01
+    #   ),
+    #   uiOutput(ns("titleviolin")),
+    #   plotlyOutput(ns("violin")),
+    #   plotlyOutput(ns("zeros"))
+    # ),
 
     tabPanel(
       "Heat Map",

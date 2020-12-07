@@ -130,52 +130,59 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         # show gene expression level:
         gene_names = py_to_r(get_all_gene_names(adata()))
         i = which(gene_names == isolate(input$color))[1]
-        if (!is.null(i)) {
-          color = py_to_r(get_col(adata(), i))
-          text = ~paste("Label: ", label_names,'\nColor value:',as.character((color)))
+        if (is.na(i)) {
+          # updateSelectInput(
+          #       session = session,
+          #       inputId = "color",
+          #       choices = c("Clusters"),
+          #       selected = "Clusters")
+          color = labels
+        } else if (!is.null(i)) {
+            color = py_to_r(get_col(adata(), i))
+            text = ~paste("Label: ", label_names,'\nColor value:',as.character((color)))
 
-          m = signif(min(color) - EPS, digits=3)
-          M = signif(max(color) + EPS, digits=3)
+            m = signif(min(color) - EPS, digits=3)
+            M = signif(max(color) + EPS, digits=3)
 
-          if (isolate(trigger_threshold()) == TRUE) {
-            v1 = isolate(input$value_t)[1]
-            v2 = isolate(input$value_t)[2]
-          } else {
-            v1 = m
-            v2 = M
-          }
+            if (isolate(trigger_threshold()) == TRUE) {
+              v1 = isolate(input$value_t)[1]
+              v2 = isolate(input$value_t)[2]
+            } else {
+              v1 = m
+              v2 = M
+            }
 
-          colors <- function(vals) {
-            c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
+            colors <- function(vals) {
+              c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
 
-            if (!is.null(v1)) { # New gene
-              # Need to be in [0, 1] range so divide by max
-              min_t = as.numeric(v1) / M
-              max_t = as.numeric(v2) / M
-              color_matrix = matrix(0, length(vals), 3)
-              for (i in 1:length(vals)) {
-                if (vals[i] < min_t) {
-                  if (color_opt()==0){
-                    color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
+              if (!is.null(v1)) { # New gene
+                # Need to be in [0, 1] range so divide by max
+                min_t = as.numeric(v1) / M
+                max_t = as.numeric(v2) / M
+                color_matrix = matrix(0, length(vals), 3)
+                for (i in 1:length(vals)) {
+                  if (vals[i] < min_t) {
+                    if (color_opt()==0){
+                      color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
+                    }
+                    else{
+                      color_matrix[i, 1:3] = GRAY
+                    }
                   }
-                  else{
-                    color_matrix[i, 1:3] = GRAY
+                  else if (vals[i] >= max_t){
+                    if (color_opt()==0){
+                      color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
+                    }
+                    else{
+                      color_matrix[i, 1:3] = GRAY
+                    }
                   }
+                  # Otherwise map [min_t, max_t] to [0, 1]
+                  else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
                 }
-                else if (vals[i] >= max_t){
-                  if (color_opt()==0){
-                    color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
-                  }
-                  else{
-                    color_matrix[i, 1:3] = GRAY
-                  }
-                }
-                # Otherwise map [min_t, max_t] to [0, 1]
-                else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
-              }
-              return(color_matrix)
-            } else { # default
-              return(c_func(vals))
+                return(color_matrix)
+              } else { # default
+                return(c_func(vals))
             }
           }
           title = isolate(input$color)

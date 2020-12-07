@@ -23,6 +23,12 @@ save_session <- function(input, output, session, adata, replot,
         activeDataset(tools::file_path_sans_ext(basename(input$upload_sess$datapath)))
         withProgress(message = "Loading Session", value = 0, {
             incProgress(1 / 3)
+            fullreset(fullreset() + 1)
+            updateSelectInput(
+                session = session,
+                inputId = "color",
+                choices = c("Clusters"),
+                selected = "Clusters")
             adata(read_h5ad(input$upload_sess$datapath))
             if (py_to_r(is_str(adata()))) {
                 showNotification("Incorrect file format")
@@ -30,7 +36,6 @@ save_session <- function(input, output, session, adata, replot,
                 return()
             }
 
-            fullreset(fullreset() + 1)
             incProgress(1 / 3)
             replot(replot() + 1)
             resubset(resubset() + 1)
@@ -46,6 +51,12 @@ save_session <- function(input, output, session, adata, replot,
         datapath = paste0('datasets/annotated/', input$annotated_datasets)
         withProgress(message = "Loading Session", value = 0, {
             incProgress(1 / 3)
+            fullreset(fullreset() + 1)
+            updateSelectInput(
+                session = session,
+                inputId = "color",
+                choices = c("Clusters"),
+                selected = "Clusters")
             adata(read_h5ad(datapath))
             if (py_to_r(is_str(adata()))) {
                 showNotification("Incorrect file format")
@@ -53,7 +64,6 @@ save_session <- function(input, output, session, adata, replot,
                 return()
             }
 
-            fullreset(fullreset() + 1)
             incProgress(1 / 3)
             replot(replot() + 1)
             resubset(resubset() + 1)
