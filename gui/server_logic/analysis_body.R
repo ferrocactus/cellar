@@ -246,14 +246,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     
     observeEvent(listen_violin() ,{
         if (input$color!='Uncertainty' && input$color != 'Clusters' && input$switcher=='Violin Plot'){
-            withProgress(message='Constructing heatmap', {
-            #print(input$switcher)
-            
-            gene_names = py_to_r(get_all_gene_names(adata()))
-            selected_gene=input$color
-            i = which(gene_names == (selected_gene))[1]
-            gene_data = py_to_r((adata()$X$T[i]))
-            
+
             v1 = isolate(input$violin_t)[1]
             v2 = isolate(input$violin_t)[2]
             v1=as.numeric(v1)
@@ -261,7 +254,20 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             
             if (v1==4.99 && v2==5.11)
                 return()
+            
+            progress='Constructing violin plot'
+            if (v1==-1 && v2==10)
+                progress='Initializing violin plot'            
+            withProgress(message=progress, {
+            #print(input$switcher)
+            
+            gene_names = py_to_r(get_all_gene_names(adata()))
+            selected_gene=input$color
+            i = which(gene_names == (selected_gene))[1]
+            gene_data = py_to_r((adata()$X$T[i]))
+            
 
+            
             incProgress(1 / 3)
             status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
 
