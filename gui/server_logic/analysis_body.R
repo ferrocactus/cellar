@@ -234,7 +234,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     })
     trigger_threshold <- reactiveVal(FALSE)
     listen_violin <- reactive({
-        list(input$color, input$violin_t)
+        list(input$color, input$violin_t, input$switcher)
     })
     
     observeEvent(input$color,{
@@ -245,7 +245,10 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     })
     
     observeEvent(listen_violin() ,{
-        if (input$color!='Uncertainty' && input$color != 'Clusters'){
+        if (input$color!='Uncertainty' && input$color != 'Clusters' && input$switcher=='Violin Plot'){
+            withProgress(message='Constructing heatmap', {
+            #print(input$switcher)
+            
             gene_names = py_to_r(get_all_gene_names(adata()))
             selected_gene=input$color
             i = which(gene_names == (selected_gene))[1]
@@ -258,22 +261,8 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             
             if (v1==4.99 && v2==5.11)
                 return()
-            # index1=which(gene_data %in% gene_data[gene_data>v1])# && gene_data %in% gene_data[gene_data>0])
-            # index2=which(gene_data %in% gene_data[gene_data<v2])
-            # index=c()
-            # for (i in 1:length(gene_data)){
-            #     if (i %in% index1 && i %in% index2){
-            #         index=c(index,i)
-            #     }
-            # }
-            # 
-            # violin_dat0 = data.frame(as.factor(py_to_r(get_labels(adata()))),gene_data)
-            # violin_dat = data.frame(as.factor(py_to_r(get_labels(adata())))[index],gene_data[index])
-            # colnames(violin_dat0)=c("cluster","expression")
-            # colnames(violin_dat)=c("cluster","expression")
-            
 
-            
+            incProgress(1 / 3)
             status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
 
             if (status==-1){
@@ -294,7 +283,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             
             
             
-            
+            incProgress(1 / 3)
             if (i>0){
 
                 gene_data = py_to_r((adata()$X$T[i]))
@@ -356,7 +345,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
 
                 output$titleviolin <- renderText(viotitle)
             }
-
+            })
         }
         ## violin
     })
