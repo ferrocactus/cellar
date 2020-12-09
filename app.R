@@ -18,7 +18,7 @@ library(RColorBrewer)
 library(shinyWidgets)
 library(shinyjqui)
 #library(scales)
-use_python('/home/jingtao/anaconda3/bin/python')
+#use_python('/home/jingtao/anaconda3/bin/python')
 source("gui/ui.R")
 source("gui/server.R")
 
