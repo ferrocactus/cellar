@@ -277,7 +277,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
 
             if (status==-1){
-                showNotification("Not enough cells in the thresholds")
+                #showNotification("Not enough cells in the thresholds")
                 output$violin<-NULL
             }
             else{
@@ -319,7 +319,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 setname=setname[index]
                 lvls=length(levels(as.factor(setname)))
                 if (length(index)==0 || lvls==length(setname)){
-                    showNotification("No cell in the thresholds")
+                    #showNotification("No cell in the thresholds")
                     output$violin<-NULL
                     output$zeros <-NULL
                     return

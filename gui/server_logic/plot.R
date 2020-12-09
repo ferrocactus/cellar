@@ -301,18 +301,18 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       isolate(trigger_threshold(FALSE))
 
       # for default violin threshold
-      # updateSliderInput(
-      #   session = session,
-      #   inputId = "value_t",
-      #   min = m, max = M,
-      #   value = c(m, M),
-      #   step = step
-      # )
-      # min_v=min(color)
+      updateSliderInput(
+        session = session,
+        inputId = "value_t",
+        min = m, max = M,
+        value = c(m, M),
+        step = step
+      )
+      min_v=min(color)
       s_color=sort(color,decreasing=TRUE)
       idx=as.integer(length(s_color)/20)
       top_ten=s_color[idx]
-      if (top_ten==min(s_color))
+      if (top_ten<=EPS+min(s_color))
         top_ten=10
       # no_zero=0.05
       # min_v=min_v-3*EPS
