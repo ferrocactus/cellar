@@ -275,17 +275,16 @@ def read_10x(file):
     adata.uns['dataset'] = 'data10x'
     return AnnData(adata)
 
-def generate_violin(adata, genename='S100A6',v1=-1,v2=10):
+def generate_violin(adata, labels,genename='S100A6',v1=-1,v2=10):
     matplotlib.use('agg')
-    x=np.array(adata.X)
+    x=np.array(adata)
+    x=x.reshape(-1,1)
     try:
-        labels=np.array(adata.obs['labels'])
+        labels=np.array(labels)
         labels=labels.reshape((x.shape[0],1))
-
+        
         x=np.hstack((x,labels))
-        genes=adata.var['parsed_names']
-        genes=list(genes)
-        genes.append('cluster')
+        genes=[genename,'cluster']
         
         df = pd.DataFrame(x,columns=genes)
         df.drop(df[df[genename] < v1].index, inplace = True) 

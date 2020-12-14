@@ -265,12 +265,13 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             selected_gene=input$color
             i = which(gene_names == (selected_gene))[1]
             gene_data = py_to_r((adata()$X$T[i]))
-            
-
+            lbls=adata()$obs['labels']
+            print(lbls)
             
             incProgress(1 / 3)
-            status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
-
+            #status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
+            status=generate_violin(r_to_py(gene_data),lbls,as.character(input$color),v1,v2)
+            print(status)
             if (status==-1){
                 #showNotification("Not enough cells in the thresholds")
                 output$violin<-NULL
