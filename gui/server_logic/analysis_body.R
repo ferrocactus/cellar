@@ -252,7 +252,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             v1=as.numeric(v1)
             v2=as.numeric(v2)
             
-            if (v1==4.99 && v2==5.11)
+            if (v1==4.99 && v2==100)
                 return()
             
             progress='Constructing violin plot'
@@ -266,12 +266,12 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
             i = which(gene_names == (selected_gene))[1]
             gene_data = py_to_r((adata()$X$T[i]))
             lbls=adata()$obs['labels']
-            print(lbls)
+            #print(lbls)
             
             incProgress(1 / 3)
             #status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
             status=generate_violin(r_to_py(gene_data),lbls,as.character(input$color),v1,v2)
-            print(status)
+            #print(status)
             if (status==-1){
                 #showNotification("Not enough cells in the thresholds")
                 output$violin<-NULL
@@ -353,6 +353,10 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 output$titleviolin <- renderText(viotitle)
             }
             })
+        }
+        else{
+            output$violin<-NULL
+            output$titleviolin<-NULL
         }
         ## violin
     })

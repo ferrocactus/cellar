@@ -324,7 +324,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
           session = session,
           inputId='violin_t',
           label="Violin plot gene expression thresholds",
-          #min=-1,max=10,
+          min=-1,max=10,
           value=c(-1, top_ten)
           #step=0.01
       )
