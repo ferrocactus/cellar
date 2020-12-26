@@ -8,6 +8,10 @@ from scipy.sparse import issparse
 from .validation import InappropriateArgument
 import os
 import scanpy as sc
+import matplotlib.pyplot as plt
+import matplotlib
+import seaborn as sns
+matplotlib.use('agg')
 
 
 def has_key(adata, attr, key):
@@ -270,3 +274,29 @@ def read_10x(file):
     # os.chdir('../../..')
     adata.uns['dataset'] = 'data10x'
     return AnnData(adata)
+
+def generate_violin(adata, labels,genename='S100A6',v1=-1,v2=10):
+    matplotlib.use('agg')
+    x=np.array(adata)
+    x=x.reshape(-1,1)
+    try:
+        labels=np.array(labels)
+        labels=labels.reshape((x.shape[0],1))
+        
+        x=np.hstack((x,labels))
+        genes=[genename,'cluster']
+        
+        df = pd.DataFrame(x,columns=genes)
+        df.drop(df[df[genename] < v1].index, inplace = True) 
+        df.drop(df[df[genename] > v2].index, inplace = True) 
+        sns.set_theme(style="whitegrid")
+        df=df.astype({'cluster': 'int32'})
+        plt.figure()
+        ax = sns.violinplot(x="cluster", y=genename, data=df)    
+        fig = ax.get_figure()
+        fig.savefig('violin'+genename+'.png')
+    except:
+        return -1
+
+    #return ax
+    return v2

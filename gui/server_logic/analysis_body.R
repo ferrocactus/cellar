@@ -234,7 +234,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     })
     trigger_threshold <- reactiveVal(FALSE)
     listen_violin <- reactive({
-        list(input$color, input$violin_t)
+        list(input$color, input$violin_t, input$switcher)
     })
 
     observeEvent(input$color,{
@@ -243,6 +243,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     observeEvent(input$violin_t,{
         trigger_threshold(TRUE)
     })
+<<<<<<< HEAD
 
     # observeEvent(listen_violin() ,{
     #     if (input$color!='Uncertainty' && input$color != 'Clusters'){
@@ -341,6 +342,126 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
     #     ## violin
     # })
 
+=======
+    
+    observeEvent(listen_violin() ,{
+        if (input$color!='Uncertainty' && input$color != 'Clusters' && input$switcher=='Violin Plot'){
+
+            v1 = isolate(input$violin_t)[1]
+            v2 = isolate(input$violin_t)[2]
+            v1=as.numeric(v1)
+            v2=as.numeric(v2)
+            
+            if (v1==4.99 && v2==100)
+                return()
+            
+            progress='Constructing violin plot'
+            if (v1==-1 && v2==10)
+                progress='Initializing violin plot'            
+            withProgress(message=progress, {
+            #print(input$switcher)
+            
+            gene_names = py_to_r(get_all_gene_names(adata()))
+            selected_gene=input$color
+            i = which(gene_names == (selected_gene))[1]
+            gene_data = py_to_r((adata()$X$T[i]))
+            lbls=adata()$obs['labels']
+            #print(lbls)
+            
+            incProgress(1 / 3)
+            #status=generate_violin(r_to_py(adata()),as.character(input$color),v1,v2)
+            status=generate_violin(r_to_py(gene_data),lbls,as.character(input$color),v1,v2)
+            #print(status)
+            if (status==-1){
+                #showNotification("Not enough cells in the thresholds")
+                output$violin<-NULL
+            }
+            else{
+                output$violin <- renderImage({
+                    list(src = paste0('violin',as.character(input$color),'.png'),
+                         contentType = 'image/png',
+                         width = 800,
+                         height = 600,
+                         alt = "This is alternate text")
+                }, deleteFile = TRUE)
+            }
+
+            
+            
+            
+            
+            incProgress(1 / 3)
+            if (i>0){
+
+                gene_data = py_to_r((adata()$X$T[i]))
+                zero=min(gene_data)
+
+                index1=which(gene_data %in% gene_data[gene_data>v1])# && gene_data %in% gene_data[gene_data>0])
+                index2=which(gene_data %in% gene_data[gene_data<v2])
+                index=c()
+                for (i in 1:length(gene_data)){
+                    if (i %in% index1 && i %in% index2){
+                        index=c(index,i)
+                    }
+                }
+                violin_dat0 = data.frame(as.factor(py_to_r(get_labels(adata()))),gene_data)
+                violin_dat = data.frame(as.factor(py_to_r(get_labels(adata())))[index],gene_data[index])
+                colnames(violin_dat0)=c("cluster","expression")
+                colnames(violin_dat)=c("cluster","expression")
+
+
+                setname <- py_to_r(get_label_names(adata()))
+
+                setname=setname[index]
+                lvls=length(levels(as.factor(setname)))
+                if (length(index)==0 || lvls==length(setname)){
+                    #showNotification("No cell in the thresholds")
+                    output$violin<-NULL
+                    output$zeros <-NULL
+                    return
+                }
+
+                else{
+
+                        # output$zeros <-renderPlotly({
+                        # 
+                        #     data_split = split(violin_dat0,violin_dat0$cluster)
+                        #     num_less_zero = matrix(nrow = length(data_split),ncol = 2)
+                        #     colnames(num_less_zero) = c("cluster","percentage")
+                        #     num_less_zero = data.frame(num_less_zero)
+                        #     num_less_zero[,1] = names(data_split)
+                        #     
+                        #     print(zero)
+                        #     for (i in c(1:nrow(num_less_zero))){
+                        #         num_less_zero[i,2] = round(sum(data_split[[num_less_zero[i,1]]]$expression<=zero)*100/nrow(data_split[[num_less_zero[i,1]]]),5)
+                        #     }
+                        #     num_less_zero$cluster = as.double(num_less_zero$cluster)
+                        #     ggplot(data=num_less_zero, aes(x=cluster, y=percentage)) +
+                        #         geom_bar(stat="identity", fill="steelblue")+
+                        #         geom_text(aes(label=percentage), vjust=1.6, color="black", size=3.5)+
+                        #         #theme_minimal()+
+                        #         scale_x_continuous(breaks = seq(0, max(num_less_zero$cluster), 1))+
+                        #         ggtitle("0 expression cells")
+                        # 
+                        # })
+                }
+
+
+                viotitle=paste0("Violin Plot for ",as.character(selected_gene))
+
+
+                output$titleviolin <- renderText(viotitle)
+            }
+            })
+        }
+        else{
+            output$violin<-NULL
+            output$titleviolin<-NULL
+        }
+        ## violin
+    })
+    
+>>>>>>> fix_bar
 }
 
 

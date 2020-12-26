@@ -47,3 +47,4 @@ read_10x <- cellar$utils$r_helpers$read_10x
 match_labels <- cellar$utils$tools$match_labels
 store_empty_labels <- cellar$utils$tools$store_empty_labels
 more_than_one_subset <- cellar$utils$r_helpers$more_than_one_subset
+generate_violin <- cellar$utils$r_helpers$generate_violin

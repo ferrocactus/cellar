@@ -317,31 +317,33 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       )
       min_v=min(color)
       s_color=sort(color,decreasing=TRUE)
-      idx=as.integer(length(s_color)/10)
+      idx=as.integer(length(s_color)/20)
       top_ten=s_color[idx]
-      no_zero=0.05
-      min_v=min_v-3*EPS
-      top_ten=top_ten+3*EPS
-      if (length(color)<200)
-      {
-        no_zero=0
-        # updateSliderInput(
-        #   session = session,
-        #   inputId='violin_t',
-        #   label="Violin plot gene expression thresholds",
-        #   min=-1,max=10,
-        #   value=c(no_zero, 10),
-        #   step=0.01
-        #)
-      }
+      if (top_ten<=EPS+min(s_color))
+        top_ten=10
+      # no_zero=0.05
+      # min_v=min_v-3*EPS
+      # top_ten=top_ten+3*EPS
+      # if (length(color)<200)
+      # {
+      #   no_zero=0
       updateSliderInput(
-        session = session,
-        inputId='violin_t',
-        label="Violin plot gene expression thresholds",
-        min=-1,max=10,
-        value=c(no_zero, 10),
-        step=0.01
+          session = session,
+          inputId='violin_t',
+          label="Violin plot gene expression thresholds",
+          min=-1,max=10,
+          value=c(-1, top_ten)
+          #step=0.01
       )
+      # }
+      # updateSliderInput(
+      #   session = session,
+      #   inputId='violin_t',
+      #   label="Violin plot gene expression thresholds",
+      #   min=-1,max=10,
+      #   value=c(no_zero, 10),
+      #   step=0.01
+      # )
       # end of default violin threshold
 
 
