@@ -14,24 +14,9 @@ tabsetPanel(
         DT::dataTableOutput(ns("DEtable")),
     ),
 
-<<<<<<< HEAD
-    # tabPanel(
-    #   "Violin Plot",
-    #   sliderInput(
-    #     ns("violin_t"),
-    #     label="Violin plot gene expression thresholds",
-    #     min=-1,max=10,
-    #     value=c(4.99, 5.11),
-    #     step=0.01
-    #   ),
-    #   uiOutput(ns("titleviolin")),
-    #   plotlyOutput(ns("violin")),
-    #   plotlyOutput(ns("zeros"))
-    # ),
-=======
     tabPanel(
       "Violin Plot",
-      
+
       uiOutput('violin_t'),
       sliderInput(
         ns("violin_t"),
@@ -56,7 +41,6 @@ tabsetPanel(
       br(),
        plotlyOutput(ns("zeros"))
     ),
->>>>>>> fix_bar
 
     tabPanel(
       "Heat Map",

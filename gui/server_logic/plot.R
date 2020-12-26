@@ -84,11 +84,20 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       legend = NULL
 
       text = ~paste("Label: ", label_names)
-      if (isolate(input$show_names) == 'show_names' && isolate(input$color) == 'Clusters') {
+      if (isolate(input$show_names) == 'show_names' &&
+            isolate(input$color) == 'Clusters' &&
+            isolate(input$color_by == 'Clusters')) {
         color = color_if_show_names
         legend = list(traceorder = 'reversed')
-      } else if (isolate(input$color) == 'Clusters') {
+      } else if (isolate(input$color) == 'Clusters' &&
+          isolate(input$color_by) == 'Clusters') {
         color = labels
+      } else if (isolate(input$color_by) != 'Clusters') {
+        color = py_to_r(get_color_by(adata(), input$color_by))
+        unq_len = length(unique(color))
+        colors = NULL
+        if (unq_len < 20) color = as.factor(color)
+        title = isolate(input$color_by)
       } else if (isolate(input$color) == 'Uncertainty') {
         if (anyNA(as.integer(isolate(input$n_neighbors))) == TRUE) {
           n_neighbors = as.integer(sqrt(length(labels)))
@@ -460,6 +469,11 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   observeEvent(input$color2, {
     req(adata())
     if (isolate(input$color) == 'Clusters' || isolate(input$color) == 'Uncertainty') return()
+    replot(replot() + 1)
+  })
+
+  observeEvent(input$color_by, {
+    req(adata())
     replot(replot() + 1)
   })
 

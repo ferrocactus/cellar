@@ -60,7 +60,13 @@ dataset_reset <- function(input, output, session, reset, setNames,
             min = 5,
             max = min(1000, max(py_to_r(adata()$shape[1]), 10)), value = 50
         )
-        
+
+        updateSelectInput(
+            session = session,
+            inputId = "color_by",
+            choices = c("Clusters", py_to_r(get_obs_keys(adata())))
+        )
+
         updateSliderInput(
             session = session,
             inputId='violin_t',
@@ -69,7 +75,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
             value=c(4.99, 100),
             step=0.01
         )
-        
+
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {
             updateSelectInput(
                 session = session,
