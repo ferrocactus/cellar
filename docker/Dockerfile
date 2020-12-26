@@ -10,6 +10,7 @@ RUN pacman -S --noconfirm\
         git\
         python\
         python-pip\
+        python-virtualenv\
         wget\
         metis\
         xorg-server-xvfb\
@@ -19,12 +20,9 @@ RUN pacman -S --noconfirm\
         libxss\
         lib32-glibc\
         gcc-fortran\
-        pandoc
-
-RUN cd /opt && wget https://archive.archlinux.org/packages/l/llvm9-libs/llvm9-libs-9.0.1-1-x86_64.pkg.tar.zst
-RUN cd /opt && pacman -U --noconfirm llvm9-libs-9.0.1-1-x86_64.pkg.tar.zst
-RUN cd /opt && wget https://archive.archlinux.org/packages/l/llvm9/llvm9-9.0.1-1-x86_64.pkg.tar.zst
-RUN cd /opt && pacman -U --noconfirm llvm9-9.0.1-1-x86_64.pkg.tar.zst
+        pandoc\
+        llvm\
+        hdf5
 
 #### Install orca
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
@@ -34,10 +32,6 @@ RUN printf '#!/bin/bash \nxvfb-run --auto-servernum --server-args "-screen 0 640
 RUN chmod 777 /usr/bin/orca
 RUN cd /opt && wget https://archive.archlinux.org/packages/g/gconf/gconf-3.2.6%2B11%2Bg07808097-5-x86_64.pkg.tar.xz
 RUN cd /opt && pacman -U --noconfirm gconf-3.2.6+11+g07808097-5-x86_64.pkg.tar.xz
-
-### Install Cluster Ensembles
-RUN pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
-RUN echo "export PATH=$PATH:/usr/lib/python3.8/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/" >> /root/.bashrc
 
 EXPOSE 23123
 
@@ -55,24 +49,37 @@ RUN Rscript -e 'install.packages(c("BiocManager"))'
 RUN Rscript -e 'BiocManager::install("SingleR")'
 RUN Rscript -e 'install.packages(c("htmlTable", "devtools"))'
 
-#### Install python3 dependencies
-# Breakpoint 1
-ARG VER=unknown
-
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN cd /home/cellar && git config pull.rebase false
 
 RUN mkdir -p /home/cellar/datasets/user_uploaded
 RUN mkdir -p /home/cellar/datasets/server
+
+# Install python3.7
+RUN useradd -m nonroot
+RUN echo "nonroot ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/nonroot
+USER nonroot
+RUN cd /home/nonroot && git clone https://aur.archlinux.org/python37.git
+RUN cd /home/nonroot/python37 && makepkg -scri --noconfirm --skippgpcheck
+
+RUN virtualenv --python=/usr/bin/python3.7 /home/nonroot/py3.7
+
+# Breakpoint 1
+ARG VER=unknown
+RUN /home/nonroot/py3.7/bin/pip3 install numba matplotlib numpy pandas\
+        scikit-learn sklearn umap-learn kneed statsmodels joblib h5py\
+        anndata scanpy leidenalg psutil plotly bidict pydiffmap\
+        diffxpy scipy BinToGene
+### Install Cluster Ensembles
+RUN /home/nonroot/py3.7/bin/pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
+USER root
 WORKDIR /home/cellar
 
-RUN pacman -S --noconfirm hdf5
-RUN pip3 install wheel
-RUN pip3 install numba==0.50.1 matplotlib numpy pandas scikit-learn sklearn umap-learn==0.3.10 kneed statsmodels joblib h5py anndata scanpy leidenalg psutil plotly bidict pydiffmap diffxpy scipy BinToGene
+COPY gpmetis /home/nonroot/py3.7/lib/python3.7/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/gpmetis
+ENV PATH="/home/nonroot/py3.7/bin:$PATH:/home/nonroot/py3.7/lib/python3.7/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux"
 
 # Breakpoint 2
 ARG VER2=unknown
 RUN git pull
 
 ENTRYPOINT ["Rscript", "app.R"]
-
