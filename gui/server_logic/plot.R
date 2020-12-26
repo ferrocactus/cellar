@@ -316,6 +316,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
       isolate(trigger_threshold(FALSE))
 
+      updateSelectInput(
+        session = session,
+        inputId = "color_by",
+        selected = "Clusters"
+      )
+
       # for default violin threshold
       updateSliderInput(
         session = session,
