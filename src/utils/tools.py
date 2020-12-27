@@ -385,7 +385,7 @@ def get_neighbors(
     n_labels=[]
     for i in indices:
         n_labels.append(adata.obs['labels'][i])
-    adata.obsm['neighbor_labels'] = n_labels
+    adata.obsm['neighbor_labels'] = np.array(n_labels)
     
     
     distances = [n_graph[nn[0][i], nn[1][i]]
