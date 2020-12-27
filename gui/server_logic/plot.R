@@ -103,12 +103,14 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
         withProgress(message = "Please Wait", value = 0, {
           incProgress(1 / 3, detail = "Data processing...")
-          cellar$safe(cellar$get_neighbors,
-                      x = adata(),
-                      n_neighbors = n_neighbors)
+
+          cellar$utils$tools$get_neighbors(
+          x = adata(),
+          n_neighbors = n_neighbors)
+          
           incProgress(1 / 3, detail = "Calculating uncertainty...")
 
-          cellar$safe(cellar$uncertainty,
+          cellar$utils$tools$uncertainty(
                       x = adata(),
                       n_neighbors = n_neighbors)
 

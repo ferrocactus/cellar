@@ -381,8 +381,13 @@ def get_neighbors(
 
     nn = n_graph.nonzero()
     indices = nn[1].reshape(-1, n_neighbors)
-    adata.obsm['neighbor_labels'] = adata.obs['labels'][indices]
 
+    n_labels=[]
+    for i in indices:
+        n_labels.append(adata.obs['labels'][i])
+    adata.obsm['neighbor_labels'] = n_labels
+    
+    
     distances = [n_graph[nn[0][i], nn[1][i]]
                  for i in range(len(x)*n_neighbors)]
     distances = np.array(distances).reshape(-1, n_neighbors)
@@ -508,7 +513,7 @@ def uncertainty(
                     lb = str(rank[i, j])
                     pos_label = pos_label+lb+": "+str(prob)+"\n"
             certainty.append(
-                "Uncertain point, other possible label(s):\n"+str(pos_label))
+                "Other possible label(s):\n"+str(pos_label))
     adata.uns['uncertainty_text'] = certainty
 
     # adata.obs['uncertain_matrix']=uncertain_matrix
