@@ -22,7 +22,9 @@ menuItem(
                         shinyInput_label_embed(
                             shiny::icon("info-circle") %>%
                                 bs_embed_tooltip(
-                                    "Choose a dimension reduction method",
+                                    paste0("Choose a dimension reduction method. These ",
+                                            "embeddings will be used in the clustering ",
+                                            "and visualization steps."),
                                     placement= "bottom"
                                 )
                         ),
@@ -52,18 +54,24 @@ menuItem(
                                 ),
                             div(
                                 class = 'div_dim_n_components',
-                                textInput(
+                                sliderInput(
                                     ns("dim_n_components"),
                                     label = NULL,
-                                    value = defaults$dim
-                            )%>%
-                                shinyInput_label_embed(
-                                    shiny::icon("info-circle") %>%
-                                        bs_embed_tooltip(
-                                            "Integer value.",
-                                            placement= "bottom"
-                                        )
-                                )
+                                    min=2, max=100, step=1,
+                                    value=40
+                                ) %>%
+                                    shinyInput_label_embed(
+                                        shiny::icon("info-circle") %>%
+                                            bs_embed_tooltip(
+                                                "Integer value.",
+                                                placement= "bottom"
+                                            )
+                                    )
+                            #     textInput(
+                            #         ns("dim_n_components"),
+                            #         label = NULL,
+                            #         value = defaults$dim
+                            # )
                             )
                         )
                     )
@@ -77,7 +85,15 @@ menuItem(
                         ns("vis_method"),
                         "Visualization method:",
                         choices = options$vis
-                    )
+                    ) %>%
+                        shinyInput_label_embed(
+                            shiny::icon("info-circle") %>%
+                                bs_embed_tooltip(
+                                    paste0("Choose a reduction method to further reduce ",
+                                            "the data to 2 dimensions for visualization."),
+                                    placement= "bottom"
+                                )
+                        )
                 )
             ),
 
@@ -98,7 +114,11 @@ menuItem(
                         shinyInput_label_embed(
                             shiny::icon("info-circle") %>%
                                 bs_embed_tooltip(
-                                    "Choose a clustering method",
+                                    paste0("Choose a clustering method. The ",
+                                            "clustering is applied to the reduced ",
+                                            "data obtained via the first dimensionality ",
+                                            "reduction method selected above (i.e., not ",
+                                            "the 2D embeddings)."),
                                     placement= "bottom"
                                 )
                         ),
@@ -110,12 +130,37 @@ menuItem(
                                 ns("leiden_resolution"),
                                 "Resolution",
                                 value = 1
-                            ),
-                            textInput(
+                            ) %>%
+                                shinyInput_label_embed(
+                                    shiny::icon("info-circle") %>%
+                                        bs_embed_tooltip(
+                                            paste0("A floating point value. ",
+                                            "A higher value results in more clusters. ",
+                                            "Consider using 0.1-0.5 for few clusters."),
+                                            placement= "bottom"
+                                        )
+                                ),
+                            sliderInput(
                                 ns("leiden_neighbors"),
                                 "Number of neighbors",
+                                min=5, max=100, step=5,
                                 value = 15
-                            )
+                            ) %>%
+                                shinyInput_label_embed(
+                                    shiny::icon("info-circle") %>%
+                                        bs_embed_tooltip(
+                                            paste0("Leiden takes a connectivity graph as input. ",
+                                                    "We construct this as a neighbors graph. ",
+                                                    "Here you can specify the number of neighbors ",
+                                                    "to use in the graph."),
+                                            placement= "bottom"
+                                        )
+                                )
+                            # textInput(
+                            #     ns("leiden_neighbors"),
+                            #     "Number of neighbors",
+                            #     value = 15
+                            # )
                         )
                     ),
                     conditionalPanel(

@@ -475,7 +475,7 @@ def de(
         method: str = 'TTest',
         alpha: float = 0.05,
         max_n_genes: int = 50,
-        correction: str = 'holm-sidak',
+        #correction: str = 'holm-sidak',
         inplace: Optional[bool] = True,
         uncertain: Optional[bool] = False,
         **kwargs) -> Optional[Union[AnnData, dict]]:
@@ -505,7 +505,7 @@ def de(
         The returned number may be smaller if not enough p values
         are found to be less then alpha.
 
-    correction: String specifying the correction method to
+    obsolete: correction: String specifying the correction method to
         use for p values. For a full list see
         https://www.statsmodels.org/dev/generated/statsmodels.stats.multitest.multipletests.html
         Can also be set to 'None' (string), in which case no correction
@@ -539,14 +539,13 @@ def de(
         subset2 = _validate_subset(subset2, adata)
     alpha = _validate_mark_alpha(alpha)
     max_n_genes = _validate_mark_markers_n(max_n_genes, adata.X.shape[1])
-    correction = _validate_mark_correction(correction)
+    #correction = _validate_mark_correction(correction)
 
     if subset2 is None:
         # Run subset1 vs all
         de_genes_d = wrap("de", method)(
             alpha=alpha,
-            max_n_genes=max_n_genes,
-            correction=correction).get(adata.X, indices=subset1, is_logged=True)
+            max_n_genes=max_n_genes).get(adata.X, indices=subset1, is_logged=True)
     else:
         # Run subset1 vs subset2
         # First, artificially create dataset and labels
@@ -557,8 +556,7 @@ def de(
 
         de_genes_d = wrap("de", method)(
             alpha=alpha,
-            max_n_genes=max_n_genes,
-            correction=correction).get(x, indices=indices, is_logged=True)
+            max_n_genes=max_n_genes).get(x, indices=indices, is_logged=True)
 
     # Assign first dict key to anndata object
     # This is the only key if subset2 is None
@@ -567,7 +565,7 @@ def de(
     adata.uns['de_info']['method'] = method
     adata.uns['de_info']['alpha'] = alpha
     adata.uns['de_info']['max_n_genes'] = max_n_genes
-    adata.uns['de_info']['correction'] = correction
+    #adata.uns['de_info']['correction'] = correction
     adata.uns['de_info']['subset1'] = subset1
     adata.uns['de_info']['subset2'] = subset2
     adata.uns['de_info']['kwargs'] = kwargs

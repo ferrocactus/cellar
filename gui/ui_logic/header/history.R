@@ -78,6 +78,23 @@ history <- function(id, label = "history") {
                 dropdownButton(
                     tags$h4("Export plot or store in a new tab"),
                     splitLayout(
+                        textInput(
+                            ns("plot_download_scale"),
+                            "Scale",
+                            value=1
+                        ),
+                        textInput(
+                            ns("plot_download_width"),
+                            "Image width",
+                            value=1000
+                        ),
+                        textInput(
+                            ns("plot_download_height"),
+                            "Image height",
+                            value=1000
+                        )
+                    ),
+                    splitLayout(
                         selectInput(
                             ns("plot_download_format"),
                             "Select format",

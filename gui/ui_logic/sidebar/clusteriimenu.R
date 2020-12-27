@@ -13,11 +13,6 @@ menuItem(
             div(
                 class = "div_step div_ssclu",
                 list(
-                    actionButton(
-                        ns("ssclurun"),
-                        "Run",
-                        class="sidebtn longbtn runconfig"
-                    ),
                     selectInput(
                         ns("ssc_method"),
                         "Constrained clustering",
@@ -62,6 +57,11 @@ menuItem(
                                         )
                                 )
                         )
+                    ),
+                    actionButton(
+                        ns("ssclurun"),
+                        "Cluster",
+                        class="sidebtn longbtn runconfig"
                     )
                 )
             ),

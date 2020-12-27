@@ -43,7 +43,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                                    method = input$test_method,
                                    alpha = input$mark_alpha,
                                    max_n_genes = input$mark_markers_n,
-                                   correction = input$mark_correction,
+                                   #correction = input$mark_correction,
                                    uncertain=TRUE,
                                    inplace = TRUE)
             }
@@ -55,7 +55,7 @@ differential_e <- function(input, output, session, adata, remark, deGenes,
                                    method = input$test_method,
                                    alpha = input$mark_alpha,
                                    max_n_genes = input$mark_markers_n,
-                                   correction = input$mark_correction,
+                                   #correction = input$mark_correction,
                                    inplace = TRUE)
             }
 

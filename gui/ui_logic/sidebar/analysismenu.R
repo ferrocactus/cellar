@@ -48,39 +48,62 @@ menuItem(
                         ns("test_method"),
                         "Choose test method",
                         choices = options$de
-                    ),
-                    sliderInput(
-                        ns("mark_markers_n"),
-                        "Select number of genes",
-                        min = 5, max = 500, value = 50
                     ) %>%
                         shinyInput_label_embed(
                             shiny::icon("info-circle") %>%
                                 bs_embed_tooltip(
-                                    "Select the number of genes used in the analysis.",
+                                    "Select the test to use for finding DE genes.",
                                     placement= "bottom"
                                 )
                         ),
                     splitLayout(
-                        cellWidths = c("50%", "50%"),
-                        textInput(
+                        sliderInput(
+                            ns("mark_markers_n"),
+                            "Number of genes",
+                            min = 5, max = 500, value = 50
+                        ) %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        paste0("Select the maximum number of DE genes to return. ",
+                                                "Note: These genes will all be used to perform enrichment."),
+                                        placement= "bottom"
+                                    )
+                            ),
+                        sliderInput(
                             ns("mark_alpha"),
-                            label = "alpha",
-                            value = defaults$mark_alpha
-                        ),
-                        selectInput(
-                            ns("mark_correction"),
-                            "Correction",
-                            choices = options$correction
-                        )
+                            "Alpha",
+                            min=0.01, max=0.5, step=0.02,
+                            value=0.05
+                        ) %>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        "Select the significance level.",
+                                        placement= "bottom"
+                                    )
+                            )
                     ),
+                    # splitLayout(
+                    #     cellWidths = c("50%", "50%"),
+                    #     textInput(
+                    #         ns("mark_alpha"),
+                    #         label = "alpha",
+                    #         value = defaults$mark_alpha
+                    #     ),
+                    #     selectInput(
+                    #         ns("mark_correction"),
+                    #         "Correction",
+                    #         choices = options$correction
+                    #     )
+                    # ),
                     splitLayout(
                         cellWidths = c("50%", "50%"),
                         selectInput(
                             ns("subset1"),
                             "Choose Subset 1",
                             choices = c("All \\ Subset 2")
-                        ) ,
+                        ),
                         # shiny::icon("info-circle") %>%
                         #     bs_embed_tooltip(
                         #         "Subset to run the analysis for against Subset 2.",

@@ -745,7 +745,10 @@ plot <- function(input, output, session, replot, adata, activeDataset,
           incProgress(1 / 2)
           withr::with_dir(dirname(fname),
                           orca(main_plot_val(), basename(fname),
-                               format = extension))
+                               format = extension,
+                               scale = input$plot_download_scale,
+                               width = input$plot_download_width,
+                               height = input$plot_download_height))
         })
       }
     }

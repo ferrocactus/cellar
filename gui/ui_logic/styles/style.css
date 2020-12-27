@@ -74,7 +74,7 @@ section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:ho
 
 .div_dim_n_components {
     margin-left: -30px !important;
-    margin-top: 20px !important;
+    margin-top: 8px !important;
     width: 100% !important;
     height: 30px !important;
 }
@@ -140,12 +140,16 @@ input:disabled {
     width: calc(100% - 35px) !important;
 }
 
+#ns-mark_markers_n {
+    margin-bottom: -20px !important;
+}
+
 #ns-runconfigbtn {
     margin-top: 30px !important;
 }
 
 #ns-ssclurun {
-    margin-top: 30px !important;
+    margin-top: 10px !important;
     /*margin-bottom: 20px !important;*/
 }
 
