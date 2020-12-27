@@ -116,7 +116,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
           cellar$utils$tools$get_neighbors(
           x = adata(),
           n_neighbors = n_neighbors)
-          
+
           incProgress(1 / 3, detail = "Calculating uncertainty...")
 
           cellar$utils$tools$uncertainty(
@@ -291,8 +291,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         title = title,
         margin = list(t = 50),
         legend = legend,
-        xaxis = list(showgrid = F, zeroline = FALSE),
-        yaxis = list(showgrid = F, zeroline = FALSE))
+        xaxis = list(showgrid = F, zeroline = FALSE, showticklabels=FALSE),
+        yaxis = list(showgrid = F, zeroline = FALSE, showticklabels=FALSE))
 
       p <- theme_plot(p, theme_mode = isolate(input$theme_mode))
       p <- plotly_build(p)
