@@ -498,7 +498,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
 
     plot_i = as.character(isolate(plot_index()))
     title = paste0("Plot ", plot_i, " (", activeDataset(), ")")
-    plot_id = paste0("plot", plot_i)
+    plot_id = paste0("frozen_plot", plot_i)
     collapse_btn_id = paste0("collapse_cell_names", plot_i)
     configs_id = paste0("clustering_info", plot_i)
     cell_names_id = paste0("cell_names_outp", plot_i)
