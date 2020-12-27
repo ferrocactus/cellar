@@ -6,20 +6,23 @@ RUN pacman -Syyu --noconfirm
 
 RUN pacman -S --noconfirm\
         base-devel\
-        python3\
-        python-pip\
         r\
         git\
+        python\
+        python-pip\
+        python-virtualenv\
         wget\
-        xorg-server-xvfb\
-        gtk2\
         metis\
+        xorg-server-xvfb\
+        nss\
+        gtk2\
+        gtk3\
+        libxss\
         lib32-glibc\
         gcc-fortran\
-        libxtst\
-        libxss\
-        nss\
-        alsa-lib
+        pandoc\
+        llvm\
+        hdf5
 
 #### Install orca
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
@@ -30,46 +33,50 @@ RUN chmod 777 /usr/bin/orca
 RUN cd /opt && wget https://archive.archlinux.org/packages/g/gconf/gconf-3.2.6%2B11%2Bg07808097-5-x86_64.pkg.tar.xz
 RUN cd /opt && pacman -U --noconfirm gconf-3.2.6+11+g07808097-5-x86_64.pkg.tar.xz
 
-#### Install Cluster Ensembles
-RUN pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
-RUN echo "export PATH=$PATH:/usr/lib/python3.8/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/" >> /root/.bashrc
-
 EXPOSE 23123
 
 COPY .Rprofile /root/.Rprofile
+RUN mkdir ~/.R
+RUN echo "MAKEFLAGS = -j8" > ~/.R/Makevars
 
 #### Install R libraries
-RUN Rscript -e 'install.packages("shiny")'
-RUN Rscript -e 'install.packages("shinydashboard")'
-RUN Rscript -e 'install.packages("shinyjs")'
-RUN Rscript -e 'install.packages("shinyBS")'
-RUN Rscript -e 'install.packages("reticulate")'
-RUN Rscript -e 'install.packages("ggplot2")'
-RUN Rscript -e 'install.packages("plotly")'
-RUN Rscript -e 'install.packages("rjson")'
-RUN Rscript -e 'install.packages("DT")'
-RUN Rscript -e 'install.packages("gplots")'
-RUN Rscript -e 'install.packages("bsplus")'
-RUN Rscript -e 'install.packages("BiocManager")'
+RUN Rscript -e 'install.packages(c("shiny", "shinydashboard", "shinyjs"))'
+RUN Rscript -e 'install.packages(c("shinyBS", "shinyjqui", "shinyWidgets"))'
+RUN Rscript -e 'install.packages(c("reticulate"))'
+RUN Rscript -e 'install.packages(c("ggplot2", "gplots", "plotly"))'
+RUN Rscript -e 'install.packages(c("rjson", "DT", "bsplus"))'
+RUN Rscript -e 'install.packages(c("BiocManager"))'
 RUN Rscript -e 'BiocManager::install("SingleR")'
-RUN Rscript -e 'install.packages("htmlTable")'
-RUN Rscript -e 'install.packages("devtools")'
-RUN Rscript -e 'install.packages("shinyWidgets")'
-RUN Rscript -e 'install.packages("shinyjqui")'
-
-#### Install python3 dependencies
-
-# Breakpoint 1
-ARG VER=unknown
+RUN Rscript -e 'install.packages(c("htmlTable", "devtools"))'
 
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN cd /home/cellar && git config pull.rebase false
 
 RUN mkdir -p /home/cellar/datasets/user_uploaded
 RUN mkdir -p /home/cellar/datasets/server
+
+# Install python3.7
+RUN useradd -m nonroot
+RUN echo "nonroot ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers.d/nonroot
+USER nonroot
+RUN cd /home/nonroot && git clone https://aur.archlinux.org/python37.git
+RUN cd /home/nonroot/python37 && makepkg -scri --noconfirm --skippgpcheck
+
+RUN virtualenv --python=/usr/bin/python3.7 /home/nonroot/py3.7
+
+# Breakpoint 1
+ARG VER=unknown
+RUN /home/nonroot/py3.7/bin/pip3 install numba matplotlib numpy pandas\
+        scikit-learn sklearn umap-learn kneed statsmodels joblib h5py\
+        anndata scanpy leidenalg psutil plotly bidict pydiffmap\
+        diffxpy scipy BinToGene
+### Install Cluster Ensembles
+RUN /home/nonroot/py3.7/bin/pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
+USER root
 WORKDIR /home/cellar
 
-RUN pip3 install -r /home/cellar/py_requirements.txt
+COPY gpmetis /home/nonroot/py3.7/lib/python3.7/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux/gpmetis
+ENV PATH="/home/nonroot/py3.7/bin:$PATH:/home/nonroot/py3.7/lib/python3.7/site-packages/Cluster_Ensembles/Hypergraph_Partitioning/hmetis-1.5-linux"
 
 # Breakpoint 2
 ARG VER2=unknown

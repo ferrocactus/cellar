@@ -48,3 +48,5 @@ match_labels <- cellar$utils$tools$match_labels
 store_empty_labels <- cellar$utils$tools$store_empty_labels
 more_than_one_subset <- cellar$utils$r_helpers$more_than_one_subset
 generate_violin <- cellar$utils$r_helpers$generate_violin
+get_color_by <- cellar$utils$r_helpers$get_color_by
+get_obs_keys <- cellar$utils$r_helpers$get_obs_keys

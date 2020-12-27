@@ -22,6 +22,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
         updateTabsetPanel(session, "tabset", "Main Plot")
 
         output$DEtable = NULL
+        output$violin = NULL
         output$GOtable = NULL
         output$KEGGtable = NULL
         output$CellTypetable = NULL
@@ -34,6 +35,7 @@ dataset_reset <- function(input, output, session, reset, setNames,
         output$clustering_info = NULL
 
         output$titleDE = NULL
+        output$titleviolin = NULL
         output$titleONTO = NULL
         output$titleKEGG = NULL
         output$titleMSIG = NULL
@@ -55,7 +57,23 @@ dataset_reset <- function(input, output, session, reset, setNames,
         updateSliderInput(
             session = session,
             inputId = "mark_markers_n",
-            min = 5, max = max(py_to_r(adata()$shape[1]), 10), value = 50
+            min = 5,
+            max = min(1000, max(py_to_r(adata()$shape[1]), 10)), value = 50
+        )
+
+        updateSelectInput(
+            session = session,
+            inputId = "color_by",
+            choices = c("Clusters", py_to_r(get_obs_keys(adata())))
+        )
+
+        updateSliderInput(
+            session = session,
+            inputId='violin_t',
+            label="Violin plot gene expression thresholds",
+            min=-1,max=100,
+            value=c(4.99, 100),
+            step=0.01
         )
 
         if (has_key(adata(), 'var', 'parsed_names') == FALSE) {

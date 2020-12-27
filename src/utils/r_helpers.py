@@ -275,29 +275,43 @@ def read_10x(file):
     adata.uns['dataset'] = 'data10x'
     return AnnData(adata)
 
-def generate_violin(adata, genename='S100A6',v1=-1,v2=10):
-    matplotlib.use('agg')
-    x=np.array(adata.X)
-    try:
-        labels=np.array(adata.obs['labels'])
-        labels=labels.reshape((x.shape[0],1))
 
-        x=np.hstack((x,labels))
-        genes=adata.var['parsed_names']
-        genes=list(genes)
-        genes.append('cluster')
-        
-        df = pd.DataFrame(x,columns=genes)
-        df.drop(df[df[genename] < v1].index, inplace = True) 
-        df.drop(df[df[genename] > v2].index, inplace = True) 
+def generate_violin(adata, labels, genename='S100A6', v1=-1, v2=10):
+    matplotlib.use('agg')
+    x = np.array(adata)
+    x = x.reshape(-1, 1)
+    try:
+        labels = np.array(labels)
+        labels = labels.reshape((x.shape[0], 1))
+
+        x = np.hstack((x, labels))
+        genes = [genename, 'cluster']
+
+        df = pd.DataFrame(x, columns=genes)
+        df.drop(df[df[genename] < v1].index, inplace=True)
+        df.drop(df[df[genename] > v2].index, inplace=True)
         sns.set_theme(style="whitegrid")
-        df=df.astype({'cluster': 'int32'})
+        df = df.astype({'cluster': 'int32'})
         plt.figure()
-        ax = sns.violinplot(x="cluster", y=genename, data=df)    
+        ax = sns.violinplot(x="cluster", y=genename, data=df)
         fig = ax.get_figure()
         fig.savefig('violin'+genename+'.png')
     except:
         return -1
 
-    #return ax
+    # return ax
     return v2
+
+
+def get_color_by(adata, key):
+    if key in adata.obs:
+        return np.array(getattr(adata.obs, key))
+    else:
+        return "error"
+
+
+def get_obs_keys(adata):
+    temp = list(adata.obs.keys())
+    if 'labels' in temp:
+        temp.remove('labels')
+    return np.array(temp)

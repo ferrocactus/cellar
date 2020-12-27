@@ -59,6 +59,12 @@ history <- function(id, label = "history") {
                         ns("gray_cells"),'Grayout cells out of range',
                         class = "longbtn-dropdown"
                     ),
+
+                    selectInput(
+                        ns("color_by"), "Color by key",
+                        c("Clusters")
+                    ),
+
                     size = 'sm',
                     circle = TRUE,
                     inputId = ns("appearance_dropdown"),

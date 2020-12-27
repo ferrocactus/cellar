@@ -16,7 +16,7 @@ tabsetPanel(
 
     tabPanel(
       "Violin Plot",
-      
+
       uiOutput('violin_t'),
       sliderInput(
         ns("violin_t"),
