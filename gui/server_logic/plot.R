@@ -22,7 +22,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   output$threshold_slider <- NULL
   outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
   color_opt <- reactiveVal(0)
-
+  
+  select_cells <- reactiveVal(0)
+  
   trigger_threshold <- reactiveVal(FALSE)
 
   observeEvent(input$gray_cells,{
@@ -92,6 +94,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       } else if (isolate(input$color) == 'Clusters' &&
           isolate(input$color_by) == 'Clusters') {
         color = labels
+        
       } else if (isolate(input$color_by) != 'Clusters') {
         color = py_to_r(get_color_by(adata(), input$color_by))
         unq_len = length(unique(color))
@@ -162,42 +165,65 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               v1 = m
               v2 = M
             }
-
-            colors <- function(vals) {
-              c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
-
-              if (!is.null(v1)) { # New gene
-                # Need to be in [0, 1] range so divide by max
-                min_t = as.numeric(v1) / M
-                max_t = as.numeric(v2) / M
-                color_matrix = matrix(0, length(vals), 3)
-                for (i in 1:length(vals)) {
-                  if (vals[i] < min_t) {
-                    if (color_opt()==0){
-                      color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
-                    }
-                    else{
-                      color_matrix[i, 1:3] = GRAY
-                    }
-                  }
-                  else if (vals[i] >= max_t){
-                    if (color_opt()==0){
-                      color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
-                    }
-                    else{
-                      color_matrix[i, 1:3] = GRAY
-                    }
-                  }
-                  # Otherwise map [min_t, max_t] to [0, 1]
-                  else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
+            
+            if (select_cells()!=0){
+              select_cells(0)
+              min_t = as.numeric(v1) / M
+              max_t = as.numeric(v2) / M
+              for (i in 1:length(color)){
+                if (min_t<color[i] && color[i]<max_t){
+                  color[i]='Match'#as.integer(1)
                 }
-                return(color_matrix)
-              } else { # default
-                return(c_func(vals))
+                else{
+                  color[i]='Other'#as.integer(0)
+                }
+              }
+              color=as.factor(color)
+              colors = c('#440154','#D3D3D3')
+              title = isolate("Select Cells")
+              showlegend = TRUE
             }
-          }
-          title = isolate(input$color)
-          showlegend = FALSE
+            else{
+              colors <- function(vals) {
+                c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
+                
+                if (!is.null(v1)) { # New gene
+                  # Need to be in [0, 1] range so divide by max
+                  min_t = as.numeric(v1) / M
+                  max_t = as.numeric(v2) / M
+                  color_matrix = matrix(0, length(vals), 3)
+                  for (i in 1:length(vals)) {
+                    if (vals[i] < min_t) {
+                      if (color_opt()==0){
+                        color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
+                      }
+                      else{
+                        color_matrix[i, 1:3] = GRAY
+                      }
+                    }
+                    else if (vals[i] >= max_t){
+                      if (color_opt()==0){
+                        color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
+                      }
+                      else{
+                        color_matrix[i, 1:3] = GRAY
+                      }
+                    }
+                    # Otherwise map [min_t, max_t] to [0, 1]
+                    else color_matrix[i, 1:3] = c_func((vals[i] - min_t) / (max_t - min_t))
+                  }
+                  return(color_matrix)
+                } else { # default
+                  return(c_func(vals))
+                }
+              }
+              title = isolate(input$color)
+              showlegend = FALSE
+            }
+            
+            
+            
+
         } else {
           showNotification("Gene not found")
           color = labels
@@ -485,6 +511,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     replot(replot() + 1)
   })
 
+  observeEvent(input$selectable, {
+    req(adata())
+    select_cells(select_cells() + 1)
+    replot(replot() + 1)
+  })
+  
   observeEvent(input$store_plot, {
     req(main_plot_val())
 
