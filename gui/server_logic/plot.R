@@ -22,9 +22,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   output$threshold_slider <- NULL
   outputOptions(output, "threshold_slider", suspendWhenHidden = FALSE)
   color_opt <- reactiveVal(0)
-  
+
   select_cells <- reactiveVal(0)
-  
+
   trigger_threshold <- reactiveVal(FALSE)
 
   observeEvent(input$gray_cells,{
@@ -83,18 +83,18 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       showlegend = TRUE
       symbol = NULL
       symbols = NULL
-      legend = NULL
+      legend = list(itemsizing='constant')
 
       text = ~paste("Label: ", label_names)
       if (isolate(input$show_names) == 'show_names' &&
             isolate(input$color) == 'Clusters' &&
             isolate(input$color_by == 'Clusters')) {
         color = color_if_show_names
-        legend = list(traceorder = 'reversed')
+        legend = list(traceorder = 'reversed', itemsizing='constant')
       } else if (isolate(input$color) == 'Clusters' &&
           isolate(input$color_by) == 'Clusters') {
         color = labels
-        
+
       } else if (isolate(input$color_by) != 'Clusters') {
         color = py_to_r(get_color_by(adata(), input$color_by))
         unq_len = length(unique(color))
@@ -165,7 +165,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               v1 = m
               v2 = M
             }
-            
+
             if (select_cells()!=0){
               select_cells(0)
               min_t = as.numeric(v1) / M
@@ -186,7 +186,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             else{
               colors <- function(vals) {
                 c_func = colorRamp(c("#440154", "#27828D", "#FDE725"))
-                
+
                 if (!is.null(v1)) { # New gene
                   # Need to be in [0, 1] range so divide by max
                   min_t = as.numeric(v1) / M
@@ -220,9 +220,9 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               title = isolate(input$color)
               showlegend = FALSE
             }
-            
-            
-            
+
+
+
 
         } else {
           showNotification("Gene not found")
@@ -516,7 +516,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     select_cells(select_cells() + 1)
     replot(replot() + 1)
   })
-  
+
   observeEvent(input$store_plot, {
     req(main_plot_val())
 
