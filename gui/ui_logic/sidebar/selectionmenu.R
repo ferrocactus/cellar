@@ -10,6 +10,37 @@ menuItem(
     menuSubItem(
         icon = NULL,
         list(
+            
+            div(
+                class = "div_step div_subsets",
+                list(
+                    splitLayout(
+                        #cellWidths = c("50%", "50%"),
+                        
+                        textInput(
+                            ns("regex"),
+                            label = 'Select Subset using IDs',
+                            placeholder ='Enter Regular Expression'
+                        )%>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        "Python re for specifying cell subsets using IDS, e.g. [a-zA-Z_]*_sample_1 or \\w*_sample_1",
+                                        placement= "bottom"
+                                    )
+                            ),
+                        
+                        
+                        actionButton(
+                            ns("highlight"),
+                            "Highlight Subset",
+                            class="secondcol"
+                        )
+                    )
+                )
+            ),
+            
+
             div(
                 class = "div_step div_subsets",
                 list(

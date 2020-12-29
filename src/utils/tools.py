@@ -546,3 +546,21 @@ def uncertainty(
 
     if not inplace:
         return adata
+
+def re_id(
+        adata:AnnData,
+        expr: str = r'\w*',
+        **kwargs
+        ):
+    # use re to select subsets 
+    
+    p = re.compile(expr)
+    keys=[]
+    for i in range(len(adata.obs.index)):
+        cell_id=adata.obs.index[i]
+        m = p.match(cell_id)
+        if m:
+            if m.end() == len(cell_id):
+                keys.append(i)
+    
+    return keys

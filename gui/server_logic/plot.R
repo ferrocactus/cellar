@@ -24,7 +24,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   color_opt <- reactiveVal(0)
 
   select_cells <- reactiveVal(0)
-
+  regex <- reactiveVal(0) # regular expression for selecting subsets triggered 
+  
   trigger_threshold <- reactiveVal(FALSE)
 
   observeEvent(input$gray_cells,{
@@ -91,7 +92,26 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             isolate(input$color_by == 'Clusters')) {
         color = color_if_show_names
         legend = list(traceorder = 'reversed', itemsizing='constant')
-      } else if (isolate(input$color) == 'Clusters' &&
+      }
+      else if (regex()!=0){ # use regex to select subsets
+        regex(0)
+        color=c()
+        cells <- py_to_r(cellar$utils$tools$re_id(adata(),input$regex))
+        for (i in 1:length(labels)){
+          if (i %in% cells){
+            color <- c(color,'Match')
+          }
+          else{
+            color <- c(color,'Other')
+          }
+        }
+        color=as.factor(color)
+        colors = c('#440154','#D3D3D3')
+        title = isolate("Select Cells")
+        showlegend = TRUE
+      }
+      
+      else if (isolate(input$color) == 'Clusters' &&
           isolate(input$color_by) == 'Clusters') {
         color = labels
 
@@ -167,21 +187,21 @@ plot <- function(input, output, session, replot, adata, activeDataset,
             }
 
             if (select_cells()!=0){
-              select_cells(0)
-              min_t = as.numeric(v1) / M
-              max_t = as.numeric(v2) / M
-              for (i in 1:length(color)){
-                if (min_t<color[i] && color[i]<max_t){
-                  color[i]='Match'#as.integer(1)
+                select_cells(0)
+                min_t = as.numeric(v1) / M
+                max_t = as.numeric(v2) / M
+                for (i in 1:length(color)){
+                    if (min_t<color[i] && color[i]<max_t){
+                        color[i]='Match'#as.integer(1)
+                    }
+                    else{
+                        color[i]='Other'#as.integer(0)
+                    }
                 }
-                else{
-                  color[i]='Other'#as.integer(0)
-                }
-              }
-              color=as.factor(color)
-              colors = c('#440154','#D3D3D3')
-              title = isolate("Select Cells")
-              showlegend = TRUE
+                color=as.factor(color)
+                colors = c('#440154','#D3D3D3')
+                title = isolate("Select Cells")
+                showlegend = TRUE
             }
             else{
               colors <- function(vals) {
@@ -514,6 +534,12 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   observeEvent(input$selectable, {
     req(adata())
     select_cells(select_cells() + 1)
+    replot(replot() + 1)
+  })
+  
+  observeEvent(input$highlight, {
+    req(adata())
+    regex(regex() + 1)
     replot(replot() + 1)
   })
 
