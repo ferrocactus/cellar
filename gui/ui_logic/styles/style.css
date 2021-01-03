@@ -99,6 +99,17 @@ section.sidebar:hover .shiny-bound-input.action-button:hover, section.sidebar:ho
     margin-bottom: 10px !important;
 }
 
+.multicol_topics {
+    -webkit-column-count: 9;
+    /* Chrome, Safari, Opera */
+    -moz-column-count: 9;
+    /* Firefox */
+    column-count: 9;
+    -moz-column-fill: auto;
+    -column-fill: auto;
+    margin-bottom: 10px !important;
+}
+
 .checkbox-inline, .radio-inline {
     margin-right: 20px !important;
 }

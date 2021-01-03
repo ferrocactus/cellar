@@ -7,7 +7,7 @@ defaults <- list(
 
 options <- list(
     "dim" = c("PCA", "Incremental PCA", "Kernel PCA", "Truncated SVD",
-              "Diffusion Map", "MDS", "UMAP", "Isomap",
+              "Diffusion Map", "cisTopic", "MDS", "UMAP", "Isomap",
               "Spectral Embedding", "Feature Agglomeration"),
     "clu" = c("Leiden", "KMeans", "KMedoids", "Spectral", "Agglomerative",
               "GaussianMixture", "Ensemble", "Fixed"),

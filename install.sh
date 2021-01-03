@@ -62,6 +62,7 @@ Rscript -e 'install.packages("BiocManager")'
 Rscript -e 'BiocManager::install("SingleR")'
 Rscript -e 'install.packages("devtools")'
 Rscript -e 'install.packages("shinyWidgets")'
+Rscript -e 'devtools::install_github("aertslab/cisTopic")'
 echo "Note: If you wish to use Cluster_Ensembles please follow the installation instructions in https://pypi.org/project/Cluster_Ensembles/"
 echo "Note: If you wish to convert plots to images, first install orca by following the instructions in https://github.com/plotly/orca"
 

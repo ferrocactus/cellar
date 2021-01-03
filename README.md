@@ -131,6 +131,7 @@ You will also need the following R packages
 * plot3D
 * SnapATAC (installed via devtools)
 * shinyWidgets
+* cisTopic
 
 Assuming all dependencies have been met, clone the github repo
 and cd into it

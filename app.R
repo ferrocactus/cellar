@@ -14,11 +14,11 @@ library(htmltools)
 library(bsplus)
 library(htmlTable)
 library(RColorBrewer)
-
 library(shinyWidgets)
 library(shinyjqui)
-#library(scales)
-#use_python('/home/jingtao/anaconda3/bin/python')
+suppressWarnings(library(cisTopic))
+library(Matrix)
+
 source("gui/ui.R")
 source("gui/server.R")
 

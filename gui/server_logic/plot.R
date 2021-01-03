@@ -24,8 +24,8 @@ plot <- function(input, output, session, replot, adata, activeDataset,
   color_opt <- reactiveVal(0)
 
   select_cells <- reactiveVal(0)
-  regex <- reactiveVal(0) # regular expression for selecting subsets triggered 
-  
+  regex <- reactiveVal(0) # regular expression for selecting subsets triggered
+
   trigger_threshold <- reactiveVal(FALSE)
 
   observeEvent(input$gray_cells,{
@@ -85,7 +85,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       symbol = NULL
       symbols = NULL
       legend = list(itemsizing='constant')
-      
+
       text = ~paste("Label: ", label_names)
       if (isolate(input$show_names) == 'show_names' &&
             isolate(input$color) == 'Clusters' &&
@@ -110,7 +110,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         title = isolate("Select Cells")
         showlegend = TRUE
       }
-      
+
       else if (isolate(input$color) == 'Clusters' &&
           isolate(input$color_by) == 'Clusters') {
         color = labels
@@ -243,10 +243,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
               title = isolate(input$color)
               showlegend = FALSE
             }
-
-
-
-
         } else {
           showNotification("Gene not found")
           color = labels
@@ -539,7 +535,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
     select_cells(select_cells() + 1)
     replot(replot() + 1)
   })
-  
+
   observeEvent(input$highlight, {
     req(adata())
     regex(regex() + 1)

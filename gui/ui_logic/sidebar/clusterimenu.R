@@ -28,51 +28,42 @@ menuItem(
                                     placement= "bottom"
                                 )
                         ),
-                    conditionalPanel(
-                        condition = "input.dim_method != 'Monocle3'",
-                        ns = ns,
-                        splitLayout(
-                            cellWidths = c("60%", "47%"),
-                            radioButtons(
-                                ns("dim_options"),
-                                "Number of components",
-                                choices = c(
-                                    "Automatic" = "pca_auto",
-                                    "Manual" = "pca_manual"
-                                ),
-                                inline = TRUE,
-                                selected = 'pca_manual',
-                            )%>%
+                    splitLayout(
+                        cellWidths = c("60%", "47%"),
+                        radioButtons(
+                            ns("dim_options"),
+                            "Number of components",
+                            choices = c(
+                                "Automatic" = "pca_auto",
+                                "Manual" = "pca_manual"
+                            ),
+                            inline = TRUE,
+                            selected = 'pca_manual',
+                        )%>%
+                            shinyInput_label_embed(
+                                shiny::icon("info-circle") %>%
+                                    bs_embed_tooltip(
+                                        paste0("If automatic, will try and detect the optimal ",
+                                            "number of components using the ankle heuristic of finding the ",
+                                            "ankle in the explained variance graph."),
+                                        placement= "bottom"
+                                    )
+                            ),
+                        div(
+                            class = 'div_dim_n_components',
+                            sliderInput(
+                                ns("dim_n_components"),
+                                label = NULL,
+                                min=2, max=100, step=1,
+                                value=40
+                            ) %>%
                                 shinyInput_label_embed(
                                     shiny::icon("info-circle") %>%
                                         bs_embed_tooltip(
-                                            paste0("If automatic, will try and detect the optimal ",
-                                                "number of components using the ankle heuristic of finding the ",
-                                                "ankle in the explained variance graph."),
+                                            "Integer value.",
                                             placement= "bottom"
                                         )
-                                ),
-                            div(
-                                class = 'div_dim_n_components',
-                                sliderInput(
-                                    ns("dim_n_components"),
-                                    label = NULL,
-                                    min=2, max=100, step=1,
-                                    value=40
-                                ) %>%
-                                    shinyInput_label_embed(
-                                        shiny::icon("info-circle") %>%
-                                            bs_embed_tooltip(
-                                                "Integer value.",
-                                                placement= "bottom"
-                                            )
-                                    )
-                            #     textInput(
-                            #         ns("dim_n_components"),
-                            #         label = NULL,
-                            #         value = defaults$dim
-                            # )
-                            )
+                                )
                         )
                     )
                 )
@@ -156,11 +147,6 @@ menuItem(
                                             placement= "bottom"
                                         )
                                 )
-                            # textInput(
-                            #     ns("leiden_neighbors"),
-                            #     "Number of neighbors",
-                            #     value = 15
-                            # )
                         )
                     ),
                     conditionalPanel(
