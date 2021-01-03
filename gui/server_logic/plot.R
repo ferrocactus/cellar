@@ -215,7 +215,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                   color_matrix = matrix(0, length(vals), 3)
                   for (i in 1:length(vals)) {
                     if (vals[i] < min_t) {
-                      opacity[i] <- 0.1
                       if (color_opt()==0){
                         color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
                       }
@@ -224,7 +223,6 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                       }
                     }
                     else if (vals[i] >= max_t){
-                      opacity[i] <- 0.1
                       if (color_opt()==0){
                         color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
                       }
@@ -319,7 +317,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         #symbol = symbol,
         #symbols = symbols,  ## 30 shapes
         key = as.character(1:length(labels)),
-        marker = list(size = isolate(input$dot_size), opacity=opacity),
+        marker = list(size = isolate(input$dot_size)),
         type = 'scatter',
         mode = 'markers',
         height = isolate(input$plot_height),
