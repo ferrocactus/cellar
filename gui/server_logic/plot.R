@@ -75,7 +75,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       mypal = mypal[fixed_shuffle]
 
       colors = mypal[sort(unique(labels)) + 1]
-
+      opacity = vector('numeric',length(labels)) + 1
       labels <- as.factor(labels)
       label_names <- as.factor(label_names)
       x_emb_2d <- py_to_r(adata()$obsm[['x_emb_2d']])
@@ -85,7 +85,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       symbol = NULL
       symbols = NULL
       legend = list(itemsizing='constant')
-
+      
       text = ~paste("Label: ", label_names)
       if (isolate(input$show_names) == 'show_names' &&
             isolate(input$color) == 'Clusters' &&
@@ -196,6 +196,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                     }
                     else{
                         color[i]='Other'#as.integer(0)
+                        opacity[i] = 0.1
                     }
                 }
                 color=as.factor(color)
@@ -214,6 +215,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                   color_matrix = matrix(0, length(vals), 3)
                   for (i in 1:length(vals)) {
                     if (vals[i] < min_t) {
+                      opacity[i] <- 0.1
                       if (color_opt()==0){
                         color_matrix[i, 1:3] = c_func(0)   #dark   #GRAY
                       }
@@ -222,6 +224,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
                       }
                     }
                     else if (vals[i] >= max_t){
+                      opacity[i] <- 0.1
                       if (color_opt()==0){
                         color_matrix[i, 1:3] = c_func(1)   #dark   #GRAY
                       }
@@ -320,7 +323,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
         #symbol = symbol,
         #symbols = symbols,  ## 30 shapes
         key = as.character(1:length(labels)),
-        marker = list(size = isolate(input$dot_size)),
+        marker = list(size = isolate(input$dot_size), opacity=opacity),
         type = 'scatter',
         mode = 'markers',
         height = isolate(input$plot_height),
