@@ -62,17 +62,7 @@ plot <- function(input, output, session, replot, adata, activeDataset,
       joined_ord = paste0(labels_ord, ": ", label_names_ord)
       color_if_show_names = factor(joined, levels=unique(joined_ord), ordered=TRUE)
 
-      mypal <- brewer.pal(8, "Set2")
-      mypal <- colorRampPalette(mypal)(50)
-      fixed_shuffle = c(1)
-      mover = 1
-      for (i in 2:50) {
-        mover = (mover + 7) %% 50
-        if (mover == 0)
-          mover = 50
-          fixed_shuffle = c(fixed_shuffle, mover)
-      }
-      mypal = mypal[fixed_shuffle]
+      mypal = get_palette() # misc.R
 
       colors = mypal[sort(unique(labels)) + 1]
       opacity = vector('numeric',length(labels)) + 1

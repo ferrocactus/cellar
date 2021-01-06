@@ -24,6 +24,8 @@ from .utils.tools import uncertainty
 
 from .utils.read import load_file
 
+from .utils.codex_tile_generator import generate_tile
+
 from .utils.exceptions import InvalidArgument
 from .utils.exceptions import InappropriateArgument
 from .utils.exceptions import MethodNotImplementedError

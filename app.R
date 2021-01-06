@@ -16,6 +16,7 @@ library(htmlTable)
 library(RColorBrewer)
 library(shinyWidgets)
 library(shinyjqui)
+library(R.utils)
 suppressWarnings(library(cisTopic))
 library(Matrix)
 

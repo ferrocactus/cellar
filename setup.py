@@ -24,6 +24,7 @@ install_requires = [
     'pydiffmap',
     'diffxpy',
     'scipy',
+    'tifffile',
     'BinToGene'
 ]
 

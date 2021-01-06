@@ -17,4 +17,5 @@ bidict
 pydiffmap
 diffxpy
 scipy
+tifffile
 BinToGene

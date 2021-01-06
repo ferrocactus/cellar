@@ -286,10 +286,6 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                 }, deleteFile = TRUE)
             }
 
-
-
-
-
             incProgress(1 / 3)
             if (i>0){
 
@@ -361,6 +357,44 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
         ## violin
     })
 
+    observeEvent(input$codex_upload, {
+        req(input$codex_upload)
+        withProgress(message = "Please Wait", value = 0, {
+            incProgress(1 / 2, detail = "Processing Upload")
+            path <- input$codex_upload$datapath
+            gunzip(path)
+            dirpath = paste0(dirname(path), '/codex')
+            untar(tools::file_path_sans_ext(path), exdir=dirpath)
+            print(paste0("Files extracted at ", dirpath))
+        })
+    })
+
+    observeEvent(input$codex_generate, {
+        req(input$codex_upload)
+        req(adata())
+
+        path <- input$codex_upload$datapath
+        dirpath = paste0(dirname(path), '/codex')
+
+        withProgress(message = "Generating CODEX Tile", value = 0, {
+            incProgress(1 / 2, detail = "This may take a while: >1min")
+            savep = paste0(dirpath, '/codex_tile.jpg')
+            print(savep)
+
+            msg <- cellar$safe(cellar$generate_tile,
+                path_to_tiff = paste0(dirpath, '/images'),
+                path_to_df = paste0(dirpath, '/data.csv'),
+                adata = adata(),
+                palette = get_palette(), # misc.R
+                savepath = r_to_py(savep))
+        })
+
+        if (is_error(msg, notify = TRUE)) return()
+
+        output$codex_tile <- renderImage({
+            list(src = savep, width="100%")
+        }, deleteFile = FALSE)
+    })
 }
 
 

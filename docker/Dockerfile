@@ -22,7 +22,8 @@ RUN pacman -S --noconfirm\
         gcc-fortran\
         pandoc\
         llvm\
-        hdf5
+        hdf5\
+        libgit2
 
 #### Install orca
 RUN wget https://github.com/plotly/orca/releases/download/v1.1.1/orca-1.1.1-x86_64.AppImage -P /opt
@@ -38,6 +39,7 @@ EXPOSE 23123
 COPY .Rprofile /root/.Rprofile
 RUN mkdir ~/.R
 RUN echo "MAKEFLAGS = -j8" > ~/.R/Makevars
+RUN Rscript -e 'x <- file.path(R.home("doc"), "html"); if (!file.exists(x)) {dir.create(x, recursive=TRUE); file.copy(system.file("html/R.css", package="stats"), x)}'
 
 #### Install R libraries
 RUN Rscript -e 'install.packages(c("shiny", "shinydashboard", "shinyjs"))'
@@ -45,9 +47,11 @@ RUN Rscript -e 'install.packages(c("shinyBS", "shinyjqui", "shinyWidgets"))'
 RUN Rscript -e 'install.packages(c("reticulate"))'
 RUN Rscript -e 'install.packages(c("ggplot2", "gplots", "plotly"))'
 RUN Rscript -e 'install.packages(c("rjson", "DT", "bsplus"))'
-RUN Rscript -e 'install.packages(c("BiocManager"))'
+RUN Rscript -e 'install.packages("htmlTable")'
+RUN Rscript -e 'install.packages("BiocManager")'
+RUN Rscript -e 'install.packages("devtools")'
 RUN Rscript -e 'BiocManager::install("SingleR")'
-RUN Rscript -e 'install.packages(c("htmlTable", "devtools"))'
+RUN Rscript -e 'devtools::install_github("aertslab/cisTopic")'
 
 RUN git clone https://github.com/ferrocactus/cellar /home/cellar
 RUN cd /home/cellar && git config pull.rebase false
@@ -70,6 +74,9 @@ RUN /home/nonroot/py3.7/bin/pip3 install numba matplotlib numpy pandas\
         scikit-learn sklearn umap-learn kneed statsmodels joblib h5py\
         anndata scanpy leidenalg psutil plotly bidict pydiffmap\
         diffxpy scipy BinToGene
+
+RUN /home/nonroot/py3.7/bin/pip3 install tifffile
+
 ### Install Cluster Ensembles
 RUN /home/nonroot/py3.7/bin/pip3 install git+https://github.com/ferrocactus/Cluster_Ensembles
 USER root
@@ -80,6 +87,7 @@ ENV PATH="/home/nonroot/py3.7/bin:$PATH:/home/nonroot/py3.7/lib/python3.7/site-p
 
 # Breakpoint 2
 ARG VER2=unknown
+RUN pip install BinToGene --upgrade
 RUN git pull
 
 ENTRYPOINT ["Rscript", "app.R"]

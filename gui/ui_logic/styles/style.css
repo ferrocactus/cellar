@@ -172,6 +172,16 @@ input:disabled {
     margin-bottom: 20px !important;
 }
 
+#ns-codex_generate {
+    margin-top: 25px;
+    width: 100%;
+}
+
+#ns-codex_tile {
+    margin-bottom: 50px;
+    width: 100%;
+}
+
 .div_color {
     margin-top: 30px;
 }

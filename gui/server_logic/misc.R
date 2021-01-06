@@ -50,3 +50,18 @@ is_error <- function(msg, notify=FALSE, from_py=TRUE) {
     }
     return(FALSE)
 }
+
+get_palette <- function() {
+    mypal <- brewer.pal(8, "Set2")
+      mypal <- colorRampPalette(mypal)(50)
+      fixed_shuffle = c(1)
+      mover = 1
+      for (i in 2:50) {
+        mover = (mover + 7) %% 50
+        if (mover == 0)
+          mover = 50
+          fixed_shuffle = c(fixed_shuffle, mover)
+      }
+    mypal = mypal[fixed_shuffle]
+    return(mypal)
+}

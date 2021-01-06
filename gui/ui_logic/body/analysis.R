@@ -123,5 +123,18 @@ tabsetPanel(
         fileInput(ns("markjson"), "Choose markers JSON",
                   multiple = FALSE, accept = c(".json")),
         DT::dataTableOutput(ns("UCellTypetable"))
+    ),
+    tabPanel(
+        "CODEX",
+        splitLayout(
+            fileInput(ns("codex_upload"), "Upload CODEX data",
+                    multiple = FALSE, accept = c(".tar.gz")),
+            actionButton(
+                ns("codex_generate"),
+                "(Re)Generate CODEX Tile"
+            )
+        ),
+        imageOutput(ns('codex_tile')),
+        style='height: 1700px'
     )
 )}

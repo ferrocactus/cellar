@@ -98,6 +98,7 @@ Cellar requires the following python packages that can be installed via `pip`:
 * scipy (>=1.4.0)
 * Cluster_Ensembles (>=1.16)
 * diffxpy (>=0.7.4)
+* tifffile (>=2020.12.8)
 * BinToGene (>=1.22)
 
 NOTE: Cluster_Ensembles package is only available for linux systems.
