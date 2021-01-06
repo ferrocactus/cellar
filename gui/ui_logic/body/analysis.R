@@ -128,7 +128,8 @@ tabsetPanel(
         "CODEX",
         splitLayout(
             fileInput(ns("codex_upload"), "Upload CODEX data",
-                    multiple = FALSE, accept = c(".tar.gz")),
+                    multiple = FALSE, accept = c(
+                        ".tar.gz", "application/tar+gzip", "application/gzip")),
             actionButton(
                 ns("codex_generate"),
                 "(Re)Generate CODEX Tile"
