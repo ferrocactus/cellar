@@ -2,7 +2,7 @@
 misc <- function(input, output, session) {
     observeEvent(input$dim_method, {
         if(input$dim_method == "PCA" || input$dim_method == "Truncated SVD"
-            || input$dim_method == "Diffusion Map"){
+            || input$dim_method == "Diffusion Map" || input$dim_method == "cisTopic"){
             shinyjs::enable(selector = "[type=radio][value=pca_auto]")
         } else {
             shinyjs::disable(selector = "[type=radio][value=pca_auto]")
