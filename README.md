@@ -127,12 +127,9 @@ You will also need the following R packages
 * bsplus
 * SingleR (installed via BiocManager)
 * htmlTable
-* doSNOW
-* GenomicRanges (installed via BiocManager)
-* plot3D
-* SnapATAC (installed via devtools)
 * shinyWidgets
 * cisTopic
+* R.utils
 
 Assuming all dependencies have been met, clone the github repo
 and cd into it

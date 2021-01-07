@@ -16,3 +16,4 @@ htmlTable
 devtools
 shinyWidgets
 cisTopic
+R.utils
