@@ -64,6 +64,14 @@ def get_n_obs(adata):
     return int(adata.n_obs)
 
 
+def get_n_clusters(adata):
+    if 'cluster_info' in adata.uns:
+        if 'n_clusters' in adata.uns['cluster_info']:
+            return adata.uns['cluster_info']['n_clusters']
+    else:
+        return -1
+
+
 def get_labels(adata):
     if 'labels' not in adata.obs:
         return "No labels found"

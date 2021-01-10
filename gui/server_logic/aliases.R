@@ -51,3 +51,4 @@ generate_violin <- cellar$utils$r_helpers$generate_violin
 get_color_by <- cellar$utils$r_helpers$get_color_by
 get_obs_keys <- cellar$utils$r_helpers$get_obs_keys
 correct_bin_names <- cellar$utils$misc$correct_bin_names
+get_n_clusters <- cellar$utils$r_helpers$get_n_clusters

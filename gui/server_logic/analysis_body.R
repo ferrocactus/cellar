@@ -99,9 +99,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     })
 }
 
-build_heatmap <- function(adata, heatmap_var) {
-    degenes<-py_to_r(get_gene_names_de(adata()))
-
+build_heatmap <- function(adata, heatmap_var, degenes=NULL) {
     if (length(degenes) != 0){
         withProgress(message='Constructing heatmap', {
             label_names=py_to_r(get_labels(adata()))
@@ -210,23 +208,64 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
                         dataset = dataset, ns = session$ns)
         })
 
-        output$titleheatmap <- renderText(tabletitle)
-        output$heatmap <- renderPlot({
-            build_heatmap(adata, heatmap_var)
-        }, height=input$heat_height)
+        #output$titleheatmap <- renderText(tabletitle)
+        # output$heatmap <- renderPlot({
+        #     build_heatmap(adata, heatmap_var, degenes=isolate(input$heatmap_genes))
+        # }, height=input$heat_height)
     })
 
     observeEvent(input$markjson, {
         isolate(uploaded_file_flag(uploaded_file_flag() + 1))
     })
 
-    observeEvent(input$heat_height, {
+    # observeEvent(input$heat_height, {
+    #     if (is_active(adata()) == FALSE) return()
+    #     if (length(isolate(input$heatmap_genes)) < 2) return()
+    #     if (py_to_r(get_n_clusters(adata())) < 2) return()
+
+    #     output$heatmap <- renderPlot({
+    #         return(heatmap_var())
+    #     }, height = input$heat_height)
+    # })
+
+    observeEvent(input$build_heatmap, {
         if (is_active(adata()) == FALSE) return()
-        if (!py_has_attr(adata()$uns, 'de')) return()
+        if (length(isolate(input$heatmap_genes)) < 2) {
+            showNotification("At least 2 genes must be selected.")
+            return()
+        }
+
+        if (py_to_r(get_n_clusters(adata())) < 2) {
+            showNotification("No clusters found.")
+            return()
+        }
 
         output$heatmap <- renderPlot({
-            return(heatmap_var())
-        }, height = input$heat_height)
+            build_heatmap(adata, heatmap_var, degenes=isolate(input$heatmap_genes))
+        }, height=input$heat_height)
+    })
+
+    observeEvent(input$append_de, {
+        if (is_active(adata()) == FALSE) return()
+
+        updateMultiInput(
+            session = session,
+            inputId = "heatmap_genes",
+            selected = c(input$heatmap_genes, deGenes())
+        )
+    })
+
+    observeEvent(input$clear_selected_genes, {
+        if (is_active(adata()) == FALSE) return()
+        if (length(deGenes()) < 2) {
+            return()
+        }
+
+        updateMultiInput(
+            session = session,
+            inputId = "heatmap_genes",
+            selected = character(0)
+        )
     })
 
     observeEvent(input$markjson, {

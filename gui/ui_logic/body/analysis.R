@@ -43,18 +43,36 @@ tabsetPanel(
     ),
 
     tabPanel(
-      "Heat Map",
-      uiOutput(ns("titleheatmap")),
-      conditionalPanel(
-            'output.heatmap',
-            ns = ns,
+        "Heat Map",
+        uiOutput(ns("titleheatmap")),
+        plotOutput(ns("heatmap"), height="100%"),
+        multiInput(
+            ns("heatmap_genes"),
+            "Select Genes to use in Heatmap",
+            choices=c("None")
+        ),
+        splitLayout(
             sliderInput(
                 ns("heat_height"),
-                "Select heat map height",
+                "Heatmap Height",
                 min = 400, max = 800, value = 600
+            ),
+            actionButton(
+                ns("build_heatmap"),
+                "Generate Heatmap w Selected Genes",
+                class="heatmap_btn"
+            ),
+            actionButton(
+                ns("append_de"),
+                "Append Current DE Genes",
+                class="heatmap_btn"
+            ),
+            actionButton(
+                ns("clear_selected_genes"),
+                "Clear Selected Genes",
+                class="heatmap_btn"
             )
-      ),
-      plotOutput(ns("heatmap"), height="100%")
+        )
     ),
     tabPanel(
         "Gene Ontology",

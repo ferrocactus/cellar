@@ -85,6 +85,11 @@ dataset_reset <- function(input, output, session, reset, setNames,
                 session = session,
                 inputId = "color2",
                 choices = c())
+            updateMultiInput(
+                session = session,
+                inputId = "heatmap_genes",
+                choices = c(),
+                selected = NULL)
         } else {
             names = py_to_r(get_all_gene_names(adata()))
             updateSelectInput(
@@ -97,6 +102,12 @@ dataset_reset <- function(input, output, session, reset, setNames,
                 inputId = "color2",
                 choices = c("None", names),
                 selected = "None")
+            updateMultiInput(
+                session = session,
+                inputId = "heatmap_genes",
+                choices = names,
+                selected = NULL
+            )
         }
 
         # Update sets

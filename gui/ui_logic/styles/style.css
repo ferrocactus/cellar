@@ -182,6 +182,11 @@ input:disabled {
     width: 100%;
 }
 
+.heatmap_btn {
+    width: 100%;
+    margin-top: 35px;
+}
+
 .div_color {
     margin-top: 30px;
 }
