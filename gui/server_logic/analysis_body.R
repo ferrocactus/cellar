@@ -125,7 +125,7 @@ build_heatmap <- function(adata, heatmap_var) {
             incProgress(1 / 3)
 
             #set the color scale
-            scaleRYG <- colorRampPalette(c("blue","white","red"), space = "rgb")(30)
+            scaleRYG <- colorRampPalette(c("#3F7F93","#F2F1F1","#C3553A"), space = "rgb")(30)
             #plot the heatmap
 
             heatmap_var(heatmap.2(heatmap_dat, density.info = "none",trace = "none",col = scaleRYG,
