@@ -107,7 +107,7 @@ def get_emb_2d(adata):
 
 def get_cluster_label_list(adata):
     if 'cluster_names' in adata.uns:
-        return list(adata.uns['cluster_names'].keys())
+        return sorted(list(adata.uns['cluster_names'].keys()))
     return []
 
 

@@ -15,6 +15,11 @@ dataset_reset <- function(input, output, session, reset, setNames,
             labelList(c())
             output$plot <- NULL
             main_plot_val(NULL)
+            updateMultiInput(
+                session = session,
+                inputId = "heatmap_genes",
+                choices = c(),
+                selected = character(0))
         } else {
             isolate(reset(0))
         }

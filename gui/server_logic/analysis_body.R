@@ -123,12 +123,17 @@ build_heatmap <- function(adata, heatmap_var, degenes=NULL) {
             incProgress(1 / 3)
 
             #set the color scale
-            scaleRYG <- colorRampPalette(c("#3F7F93","#F2F1F1","#C3553A"), space = "rgb")(30)
-            #plot the heatmap
+            #scaleRYG <- colorRampPalette(c("#3F7F93","#F2F1F1","#C3553A"), space = "rgb")(30)
+            scaleRYG = colorRampPalette(rev(c(
+                "#580000", "#79260B", "#9C4511", "#BD651A" ,"#DD8629" ,"#F5AD52" ,
+                "#FED693" ,"#FFFFE0" ,"#BBE4D1" ,"#76C7BE" ,"#3EA8A6" ,"#208288" ,
+                "#076769" ,"#00494B" ,"#002C2D")), space = "rgb")(30)
 
-            heatmap_var(heatmap.2(heatmap_dat, density.info = "none",trace = "none",col = scaleRYG,
-                        xlab = "DE Genes",margins = c(9,7),
-                        ylab = "Cluster"))
+            #plot the heatmap
+            heatmap_var(heatmap.2(heatmap_dat,
+                        density.info = "none", trace = "none", col = scaleRYG,
+                        xlab = "DE Genes", margins = c(9,7), ylab = "Cluster",
+                        keysize=0.7, symkey=FALSE))
             incProgress(1 / 3)
         })
         return(heatmap_var())
