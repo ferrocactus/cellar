@@ -247,7 +247,7 @@ def update_subset_label(adata, subset_name, name):
         if len(np.unique(adata.obs['labels'][indices])) == 1:
             label = int(adata.obs['labels'][indices][0])
             # In case this label is elsewhere
-            if label in np.delete(adata.obs['labels'], indices):
+            if label in np.delete(adata.obs['labels'].to_numpy(), indices):
                 label = np.max(adata.obs['labels']) + 1
         else:
             label = np.max(adata.obs['labels']) + 1
