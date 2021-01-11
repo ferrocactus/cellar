@@ -224,6 +224,12 @@ def store_x_emb_d(adata, x_emb_d, method):
 
 
 def update_subset_label(adata, subset_name, name):
+    """
+    Parameters:
+    subset_name: existing subset name to change
+
+    name: new cell type to assign to subset
+    """
     subset_name = str(subset_name)
     name = str(name)
 
@@ -232,17 +238,26 @@ def update_subset_label(adata, subset_name, name):
 
     indices = adata.uns['subsets'][subset_name]
 
-    # adata.uns['cluster_names] is a bidict
-    # with keys=cluster ids and values=cluster names
+    # If cell type exists in dictionary
     if name in list(adata.uns['cluster_names'].values()):
-        label = adata.uns['cluster_names'].inverse[name]
-    else:  # name does not exist, so add it
-        label = np.max(adata.obs['labels']) + 1
-        adata.uns['cluster_names'][label] = name
+        # Get the cluster ID the cell type is assigned to
+        label = int(adata.uns['cluster_names'].inverse[name])
+    else:
+        # Determine if an entire cluster is being updated
+        if len(np.unique(adata.obs['labels'][indices])) == 1:
+            label = int(adata.obs['labels'][indices][0])
+        else:
+            label = np.max(adata.obs['labels']) + 1
 
+
+    adata.uns['cluster_names'][label] = name
+
+    # Assign that cluster ID to current cells
     temp_labels = adata.obs['labels'].copy()
     temp_labels[indices] = label
     adata.obs['labels'] = temp_labels.copy()
+
+    # Correct dictionary
     unq_new_labels = np.unique(adata.obs['labels'])
 
     for old_label in list(adata.uns['cluster_names'].keys()):
@@ -386,8 +401,8 @@ def get_neighbors(
     for i in indices:
         n_labels.append(adata.obs['labels'][i])
     adata.obsm['neighbor_labels'] = np.array(n_labels)
-    
-    
+
+
     distances = [n_graph[nn[0][i], nn[1][i]]
                  for i in range(len(x)*n_neighbors)]
     distances = np.array(distances).reshape(-1, n_neighbors)
@@ -552,8 +567,8 @@ def re_id(
         expr: str = r'\w*',
         **kwargs
         ):
-    # use re to select subsets 
-    
+    # use re to select subsets
+
     p = re.compile(expr)
     keys=[]
     for i in range(len(adata.obs.index)):
@@ -562,5 +577,5 @@ def re_id(
         if m:
             if m.end() == len(cell_id):
                 keys.append(i)
-    
+
     return keys

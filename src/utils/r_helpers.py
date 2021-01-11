@@ -113,7 +113,10 @@ def get_cluster_label_list(adata):
 
 def get_cluster_name_list(adata):
     if 'cluster_names' in adata.uns:
-        return list(adata.uns['cluster_names'].values())
+        cluster_names = []
+        for i in sorted(list(adata.uns['cluster_names'].keys())):
+            cluster_names.append(adata.uns['cluster_names'][i])
+        return cluster_names
     return []
 
 
