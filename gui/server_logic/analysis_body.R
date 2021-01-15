@@ -422,8 +422,7 @@ analysis_body <- function(input, output, session, adata, deGenes, activeDataset)
 
         withProgress(message = "Generating CODEX Tile", value = 0, {
             incProgress(1 / 2, detail = "This may take a while: >1min")
-            savep = paste0(dirpath, '/codex_tile.jpg')
-            print(savep)
+            savep = paste0(dirpath, '/codex_tile.png')
 
             msg <- cellar$safe(cellar$generate_tile,
                 path_to_tiff = paste0(dirpath, '/images'),

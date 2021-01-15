@@ -111,7 +111,6 @@ def generate_tile(path_to_tiff, path_to_df, adata=None, palette=None, savepath=N
 
     grid = np.moveaxis(np.hstack(grid), 0, -1)
 
-    print(savepath)
     if savepath is not None:
         matplotlib.image.imsave(savepath, grid.astype(np.uint8))
 
