@@ -32,7 +32,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
     dispdat <- data.frame(categories,
                           integer(length = len),
                           integer(length = len),
-                          double(length = len),
+                          numeric(length = len),
                           character(length = len),
                           stringsAsFactors = FALSE)
     colnames(dispdat) <- c("Name", "n", "Intersection Length",
@@ -63,8 +63,8 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
             if (dispdat[i, 3] == 0){
                 dispdat[i, 4] <- 1.0
             } else {
-                dispdat[i, 4] <- phyper(leni, lenhs, nc-1-lenhs,
-                                        lende_i, lower.tail = F)
+                dispdat[i, 4] <- as.double(phyper(leni, lenhs, nc-1-lenhs,
+                                        lende_i, lower.tail = F))
 
                 if (mode != 'CellType' && mode != 'UCellType' && mode != 'Disease') {
                     rownames(gene_ids_all) <- gene_ids_all[, 3]
@@ -81,7 +81,7 @@ build_table <- function(output, mode, fl, deGenes, nc, alpha, dataset, ns) {
 
         ord <- dispdat[which(dispdat[, 4] < alpha),]
         ord <- ord[order(ord[, 4]),]
-        ord[, 4] <- format(ord[, 4], scientific = T)
+        ord[, 4] <- as.numeric(format(ord[, 4], scientific = T))
 
         showNotification(paste(mode, "analysis finished"))
 
