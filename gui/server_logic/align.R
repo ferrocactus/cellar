@@ -57,9 +57,13 @@ align <- function(input, output, session, adata, selDatasetAlign,
                 pred <- SingleR(test = x1, ref = x2,
                                 labels = labels)
 
+                pred = as.numeric(pred$pruned.labels)
+                # low quality cells
+                pred[is.na(pred)] <- max(pred[!is.na(pred)]) + 1
+
                 msg <- cellar$safe(store_labels,
                     adata = adata(),
-                    labels = as.integer(pred$labels),
+                    labels = as.integer(pred),
                     method = 'SingleR')
 
                 if (!is_error(msg)) {
